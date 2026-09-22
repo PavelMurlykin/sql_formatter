@@ -28,6 +28,8 @@ code fail the build.
 Package versions, including `Microsoft.SqlServer.TransactSql.ScriptDom`, are
 pinned in `Directory.Packages.props`.
 
+See the five architecture decision records in `docs/adr/`.
+
 ## Projects
 
 - `src/TSqlFormatter.Core` — formatter engine boundary (`netstandard2.0`).
