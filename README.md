@@ -1,7 +1,7 @@
 # T-SQL Formatter
 
 An extensible T-SQL formatter under active development. The repository currently
-contains the Phase 0 solution scaffold described in
+contains the Phase 0 solution scaffold and ScriptDom dependency described in
 [`CODEX_DEVELOPMENT_PLAN.md`](CODEX_DEVELOPMENT_PLAN.md).
 
 ## Prerequisites
@@ -20,6 +20,13 @@ dotnet build TSqlFormatter.sln --no-restore
 ```powershell
 dotnet test TSqlFormatter.sln
 ```
+
+The shared C# baseline is defined in `Directory.Build.props` and `.editorconfig`:
+nullable reference types and implicit usings are enabled, and warnings in project
+code fail the build.
+
+Package versions, including `Microsoft.SqlServer.TransactSql.ScriptDom`, are
+pinned in `Directory.Packages.props`.
 
 ## Projects
 
