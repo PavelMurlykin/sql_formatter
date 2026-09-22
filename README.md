@@ -1,8 +1,11 @@
 # T-SQL Formatter
 
-An extensible T-SQL formatter under active development. The repository currently
-contains the Phase 0 solution scaffold and ScriptDom dependency described in
+An extensible T-SQL formatter under active development. The current Core exposes
+a ScriptDom-based parser; formatting and CLI commands are planned in
 [`CODEX_DEVELOPMENT_PLAN.md`](CODEX_DEVELOPMENT_PLAN.md).
+
+Current usage: [English manual](docs/user-manual.en.md) ·
+[Русское руководство](docs/user-manual.ru.md).
 
 ## Prerequisites
 
@@ -32,11 +35,11 @@ See the five architecture decision records in `docs/adr/`.
 
 ## Projects
 
-- `src/TSqlFormatter.Core` — formatter engine boundary (`netstandard2.0`).
+- `src/TSqlFormatter.Core` — T-SQL parser and future formatter engine (`netstandard2.0`).
 - `src/TSqlFormatter.Configuration` — configuration boundary (`netstandard2.0`).
 - `src/TSqlFormatter.Cli` — command-line host (`net8.0`).
 - `tests/TSqlFormatter.Core.Tests` — Core unit tests (`net8.0`).
 - `tests/TSqlFormatter.GoldenTests` — golden formatting tests (`net8.0`).
 
-Parser, formatting rules, configuration loading, and CLI commands are added in
-later roadmap tasks.
+Token navigation, formatting rules, configuration loading, and CLI commands are
+added in later roadmap tasks.
