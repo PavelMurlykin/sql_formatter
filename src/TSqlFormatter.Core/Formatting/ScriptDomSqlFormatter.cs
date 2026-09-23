@@ -44,9 +44,10 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         }
 
         var builder = new BasicSelectDocBuilder(options);
-        var document = new SqlDocBuilder(new ISqlFragmentDocBuilder[] { builder })
+        var insertBuilder = new InsertDocBuilder(options);
+        var document = new SqlDocBuilder(new ISqlFragmentDocBuilder[] { builder, insertBuilder })
             .BuildDocument(parsed, cancellationToken);
-        if (builder.Applied)
+        if (builder.Applied || insertBuilder.Applied)
         {
             var rendered = new DocRenderer().Render(document, new DocRenderOptions(
                 options.General.MaxLineWidth, options.Indent.Size, options.General.LineEnding,
