@@ -22,12 +22,12 @@ public sealed class BasicSelectFormattingTests
     }
 
     [Fact]
-    public void Unsupported_where_keeps_original_layout()
+    public void Basic_where_is_formatted()
     {
         const string source = "select  Id  from Items where Id = 1";
         var result = _formatter.Format(source, new FormattingOptions(), new FormatRequest());
 
-        Assert.Equal("SELECT  Id  FROM Items WHERE Id = 1", result.Text);
+        Assert.Equal("SELECT Id\nFROM Items\nWHERE\n    Id = 1", result.Text);
     }
 
     [Fact]

@@ -24,7 +24,6 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
         if (statement.QueryExpression is not QuerySpecification query
             || statement.WithCtesAndXmlNamespaces is not null
             || query.SelectElements.Count == 0
-            || query.WhereClause is not null
             || query.GroupByClause is not null
             || query.HavingClause is not null
             || query.FromClause?.TableReferences.Count > 1)
@@ -94,6 +93,21 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
             parts.Add(new TextDoc(" "));
             parts.Add(tableDoc);
             cursor = from.StartOffset + from.FragmentLength;
+        }
+
+        if (query.WhereClause is not null)
+        {
+            var where = query.WhereClause;
+            var between = source.Substring(cursor, where.StartOffset - cursor);
+            var whereDoc = new WhereDocBuilder().Build(where, context);
+            if (!string.IsNullOrWhiteSpace(between) || whereDoc is null)
+            {
+                return new TextDoc(context.GetOriginalText(statement));
+            }
+
+            parts.Add(HardLineDoc.Instance);
+            parts.Add(whereDoc);
+            cursor = where.StartOffset + where.FragmentLength;
         }
 
         var queryTail = source.Substring(cursor, query.StartOffset + query.FragmentLength - cursor);

@@ -156,7 +156,21 @@ System.Console.WriteLine(result.Text);
 // FROM dbo.Users u;
 ```
 
-Structural formatting currently covers simple column lists and one table in `FROM`. If the construct contains comments or an unsupported clause such as `WHERE` or `ORDER BY`, original layout is retained, although keyword casing may still change. A trailing semicolon is preserved.
+Structural formatting currently covers simple column lists, one table in `FROM`, and basic `WHERE`. If the construct contains comments or an unsupported clause such as `ORDER BY`, original layout is retained, although keyword casing may still change. A trailing semicolon is preserved.
+
+### WHERE conditions
+
+Basic comparisons (`=`, `<>`, `!=`, `<`, `>`, `<=`, `>=`, `!<`, `!>`) are spaced around the operator. `AND` and `OR` conditions start on new lines beneath `WHERE`:
+
+```sql
+SELECT Id
+FROM Items
+WHERE
+    Id >= @Min
+    AND State = 'open';
+```
+
+Predicates such as `IS NULL` and `LIKE`, and parenthesized conditions, are not supported yet. They retain their original layout, although keyword casing may change. Internal whitespace in expressions on either side of a comparison is preserved.
 
 ### FROM source
 
