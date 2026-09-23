@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. Programmatic T-SQL parsing and token navigation are available through `TSqlFormatter.Core`. SQL formatting, configuration loading, and CLI commands are not implemented yet. There is no installable package.
+This is an early prototype. Programmatic T-SQL parsing, token navigation, and offset-to-line mapping are available through `TSqlFormatter.Core`. SQL formatting, configuration loading, and CLI commands are not implemented yet. There is no installable package.
 
 ## Setup
 
@@ -73,8 +73,24 @@ if (result.ParseSucceeded)
 
 `GetFragmentTokens(fragment)` returns every token from `FirstTokenIndex` through `LastTokenIndex`, inclusive, preserving comments and whitespace inside the fragment. `GetTextSpan(fragment)` returns a range in the original source: `StartOffset`, `Length`, and exclusive `EndOffset`. Offsets are zero-based .NET character positions. A `null` fragment raises `ArgumentNullException`; a fragment with invalid bounds raises `ArgumentException`. Token navigation remains available when parsing reports errors, but AST fragments may be partial.
 
+## Positions in the original source
+
+Every `SqlParseResult` contains a `LineMap` built from the unchanged source text:
+
+```csharp
+using System;
+using TSqlFormatter.Core.Parsing;
+
+var result = new ScriptDomSqlParser().Parse("SELECT 1;\r\nSELECT 2;", SqlDialectVersion.Auto);
+var offset = result.Source.IndexOf("SELECT 2;", StringComparison.Ordinal);
+var position = result.LineMap.GetLinePosition(offset);
+Console.WriteLine($"{position.Line}:{position.Column}"); // 2:1
+Console.WriteLine(result.LineMap.GetOffset(position)); // original offset
+```
+
+`GetLinePosition(offset)` converts an offset to a `SqlLinePosition` with `Line` and `Column` properties; `GetOffset(line, column)` or `GetOffset(position)` performs the reverse conversion. `LineCount` reports the number of lines. Offsets start at 0 and include the position after the last character; lines and columns start at 1. Columns count UTF-16 code units, not visible characters. LF, CRLF, and lone CR line endings are supported. Both code units of CRLF belong to the preceding line, and the next line starts after LF; this makes every offset, including one inside CRLF, round-trip exactly. Empty text has one line with position `1:1`. Invalid offsets and positions raise `ArgumentOutOfRangeException`.
+
 ## Limitations
 
 - The CLI is a placeholder: it does not format SQL or provide user commands yet.
 - The parser does not modify SQL or produce formatted text.
-- Offset-to-line/column conversion (`LineMap`) is not implemented yet.

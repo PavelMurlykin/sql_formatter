@@ -13,6 +13,7 @@ public sealed class SqlParseResult
         IReadOnlyList<ParseDiagnostic> diagnostics)
     {
         Source = source ?? throw new ArgumentNullException(nameof(source));
+        LineMap = new SqlLineMap(Source);
         RequestedDialect = requestedDialect;
         ParserVersion = parserVersion;
         Root = root;
@@ -21,6 +22,8 @@ public sealed class SqlParseResult
     }
 
     public string Source { get; }
+
+    public SqlLineMap LineMap { get; }
 
     public SqlDialectVersion RequestedDialect { get; }
 
