@@ -50,14 +50,14 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
 
         if (query.FromClause is not null)
         {
-            var between = source.Substring(cursor, query.FromClause.StartOffset - cursor);
+            var leading = new LeadingCommentDocBuilder().Build(cursor, query.FromClause.StartOffset, context);
             var from = query.FromClause;
             var table = from.TableReferences[0];
             var fromPrefix = source.Substring(from.StartOffset, table.StartOffset - from.StartOffset);
             var fromTail = source.Substring(table.StartOffset + table.FragmentLength,
                 from.StartOffset + from.FragmentLength - table.StartOffset - table.FragmentLength);
             var tableDoc = new FromTableDocBuilder(_options).Build(table, context);
-            if (!string.IsNullOrWhiteSpace(between)
+            if (leading is null
                 || !Regex.IsMatch(fromPrefix, @"^FROM\s+$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)
                 || !string.IsNullOrWhiteSpace(fromTail)
                 || tableDoc is null)
@@ -65,7 +65,7 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
                 return new TextDoc(context.GetOriginalText(statement));
             }
 
-            parts.Add(HardLineDoc.Instance);
+            parts.Add(leading);
             parts.Add(new TextDoc(fromPrefix.Trim()));
             parts.Add(new TextDoc(" "));
             parts.Add(tableDoc);
@@ -75,14 +75,14 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
         if (query.WhereClause is not null)
         {
             var where = query.WhereClause;
-            var between = source.Substring(cursor, where.StartOffset - cursor);
+            var leading = new LeadingCommentDocBuilder().Build(cursor, where.StartOffset, context);
             var whereDoc = new WhereDocBuilder().Build(where, context);
-            if (!string.IsNullOrWhiteSpace(between) || whereDoc is null)
+            if (leading is null || whereDoc is null)
             {
                 return new TextDoc(context.GetOriginalText(statement));
             }
 
-            parts.Add(HardLineDoc.Instance);
+            parts.Add(leading);
             parts.Add(whereDoc);
             cursor = where.StartOffset + where.FragmentLength;
         }
@@ -90,17 +90,17 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
         if (query.GroupByClause is not null)
         {
             var group = query.GroupByClause;
-            var between = source.Substring(cursor, group.StartOffset - cursor);
+            var leading = new LeadingCommentDocBuilder().Build(cursor, group.StartOffset, context);
             var groupDoc = group.GroupingSpecifications.All(item => item is ExpressionGroupingSpecification)
                 ? new ListClauseDocBuilder().Build(group, group.GroupingSpecifications,
                     @"GROUP\s+BY", _options.Clauses.GroupByLayout, context)
                 : null;
-            if (!string.IsNullOrWhiteSpace(between) || groupDoc is null)
+            if (leading is null || groupDoc is null)
             {
                 return new TextDoc(context.GetOriginalText(statement));
             }
 
-            parts.Add(HardLineDoc.Instance);
+            parts.Add(leading);
             parts.Add(groupDoc);
             cursor = group.StartOffset + group.FragmentLength;
         }
@@ -108,14 +108,14 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
         if (query.HavingClause is not null)
         {
             var having = query.HavingClause;
-            var between = source.Substring(cursor, having.StartOffset - cursor);
+            var leading = new LeadingCommentDocBuilder().Build(cursor, having.StartOffset, context);
             var havingDoc = new WhereDocBuilder().Build(having, context);
-            if (!string.IsNullOrWhiteSpace(between) || havingDoc is null)
+            if (leading is null || havingDoc is null)
             {
                 return new TextDoc(context.GetOriginalText(statement));
             }
 
-            parts.Add(HardLineDoc.Instance);
+            parts.Add(leading);
             parts.Add(havingDoc);
             cursor = having.StartOffset + having.FragmentLength;
         }
@@ -123,15 +123,15 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
         if (query.OrderByClause is not null)
         {
             var order = query.OrderByClause;
-            var between = source.Substring(cursor, order.StartOffset - cursor);
+            var leading = new LeadingCommentDocBuilder().Build(cursor, order.StartOffset, context);
             var orderDoc = order.All ? null : new ListClauseDocBuilder().Build(order,
                 order.OrderByElements, @"ORDER\s+BY", _options.Clauses.OrderByLayout, context);
-            if (!string.IsNullOrWhiteSpace(between) || orderDoc is null)
+            if (leading is null || orderDoc is null)
             {
                 return new TextDoc(context.GetOriginalText(statement));
             }
 
-            parts.Add(HardLineDoc.Instance);
+            parts.Add(leading);
             parts.Add(orderDoc);
             cursor = order.StartOffset + order.FragmentLength;
         }
