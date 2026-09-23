@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. Programmatic T-SQL parsing, token navigation, offset-to-line mapping, and layout document construction and rendering are available through `TSqlFormatter.Core`. Automatic SQL formatting, configuration loading, and CLI commands are not implemented yet. There is no installable package.
+This is an early prototype. Programmatic T-SQL parsing, token navigation, offset-to-line mapping, layout document construction and rendering, and a future formatter contract are available through `TSqlFormatter.Core`. Automatic SQL formatting, configuration loading, and CLI commands are not implemented yet. There is no installable package.
 
 ## Setup
 
@@ -124,6 +124,12 @@ dotnet run --project benchmarks/TSqlFormatter.Benchmarks/TSqlFormatter.Benchmark
 ```
 
 The `SmallFlat`, `MediumWrapped`, and `LargeWrapped` scenarios measure only `DocRenderer.Render` on prebuilt documents with 5, 50, and 500 columns. The report includes time and allocations; it does not measure SQL parsing, tree construction, or end-to-end formatting. Add `--job Dry` for a quick execution check, but do not use its single measurement for performance comparisons. The first run may need NuGet access for BenchmarkDotNet's child project.
+
+## Formatter contract (no implementation yet)
+
+`TSqlFormatter.Core.Formatting` contains the `ISqlFormatter.Format(source, options, request, cancellationToken)` interface and types for future formatting. `FormatRequest` defaults to whole-document scope (`Document`), the `Auto` dialect, and strict parse-failure behavior (`Strict`). `Selection` scope requires a `SqlTextSpan`; `Statement`, `Safe`, and `TokenFallback` are also declared, but their behavior is not implemented yet.
+
+`FormattingOptions` groups settings into `General` (width 100, LF, no final newline), `Indent` (4 spaces, no tabs), and `Keywords` (`Preserve`). `FormatResult` is designed to carry final text, `TextEdit` changes, diagnostics, change status, and parse success. Core currently has no class implementing `ISqlFormatter`: these options do not format SQL or change keyword case yet.
 
 ## Limitations
 

@@ -1,8 +1,9 @@
 # T-SQL Formatter
 
 An extensible T-SQL formatter under active development. The current Core exposes
-a ScriptDom-based parser, token helpers, a line map, and a layout renderer for
-manually built documents. SQL formatting and CLI commands are planned in
+a ScriptDom-based parser, token helpers, a line map, a layout renderer for
+manually built documents, and public formatter contracts. SQL formatting and
+CLI commands are planned in
 [`CODEX_DEVELOPMENT_PLAN.md`](CODEX_DEVELOPMENT_PLAN.md).
 
 Current usage: [English manual](docs/user-manual.en.md) ·
