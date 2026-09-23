@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. Programmatic T-SQL parsing, token navigation, offset-to-line mapping, and a layout document model are available through `TSqlFormatter.Core`. SQL formatting, layout rendering, configuration loading, and CLI commands are not implemented yet. There is no installable package.
+This is an early prototype. Programmatic T-SQL parsing, token navigation, offset-to-line mapping, and layout document construction and rendering are available through `TSqlFormatter.Core`. Automatic SQL formatting, configuration loading, and CLI commands are not implemented yet. There is no installable package.
 
 ## Setup
 
@@ -95,6 +95,7 @@ Console.WriteLine(result.LineMap.GetOffset(position)); // original offset
 In `TSqlFormatter.Core.Layout`, you can compose a tree from `TextDoc`, `ConcatDoc`, `SoftLineDoc.Instance`, `HardLineDoc.Instance`, `IndentDoc`, `GroupDoc`, and `IfBreakDoc`. For example:
 
 ```csharp
+using System;
 using TSqlFormatter.Core.Layout;
 
 Doc document = new GroupDoc(new ConcatDoc(new Doc[]
@@ -103,12 +104,19 @@ Doc document = new GroupDoc(new ConcatDoc(new Doc[]
     SoftLineDoc.Instance,
     new IndentDoc(1, new TextDoc("Id"))
 }));
+
+var rendered = new DocRenderer().Render(
+    document,
+    new DocRenderOptions(maxLineWidth: 6, finalNewline: true));
+Console.Write(rendered); // SELECT\n    Id\n
 ```
 
-`SoftLineDoc` means a space in flat mode or a newline in broken mode; `HardLineDoc` means an unconditional newline. `GroupDoc` marks content that a future renderer may keep on one line if it fits. `IndentDoc` specifies a nonnegative number of indentation levels, and `IfBreakDoc(broken, flat)` holds alternatives for broken and flat modes. The nodes currently only store structure: there is no API yet to turn a `Doc` into text.
+`SoftLineDoc` means a space in flat mode or a newline in broken mode; `HardLineDoc` means an unconditional newline. `GroupDoc` tries to keep content on one line if it fits. `IndentDoc` specifies a nonnegative number of indentation levels, and `IfBreakDoc(broken, flat)` selects an alternative according to the group mode.
+
+By default, `DocRenderOptions` uses a width of 100 UTF-16 code units, 4 spaces per indentation level, LF, and no final newline. You can set `maxLineWidth`, `indentWidth`, `lineEnding` (`Lf`, `CrLf`, `Cr`), `finalNewline`, and `useTabs`. The selected EOL applies to document breaks; line endings inside `TextDoc` are preserved. An empty document stays empty even with `finalNewline: true`.
 
 ## Limitations
 
 - The CLI is a placeholder: it does not format SQL or provide user commands yet.
 - The parser does not modify SQL or produce formatted text.
-- The layout document model has no renderer yet, so it cannot produce formatted SQL.
+- The renderer accepts a prepared `Doc` tree, but it does not build one from a T-SQL AST or format arbitrary SQL yet.
