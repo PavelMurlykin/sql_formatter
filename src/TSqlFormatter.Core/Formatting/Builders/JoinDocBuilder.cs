@@ -59,12 +59,17 @@ internal sealed class JoinDocBuilder
                 return null;
             }
 
+            var conditionDoc = WhereDocBuilder.BuildCondition(condition, context)
+                ?? new TextDoc(context.GetOriginalText(condition).Trim());
             return new ConcatDoc(new Doc[]
             {
                 left, HardLineDoc.Instance,
                 new TextDoc(Normalize(separator)), new TextDoc(" "), right,
-                new TextDoc(" "), new TextDoc(onPrefix.Trim()), new TextDoc(" "),
-                new TextDoc(context.GetOriginalText(condition).Trim())
+                HardLineDoc.Instance,
+                new IndentDoc(1, new ConcatDoc(new Doc[]
+                {
+                    new TextDoc(onPrefix.Trim()), new TextDoc(" "), conditionDoc
+                }))
             });
         }
 

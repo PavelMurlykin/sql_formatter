@@ -32,7 +32,7 @@ internal sealed class FromTableDocBuilder
         }
 
         if (table is not QueryDerivedTable derived
-            || derived.QueryExpression is not QuerySpecification
+            || derived.QueryExpression is null
             || derived.Alias is null
             || derived.Columns.Count != 0)
         {
@@ -54,8 +54,57 @@ internal sealed class FromTableDocBuilder
             return null;
         }
 
-        var querySource = context.GetOriginalText(query);
-        var nested = new ScriptDomSqlFormatter().Format(querySource, _options,
+        var innerDoc = BuildQueryExpression(query, context);
+        if (innerDoc is null)
+        {
+            return null;
+        }
+
+        return new ConcatDoc(new Doc[]
+        {
+            new TextDoc("("),
+            HardLineDoc.Instance,
+            new IndentDoc(1, innerDoc),
+            HardLineDoc.Instance,
+            new TextDoc(")"),
+            new TextDoc(suffix.IndexOf("AS", StringComparison.OrdinalIgnoreCase) >= 0 ? " AS " : " "),
+            new TextDoc(context.GetOriginalText(derived.Alias))
+        });
+    }
+
+    private Doc? BuildQueryExpression(QueryExpression query, SqlDocBuilderContext context)
+    {
+        if (query is QueryParenthesisExpression parenthesis
+            && parenthesis.QueryExpression is not null)
+        {
+            var child = parenthesis.QueryExpression;
+            var source = context.ParseResult.Source;
+            var prefix = source.Substring(query.StartOffset, child.StartOffset - query.StartOffset);
+            var suffix = source.Substring(child.StartOffset + child.FragmentLength,
+                query.StartOffset + query.FragmentLength - child.StartOffset - child.FragmentLength);
+            if (!Regex.IsMatch(prefix, @"^\(\s*$", RegexOptions.CultureInvariant)
+                || !Regex.IsMatch(suffix, @"^\s*\)$", RegexOptions.CultureInvariant))
+            {
+                return null;
+            }
+
+            var inner = BuildQueryExpression(child, context);
+            return inner is null ? null : new ConcatDoc(new Doc[]
+            {
+                new TextDoc("("),
+                HardLineDoc.Instance,
+                new IndentDoc(1, inner),
+                HardLineDoc.Instance,
+                new TextDoc(")")
+            });
+        }
+
+        if (query is not QuerySpecification)
+        {
+            return null;
+        }
+
+        var nested = new ScriptDomSqlFormatter().Format(context.GetOriginalText(query), _options,
             new FormatRequest(dialect: context.ParseResult.RequestedDialect), context.CancellationToken);
         if (!nested.ParseSucceeded)
         {
@@ -63,22 +112,13 @@ internal sealed class FromTableDocBuilder
         }
 
         var lines = Regex.Split(nested.Text.Trim(), @"\r\n|\n|\r");
-        var inner = new List<Doc>();
+        var parts = new List<Doc>();
         for (var index = 0; index < lines.Length; index++)
         {
-            if (index > 0) inner.Add(HardLineDoc.Instance);
-            inner.Add(new TextDoc(lines[index]));
+            if (index > 0) parts.Add(HardLineDoc.Instance);
+            parts.Add(new TextDoc(lines[index]));
         }
 
-        return new ConcatDoc(new Doc[]
-        {
-            new TextDoc("("),
-            HardLineDoc.Instance,
-            new IndentDoc(1, new ConcatDoc(inner)),
-            HardLineDoc.Instance,
-            new TextDoc(")"),
-            new TextDoc(suffix.IndexOf("AS", StringComparison.OrdinalIgnoreCase) >= 0 ? " AS " : " "),
-            new TextDoc(context.GetOriginalText(derived.Alias))
-        });
+        return new ConcatDoc(parts);
     }
 }

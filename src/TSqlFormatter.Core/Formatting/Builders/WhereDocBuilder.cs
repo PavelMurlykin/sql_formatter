@@ -49,7 +49,7 @@ internal sealed class WhereDocBuilder
         });
     }
 
-    private static Doc? BuildCondition(BooleanExpression expression, SqlDocBuilderContext context)
+    internal static Doc? BuildCondition(BooleanExpression expression, SqlDocBuilderContext context)
     {
         var source = context.ParseResult.Source;
         if (expression is BooleanComparisonExpression comparison
@@ -101,6 +101,29 @@ internal sealed class WhereDocBuilder
             return new ConcatDoc(new Doc[]
             {
                 leftDoc, HardLineDoc.Instance, new TextDoc(op.Trim()), new TextDoc(" "), rightDoc
+            });
+        }
+
+        if (expression is BooleanParenthesisExpression parenthesis
+            && parenthesis.Expression is not null)
+        {
+            var inner = parenthesis.Expression;
+            var prefix = source.Substring(expression.StartOffset, inner.StartOffset - expression.StartOffset);
+            var suffix = source.Substring(inner.StartOffset + inner.FragmentLength,
+                expression.StartOffset + expression.FragmentLength - inner.StartOffset - inner.FragmentLength);
+            if (!Regex.IsMatch(prefix, @"^\(\s*$", RegexOptions.CultureInvariant)
+                || !Regex.IsMatch(suffix, @"^\s*\)$", RegexOptions.CultureInvariant))
+            {
+                return null;
+            }
+
+            var innerDoc = BuildCondition(inner, context);
+            return innerDoc is null ? null : new ConcatDoc(new Doc[]
+            {
+                new TextDoc("("),
+                new IndentDoc(1, new ConcatDoc(new Doc[] { HardLineDoc.Instance, innerDoc })),
+                HardLineDoc.Instance,
+                new TextDoc(")")
             });
         }
 

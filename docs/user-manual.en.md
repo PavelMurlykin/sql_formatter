@@ -170,7 +170,22 @@ WHERE
     AND State = 'open';
 ```
 
-Predicates such as `IS NULL` and `LIKE`, and parenthesized conditions, are not supported yet. They retain their original layout, although keyword casing may change. Internal whitespace in expressions on either side of a comparison is preserved.
+Predicates such as `IS NULL` and `LIKE` are not supported yet. They retain their original layout, although keyword casing may change. Internal whitespace in expressions on either side of a comparison is preserved.
+
+### Nested parentheses
+
+Logical groups made of supported comparisons and `AND`/`OR` can be nested. Parentheses are retained, with an additional indent for their contents:
+
+```sql
+WHERE
+    (
+        A = 1
+        OR B = 2
+    )
+    AND C = 3
+```
+
+A derived table can also contain a parenthesized query expression, such as `FROM ((SELECT Id FROM T)) AS d`. Each parenthesis level is emitted as a separate nested block. Other complex query expressions retain their original layout for now.
 
 ### GROUP BY, HAVING, and ORDER BY
 
@@ -203,13 +218,15 @@ A derived table's column alias list (`AS d(Id)`) is not structurally formatted y
 
 ### JOIN and APPLY
 
-`INNER JOIN` (and short `JOIN`), `LEFT [OUTER] JOIN`, `RIGHT [OUTER] JOIN`, `FULL [OUTER] JOIN`, `CROSS JOIN`, `CROSS APPLY`, and `OUTER APPLY` are supported. Each join in a chain starts on a new line. Its `ON` condition stays on the same line; the expression's internal spacing is preserved for now:
+`INNER JOIN` (and short `JOIN`), `LEFT [OUTER] JOIN`, `RIGHT [OUTER] JOIN`, `FULL [OUTER] JOIN`, `CROSS JOIN`, `CROSS APPLY`, and `OUTER APPLY` are supported. Each join in a chain starts on a new line. Its `ON` condition gets its own indented line; basic comparisons and logical groups are formatted, while more complex expressions are kept as they are:
 
 ```sql
 SELECT a.Id
 FROM dbo.A a
-INNER JOIN dbo.B b ON a.Id = b.Id
-LEFT JOIN dbo.C c ON b.Id = c.Id;
+INNER JOIN dbo.B b
+    ON a.Id = b.Id
+LEFT JOIN dbo.C c
+    ON b.Id = c.Id;
 ```
 
 The right side of `APPLY` may be a simple derived table. Join hints such as `HASH JOIN` and other unsupported forms keep their original layout. Tokens recognized by ScriptDom as keywords may still change case.

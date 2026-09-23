@@ -19,7 +19,7 @@ public sealed class JoinFormattingTests
         var source = $"select a.Id from dbo.A a {sourceJoin} dbo.B b on a.Id = b.Id";
         var result = _formatter.Format(source, new FormattingOptions(), new FormatRequest());
 
-        Assert.Equal($"SELECT a.Id\nFROM dbo.A a\n{expectedJoin} dbo.B b ON a.Id = b.Id", result.Text);
+        Assert.Equal($"SELECT a.Id\nFROM dbo.A a\n{expectedJoin} dbo.B b\n    ON a.Id = b.Id", result.Text);
     }
 
     [Theory]
@@ -53,7 +53,7 @@ public sealed class JoinFormattingTests
         const string source = "select a.Id from A a join B b on a.Id=b.Id left join C c on b.Id=c.Id;";
         var result = _formatter.Format(source, new FormattingOptions(), new FormatRequest());
 
-        Assert.Equal("SELECT a.Id\nFROM A a\nJOIN B b ON a.Id=b.Id\nLEFT JOIN C c ON b.Id=c.Id;", result.Text);
+        Assert.Equal("SELECT a.Id\nFROM A a\nJOIN B b\n    ON a.Id = b.Id\nLEFT JOIN C c\n    ON b.Id = c.Id;", result.Text);
     }
 
     [Fact]
