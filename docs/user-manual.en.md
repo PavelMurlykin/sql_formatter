@@ -16,6 +16,14 @@ dotnet test TSqlFormatter.sln --no-build --no-restore
 
 To use the parser in your C# project, add a reference to `src/TSqlFormatter.Core/TSqlFormatter.Core.csproj`.
 
+To check comment preservation separately, run the golden suite:
+
+```powershell
+dotnet test tests/TSqlFormatter.GoldenTests/TSqlFormatter.GoldenTests.csproj --no-restore
+```
+
+The suite contains 50 fixed expected-SQL cases with leading, inline, block, and standalone comments. It checks that each comment appears once and that formatting again does not change the result. These checks are also included in `dotnet test TSqlFormatter.sln`.
+
 ## Parsing T-SQL
 
 ```csharp
