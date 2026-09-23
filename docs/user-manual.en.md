@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. Programmatic T-SQL parsing is available through `TSqlFormatter.Core`. SQL formatting, configuration loading, and CLI commands are not implemented yet. There is no installable package.
+This is an early prototype. Programmatic T-SQL parsing and token navigation are available through `TSqlFormatter.Core`. SQL formatting, configuration loading, and CLI commands are not implemented yet. There is no installable package.
 
 ## Setup
 
@@ -42,8 +42,39 @@ else
 
 `SqlDialectVersion` accepts `Auto`, `Sql2016`, `Sql2017`, `Sql2019`, `Sql2022`, and `Latest`. Currently, `Auto` and `Latest` use ScriptDom parser `Sql180`; `Auto` does not detect a server version. `ScriptDomSqlParser` enables quoted identifiers by default; pass `initialQuotedIdentifiers: false` to change the initial setting.
 
+## Navigating tokens and fragments
+
+After a successful parse, create a `SqlTokenNavigator` for the same result:
+
+```csharp
+using System;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
+using TSqlFormatter.Core.Parsing;
+
+var result = new ScriptDomSqlParser().Parse("SELECT /* note */ 1;", SqlDialectVersion.Auto);
+if (result.ParseSucceeded)
+{
+    var navigator = new SqlTokenNavigator(result);
+    var script = (TSqlScript)result.Root!;
+    var statement = script.Batches[0].Statements[0];
+
+    var firstToken = navigator.GetToken(statement.FirstTokenIndex);
+    var next = navigator.GetNextMeaningfulToken(statement.FirstTokenIndex);
+    var tokens = navigator.GetFragmentTokens(statement);
+    var span = navigator.GetTextSpan(statement);
+    var originalText = result.Source.Substring(span.StartOffset, span.Length);
+
+    Console.WriteLine($"{firstToken.Text} -> {next?.Text}; tokens: {tokens.Count}");
+    Console.WriteLine(originalText);
+}
+```
+
+`GetToken(index)` returns the token at that exact index in `result.Tokens`. `GetPreviousMeaningfulToken(index)` and `GetNextMeaningfulToken(index)` search strictly before and after the specified token, skipping whitespace, single-line and multiline comments, and the end-of-file marker; they return `null` when no suitable token exists. These methods throw `ArgumentOutOfRangeException` for an index outside the token range.
+
+`GetFragmentTokens(fragment)` returns every token from `FirstTokenIndex` through `LastTokenIndex`, inclusive, preserving comments and whitespace inside the fragment. `GetTextSpan(fragment)` returns a range in the original source: `StartOffset`, `Length`, and exclusive `EndOffset`. Offsets are zero-based .NET character positions. A `null` fragment raises `ArgumentNullException`; a fragment with invalid bounds raises `ArgumentException`. Token navigation remains available when parsing reports errors, but AST fragments may be partial.
+
 ## Limitations
 
 - The CLI is a placeholder: it does not format SQL or provide user commands yet.
 - The parser does not modify SQL or produce formatted text.
-- `LineMap` and token navigation helpers are planned for later stages.
+- Offset-to-line/column conversion (`LineMap`) is not implemented yet.
