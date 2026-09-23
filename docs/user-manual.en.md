@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and basic `SELECT`, `FROM`, `JOIN`, and `APPLY` formatting are available through `TSqlFormatter.Core`. Configuration loading and CLI commands are not implemented yet. There is no installable package.
+This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and basic `SELECT`, `FROM`, `JOIN`, and `APPLY` formatting are available through `TSqlFormatter.Core`, including line comments after commas in the SELECT column list. Configuration loading and CLI commands are not implemented yet. There is no installable package.
 
 ## Setup
 
@@ -89,7 +89,7 @@ foreach (var comment in comments)
 }
 ```
 
-Each `SqlCommentTrivia` carries an exact `Span`, original `Text`, `Kind` (`Line`/`Block`), `TokenIndex`, and `Placement`: `Trailing` follows a SQL token on the same line; `Leading` is adjacent to the next token (including a contiguous chain of comments); `Standalone` has no such attachment, for example when separated by a blank line. `AnchorTokenIndex` refers to the attached SQL token in `parsed.Tokens`; it is `null` for `Standalone`. The scanner also works with available tokens after a parse error. This stage exposes classification to callers but does not yet change formatter behavior.
+Each `SqlCommentTrivia` carries an exact `Span`, original `Text`, `Kind` (`Line`/`Block`), `TokenIndex`, and `Placement`: `Trailing` follows a SQL token on the same line; `Leading` is adjacent to the next token (including a contiguous chain of comments); `Standalone` has no such attachment, for example when separated by a blank line. `AnchorTokenIndex` refers to the attached SQL token in `parsed.Tokens`; it is `null` for `Standalone`. The scanner also works with available tokens after a parse error. The formatter uses this classification for line comments after commas in `SELECT`; other comment placements do not yet have dedicated formatting rules.
 
 ## Positions in the original source
 
@@ -174,7 +174,7 @@ System.Console.WriteLine(result.Text);
 // FROM dbo.Users u;
 ```
 
-Structural formatting currently covers simple column lists, one table in `FROM`, and basic `WHERE`, `GROUP BY`, `HAVING`, and `ORDER BY`. If the construct contains comments or an unsupported clause, original layout is retained, although keyword casing may still change. A trailing semicolon is preserved.
+Structural formatting currently covers simple column lists, one table in `FROM`, and basic `WHERE`, `GROUP BY`, `HAVING`, and `ORDER BY`. Line comments after commas in the column list are handled separately; for other comments inside a construct or an unsupported clause, original layout is retained, although keyword casing may still change. A trailing semicolon is preserved.
 
 ### WHERE conditions
 
@@ -264,6 +264,17 @@ System.Console.WriteLine(result.Text);
 //     Name
 // FROM Users
 ```
+
+A line comment immediately after a comma stays with the preceding column. In this case, the list is forced to one column per line even with `Auto`. For example, `select Id, -- note\nName from T` becomes:
+
+```sql
+SELECT
+    Id, -- note
+    Name
+FROM T
+```
+
+Multiple such comments in one list are supported. Spacing before `--` is normalized to one space and line endings follow `GeneralOptions.LineEnding`; the comment text itself is unchanged. Comments before a column and block comments are reserved for later stages.
 
 ## Building a `Doc` from the AST
 

@@ -39,37 +39,14 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
             return new TextDoc(context.GetOriginalText(statement));
         }
 
-        var columns = new List<Doc>();
-        for (var index = 0; index < query.SelectElements.Count; index++)
+        var columnDoc = new SelectColumnDocBuilder(_options.Select).Build(query, context);
+        if (columnDoc is null)
         {
-            var element = query.SelectElements[index];
-            if (index > 0)
-            {
-                var previous = query.SelectElements[index - 1];
-                var separator = source.Substring(previous.StartOffset + previous.FragmentLength,
-                    element.StartOffset - previous.StartOffset - previous.FragmentLength);
-                if (!Regex.IsMatch(separator, @"^\s*,\s*$", RegexOptions.CultureInvariant))
-                {
-                    return new TextDoc(context.GetOriginalText(statement));
-                }
-
-                columns.Add(new TextDoc(","));
-                columns.Add(_options.Select.ColumnLayout == SelectColumnLayout.OnePerLine
-                    ? HardLineDoc.Instance : SoftLineDoc.Instance);
-            }
-
-            columns.Add(new TextDoc(context.GetOriginalText(element).Trim()));
+            return new TextDoc(context.GetOriginalText(statement));
         }
-
         var lastElement = query.SelectElements[query.SelectElements.Count - 1];
         var cursor = lastElement.StartOffset + lastElement.FragmentLength;
-        var columnParts = new List<Doc> { _options.Select.ColumnLayout == SelectColumnLayout.OnePerLine
-            ? HardLineDoc.Instance : SoftLineDoc.Instance };
-        columnParts.AddRange(columns);
-        var columnDoc = new IndentDoc(1, new ConcatDoc(columnParts));
-        var parts = new List<Doc> { new TextDoc(prefix.Trim()),
-            _options.Select.ColumnLayout == SelectColumnLayout.OnePerLine
-                ? columnDoc : new GroupDoc(columnDoc) };
+        var parts = new List<Doc> { new TextDoc(prefix.Trim()), columnDoc };
 
         if (query.FromClause is not null)
         {
