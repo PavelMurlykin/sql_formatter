@@ -243,14 +243,7 @@ public sealed class DocRenderer
 
         public void AppendNewline()
         {
-            if (!_lineHasLiteral)
-            {
-                _output.Length = _lineStartIndex;
-            }
-            else if (_generatedTrailingSpaces > 0)
-            {
-                _output.Length -= _generatedTrailingSpaces;
-            }
+            TrimGeneratedWhitespace();
 
             _output.Append(_options.Newline);
             _lineStartIndex = _output.Length;
@@ -262,6 +255,7 @@ public sealed class DocRenderer
 
         public string Finish()
         {
+            TrimGeneratedWhitespace();
             if (_options.FinalNewline && _output.Length > 0)
             {
                 var last = _output[_output.Length - 1];
@@ -272,6 +266,20 @@ public sealed class DocRenderer
             }
 
             return _output.ToString();
+        }
+
+        private void TrimGeneratedWhitespace()
+        {
+            if (!_lineHasLiteral)
+            {
+                _output.Length = _lineStartIndex;
+            }
+            else if (_generatedTrailingSpaces > 0)
+            {
+                _output.Length -= _generatedTrailingSpaces;
+            }
+
+            _generatedTrailingSpaces = 0;
         }
 
         private void AppendIndent(int levels)
