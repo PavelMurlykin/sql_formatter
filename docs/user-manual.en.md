@@ -265,7 +265,7 @@ WHERE
     );
 ```
 
-A scalar subquery in the select list may have an alias; a derived-table example appears below. Parentheses and original keyword spelling under `KeywordCase.Preserve` are retained. Complex query expressions such as `UNION`, and comments in unsupported positions, do not receive structural layout: the formatter keeps the construct's original layout, though keyword casing may still change.
+A scalar subquery in the select list may have an alias; a derived-table example appears below. Parentheses and original keyword spelling under `KeywordCase.Preserve` are retained. Comments in unsupported positions do not receive structural layout: the formatter keeps the construct's original layout, though keyword casing may still change.
 
 ### CASE expressions
 
@@ -282,6 +282,21 @@ FROM T
 ```
 
 Condition and result expression text within each branch is retained. If comments or another unsupported construct appear between CASE parts, the query's original layout is retained; keyword casing may still change.
+
+### Set operators
+
+`UNION`, `UNION ALL`, `INTERSECT`, and `EXCEPT` go on their own lines between supported `SELECT` queries. They can be chained, used in a derived table, and followed by a final `ORDER BY`:
+
+```sql
+SELECT Id
+FROM A
+UNION ALL
+SELECT Id
+FROM B
+ORDER BY Id;
+```
+
+If a comment appears between a query and the operator, the entire expression keeps its original layout; only keyword casing may change. Combining such an expression with a CTE or `OFFSET/FETCH` does not yet receive structural formatting.
 
 ### FROM source
 

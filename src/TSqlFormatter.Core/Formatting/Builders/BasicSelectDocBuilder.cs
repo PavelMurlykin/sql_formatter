@@ -21,6 +21,25 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
     public Doc Build(TSqlFragment fragment, SqlDocBuilderContext context)
     {
         var statement = (SelectStatement)fragment;
+        if (statement.QueryExpression is BinaryQueryExpression binary)
+        {
+            var binaryDoc = new BinaryQueryDocBuilder(_options).Build(binary, context);
+            var sourceText = context.ParseResult.Source;
+            var binaryPrefix = sourceText.Substring(statement.StartOffset,
+                binary.StartOffset - statement.StartOffset);
+            var tail = sourceText.Substring(binary.StartOffset + binary.FragmentLength,
+                statement.StartOffset + statement.FragmentLength - binary.StartOffset - binary.FragmentLength);
+            if (binaryDoc is null || statement.WithCtesAndXmlNamespaces is not null
+                || !string.IsNullOrWhiteSpace(binaryPrefix)
+                || !Regex.IsMatch(tail, @"^\s*;?\s*$", RegexOptions.CultureInvariant))
+            {
+                return new TextDoc(context.GetOriginalText(statement));
+            }
+
+            Applied = true;
+            return new ConcatDoc(new Doc[] { binaryDoc, new TextDoc(tail.Trim()) });
+        }
+
         if (statement.QueryExpression is not QuerySpecification query
             || query.SelectElements.Count == 0
             || query.OffsetClause is not null

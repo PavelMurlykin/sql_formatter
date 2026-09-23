@@ -16,6 +16,11 @@ internal sealed class NestedQueryDocBuilder
 
     public Doc? Build(QueryExpression query, SqlDocBuilderContext context)
     {
+        if (query is BinaryQueryExpression binary)
+        {
+            return new BinaryQueryDocBuilder(_options).Build(binary, context);
+        }
+
         if (query is QueryParenthesisExpression parenthesis
             && parenthesis.QueryExpression is not null)
         {
