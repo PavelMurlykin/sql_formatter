@@ -141,7 +141,7 @@ System.Console.WriteLine(result.Text); // SELECT 'from' FROM dbo.Items
 
 `FormatRequest` defaults to whole-document scope (`Document`), the `Auto` dialect, and strict parse-failure behavior (`Strict`). `Selection` requires a `SqlTextSpan`; `Selection` and `Statement` currently return unchanged source with a `TSF3000` warning. On a parse error, source remains unchanged, `ParseSucceeded` is `false`, and a `TSF1000` diagnostic is reported for all of `Strict`, `Safe`, and `TokenFallback`.
 
-`FormattingOptions` groups settings into `General` (width 100, LF, no final newline), `Indent` (4 spaces, no tabs), `Keywords` (`Upper`), and `Select` (`Auto`). Width, indentation, EOL, and column layout apply to supported `SELECT` output; otherwise only keyword casing currently changes. `FormatResult` carries final text, `TextEdit` changes, diagnostics, change status, and parse success.
+`FormattingOptions` groups settings into `General` (width 100, LF, no final newline), `Indent` (4 spaces, no tabs), `Keywords` (`Upper`), `Select` (`Auto`), and `Clauses` (`Auto` for `GROUP BY` and `ORDER BY`). Width, indentation, EOL, and list layouts apply to supported `SELECT` output; otherwise only keyword casing currently changes. `FormatResult` carries final text, `TextEdit` changes, diagnostics, change status, and parse success.
 
 ## Basic SELECT
 
@@ -156,7 +156,7 @@ System.Console.WriteLine(result.Text);
 // FROM dbo.Users u;
 ```
 
-Structural formatting currently covers simple column lists, one table in `FROM`, and basic `WHERE`. If the construct contains comments or an unsupported clause such as `ORDER BY`, original layout is retained, although keyword casing may still change. A trailing semicolon is preserved.
+Structural formatting currently covers simple column lists, one table in `FROM`, and basic `WHERE`, `GROUP BY`, `HAVING`, and `ORDER BY`. If the construct contains comments or an unsupported clause, original layout is retained, although keyword casing may still change. A trailing semicolon is preserved.
 
 ### WHERE conditions
 
@@ -171,6 +171,21 @@ WHERE
 ```
 
 Predicates such as `IS NULL` and `LIKE`, and parenthesized conditions, are not supported yet. They retain their original layout, although keyword casing may change. Internal whitespace in expressions on either side of a comparison is preserved.
+
+### GROUP BY, HAVING, and ORDER BY
+
+Basic `GROUP BY` and `ORDER BY` lists use trailing commas between items. `ASC` and `DESC` are preserved. `HAVING` supports the same simple comparisons and `AND`/`OR` as `WHERE`:
+
+```sql
+SELECT Category, count(*) AS Total
+FROM Sales
+GROUP BY Category
+HAVING
+    count(*) > 1
+ORDER BY Total DESC;
+```
+
+`QueryClauseOptions.GroupByLayout` and `OrderByLayout` accept `ClauseItemLayout.Auto` (the default) or `OnePerLine`. `Auto` keeps the list on one line if it fits within `GeneralOptions.MaxLineWidth`, otherwise it puts each item on its own line. `OnePerLine` always breaks. For example: `new FormattingOptions(clauses: new QueryClauseOptions(ClauseItemLayout.OnePerLine, ClauseItemLayout.OnePerLine))`. `ROLLUP`/`CUBE` groupings, `ORDER BY ALL`, and `OFFSET/FETCH` are not structurally formatted yet.
 
 ### FROM source
 

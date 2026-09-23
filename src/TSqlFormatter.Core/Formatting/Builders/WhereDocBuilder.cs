@@ -9,17 +9,33 @@ internal sealed class WhereDocBuilder
 {
     public Doc? Build(WhereClause where, SqlDocBuilderContext context)
     {
-        if (where.SearchCondition is null)
+        return where.SearchCondition is null ? null
+            : BuildClause(where, where.SearchCondition, @"WHERE", context);
+    }
+
+    public Doc? Build(HavingClause having, SqlDocBuilderContext context)
+    {
+        return having.SearchCondition is null ? null
+            : BuildClause(having, having.SearchCondition, @"HAVING", context);
+    }
+
+    private static Doc? BuildClause(
+        TSqlFragment clause,
+        BooleanExpression expression,
+        string keyword,
+        SqlDocBuilderContext context)
+    {
+        if (expression is null)
         {
             return null;
         }
 
         var source = context.ParseResult.Source;
-        var expression = where.SearchCondition;
-        var prefix = source.Substring(where.StartOffset, expression.StartOffset - where.StartOffset);
+        var prefix = source.Substring(clause.StartOffset, expression.StartOffset - clause.StartOffset);
         var tail = source.Substring(expression.StartOffset + expression.FragmentLength,
-            where.StartOffset + where.FragmentLength - expression.StartOffset - expression.FragmentLength);
-        if (!Regex.IsMatch(prefix, @"^WHERE\s+$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)
+            clause.StartOffset + clause.FragmentLength - expression.StartOffset - expression.FragmentLength);
+        if (!Regex.IsMatch(prefix, "^" + keyword + @"\s+$",
+                RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)
             || !string.IsNullOrWhiteSpace(tail))
         {
             return null;

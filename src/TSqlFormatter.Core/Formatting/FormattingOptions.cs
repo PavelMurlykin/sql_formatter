@@ -7,12 +7,14 @@ public sealed class FormattingOptions
         GeneralOptions? general = null,
         IndentOptions? indent = null,
         KeywordOptions? keywords = null,
-        SelectOptions? select = null)
+        SelectOptions? select = null,
+        QueryClauseOptions? clauses = null)
     {
         General = general ?? new GeneralOptions();
         Indent = indent ?? new IndentOptions();
         Keywords = keywords ?? new KeywordOptions();
         Select = select ?? new SelectOptions();
+        Clauses = clauses ?? new QueryClauseOptions();
     }
 
     public GeneralOptions General { get; }
@@ -22,4 +24,6 @@ public sealed class FormattingOptions
     public KeywordOptions Keywords { get; }
 
     public SelectOptions Select { get; }
+
+    public QueryClauseOptions Clauses { get; }
 }

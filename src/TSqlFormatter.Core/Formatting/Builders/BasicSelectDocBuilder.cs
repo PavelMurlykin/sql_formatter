@@ -24,8 +24,8 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
         if (statement.QueryExpression is not QuerySpecification query
             || statement.WithCtesAndXmlNamespaces is not null
             || query.SelectElements.Count == 0
-            || query.GroupByClause is not null
-            || query.HavingClause is not null
+            || query.OffsetClause is not null
+            || query.ForClause is not null
             || query.FromClause?.TableReferences.Count > 1)
         {
             return new TextDoc(context.GetOriginalText(statement));
@@ -108,6 +108,55 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
             parts.Add(HardLineDoc.Instance);
             parts.Add(whereDoc);
             cursor = where.StartOffset + where.FragmentLength;
+        }
+
+        if (query.GroupByClause is not null)
+        {
+            var group = query.GroupByClause;
+            var between = source.Substring(cursor, group.StartOffset - cursor);
+            var groupDoc = group.GroupingSpecifications.All(item => item is ExpressionGroupingSpecification)
+                ? new ListClauseDocBuilder().Build(group, group.GroupingSpecifications,
+                    @"GROUP\s+BY", _options.Clauses.GroupByLayout, context)
+                : null;
+            if (!string.IsNullOrWhiteSpace(between) || groupDoc is null)
+            {
+                return new TextDoc(context.GetOriginalText(statement));
+            }
+
+            parts.Add(HardLineDoc.Instance);
+            parts.Add(groupDoc);
+            cursor = group.StartOffset + group.FragmentLength;
+        }
+
+        if (query.HavingClause is not null)
+        {
+            var having = query.HavingClause;
+            var between = source.Substring(cursor, having.StartOffset - cursor);
+            var havingDoc = new WhereDocBuilder().Build(having, context);
+            if (!string.IsNullOrWhiteSpace(between) || havingDoc is null)
+            {
+                return new TextDoc(context.GetOriginalText(statement));
+            }
+
+            parts.Add(HardLineDoc.Instance);
+            parts.Add(havingDoc);
+            cursor = having.StartOffset + having.FragmentLength;
+        }
+
+        if (query.OrderByClause is not null)
+        {
+            var order = query.OrderByClause;
+            var between = source.Substring(cursor, order.StartOffset - cursor);
+            var orderDoc = order.All ? null : new ListClauseDocBuilder().Build(order,
+                order.OrderByElements, @"ORDER\s+BY", _options.Clauses.OrderByLayout, context);
+            if (!string.IsNullOrWhiteSpace(between) || orderDoc is null)
+            {
+                return new TextDoc(context.GetOriginalText(statement));
+            }
+
+            parts.Add(HardLineDoc.Instance);
+            parts.Add(orderDoc);
+            cursor = order.StartOffset + order.FragmentLength;
         }
 
         var queryTail = source.Substring(cursor, query.StartOffset + query.FragmentLength - cursor);
