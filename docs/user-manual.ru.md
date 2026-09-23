@@ -115,6 +115,16 @@ Console.Write(rendered); // SELECT\n    Id\n
 
 `DocRenderOptions` по умолчанию использует ширину 100 кодовых единиц UTF-16, 4 пробела на уровень, LF, без конечного перевода строки. Можно задать `maxLineWidth`, `indentWidth`, `lineEnding` (`Lf`, `CrLf`, `Cr`), `finalNewline` и `useTabs`. Заданный EOL применяется к переносам узлов; переводы строк внутри `TextDoc` сохраняются как есть. Рендерер удаляет созданные им завершающие пробелы, но не изменяет буквальный текст `TextDoc`. Пустой документ остаётся пустым даже при `finalNewline: true`.
 
+## Измерение производительности рендерера
+
+Из корня репозитория после `dotnet restore TSqlFormatter.sln` запустите BenchmarkDotNet в Release:
+
+```powershell
+dotnet run --project benchmarks/TSqlFormatter.Benchmarks/TSqlFormatter.Benchmarks.csproj -c Release --no-restore -- --filter '*DocRendererBenchmarks*'
+```
+
+Сценарии `SmallFlat`, `MediumWrapped` и `LargeWrapped` измеряют только `DocRenderer.Render` на заранее построенных документах с 5, 50 и 500 колонками. Отчёт включает время и выделения памяти; он не измеряет разбор SQL, создание дерева или полное форматирование. Для короткой проверки запуска можно добавить `--job Dry`, но его одно измерение не следует использовать для сравнения производительности. Первый запуск может потребовать доступ к NuGet для дочернего проекта BenchmarkDotNet.
+
 ## Ограничения
 
 - CLI пока является заготовкой: он не форматирует SQL и не предоставляет пользовательских команд.

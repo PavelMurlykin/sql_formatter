@@ -115,6 +115,16 @@ Console.Write(rendered); // SELECT\n    Id\n
 
 By default, `DocRenderOptions` uses a width of 100 UTF-16 code units, 4 spaces per indentation level, LF, and no final newline. You can set `maxLineWidth`, `indentWidth`, `lineEnding` (`Lf`, `CrLf`, `Cr`), `finalNewline`, and `useTabs`. The selected EOL applies to document breaks; line endings inside `TextDoc` are preserved. The renderer removes generated trailing spaces but does not change literal `TextDoc` content. An empty document stays empty even with `finalNewline: true`.
 
+## Measuring renderer performance
+
+From the repository root, after `dotnet restore TSqlFormatter.sln`, run BenchmarkDotNet in Release:
+
+```powershell
+dotnet run --project benchmarks/TSqlFormatter.Benchmarks/TSqlFormatter.Benchmarks.csproj -c Release --no-restore -- --filter '*DocRendererBenchmarks*'
+```
+
+The `SmallFlat`, `MediumWrapped`, and `LargeWrapped` scenarios measure only `DocRenderer.Render` on prebuilt documents with 5, 50, and 500 columns. The report includes time and allocations; it does not measure SQL parsing, tree construction, or end-to-end formatting. Add `--job Dry` for a quick execution check, but do not use its single measurement for performance comparisons. The first run may need NuGet access for BenchmarkDotNet's child project.
+
 ## Limitations
 
 - The CLI is a placeholder: it does not format SQL or provide user commands yet.

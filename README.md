@@ -41,6 +41,7 @@ See the five architecture decision records in `docs/adr/`.
 - `src/TSqlFormatter.Cli` — command-line host (`net8.0`).
 - `tests/TSqlFormatter.Core.Tests` — Core unit tests (`net8.0`).
 - `tests/TSqlFormatter.GoldenTests` — golden formatting tests (`net8.0`).
+- `benchmarks/TSqlFormatter.Benchmarks` — renderer microbenchmarks (`net8.0`).
 
 Automatic SQL formatting, configuration loading, and CLI commands are
 planned for later roadmap tasks.
