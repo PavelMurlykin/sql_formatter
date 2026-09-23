@@ -43,7 +43,7 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
             return new FormatResult(source, false, false, diagnostics: diagnostics);
         }
 
-        var builder = new BasicSelectDocBuilder(options.Select);
+        var builder = new BasicSelectDocBuilder(options);
         var document = new SqlDocBuilder(new ISqlFragmentDocBuilder[] { builder })
             .BuildDocument(parsed, cancellationToken);
         if (builder.Applied)

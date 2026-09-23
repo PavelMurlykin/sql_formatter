@@ -7,9 +7,9 @@ namespace TSqlFormatter.Core.Formatting.Builders;
 /// <summary>Formats the supported, uncomplicated SELECT shape without discarding source trivia.</summary>
 internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
 {
-    private readonly SelectOptions _options;
+    private readonly FormattingOptions _options;
 
-    public BasicSelectDocBuilder(SelectOptions options)
+    public BasicSelectDocBuilder(FormattingOptions options)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
     }
@@ -27,9 +27,7 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
             || query.WhereClause is not null
             || query.GroupByClause is not null
             || query.HavingClause is not null
-            || query.FromClause?.TableReferences.Count > 1
-            || (query.FromClause is not null
-                && query.FromClause.TableReferences[0] is not NamedTableReference))
+            || query.FromClause?.TableReferences.Count > 1)
         {
             return new TextDoc(context.GetOriginalText(statement));
         }
@@ -57,7 +55,7 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
                 }
 
                 columns.Add(new TextDoc(","));
-                columns.Add(_options.ColumnLayout == SelectColumnLayout.OnePerLine
+                columns.Add(_options.Select.ColumnLayout == SelectColumnLayout.OnePerLine
                     ? HardLineDoc.Instance : SoftLineDoc.Instance);
             }
 
@@ -66,12 +64,12 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
 
         var lastElement = query.SelectElements[query.SelectElements.Count - 1];
         var cursor = lastElement.StartOffset + lastElement.FragmentLength;
-        var columnParts = new List<Doc> { _options.ColumnLayout == SelectColumnLayout.OnePerLine
+        var columnParts = new List<Doc> { _options.Select.ColumnLayout == SelectColumnLayout.OnePerLine
             ? HardLineDoc.Instance : SoftLineDoc.Instance };
         columnParts.AddRange(columns);
         var columnDoc = new IndentDoc(1, new ConcatDoc(columnParts));
         var parts = new List<Doc> { new TextDoc(prefix.Trim()),
-            _options.ColumnLayout == SelectColumnLayout.OnePerLine
+            _options.Select.ColumnLayout == SelectColumnLayout.OnePerLine
                 ? columnDoc : new GroupDoc(columnDoc) };
 
         if (query.FromClause is not null)
@@ -82,9 +80,11 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
             var fromPrefix = source.Substring(from.StartOffset, table.StartOffset - from.StartOffset);
             var fromTail = source.Substring(table.StartOffset + table.FragmentLength,
                 from.StartOffset + from.FragmentLength - table.StartOffset - table.FragmentLength);
+            var tableDoc = new FromTableDocBuilder(_options).Build(table, context);
             if (!string.IsNullOrWhiteSpace(between)
                 || !Regex.IsMatch(fromPrefix, @"^FROM\s+$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)
-                || !string.IsNullOrWhiteSpace(fromTail))
+                || !string.IsNullOrWhiteSpace(fromTail)
+                || tableDoc is null)
             {
                 return new TextDoc(context.GetOriginalText(statement));
             }
@@ -92,7 +92,7 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
             parts.Add(HardLineDoc.Instance);
             parts.Add(new TextDoc(fromPrefix.Trim()));
             parts.Add(new TextDoc(" "));
-            parts.Add(new TextDoc(context.GetOriginalText(table).Trim()));
+            parts.Add(tableDoc);
             cursor = from.StartOffset + from.FragmentLength;
         }
 

@@ -156,7 +156,21 @@ System.Console.WriteLine(result.Text);
 // FROM dbo.Users u;
 ```
 
-Structural formatting currently covers simple column lists and one ordinary table in `FROM`. If the construct contains comments or an unsupported clause such as `WHERE` or `ORDER BY`, original layout is retained, although keyword casing may still change. A trailing semicolon is preserved.
+Structural formatting currently covers simple column lists and one table in `FROM`. If the construct contains comments or an unsupported clause such as `WHERE` or `ORDER BY`, original layout is retained, although keyword casing may still change. A trailing semicolon is preserved.
+
+### FROM source
+
+Table names are supported, including `schema.table` and bracket-quoted parts, along with aliases with or without `AS`. A basic derived table containing a `SELECT` is formatted as an indented nested query:
+
+```sql
+SELECT d.Id
+FROM (
+    SELECT Id
+    FROM dbo.Items
+) AS d;
+```
+
+A derived table's column alias list (`AS d(Id)`) is not structurally formatted yet: its original layout is kept and only keyword casing may change.
 
 ### Column layout
 
