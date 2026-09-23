@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. Programmatic T-SQL parsing, token navigation, and offset-to-line mapping are available through `TSqlFormatter.Core`. SQL formatting, configuration loading, and CLI commands are not implemented yet. There is no installable package.
+This is an early prototype. Programmatic T-SQL parsing, token navigation, offset-to-line mapping, and a layout document model are available through `TSqlFormatter.Core`. SQL formatting, layout rendering, configuration loading, and CLI commands are not implemented yet. There is no installable package.
 
 ## Setup
 
@@ -90,7 +90,25 @@ Console.WriteLine(result.LineMap.GetOffset(position)); // original offset
 
 `GetLinePosition(offset)` converts an offset to a `SqlLinePosition` with `Line` and `Column` properties; `GetOffset(line, column)` or `GetOffset(position)` performs the reverse conversion. `LineCount` reports the number of lines. Offsets start at 0 and include the position after the last character; lines and columns start at 1. Columns count UTF-16 code units, not visible characters. LF, CRLF, and lone CR line endings are supported. Both code units of CRLF belong to the preceding line, and the next line starts after LF; this makes every offset, including one inside CRLF, round-trip exactly. Empty text has one line with position `1:1`. Invalid offsets and positions raise `ArgumentOutOfRangeException`.
 
+## Layout document model for developers
+
+In `TSqlFormatter.Core.Layout`, you can compose a tree from `TextDoc`, `ConcatDoc`, `SoftLineDoc.Instance`, `HardLineDoc.Instance`, `IndentDoc`, `GroupDoc`, and `IfBreakDoc`. For example:
+
+```csharp
+using TSqlFormatter.Core.Layout;
+
+Doc document = new GroupDoc(new ConcatDoc(new Doc[]
+{
+    new TextDoc("SELECT"),
+    SoftLineDoc.Instance,
+    new IndentDoc(1, new TextDoc("Id"))
+}));
+```
+
+`SoftLineDoc` means a space in flat mode or a newline in broken mode; `HardLineDoc` means an unconditional newline. `GroupDoc` marks content that a future renderer may keep on one line if it fits. `IndentDoc` specifies a nonnegative number of indentation levels, and `IfBreakDoc(broken, flat)` holds alternatives for broken and flat modes. The nodes currently only store structure: there is no API yet to turn a `Doc` into text.
+
 ## Limitations
 
 - The CLI is a placeholder: it does not format SQL or provide user commands yet.
 - The parser does not modify SQL or produce formatted text.
+- The layout document model has no renderer yet, so it cannot produce formatted SQL.
