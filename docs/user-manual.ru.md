@@ -141,7 +141,7 @@ System.Console.WriteLine(result.Text); // SELECT 'from' FROM dbo.Items
 
 `FormatRequest` по умолчанию запрашивает весь документ (`Document`), диалект `Auto` и строгое поведение при ошибке разбора (`Strict`). Область `Selection` требует `SqlTextSpan`; `Selection` и `Statement` пока возвращают исходный текст с предупреждением `TSF3000`. При ошибке разбора исходный текст остаётся неизменным, `ParseSucceeded` равен `false`, выдаётся диагностика `TSF1000` независимо от выбранного режима `Strict`, `Safe` или `TokenFallback`.
 
-`FormattingOptions` разделяет параметры на `General` (ширина 100, LF, без конечного перевода строки), `Indent` (4 пробела, без табуляции) и `Keywords` (`Upper`). Для базового `SELECT` применяются `General` и `Indent`; в остальных случаях пока меняется только регистр ключевых слов. `FormatResult` содержит итоговый текст, правки `TextEdit`, диагностики, признаки изменения и успешности разбора.
+`FormattingOptions` разделяет параметры на `General` (ширина 100, LF, без конечного перевода строки), `Indent` (4 пробела, без табуляции), `Keywords` (`Upper`) и `Select` (`Auto`). Для поддержанного `SELECT` применяются параметры ширины, отступа, EOL и раскладки колонок; в остальных случаях пока меняется только регистр ключевых слов. `FormatResult` содержит итоговый текст, правки `TextEdit`, диагностики, признаки изменения и успешности разбора.
 
 ## Базовый SELECT
 
@@ -157,6 +157,22 @@ System.Console.WriteLine(result.Text);
 ```
 
 Пока структурно поддержаны простые списки колонок и одна обычная таблица в `FROM`. При наличии комментариев внутри конструкции либо пока неподдержанного предложения (`WHERE`, `ORDER BY` и т. п.) расположение текста сохраняется, но регистр ключевых слов всё равно может измениться. Завершающая точка с запятой сохраняется.
+
+### Раскладка колонок
+
+`SelectOptions.ColumnLayout` принимает `Auto` (по умолчанию) или `OnePerLine`. В режиме `Auto` весь список остаётся в одной строке, если помещается в `GeneralOptions.MaxLineWidth`; иначе каждая колонка переносится на строку с отступом. `OnePerLine` всегда переносит каждую колонку. Запятая остаётся после колонки, кроме последней:
+
+```csharp
+var options = new FormattingOptions(
+    select: new SelectOptions(SelectColumnLayout.OnePerLine));
+var result = new ScriptDomSqlFormatter().Format(
+    "select Id,Name from Users", options, new FormatRequest());
+System.Console.WriteLine(result.Text);
+// SELECT
+//     Id,
+//     Name
+// FROM Users
+```
 
 ## Построение `Doc` из AST
 

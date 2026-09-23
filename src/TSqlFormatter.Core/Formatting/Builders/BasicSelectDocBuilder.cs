@@ -7,6 +7,13 @@ namespace TSqlFormatter.Core.Formatting.Builders;
 /// <summary>Formats the supported, uncomplicated SELECT shape without discarding source trivia.</summary>
 internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
 {
+    private readonly SelectOptions _options;
+
+    public BasicSelectDocBuilder(SelectOptions options)
+    {
+        _options = options ?? throw new ArgumentNullException(nameof(options));
+    }
+
     public bool Applied { get; private set; }
 
     public bool CanBuild(TSqlFragment fragment) => fragment is SelectStatement;
@@ -49,7 +56,9 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
                     return new TextDoc(context.GetOriginalText(statement));
                 }
 
-                columns.Add(new TextDoc(", "));
+                columns.Add(new TextDoc(","));
+                columns.Add(_options.ColumnLayout == SelectColumnLayout.OnePerLine
+                    ? HardLineDoc.Instance : SoftLineDoc.Instance);
             }
 
             columns.Add(new TextDoc(context.GetOriginalText(element).Trim()));
@@ -57,12 +66,13 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
 
         var lastElement = query.SelectElements[query.SelectElements.Count - 1];
         var cursor = lastElement.StartOffset + lastElement.FragmentLength;
-        var parts = new List<Doc>
-        {
-            new TextDoc(prefix.Trim()),
-            new TextDoc(" "),
-            new ConcatDoc(columns)
-        };
+        var columnParts = new List<Doc> { _options.ColumnLayout == SelectColumnLayout.OnePerLine
+            ? HardLineDoc.Instance : SoftLineDoc.Instance };
+        columnParts.AddRange(columns);
+        var columnDoc = new IndentDoc(1, new ConcatDoc(columnParts));
+        var parts = new List<Doc> { new TextDoc(prefix.Trim()),
+            _options.ColumnLayout == SelectColumnLayout.OnePerLine
+                ? columnDoc : new GroupDoc(columnDoc) };
 
         if (query.FromClause is not null)
         {

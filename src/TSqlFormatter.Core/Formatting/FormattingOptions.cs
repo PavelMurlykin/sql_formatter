@@ -6,11 +6,13 @@ public sealed class FormattingOptions
     public FormattingOptions(
         GeneralOptions? general = null,
         IndentOptions? indent = null,
-        KeywordOptions? keywords = null)
+        KeywordOptions? keywords = null,
+        SelectOptions? select = null)
     {
         General = general ?? new GeneralOptions();
         Indent = indent ?? new IndentOptions();
         Keywords = keywords ?? new KeywordOptions();
+        Select = select ?? new SelectOptions();
     }
 
     public GeneralOptions General { get; }
@@ -18,4 +20,6 @@ public sealed class FormattingOptions
     public IndentOptions Indent { get; }
 
     public KeywordOptions Keywords { get; }
+
+    public SelectOptions Select { get; }
 }

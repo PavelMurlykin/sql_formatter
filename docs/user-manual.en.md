@@ -141,7 +141,7 @@ System.Console.WriteLine(result.Text); // SELECT 'from' FROM dbo.Items
 
 `FormatRequest` defaults to whole-document scope (`Document`), the `Auto` dialect, and strict parse-failure behavior (`Strict`). `Selection` requires a `SqlTextSpan`; `Selection` and `Statement` currently return unchanged source with a `TSF3000` warning. On a parse error, source remains unchanged, `ParseSucceeded` is `false`, and a `TSF1000` diagnostic is reported for all of `Strict`, `Safe`, and `TokenFallback`.
 
-`FormattingOptions` groups settings into `General` (width 100, LF, no final newline), `Indent` (4 spaces, no tabs), and `Keywords` (`Upper`). `General` and `Indent` apply to basic `SELECT` output; otherwise only keyword casing currently changes. `FormatResult` carries final text, `TextEdit` changes, diagnostics, change status, and parse success.
+`FormattingOptions` groups settings into `General` (width 100, LF, no final newline), `Indent` (4 spaces, no tabs), `Keywords` (`Upper`), and `Select` (`Auto`). Width, indentation, EOL, and column layout apply to supported `SELECT` output; otherwise only keyword casing currently changes. `FormatResult` carries final text, `TextEdit` changes, diagnostics, change status, and parse success.
 
 ## Basic SELECT
 
@@ -157,6 +157,22 @@ System.Console.WriteLine(result.Text);
 ```
 
 Structural formatting currently covers simple column lists and one ordinary table in `FROM`. If the construct contains comments or an unsupported clause such as `WHERE` or `ORDER BY`, original layout is retained, although keyword casing may still change. A trailing semicolon is preserved.
+
+### Column layout
+
+`SelectOptions.ColumnLayout` accepts `Auto` (the default) or `OnePerLine`. In `Auto`, the entire list stays on one line if it fits within `GeneralOptions.MaxLineWidth`; otherwise every column moves to an indented line. `OnePerLine` always puts each column on its own line. Commas remain after each column except the last:
+
+```csharp
+var options = new FormattingOptions(
+    select: new SelectOptions(SelectColumnLayout.OnePerLine));
+var result = new ScriptDomSqlFormatter().Format(
+    "select Id,Name from Users", options, new FormatRequest());
+System.Console.WriteLine(result.Text);
+// SELECT
+//     Id,
+//     Name
+// FROM Users
+```
 
 ## Building a `Doc` from the AST
 
