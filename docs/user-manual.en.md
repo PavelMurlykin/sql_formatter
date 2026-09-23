@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. T-SQL parsing, token navigation, offset-to-line mapping, layout document construction and rendering, keyword casing, and basic `SELECT`, `FROM`, `JOIN`, and `APPLY` formatting are available through `TSqlFormatter.Core`. Configuration loading and CLI commands are not implemented yet. There is no installable package.
+This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and basic `SELECT`, `FROM`, `JOIN`, and `APPLY` formatting are available through `TSqlFormatter.Core`. Configuration loading and CLI commands are not implemented yet. There is no installable package.
 
 ## Setup
 
@@ -72,6 +72,24 @@ if (result.ParseSucceeded)
 `GetToken(index)` returns the token at that exact index in `result.Tokens`. `GetPreviousMeaningfulToken(index)` and `GetNextMeaningfulToken(index)` search strictly before and after the specified token, skipping whitespace, single-line and multiline comments, and the end-of-file marker; they return `null` when no suitable token exists. These methods throw `ArgumentOutOfRangeException` for an index outside the token range.
 
 `GetFragmentTokens(fragment)` returns every token from `FirstTokenIndex` through `LastTokenIndex`, inclusive, preserving comments and whitespace inside the fragment. `GetTextSpan(fragment)` returns a range in the original source: `StartOffset`, `Length`, and exclusive `EndOffset`. Offsets are zero-based .NET character positions. A `null` fragment raises `ArgumentNullException`; a fragment with invalid bounds raises `ArgumentException`. Token navigation remains available when parsing reports errors, but AST fragments may be partial.
+
+## Classifying comments
+
+`SqlTriviaScanner` inspects parse-result tokens without modifying the SQL source:
+
+```csharp
+using TSqlFormatter.Core.Parsing;
+
+var parsed = new ScriptDomSqlParser().Parse(
+    "SELECT Id, -- note\nName FROM T", SqlDialectVersion.Auto);
+var comments = new SqlTriviaScanner().Scan(parsed);
+foreach (var comment in comments)
+{
+    System.Console.WriteLine($"{comment.Placement}: {comment.Text}");
+}
+```
+
+Each `SqlCommentTrivia` carries an exact `Span`, original `Text`, `Kind` (`Line`/`Block`), `TokenIndex`, and `Placement`: `Trailing` follows a SQL token on the same line; `Leading` is adjacent to the next token (including a contiguous chain of comments); `Standalone` has no such attachment, for example when separated by a blank line. `AnchorTokenIndex` refers to the attached SQL token in `parsed.Tokens`; it is `null` for `Standalone`. The scanner also works with available tokens after a parse error. This stage exposes classification to callers but does not yet change formatter behavior.
 
 ## Positions in the original source
 
