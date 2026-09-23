@@ -1,5 +1,7 @@
 using System.Text;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
+using TSqlFormatter.Core.Formatting.Builders;
+using TSqlFormatter.Core.Layout;
 using TSqlFormatter.Core.Parsing;
 
 namespace TSqlFormatter.Core.Formatting;
@@ -39,6 +41,33 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
                 "TSF1000", error.Message, FormatterDiagnosticSeverity.Error,
                 new SqlTextSpan(error.Offset, 0))).ToArray();
             return new FormatResult(source, false, false, diagnostics: diagnostics);
+        }
+
+        var builder = new BasicSelectDocBuilder();
+        var document = new SqlDocBuilder(new ISqlFragmentDocBuilder[] { builder })
+            .BuildDocument(parsed, cancellationToken);
+        if (builder.Applied)
+        {
+            var rendered = new DocRenderer().Render(document, new DocRenderOptions(
+                options.General.MaxLineWidth, options.Indent.Size, options.General.LineEnding,
+                options.General.FinalNewline, options.Indent.UseTabs));
+            var reparsed = _parser.Parse(rendered, request.Dialect, cancellationToken);
+            if (!reparsed.ParseSucceeded)
+            {
+                return Unchanged(source, true, new FormatterDiagnostic(
+                    "TSF3001", "Formatted SQL failed validation and was left unchanged.",
+                    FormatterDiagnosticSeverity.Warning));
+            }
+
+            rendered = KeywordCasing.Apply(rendered,
+                KeywordCasing.GetEdits(reparsed, options.Keywords.Case, cancellationToken));
+            if (string.Equals(rendered, source, StringComparison.Ordinal))
+            {
+                return Unchanged(source, true);
+            }
+
+            return new FormatResult(rendered, true, true,
+                new[] { new TextEdit(new SqlTextSpan(0, source.Length), rendered) });
         }
 
         var edits = KeywordCasing.GetEdits(parsed, options.Keywords.Case, cancellationToken);

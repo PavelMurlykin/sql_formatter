@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. T-SQL parsing, token navigation, offset-to-line mapping, layout document construction and rendering, and programmatic keyword casing are available through `TSqlFormatter.Core`. Structural SQL formatting, configuration loading, and CLI commands are not implemented yet. There is no installable package.
+This is an early prototype. T-SQL parsing, token navigation, offset-to-line mapping, layout document construction and rendering, keyword casing, and basic `SELECT` formatting are available through `TSqlFormatter.Core`. Configuration loading and CLI commands are not implemented yet. There is no installable package.
 
 ## Setup
 
@@ -127,7 +127,7 @@ The `SmallFlat`, `MediumWrapped`, and `LargeWrapped` scenarios measure only `Doc
 
 ## Keyword casing
 
-`ScriptDomSqlFormatter` implements `ISqlFormatter.Format(source, options, request, cancellationToken)`. It currently changes only tokens ScriptDom recognizes as keywords; whitespace, strings, comments, and identifiers are preserved. The default is `Upper`; `Lower` and `Preserve` are also available:
+`ScriptDomSqlFormatter` implements `ISqlFormatter.Format(source, options, request, cancellationToken)`. It changes the case only of tokens ScriptDom recognizes as keywords; strings, comments, and identifiers are preserved. The default is `Upper`; `Lower` and `Preserve` are also available:
 
 ```csharp
 using TSqlFormatter.Core.Formatting;
@@ -141,7 +141,22 @@ System.Console.WriteLine(result.Text); // SELECT 'from' FROM dbo.Items
 
 `FormatRequest` defaults to whole-document scope (`Document`), the `Auto` dialect, and strict parse-failure behavior (`Strict`). `Selection` requires a `SqlTextSpan`; `Selection` and `Statement` currently return unchanged source with a `TSF3000` warning. On a parse error, source remains unchanged, `ParseSucceeded` is `false`, and a `TSF1000` diagnostic is reported for all of `Strict`, `Safe`, and `TokenFallback`.
 
-`FormattingOptions` groups settings into `General` (width 100, LF, no final newline), `Indent` (4 spaces, no tabs), and `Keywords` (`Upper`). The formatter currently uses only `Keywords`. `FormatResult` carries final text, `TextEdit` changes, diagnostics, change status, and parse success.
+`FormattingOptions` groups settings into `General` (width 100, LF, no final newline), `Indent` (4 spaces, no tabs), and `Keywords` (`Upper`). `General` and `Indent` apply to basic `SELECT` output; otherwise only keyword casing currently changes. `FormatResult` carries final text, `TextEdit` changes, diagnostics, change status, and parse success.
+
+## Basic SELECT
+
+For a simple `SELECT` of literals or columns, the formatter normalizes spacing between items, retains names and aliases, and places `FROM` on a separate line:
+
+```csharp
+var result = new ScriptDomSqlFormatter().Format(
+    "select u.Id as UserId,u.Name from dbo.Users u;",
+    new FormattingOptions(), new FormatRequest());
+System.Console.WriteLine(result.Text);
+// SELECT u.Id AS UserId, u.Name
+// FROM dbo.Users u;
+```
+
+Structural formatting currently covers simple column lists and one ordinary table in `FROM`. If the construct contains comments or an unsupported clause such as `WHERE` or `ORDER BY`, original layout is retained, although keyword casing may still change. A trailing semicolon is preserved.
 
 ## Building a `Doc` from the AST
 
@@ -163,5 +178,5 @@ When parsing fails, `BuildDocument` also returns the unchanged source. You can r
 ## Limitations
 
 - The CLI is a placeholder: it does not format SQL or provide user commands yet.
-- The formatter does not yet change SQL structure, whitespace, or line breaks.
+- Structural formatting is currently limited to simple `SELECT` statements; complex queries retain their original layout.
 - The renderer accepts a prepared `Doc` tree; built-in AST handlers currently preserve source text.

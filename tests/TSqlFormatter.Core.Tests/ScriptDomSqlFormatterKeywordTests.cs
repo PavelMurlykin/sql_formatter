@@ -31,9 +31,9 @@ public sealed class ScriptDomSqlFormatterKeywordTests
         var preserve = _formatter.Format(source,
             new FormattingOptions(keywords: new KeywordOptions(KeywordCase.Preserve)), new FormatRequest());
 
-        Assert.Equal("select 'FROM' from dbo.TableName", lower.Text);
-        Assert.Equal(source, preserve.Text);
-        Assert.False(preserve.Changed);
+        Assert.Equal("select 'FROM'\nfrom dbo.TableName", lower.Text);
+        Assert.Equal("SELECT 'FROM'\nFROM dbo.TableName", preserve.Text);
+        Assert.True(preserve.Changed);
     }
 
     [Fact]
