@@ -2,8 +2,8 @@
 
 An extensible T-SQL formatter under active development. The current Core exposes
 a ScriptDom-based parser, token helpers, a line map, a layout renderer, an
-AST-to-document builder, and public formatter contracts. SQL formatting and
-CLI commands are planned in
+AST-to-document builder, and programmatic formatting for basic SELECT/FROM/JOIN
+queries. CLI commands and broader SQL coverage are planned in
 [`CODEX_DEVELOPMENT_PLAN.md`](CODEX_DEVELOPMENT_PLAN.md).
 
 Current usage: [English manual](docs/user-manual.en.md) ·
@@ -44,5 +44,5 @@ See the five architecture decision records in `docs/adr/`.
 - `tests/TSqlFormatter.GoldenTests` — golden formatting tests (`net8.0`).
 - `benchmarks/TSqlFormatter.Benchmarks` — renderer microbenchmarks (`net8.0`).
 
-Automatic SQL formatting, configuration loading, and CLI commands are
-planned for later roadmap tasks.
+Broader SQL formatting, configuration loading, and CLI commands are planned for
+later roadmap tasks. See the manuals for the supported subset.

@@ -16,7 +16,17 @@ internal sealed class FromTableDocBuilder
 
     public Doc? Build(TableReference table, SqlDocBuilderContext context)
     {
+        if (table is JoinTableReference join)
+        {
+            return new JoinDocBuilder(this, _options.Keywords.Case).Build(join, context);
+        }
+
         if (table is NamedTableReference)
+        {
+            return new TextDoc(context.GetOriginalText(table).Trim());
+        }
+
+        if (table is SchemaObjectFunctionTableReference)
         {
             return new TextDoc(context.GetOriginalText(table).Trim());
         }

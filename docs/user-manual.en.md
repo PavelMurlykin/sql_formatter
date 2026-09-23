@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. T-SQL parsing, token navigation, offset-to-line mapping, layout document construction and rendering, keyword casing, and basic `SELECT` formatting are available through `TSqlFormatter.Core`. Configuration loading and CLI commands are not implemented yet. There is no installable package.
+This is an early prototype. T-SQL parsing, token navigation, offset-to-line mapping, layout document construction and rendering, keyword casing, and basic `SELECT`, `FROM`, `JOIN`, and `APPLY` formatting are available through `TSqlFormatter.Core`. Configuration loading and CLI commands are not implemented yet. There is no installable package.
 
 ## Setup
 
@@ -127,7 +127,7 @@ The `SmallFlat`, `MediumWrapped`, and `LargeWrapped` scenarios measure only `Doc
 
 ## Keyword casing
 
-`ScriptDomSqlFormatter` implements `ISqlFormatter.Format(source, options, request, cancellationToken)`. It changes the case only of tokens ScriptDom recognizes as keywords; strings, comments, and identifiers are preserved. The default is `Upper`; `Lower` and `Preserve` are also available:
+`ScriptDomSqlFormatter` implements `ISqlFormatter.Format(source, options, request, cancellationToken)`. It changes the case of tokens ScriptDom recognizes as keywords and of supported AST-confirmed `JOIN`/`APPLY` operators; strings, comments, and identifiers are preserved. The default is `Upper`; `Lower` and `Preserve` are also available:
 
 ```csharp
 using TSqlFormatter.Core.Formatting;
@@ -171,6 +171,19 @@ FROM (
 ```
 
 A derived table's column alias list (`AS d(Id)`) is not structurally formatted yet: its original layout is kept and only keyword casing may change.
+
+### JOIN and APPLY
+
+`INNER JOIN` (and short `JOIN`), `LEFT [OUTER] JOIN`, `RIGHT [OUTER] JOIN`, `FULL [OUTER] JOIN`, `CROSS JOIN`, `CROSS APPLY`, and `OUTER APPLY` are supported. Each join in a chain starts on a new line. Its `ON` condition stays on the same line; the expression's internal spacing is preserved for now:
+
+```sql
+SELECT a.Id
+FROM dbo.A a
+INNER JOIN dbo.B b ON a.Id = b.Id
+LEFT JOIN dbo.C c ON b.Id = c.Id;
+```
+
+The right side of `APPLY` may be a simple derived table. Join hints such as `HASH JOIN` and other unsupported forms keep their original layout. Tokens recognized by ScriptDom as keywords may still change case.
 
 ### Column layout
 
