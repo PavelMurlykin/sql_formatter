@@ -38,7 +38,7 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
             return new TextDoc(context.GetOriginalText(statement));
         }
 
-        var columnDoc = new SelectColumnDocBuilder(_options.Select).Build(query, context);
+        var columnDoc = new SelectColumnDocBuilder(_options).Build(query, context);
         if (columnDoc is null)
         {
             return new TextDoc(context.GetOriginalText(statement));
@@ -93,7 +93,7 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
         {
             var where = query.WhereClause;
             var leading = new LeadingCommentDocBuilder().Build(cursor, where.StartOffset, context);
-            var whereDoc = new WhereDocBuilder().Build(where, context);
+            var whereDoc = new WhereDocBuilder(_options).Build(where, context);
             if (leading is null || whereDoc is null)
             {
                 return new TextDoc(context.GetOriginalText(statement));
@@ -126,7 +126,7 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
         {
             var having = query.HavingClause;
             var leading = new LeadingCommentDocBuilder().Build(cursor, having.StartOffset, context);
-            var havingDoc = new WhereDocBuilder().Build(having, context);
+            var havingDoc = new WhereDocBuilder(_options).Build(having, context);
             if (leading is null || havingDoc is null)
             {
                 return new TextDoc(context.GetOriginalText(statement));

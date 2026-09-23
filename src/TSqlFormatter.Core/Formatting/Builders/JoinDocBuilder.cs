@@ -9,11 +9,13 @@ internal sealed class JoinDocBuilder
 {
     private readonly FromTableDocBuilder _tables;
     private readonly KeywordCase _keywordCase;
+    private readonly FormattingOptions _options;
 
-    public JoinDocBuilder(FromTableDocBuilder tables, KeywordCase keywordCase)
+    public JoinDocBuilder(FromTableDocBuilder tables, FormattingOptions options)
     {
         _tables = tables;
-        _keywordCase = keywordCase;
+        _options = options;
+        _keywordCase = options.Keywords.Case;
     }
 
     public Doc? Build(JoinTableReference join, SqlDocBuilderContext context)
@@ -52,14 +54,16 @@ internal sealed class JoinDocBuilder
             var onPrefix = source.Substring(secondEnd, condition.StartOffset - secondEnd);
             var tail = source.Substring(condition.StartOffset + condition.FragmentLength,
                 end - condition.StartOffset - condition.FragmentLength);
-            if (!Regex.IsMatch(onPrefix, @"^\s+ON\s+$",
+            var expectedOnPrefix = WhereDocBuilder.StartsWithExists(condition)
+                ? @"^\s+ON\s+EXISTS\s+$" : @"^\s+ON\s+$";
+            if (!Regex.IsMatch(onPrefix, expectedOnPrefix,
                     RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)
                 || !string.IsNullOrWhiteSpace(tail))
             {
                 return null;
             }
 
-            var conditionDoc = WhereDocBuilder.BuildCondition(condition, context)
+            var conditionDoc = new WhereDocBuilder(_options).BuildCondition(condition, context)
                 ?? new TextDoc(context.GetOriginalText(condition).Trim());
             return new ConcatDoc(new Doc[]
             {
@@ -68,7 +72,8 @@ internal sealed class JoinDocBuilder
                 HardLineDoc.Instance,
                 new IndentDoc(1, new ConcatDoc(new Doc[]
                 {
-                    new TextDoc(onPrefix.Trim()), new TextDoc(" "), conditionDoc
+                    new TextDoc(Regex.Match(onPrefix, @"ON", RegexOptions.IgnoreCase).Value),
+                    new TextDoc(" "), conditionDoc
                 }))
             });
         }

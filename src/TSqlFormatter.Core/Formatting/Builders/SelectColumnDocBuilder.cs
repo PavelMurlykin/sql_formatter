@@ -8,9 +8,9 @@ namespace TSqlFormatter.Core.Formatting.Builders;
 /// <summary>Builds SELECT columns and keeps trailing comments attached to commas.</summary>
 internal sealed class SelectColumnDocBuilder
 {
-    private readonly SelectOptions _options;
+    private readonly FormattingOptions _options;
 
-    public SelectColumnDocBuilder(SelectOptions options)
+    public SelectColumnDocBuilder(FormattingOptions options)
     {
         _options = options;
     }
@@ -65,7 +65,7 @@ internal sealed class SelectColumnDocBuilder
             hasInline = true;
         }
 
-        var breakEvery = hasInline || _options.ColumnLayout == SelectColumnLayout.OnePerLine;
+        var breakEvery = hasInline || _options.Select.ColumnLayout == SelectColumnLayout.OnePerLine;
         var parts = new List<Doc> { breakEvery ? HardLineDoc.Instance : SoftLineDoc.Instance };
         for (var index = 0; index < elements.Count; index++)
         {
@@ -85,10 +85,51 @@ internal sealed class SelectColumnDocBuilder
                 }
             }
 
-            parts.Add(new TextDoc(context.GetOriginalText(elements[index]).Trim()));
+            var column = BuildElement(elements[index], context);
+            if (column is null) return null;
+            parts.Add(column);
         }
 
         var body = new IndentDoc(1, new ConcatDoc(parts));
         return breakEvery ? body : new GroupDoc(body);
+    }
+
+    private Doc? BuildElement(SelectElement element, SqlDocBuilderContext context)
+    {
+        if (element is not SelectScalarExpression scalar
+            || scalar.Expression is not ScalarSubquery subquery)
+        {
+            return new TextDoc(context.GetOriginalText(element).Trim());
+        }
+
+        var source = context.ParseResult.Source;
+        var before = source.Substring(element.StartOffset, subquery.StartOffset - element.StartOffset);
+        var after = source.Substring(subquery.StartOffset + subquery.FragmentLength,
+            element.StartOffset + element.FragmentLength - subquery.StartOffset - subquery.FragmentLength);
+        if (!string.IsNullOrWhiteSpace(before)) return null;
+        if (scalar.ColumnName is null)
+        {
+            if (!string.IsNullOrWhiteSpace(after)) return null;
+        }
+        else
+        {
+            var alias = scalar.ColumnName;
+            var aliasPrefix = source.Substring(subquery.StartOffset + subquery.FragmentLength,
+                alias.StartOffset - subquery.StartOffset - subquery.FragmentLength);
+            var aliasTail = source.Substring(alias.StartOffset + alias.FragmentLength,
+                element.StartOffset + element.FragmentLength - alias.StartOffset - alias.FragmentLength);
+            if (!Regex.IsMatch(aliasPrefix, @"^\s+(?:AS\s+)?$",
+                    RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)
+                || !string.IsNullOrWhiteSpace(aliasTail))
+            {
+                return null;
+            }
+        }
+
+        var doc = new SubqueryDocBuilder(_options).Build(subquery, context);
+        return doc is null ? null : new ConcatDoc(new Doc[]
+        {
+            doc, new TextDoc(after.TrimEnd())
+        });
     }
 }

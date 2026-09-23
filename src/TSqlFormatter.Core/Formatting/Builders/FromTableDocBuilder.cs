@@ -18,7 +18,7 @@ internal sealed class FromTableDocBuilder
     {
         if (table is JoinTableReference join)
         {
-            return new JoinDocBuilder(this, _options.Keywords.Case).Build(join, context);
+            return new JoinDocBuilder(this, _options).Build(join, context);
         }
 
         if (table is NamedTableReference)

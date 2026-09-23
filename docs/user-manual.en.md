@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and basic `SELECT`, CTE, `FROM`, `JOIN`, and `APPLY` formatting are available through `TSqlFormatter.Core`, including line and block comments in supported positions. Configuration loading and CLI commands are not implemented yet. There is no installable package.
+This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and basic `SELECT`, CTE, subquery, `FROM`, `JOIN`, and `APPLY` formatting are available through `TSqlFormatter.Core`, including line and block comments in supported positions. Configuration loading and CLI commands are not implemented yet. There is no installable package.
 
 ## Setup
 
@@ -246,6 +246,26 @@ FROM B;
 ```
 
 CTEs with `XMLNAMESPACES`, nested `WITH`, or an unsupported query expression retain their original layout for now. CTE formatting does not yet cover `INSERT`/`UPDATE`/`DELETE`.
+
+### Subqueries
+
+A simple `SELECT` inside a scalar subquery, derived table, `EXISTS`, `IN`, or `NOT IN` is formatted as a separate indented block. Scalar subqueries are supported in the select list and on either side of a basic comparison; subquery predicates work in supported `WHERE`/`HAVING`/`ON` conditions, including combinations with `AND`/`OR`:
+
+```sql
+SELECT Id
+FROM T
+WHERE
+    Id IN (
+        SELECT Id
+        FROM U
+    )
+    AND EXISTS (
+        SELECT 1
+        FROM V
+    );
+```
+
+A scalar subquery in the select list may have an alias; a derived-table example appears below. Parentheses and original keyword spelling under `KeywordCase.Preserve` are retained. Complex query expressions such as `UNION`, and comments in unsupported positions, do not receive structural layout: the formatter keeps the construct's original layout, though keyword casing may still change.
 
 ### FROM source
 
