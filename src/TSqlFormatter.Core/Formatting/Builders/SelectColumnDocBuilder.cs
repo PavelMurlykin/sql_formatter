@@ -97,12 +97,16 @@ internal sealed class SelectColumnDocBuilder
     private Doc? BuildElement(SelectElement element, SqlDocBuilderContext context)
     {
         if (element is not SelectScalarExpression scalar
-            || scalar.Expression is not (ScalarSubquery or CaseExpression))
+            || scalar.Expression is not (ScalarSubquery or CaseExpression or FunctionCall))
         {
             return new TextDoc(context.GetOriginalText(element).Trim());
         }
 
         var expression = scalar.Expression;
+        if (expression is FunctionCall ordinary && ordinary.OverClause is null)
+        {
+            return new TextDoc(context.GetOriginalText(element).Trim());
+        }
         var source = context.ParseResult.Source;
         var before = source.Substring(element.StartOffset, expression.StartOffset - element.StartOffset);
         var after = source.Substring(expression.StartOffset + expression.FragmentLength,
@@ -131,6 +135,7 @@ internal sealed class SelectColumnDocBuilder
         {
             ScalarSubquery subquery => new SubqueryDocBuilder(_options).Build(subquery, context),
             CaseExpression caseExpression => new CaseDocBuilder().Build(caseExpression, context),
+            FunctionCall function => new WindowFunctionDocBuilder(_options).Build(function, context),
             _ => null
         };
         return doc is null ? null : new ConcatDoc(new Doc[]

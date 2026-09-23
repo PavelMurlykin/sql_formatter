@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and basic `SELECT`, CTE, subquery, `FROM`, `JOIN`, and `APPLY` formatting are available through `TSqlFormatter.Core`, including line and block comments in supported positions. Configuration loading and CLI commands are not implemented yet. There is no installable package.
+This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and basic `SELECT`, CTE, subquery, `CASE`, window-function, `FROM`, `JOIN`, and `APPLY` formatting are available through `TSqlFormatter.Core`, including line and block comments in supported positions. Configuration loading and CLI commands are not implemented yet. There is no installable package.
 
 ## Setup
 
@@ -297,6 +297,21 @@ ORDER BY Id;
 ```
 
 If a comment appears between a query and the operator, the entire expression keeps its original layout; only keyword casing may change. Combining such an expression with a CTE or `OFFSET/FETCH` does not yet receive structural formatting.
+
+### Window functions
+
+For a function call directly in the `SELECT` list, an `OVER` clause with `PARTITION BY` and/or `ORDER BY` is split across lines. Partition and sort lists retain their order; empty `OVER()` becomes `OVER ()`:
+
+```sql
+SELECT
+    row_number() OVER (
+        PARTITION BY Category
+        ORDER BY CreatedAt DESC
+    ) AS rn
+FROM T
+```
+
+The function arguments retain their original text. Window frames (`ROWS`/`RANGE`), named windows, and window functions embedded in more complex scalar expressions do not yet receive structural formatting. In these cases, original layout is retained, though recognized keywords may change case.
 
 ### FROM source
 
