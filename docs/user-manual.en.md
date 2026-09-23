@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. Programmatic T-SQL parsing, token navigation, offset-to-line mapping, layout document construction and rendering, and a future formatter contract are available through `TSqlFormatter.Core`. Automatic SQL formatting, configuration loading, and CLI commands are not implemented yet. There is no installable package.
+This is an early prototype. T-SQL parsing, token navigation, offset-to-line mapping, layout document construction and rendering, and programmatic keyword casing are available through `TSqlFormatter.Core`. Structural SQL formatting, configuration loading, and CLI commands are not implemented yet. There is no installable package.
 
 ## Setup
 
@@ -125,11 +125,23 @@ dotnet run --project benchmarks/TSqlFormatter.Benchmarks/TSqlFormatter.Benchmark
 
 The `SmallFlat`, `MediumWrapped`, and `LargeWrapped` scenarios measure only `DocRenderer.Render` on prebuilt documents with 5, 50, and 500 columns. The report includes time and allocations; it does not measure SQL parsing, tree construction, or end-to-end formatting. Add `--job Dry` for a quick execution check, but do not use its single measurement for performance comparisons. The first run may need NuGet access for BenchmarkDotNet's child project.
 
-## Formatter contract (no implementation yet)
+## Keyword casing
 
-`TSqlFormatter.Core.Formatting` contains the `ISqlFormatter.Format(source, options, request, cancellationToken)` interface and types for future formatting. `FormatRequest` defaults to whole-document scope (`Document`), the `Auto` dialect, and strict parse-failure behavior (`Strict`). `Selection` scope requires a `SqlTextSpan`; `Statement`, `Safe`, and `TokenFallback` are also declared, but their behavior is not implemented yet.
+`ScriptDomSqlFormatter` implements `ISqlFormatter.Format(source, options, request, cancellationToken)`. It currently changes only tokens ScriptDom recognizes as keywords; whitespace, strings, comments, and identifiers are preserved. The default is `Upper`; `Lower` and `Preserve` are also available:
 
-`FormattingOptions` groups settings into `General` (width 100, LF, no final newline), `Indent` (4 spaces, no tabs), and `Keywords` (`Upper`). `FormatResult` is designed to carry final text, `TextEdit` changes, diagnostics, change status, and parse success. Core currently has no class implementing `ISqlFormatter`: these options do not format SQL or change keyword case yet.
+```csharp
+using TSqlFormatter.Core.Formatting;
+
+ISqlFormatter formatter = new ScriptDomSqlFormatter();
+var result = formatter.Format("select 'from' from dbo.Items",
+    new FormattingOptions(keywords: new KeywordOptions(KeywordCase.Upper)),
+    new FormatRequest());
+System.Console.WriteLine(result.Text); // SELECT 'from' FROM dbo.Items
+```
+
+`FormatRequest` defaults to whole-document scope (`Document`), the `Auto` dialect, and strict parse-failure behavior (`Strict`). `Selection` requires a `SqlTextSpan`; `Selection` and `Statement` currently return unchanged source with a `TSF3000` warning. On a parse error, source remains unchanged, `ParseSucceeded` is `false`, and a `TSF1000` diagnostic is reported for all of `Strict`, `Safe`, and `TokenFallback`.
+
+`FormattingOptions` groups settings into `General` (width 100, LF, no final newline), `Indent` (4 spaces, no tabs), and `Keywords` (`Upper`). The formatter currently uses only `Keywords`. `FormatResult` carries final text, `TextEdit` changes, diagnostics, change status, and parse success.
 
 ## Building a `Doc` from the AST
 
@@ -146,10 +158,10 @@ var document = new SqlDocBuilder().BuildDocument(parsed);
 Console.Write(new DocRenderer().Render(document)); // unchanged source
 ```
 
-When parsing fails, `BuildDocument` also returns the unchanged source. You can register custom `ISqlFragmentDocBuilder` implementations for specific AST node types; earlier builders take precedence. `SqlFragmentWalker` traverses ScriptDom nodes. These extension points do not yet provide ready-made formatting rules or an `ISqlFormatter` implementation.
+When parsing fails, `BuildDocument` also returns the unchanged source. You can register custom `ISqlFragmentDocBuilder` implementations for specific AST node types; earlier builders take precedence. `SqlFragmentWalker` traverses ScriptDom nodes. These extension points do not yet provide built-in structural formatting rules. Use `ScriptDomSqlFormatter` for keyword casing.
 
 ## Limitations
 
 - The CLI is a placeholder: it does not format SQL or provide user commands yet.
-- The parser does not modify SQL or produce formatted text.
-- The renderer accepts a prepared `Doc` tree, but it does not build one from a T-SQL AST or format arbitrary SQL yet.
+- The formatter does not yet change SQL structure, whitespace, or line breaks.
+- The renderer accepts a prepared `Doc` tree; built-in AST handlers currently preserve source text.

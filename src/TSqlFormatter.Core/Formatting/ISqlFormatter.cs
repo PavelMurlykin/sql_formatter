@@ -1,6 +1,6 @@
 namespace TSqlFormatter.Core.Formatting;
 
-/// <summary>Contract for a future T-SQL formatter implementation.</summary>
+/// <summary>Contract for T-SQL formatting.</summary>
 public interface ISqlFormatter
 {
     FormatResult Format(

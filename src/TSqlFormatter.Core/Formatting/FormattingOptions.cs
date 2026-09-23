@@ -1,6 +1,6 @@
 namespace TSqlFormatter.Core.Formatting;
 
-/// <summary>Immutable, sectioned options for a future SQL formatter implementation.</summary>
+/// <summary>Immutable, sectioned options for SQL formatting.</summary>
 public sealed class FormattingOptions
 {
     public FormattingOptions(
