@@ -48,7 +48,7 @@ public sealed class FormatterApiTests
         Assert.False(options.General.FinalNewline);
         Assert.Equal(4, options.Indent.Size);
         Assert.False(options.Indent.UseTabs);
-        Assert.Equal(KeywordCase.Preserve, options.Keywords.Case);
+        Assert.Equal(KeywordCase.Upper, options.Keywords.Case);
     }
 
     [Fact]

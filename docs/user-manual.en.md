@@ -129,7 +129,24 @@ The `SmallFlat`, `MediumWrapped`, and `LargeWrapped` scenarios measure only `Doc
 
 `TSqlFormatter.Core.Formatting` contains the `ISqlFormatter.Format(source, options, request, cancellationToken)` interface and types for future formatting. `FormatRequest` defaults to whole-document scope (`Document`), the `Auto` dialect, and strict parse-failure behavior (`Strict`). `Selection` scope requires a `SqlTextSpan`; `Statement`, `Safe`, and `TokenFallback` are also declared, but their behavior is not implemented yet.
 
-`FormattingOptions` groups settings into `General` (width 100, LF, no final newline), `Indent` (4 spaces, no tabs), and `Keywords` (`Preserve`). `FormatResult` is designed to carry final text, `TextEdit` changes, diagnostics, change status, and parse success. Core currently has no class implementing `ISqlFormatter`: these options do not format SQL or change keyword case yet.
+`FormattingOptions` groups settings into `General` (width 100, LF, no final newline), `Indent` (4 spaces, no tabs), and `Keywords` (`Upper`). `FormatResult` is designed to carry final text, `TextEdit` changes, diagnostics, change status, and parse success. Core currently has no class implementing `ISqlFormatter`: these options do not format SQL or change keyword case yet.
+
+## Building a `Doc` from the AST
+
+`SqlDocBuilder` creates a layout document from a parse result. With no additional builders, it preserves the entire source, including comments and `GO` separators:
+
+```csharp
+using System;
+using TSqlFormatter.Core.Formatting.Builders;
+using TSqlFormatter.Core.Layout;
+using TSqlFormatter.Core.Parsing;
+
+var parsed = new ScriptDomSqlParser().Parse("-- note\nSELECT 1;", SqlDialectVersion.Auto);
+var document = new SqlDocBuilder().BuildDocument(parsed);
+Console.Write(new DocRenderer().Render(document)); // unchanged source
+```
+
+When parsing fails, `BuildDocument` also returns the unchanged source. You can register custom `ISqlFragmentDocBuilder` implementations for specific AST node types; earlier builders take precedence. `SqlFragmentWalker` traverses ScriptDom nodes. These extension points do not yet provide ready-made formatting rules or an `ISqlFormatter` implementation.
 
 ## Limitations
 

@@ -129,7 +129,24 @@ dotnet run --project benchmarks/TSqlFormatter.Benchmarks/TSqlFormatter.Benchmark
 
 `TSqlFormatter.Core.Formatting` содержит интерфейс `ISqlFormatter.Format(source, options, request, cancellationToken)` и типы для будущего форматирования. `FormatRequest` по умолчанию запрашивает весь документ (`Document`), диалект `Auto` и строгое поведение при ошибке разбора (`Strict`). Область `Selection` требует `SqlTextSpan`; также объявлены `Statement`, `Safe` и `TokenFallback`, но их выполнение пока не реализовано.
 
-`FormattingOptions` разделяет параметры на `General` (ширина 100, LF, без конечного перевода строки), `Indent` (4 пробела, без табуляции) и `Keywords` (`Preserve`). `FormatResult` предназначен для итогового текста, правок `TextEdit`, диагностик, признаков изменения и успешности разбора. Сейчас в Core нет класса, реализующего `ISqlFormatter`: эти настройки ещё не форматируют SQL и не применяют регистр ключевых слов.
+`FormattingOptions` разделяет параметры на `General` (ширина 100, LF, без конечного перевода строки), `Indent` (4 пробела, без табуляции) и `Keywords` (`Upper`). `FormatResult` предназначен для итогового текста, правок `TextEdit`, диагностик, признаков изменения и успешности разбора. Сейчас в Core нет класса, реализующего `ISqlFormatter`: эти настройки ещё не форматируют SQL и не применяют регистр ключевых слов.
+
+## Построение `Doc` из AST
+
+`SqlDocBuilder` создаёт layout-документ из результата парсинга. Без дополнительных обработчиков он сохраняет весь исходный текст, включая комментарии и разделители `GO`:
+
+```csharp
+using System;
+using TSqlFormatter.Core.Formatting.Builders;
+using TSqlFormatter.Core.Layout;
+using TSqlFormatter.Core.Parsing;
+
+var parsed = new ScriptDomSqlParser().Parse("-- note\nSELECT 1;", SqlDialectVersion.Auto);
+var document = new SqlDocBuilder().BuildDocument(parsed);
+Console.Write(new DocRenderer().Render(document)); // исходный текст без изменений
+```
+
+При неудачном разборе `BuildDocument` также возвращает неизменённый исходный текст. Для отдельных видов AST-узлов можно зарегистрировать собственные `ISqlFragmentDocBuilder`; более ранний обработчик имеет приоритет. `SqlFragmentWalker` позволяет обойти узлы ScriptDom. Эти точки расширения пока не добавляют готовых правил форматирования и не являются реализацией `ISqlFormatter`.
 
 ## Ограничения
 

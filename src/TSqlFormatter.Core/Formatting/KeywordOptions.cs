@@ -2,7 +2,7 @@ namespace TSqlFormatter.Core.Formatting;
 
 public sealed class KeywordOptions
 {
-    public KeywordOptions(KeywordCase @case = KeywordCase.Preserve)
+    public KeywordOptions(KeywordCase @case = KeywordCase.Upper)
     {
         if (!Enum.IsDefined(typeof(KeywordCase), @case))
         {
