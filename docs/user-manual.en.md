@@ -267,6 +267,22 @@ WHERE
 
 A scalar subquery in the select list may have an alias; a derived-table example appears below. Parentheses and original keyword spelling under `KeywordCase.Preserve` are retained. Complex query expressions such as `UNION`, and comments in unsupported positions, do not receive structural layout: the formatter keeps the construct's original layout, though keyword casing may still change.
 
+### CASE expressions
+
+Both simple `CASE value WHEN ...` and searched `CASE WHEN condition ...` are formatted branch by branch in the `SELECT` list and as an operand of a basic comparison. `THEN` receives an extra indent; `ELSE` is optional:
+
+```sql
+SELECT
+    CASE Status
+        WHEN 1
+            THEN 'New'
+        ELSE 'Other'
+    END AS Label
+FROM T
+```
+
+Condition and result expression text within each branch is retained. If comments or another unsupported construct appear between CASE parts, the query's original layout is retained; keyword casing may still change.
+
 ### FROM source
 
 Table names are supported, including `schema.table` and bracket-quoted parts, along with aliases with or without `AS`. A basic derived table containing a `SELECT` is formatted as an indented nested query:

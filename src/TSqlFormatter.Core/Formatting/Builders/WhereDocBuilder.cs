@@ -205,6 +205,8 @@ internal sealed class WhereDocBuilder
     {
         return expression is ScalarSubquery subquery
             ? new SubqueryDocBuilder(_options).Build(subquery, context)
+            : expression is CaseExpression caseExpression
+                ? new CaseDocBuilder().Build(caseExpression, context)
             : new TextDoc(context.GetOriginalText(expression).Trim());
     }
 

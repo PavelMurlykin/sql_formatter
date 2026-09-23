@@ -97,15 +97,16 @@ internal sealed class SelectColumnDocBuilder
     private Doc? BuildElement(SelectElement element, SqlDocBuilderContext context)
     {
         if (element is not SelectScalarExpression scalar
-            || scalar.Expression is not ScalarSubquery subquery)
+            || scalar.Expression is not (ScalarSubquery or CaseExpression))
         {
             return new TextDoc(context.GetOriginalText(element).Trim());
         }
 
+        var expression = scalar.Expression;
         var source = context.ParseResult.Source;
-        var before = source.Substring(element.StartOffset, subquery.StartOffset - element.StartOffset);
-        var after = source.Substring(subquery.StartOffset + subquery.FragmentLength,
-            element.StartOffset + element.FragmentLength - subquery.StartOffset - subquery.FragmentLength);
+        var before = source.Substring(element.StartOffset, expression.StartOffset - element.StartOffset);
+        var after = source.Substring(expression.StartOffset + expression.FragmentLength,
+            element.StartOffset + element.FragmentLength - expression.StartOffset - expression.FragmentLength);
         if (!string.IsNullOrWhiteSpace(before)) return null;
         if (scalar.ColumnName is null)
         {
@@ -114,8 +115,8 @@ internal sealed class SelectColumnDocBuilder
         else
         {
             var alias = scalar.ColumnName;
-            var aliasPrefix = source.Substring(subquery.StartOffset + subquery.FragmentLength,
-                alias.StartOffset - subquery.StartOffset - subquery.FragmentLength);
+            var aliasPrefix = source.Substring(expression.StartOffset + expression.FragmentLength,
+                alias.StartOffset - expression.StartOffset - expression.FragmentLength);
             var aliasTail = source.Substring(alias.StartOffset + alias.FragmentLength,
                 element.StartOffset + element.FragmentLength - alias.StartOffset - alias.FragmentLength);
             if (!Regex.IsMatch(aliasPrefix, @"^\s+(?:AS\s+)?$",
@@ -126,7 +127,12 @@ internal sealed class SelectColumnDocBuilder
             }
         }
 
-        var doc = new SubqueryDocBuilder(_options).Build(subquery, context);
+        var doc = expression switch
+        {
+            ScalarSubquery subquery => new SubqueryDocBuilder(_options).Build(subquery, context),
+            CaseExpression caseExpression => new CaseDocBuilder().Build(caseExpression, context),
+            _ => null
+        };
         return doc is null ? null : new ConcatDoc(new Doc[]
         {
             doc, new TextDoc(after.TrimEnd())
