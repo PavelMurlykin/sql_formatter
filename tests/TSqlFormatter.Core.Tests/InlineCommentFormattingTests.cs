@@ -52,12 +52,12 @@ public sealed class InlineCommentFormattingTests
     }
 
     [Fact]
-    public void Unsupported_block_comment_is_not_dropped()
+    public void Block_comment_after_comma_is_attached_to_column()
     {
         const string source = "select Id, /* note */ Name from T";
         var result = _formatter.Format(source, new FormattingOptions(), new FormatRequest());
 
-        Assert.Equal("SELECT Id, /* note */ Name FROM T", result.Text);
+        Assert.Equal("SELECT\n    Id, /* note */\n    Name\nFROM T", result.Text);
     }
 
     private static int Count(string source, string fragment) =>

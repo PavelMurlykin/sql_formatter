@@ -5,7 +5,7 @@ using TSqlFormatter.Core.Parsing;
 
 namespace TSqlFormatter.Core.Formatting.Builders;
 
-/// <summary>Builds SELECT columns and keeps trailing line comments attached to commas.</summary>
+/// <summary>Builds SELECT columns and keeps trailing comments attached to commas.</summary>
 internal sealed class SelectColumnDocBuilder
 {
     private readonly SelectOptions _options;
@@ -38,19 +38,25 @@ internal sealed class SelectColumnDocBuilder
             var match = Regex.Match(separator,
                 @"^\s*,[ \t]*(?<comment>--[^\r\n]*)(?:\r\n|\r|\n)\s*$",
                 RegexOptions.CultureInvariant);
+            var kind = SqlCommentKind.Line;
             if (!match.Success)
             {
-                return null;
+                match = Regex.Match(separator,
+                    @"^\s*,[ \t]*(?<comment>/\*[\s\S]*?\*/)\s*$",
+                    RegexOptions.CultureInvariant);
+                kind = SqlCommentKind.Block;
+                if (!match.Success) return null;
             }
 
             var commentStart = start + match.Groups["comment"].Index;
             var found = comments.FirstOrDefault(item => item.Span.StartOffset == commentStart);
             if (found is null
-                || found.Kind != SqlCommentKind.Line
+                || found.Kind != kind
                 || found.Placement != SqlTriviaPlacement.Trailing
                 || found.AnchorTokenIndex is null
                 || context.ParseResult.Tokens[found.AnchorTokenIndex.Value].Text != ","
-                || found.Text.TrimEnd('\r', '\n') != match.Groups["comment"].Value)
+                || (kind == SqlCommentKind.Line
+                    ? found.Text.TrimEnd('\r', '\n') : found.Text) != match.Groups["comment"].Value)
             {
                 return null;
             }

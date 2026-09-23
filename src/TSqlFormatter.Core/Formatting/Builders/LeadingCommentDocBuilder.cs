@@ -3,7 +3,7 @@ using TSqlFormatter.Core.Parsing;
 
 namespace TSqlFormatter.Core.Formatting.Builders;
 
-/// <summary>Builds a clause separator containing only adjacent leading line comments.</summary>
+/// <summary>Builds a clause separator containing only adjacent leading comments.</summary>
 internal sealed class LeadingCommentDocBuilder
 {
     public Doc? Build(int start, int clauseStart, SqlDocBuilderContext context)
@@ -17,7 +17,6 @@ internal sealed class LeadingCommentDocBuilder
         foreach (var comment in comments)
         {
             if (!string.IsNullOrWhiteSpace(source.Substring(cursor, comment.Span.StartOffset - cursor))
-                || comment.Kind != SqlCommentKind.Line
                 || comment.Placement != SqlTriviaPlacement.Leading
                 || comment.AnchorTokenIndex is null
                 || context.ParseResult.Tokens[comment.AnchorTokenIndex.Value].Offset != clauseStart)
