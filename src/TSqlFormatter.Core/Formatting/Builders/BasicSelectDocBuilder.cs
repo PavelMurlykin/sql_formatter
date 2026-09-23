@@ -22,7 +22,6 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
     {
         var statement = (SelectStatement)fragment;
         if (statement.QueryExpression is not QuerySpecification query
-            || statement.WithCtesAndXmlNamespaces is not null
             || query.SelectElements.Count == 0
             || query.OffsetClause is not null
             || query.ForClause is not null
@@ -46,7 +45,25 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
         }
         var lastElement = query.SelectElements[query.SelectElements.Count - 1];
         var cursor = lastElement.StartOffset + lastElement.FragmentLength;
-        var parts = new List<Doc> { new TextDoc(prefix.Trim()), columnDoc };
+        var parts = new List<Doc>();
+        if (statement.WithCtesAndXmlNamespaces is not null)
+        {
+            var with = statement.WithCtesAndXmlNamespaces;
+            var withDoc = new CteDocBuilder(_options).Build(with, context);
+            var between = source.Substring(with.StartOffset + with.FragmentLength,
+                query.StartOffset - with.StartOffset - with.FragmentLength);
+            if (withDoc is null || !string.IsNullOrWhiteSpace(between)
+                || statement.StartOffset != with.StartOffset)
+            {
+                return new TextDoc(context.GetOriginalText(statement));
+            }
+
+            parts.Add(withDoc);
+            parts.Add(HardLineDoc.Instance);
+        }
+
+        parts.Add(new TextDoc(prefix.Trim()));
+        parts.Add(columnDoc);
 
         if (query.FromClause is not null)
         {

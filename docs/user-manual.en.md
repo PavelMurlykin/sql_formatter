@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and basic `SELECT`, `FROM`, `JOIN`, and `APPLY` formatting are available through `TSqlFormatter.Core`, including line and block comments in supported positions. Configuration loading and CLI commands are not implemented yet. There is no installable package.
+This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and basic `SELECT`, CTE, `FROM`, `JOIN`, and `APPLY` formatting are available through `TSqlFormatter.Core`, including line and block comments in supported positions. Configuration loading and CLI commands are not implemented yet. There is no installable package.
 
 ## Setup
 
@@ -227,6 +227,25 @@ ORDER BY Total DESC;
 ```
 
 `QueryClauseOptions.GroupByLayout` and `OrderByLayout` accept `ClauseItemLayout.Auto` (the default) or `OnePerLine`. `Auto` keeps the list on one line if it fits within `GeneralOptions.MaxLineWidth`, otherwise it puts each item on its own line. `OnePerLine` always breaks. For example: `new FormattingOptions(clauses: new QueryClauseOptions(ClauseItemLayout.OnePerLine, ClauseItemLayout.OnePerLine))`. `ROLLUP`/`CUBE` groupings, `ORDER BY ALL`, and `OFFSET/FETCH` are not structurally formatted yet.
+
+### Common table expressions (CTEs)
+
+One or more simple CTEs before the main `SELECT` are supported. Each CTE's nested query is indented; an optional column-name list is preserved:
+
+```sql
+WITH A (Id) AS (
+    SELECT Id
+    FROM T
+),
+B AS (
+    SELECT Id
+    FROM A
+)
+SELECT Id
+FROM B;
+```
+
+CTEs with `XMLNAMESPACES`, nested `WITH`, or an unsupported query expression retain their original layout for now. CTE formatting does not yet cover `INSERT`/`UPDATE`/`DELETE`.
 
 ### FROM source
 
