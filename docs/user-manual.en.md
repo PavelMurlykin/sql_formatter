@@ -407,7 +407,7 @@ VALUES
     (2, 'b');
 ```
 
-In `INSERT ... SELECT`, the nested query follows the supported `SELECT` formatting rules. Column and value order is retained. `INSERT ... EXEC`, `DEFAULT VALUES`, `OUTPUT`, a CTE before `INSERT`, and comments between value rows retain their original layout for now; recognized keywords may still change case.
+In `INSERT ... SELECT`, the nested query follows the supported `SELECT` formatting rules. Column and value order is retained. `INSERT ... EXEC`, `DEFAULT VALUES`, a CTE before `INSERT`, and comments between value rows retain their original layout for now; recognized keywords may still change case.
 
 ## UPDATE
 
@@ -423,7 +423,7 @@ WHERE
     t.Id = 1;
 ```
 
-Assignment order is retained. Compound assignments such as `+=`, `TOP`, `OUTPUT`, and a CTE before `UPDATE` do not yet receive structural formatting. Unsupported constructs retain their original layout, though recognized keywords may change case.
+Assignment order is retained. Compound assignments such as `+=`, `TOP`, and a CTE before `UPDATE` do not yet receive structural formatting. Unsupported constructs retain their original layout, though recognized keywords may change case.
 
 ## DELETE
 
@@ -438,7 +438,20 @@ WHERE
     u.Flag = 1;
 ```
 
-`DELETE TOP`, `OUTPUT`, and a CTE before `DELETE` retain their original layout for now; recognized keywords may change case. Other `FROM` and `WHERE` limitations match those described for supported `SELECT` and `UPDATE`.
+`DELETE TOP` and a CTE before `DELETE` retain their original layout for now; recognized keywords may change case. Other `FROM` and `WHERE` limitations match those described for supported `SELECT` and `UPDATE`.
+
+## OUTPUT
+
+In supported `INSERT`, `UPDATE`, and `DELETE`, the `OUTPUT` clause starts on its own line. Its projection list uses comma-space separators; `OUTPUT ... INTO table [(columns)]` is also supported:
+
+```sql
+DELETE FROM T
+OUTPUT deleted.Id INTO dbo.Audit (Id)
+WHERE
+    Id = 1;
+```
+
+Original expressions and their order are retained. A comment between `OUTPUT` items or an unsupported `INTO` target leaves the entire statement's layout unchanged. `OUTPUT` for `MERGE` is not supported yet.
 
 ## Building a `Doc` from the AST
 

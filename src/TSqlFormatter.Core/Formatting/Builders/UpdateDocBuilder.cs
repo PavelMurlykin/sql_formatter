@@ -24,8 +24,8 @@ internal sealed class UpdateDocBuilder : ISqlFragmentDocBuilder
         var spec = statement.UpdateSpecification;
         if (spec?.Target is not NamedTableReference target
             || spec.SetClauses.Count == 0
-            || spec.TopRowFilter is not null || spec.OutputClause is not null
-            || spec.OutputIntoClause is not null || statement.WithCtesAndXmlNamespaces is not null
+            || spec.TopRowFilter is not null || statement.WithCtesAndXmlNamespaces is not null
+            || (spec.OutputClause is not null && spec.OutputIntoClause is not null)
             || spec.StartOffset != statement.StartOffset)
         {
             return new TextDoc(context.GetOriginalText(statement));
@@ -97,6 +97,22 @@ internal sealed class UpdateDocBuilder : ISqlFragmentDocBuilder
         parts.Add(new ConcatDoc(assignments));
         var last = spec.SetClauses[spec.SetClauses.Count - 1];
         var cursor = last.StartOffset + last.FragmentLength;
+        var output = (TSqlFragment?)spec.OutputClause ?? spec.OutputIntoClause;
+        if (output is not null)
+        {
+            var leading = new LeadingCommentDocBuilder().Build(cursor, output.StartOffset, context);
+            var outputDoc = new OutputDocBuilder(_options).Build(
+                spec.OutputClause, spec.OutputIntoClause, context);
+            if (leading is null || outputDoc is null)
+            {
+                return new TextDoc(context.GetOriginalText(statement));
+            }
+
+            parts.Add(leading);
+            parts.Add(outputDoc);
+            cursor = output.StartOffset + output.FragmentLength;
+        }
+
         if (spec.FromClause is not null)
         {
             var from = spec.FromClause;

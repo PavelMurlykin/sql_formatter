@@ -23,8 +23,8 @@ internal sealed class DeleteDocBuilder : ISqlFragmentDocBuilder
         var statement = (DeleteStatement)fragment;
         var spec = statement.DeleteSpecification;
         if (spec?.Target is not NamedTableReference target
-            || spec.TopRowFilter is not null || spec.OutputClause is not null
-            || spec.OutputIntoClause is not null || statement.WithCtesAndXmlNamespaces is not null
+            || spec.TopRowFilter is not null || statement.WithCtesAndXmlNamespaces is not null
+            || (spec.OutputClause is not null && spec.OutputIntoClause is not null)
             || spec.StartOffset != statement.StartOffset)
         {
             return new TextDoc(context.GetOriginalText(statement));
@@ -44,6 +44,22 @@ internal sealed class DeleteDocBuilder : ISqlFragmentDocBuilder
                 + " " + context.GetOriginalText(target).Trim())
         };
         var cursor = target.StartOffset + target.FragmentLength;
+        var output = (TSqlFragment?)spec.OutputClause ?? spec.OutputIntoClause;
+        if (output is not null)
+        {
+            var leading = new LeadingCommentDocBuilder().Build(cursor, output.StartOffset, context);
+            var outputDoc = new OutputDocBuilder(_options).Build(
+                spec.OutputClause, spec.OutputIntoClause, context);
+            if (leading is null || outputDoc is null)
+            {
+                return new TextDoc(context.GetOriginalText(statement));
+            }
+
+            parts.Add(leading);
+            parts.Add(outputDoc);
+            cursor = output.StartOffset + output.FragmentLength;
+        }
+
         if (spec.FromClause is not null)
         {
             var from = spec.FromClause;

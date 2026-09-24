@@ -25,8 +25,8 @@ internal sealed class InsertDocBuilder : ISqlFragmentDocBuilder
         var target = spec?.Target;
         var source = spec?.InsertSource;
         if (spec is null || target is not NamedTableReference || source is null
-            || spec.TopRowFilter is not null || spec.OutputClause is not null
-            || spec.OutputIntoClause is not null || statement.WithCtesAndXmlNamespaces is not null
+            || spec.TopRowFilter is not null || statement.WithCtesAndXmlNamespaces is not null
+            || (spec.OutputClause is not null && spec.OutputIntoClause is not null)
             || statement.StartOffset != spec.StartOffset)
         {
             return new TextDoc(context.GetOriginalText(statement));
@@ -42,6 +42,8 @@ internal sealed class InsertDocBuilder : ISqlFragmentDocBuilder
 
         var header = Regex.Replace(prefix.Trim(), @"\s+", " ")
             + " " + context.GetOriginalText(target).Trim();
+        var output = (TSqlFragment?)spec.OutputClause ?? spec.OutputIntoClause;
+        var nextStart = output?.StartOffset ?? source.StartOffset;
         var cursor = target.StartOffset + target.FragmentLength;
         if (spec.Columns.Count > 0)
         {
@@ -72,7 +74,7 @@ internal sealed class InsertDocBuilder : ISqlFragmentDocBuilder
 
             var last = columns[columns.Count - 1];
             cursor = last.StartOffset + last.FragmentLength;
-            var closing = sql.Substring(cursor, source.StartOffset - cursor);
+            var closing = sql.Substring(cursor, nextStart - cursor);
             if (!Regex.IsMatch(closing, @"^\s*\)\s*$", RegexOptions.CultureInvariant))
             {
                 return new TextDoc(context.GetOriginalText(statement));
@@ -80,7 +82,17 @@ internal sealed class InsertDocBuilder : ISqlFragmentDocBuilder
 
             header += " (" + string.Join(", ", names) + ")";
         }
-        else if (!string.IsNullOrWhiteSpace(sql.Substring(cursor, source.StartOffset - cursor)))
+        else if (!string.IsNullOrWhiteSpace(sql.Substring(cursor, nextStart - cursor)))
+        {
+            return new TextDoc(context.GetOriginalText(statement));
+        }
+
+        var outputDoc = output is null ? null : new OutputDocBuilder(_options).Build(
+            spec.OutputClause, spec.OutputIntoClause, context);
+        if (output is not null
+            && (outputDoc is null || !string.IsNullOrWhiteSpace(sql.Substring(
+                output.StartOffset + output.FragmentLength,
+                source.StartOffset - output.StartOffset - output.FragmentLength))))
         {
             return new TextDoc(context.GetOriginalText(statement));
         }
@@ -102,11 +114,19 @@ internal sealed class InsertDocBuilder : ISqlFragmentDocBuilder
         }
 
         Applied = true;
-        return new ConcatDoc(new Doc[]
+        var parts = new List<Doc>
         {
-            new TextDoc(header), HardLineDoc.Instance, sourceDoc,
-            new TextDoc(statementTail.Trim())
-        });
+            new TextDoc(header), HardLineDoc.Instance
+        };
+        if (outputDoc is not null)
+        {
+            parts.Add(outputDoc);
+            parts.Add(HardLineDoc.Instance);
+        }
+
+        parts.Add(sourceDoc);
+        parts.Add(new TextDoc(statementTail.Trim()));
+        return new ConcatDoc(parts);
     }
 
     private static Doc? BuildValues(ValuesInsertSource values, SqlDocBuilderContext context)
