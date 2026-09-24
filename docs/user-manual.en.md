@@ -31,7 +31,7 @@ To read and write settings, reference `src/TSqlFormatter.Configuration/TSqlForma
 }
 ```
 
-`lineEnding` accepts `lf`, `crlf`, or `cr`; `indent.style` accepts `spaces` or `tabs`; `keywords.case` accepts `upper`, `lower`, or `preserve`; layouts accept `auto` or `onePerLine`. Missing sections and properties use built-in defaults. Serialization writes all supported properties and a final LF. Deserialization does not yet check unknown properties; strict validation is the next stage.
+`lineEnding` accepts `lf`, `crlf`, or `cr`; `indent.style` accepts `spaces` or `tabs`; `keywords.case` accepts `upper`, `lower`, or `preserve`; layouts accept `auto` or `onePerLine`. `general.maxLineLength` must be an integer of at least 1, and `indent.size` an integer of at least 0. Missing sections and properties use built-in defaults. Serialization writes all supported properties and a final LF.
 
 ```csharp
 using System.IO;
@@ -45,7 +45,23 @@ var result = new ScriptDomSqlFormatter().Format(
 File.WriteAllText(".tsqlformatter.json", serializer.Serialize(options));
 ```
 
-This explicitly reads a file in your application: neither the CLI nor the formatter discovers config files automatically yet. The plan's example also shows future fields (`joins`, `expressions`, `aliases`, and others); the current serializer does not apply them.
+This explicitly reads a file in your application: neither the CLI nor the formatter discovers config files automatically yet. The plan's example also shows future fields (`joins`, `expressions`, `aliases`, and others); the current serializer rejects them as unknown.
+
+To handle invalid input without an exception, use `Parse`:
+
+```csharp
+var parsed = serializer.Parse(File.ReadAllText(".tsqlformatter.json"));
+if (!parsed.Succeeded)
+{
+    foreach (var diagnostic in parsed.Diagnostics)
+        System.Console.Error.WriteLine($"{diagnostic.Code}: {diagnostic.Message}");
+    return;
+}
+
+var validatedOptions = parsed.Options!;
+```
+
+Unknown sections and properties, unsupported versions, duplicate keys, wrong types, and invalid values produce `TSF2000` diagnostics with `Error` severity. On any error, `Options` is `null`; independent field errors are collected together. `Deserialize` throws `JsonSerializationException` for invalid configuration. For example, the plan's `lineEnding: "auto"` is not supported yet; use `lf`, `crlf`, or `cr` instead.
 
 To check comment preservation separately, run the golden suite:
 

@@ -72,4 +72,65 @@ public sealed class ConfigurationSerializerTests
     {
         Assert.ThrowsAny<Newtonsoft.Json.JsonException>(() => _serializer.Deserialize(json));
     }
+
+    [Fact]
+    public void Parse_returns_options_without_diagnostics_for_valid_partial_configuration()
+    {
+        var result = _serializer.Parse("""
+            {"version":1,"keywords":{"case":"preserve"}}
+            """);
+
+        Assert.True(result.Succeeded);
+        Assert.Empty(result.Diagnostics);
+        Assert.Equal(KeywordCase.Preserve, result.Options!.Keywords.Case);
+        Assert.Equal(4, result.Options.Indent.Size);
+    }
+
+    [Theory]
+    [InlineData("{", "Invalid configuration JSON")]
+    [InlineData("{\"version\":1,\"version\":1}", "Invalid configuration JSON")]
+    [InlineData("{}", "version")]
+    [InlineData("{\"version\":2}", "version")]
+    [InlineData("{\"version\":999999999999999999999999}", "version")]
+    [InlineData("{\"version\":1,\"future\":{}}", "future")]
+    [InlineData("{\"version\":1,\"general\":null}", "general")]
+    [InlineData("{\"version\":1,\"general\":{\"maxLineLength\":0}}", "general.maxLineLength")]
+    [InlineData("{\"version\":1,\"general\":{\"maxLineLength\":999999999999999999999999}}", "general.maxLineLength")]
+    [InlineData("{\"version\":1,\"general\":{\"lineEnding\":\"auto\"}}", "general.lineEnding")]
+    [InlineData("{\"version\":1,\"general\":{\"finalNewLine\":1}}", "general.finalNewLine")]
+    [InlineData("{\"version\":1,\"indent\":{\"size\":-1}}", "indent.size")]
+    [InlineData("{\"version\":1,\"indent\":{\"style\":\"other\"}}", "indent.style")]
+    [InlineData("{\"version\":1,\"keywords\":{\"case\":null}}", "keywords.case")]
+    [InlineData("{\"version\":1,\"select\":{\"commaStyle\":\"trailing\"}}", "select.commaStyle")]
+    [InlineData("{\"version\":1,\"clauses\":{\"groupByLayout\":false}}", "clauses.groupByLayout")]
+    public void Parse_reports_invalid_configuration_without_options(string json, string expectedMessage)
+    {
+        var result = _serializer.Parse(json);
+
+        Assert.False(result.Succeeded);
+        Assert.Null(result.Options);
+        var diagnostic = Assert.Single(result.Diagnostics);
+        Assert.Equal("TSF2000", diagnostic.Code);
+        Assert.Equal(FormatterDiagnosticSeverity.Error, diagnostic.Severity);
+        Assert.Contains(expectedMessage, diagnostic.Message);
+        Assert.Throws<Newtonsoft.Json.JsonSerializationException>(() => _serializer.Deserialize(json));
+    }
+
+    [Fact]
+    public void Parse_collects_multiple_independent_errors()
+    {
+        var result = _serializer.Parse("""
+            {
+              "version": 1,
+              "general": { "maxLineLength": 0, "lineEnding": "auto" },
+              "select": { "columns": "wide", "commaStyle": "trailing" },
+              "unknown": true
+            }
+            """);
+
+        Assert.False(result.Succeeded);
+        Assert.Null(result.Options);
+        Assert.Equal(5, result.Diagnostics.Count);
+        Assert.All(result.Diagnostics, diagnostic => Assert.Equal("TSF2000", diagnostic.Code));
+    }
 }

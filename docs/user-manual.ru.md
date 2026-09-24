@@ -31,7 +31,7 @@ dotnet test TSqlFormatter.sln --no-build --no-restore
 }
 ```
 
-`lineEnding` принимает `lf`, `crlf` или `cr`; `indent.style` — `spaces` или `tabs`; `keywords.case` — `upper`, `lower` или `preserve`; раскладки — `auto` или `onePerLine`. Отсутствующие разделы и поля получают встроенные значения по умолчанию. Сериализатор записывает все поддержанные поля и завершающий LF. Десериализация пока не проверяет неизвестные поля; строгая проверка появится на следующем этапе.
+`lineEnding` принимает `lf`, `crlf` или `cr`; `indent.style` — `spaces` или `tabs`; `keywords.case` — `upper`, `lower` или `preserve`; раскладки — `auto` или `onePerLine`. `general.maxLineLength` должен быть целым числом не меньше 1, `indent.size` — целым числом не меньше 0. Отсутствующие разделы и поля получают встроенные значения по умолчанию. Сериализатор записывает все поддержанные поля и завершающий LF.
 
 ```csharp
 using System.IO;
@@ -45,7 +45,23 @@ var result = new ScriptDomSqlFormatter().Format(
 File.WriteAllText(".tsqlformatter.json", serializer.Serialize(options));
 ```
 
-Это явное чтение файла приложением: CLI и сам форматтер пока не ищут конфигурацию автоматически. Файл плана показывает также будущие поля (`joins`, `expressions`, `aliases` и другие); текущий сериализатор их не применяет.
+Это явное чтение файла приложением: CLI и сам форматтер пока не ищут конфигурацию автоматически. Файл плана показывает также будущие поля (`joins`, `expressions`, `aliases` и другие); текущий сериализатор отклоняет их как неизвестные.
+
+Для обработки ошибок без исключения используйте `Parse`:
+
+```csharp
+var parsed = serializer.Parse(File.ReadAllText(".tsqlformatter.json"));
+if (!parsed.Succeeded)
+{
+    foreach (var diagnostic in parsed.Diagnostics)
+        System.Console.Error.WriteLine($"{diagnostic.Code}: {diagnostic.Message}");
+    return;
+}
+
+var validatedOptions = parsed.Options!;
+```
+
+Неизвестные разделы и поля, неподдерживаемая версия, дублирующиеся ключи, неправильные типы и недопустимые значения дают диагностику `TSF2000` уровня `Error`. При любой ошибке `Options` равен `null`; независимые ошибки полей собираются вместе. `Deserialize` для невалидной конфигурации выбрасывает `JsonSerializationException`. Например, показанный в плане `lineEnding: "auto"` пока не поддерживается; его нужно заменить на `lf`, `crlf` или `cr`.
 
 Для проверки сохранности комментариев отдельно запустите golden-набор:
 

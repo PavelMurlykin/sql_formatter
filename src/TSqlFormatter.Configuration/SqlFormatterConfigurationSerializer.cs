@@ -74,16 +74,45 @@ public sealed class SqlFormatterConfigurationSerializer
 
     public FormattingOptions Deserialize(string json)
     {
-        if (json is null) throw new ArgumentNullException(nameof(json));
-        var root = JObject.Parse(json, new JsonLoadSettings
+        var result = Parse(json);
+        if (!result.Succeeded)
         {
-            DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error
-        });
-        var version = root["version"];
-        if (version?.Type != JTokenType.Integer || version.Value<int>() != 1)
-        {
-            throw new JsonSerializationException("Configuration requires version 1.");
+            throw new JsonSerializationException(result.Diagnostics[0].Message);
         }
+
+        return result.Options!;
+    }
+
+    /// <summary>Validates a configuration and returns TSF2000 diagnostics without applying partial settings.</summary>
+    public ConfigurationParseResult Parse(string json)
+    {
+        if (json is null) throw new ArgumentNullException(nameof(json));
+
+        JObject root;
+        try
+        {
+            root = JObject.Parse(json, new JsonLoadSettings
+            {
+                DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error
+            });
+        }
+        catch (JsonException exception)
+        {
+            return Failed($"Invalid configuration JSON: {exception.Message}");
+        }
+
+        var diagnostics = new List<FormatterDiagnostic>();
+        ValidateRoot(root, diagnostics);
+        if (diagnostics.Count > 0)
+        {
+            return new ConfigurationParseResult(null, Array.AsReadOnly(diagnostics.ToArray()));
+        }
+
+        return new ConfigurationParseResult(DeserializeValid(root), Array.Empty<FormatterDiagnostic>());
+    }
+
+    private static FormattingOptions DeserializeValid(JObject root)
+    {
 
         var defaults = FormattingOptions.Default;
         var general = GetSection(root, "general");
@@ -107,6 +136,114 @@ public sealed class SqlFormatterConfigurationSerializer
             clauses: new QueryClauseOptions(
                 ParseClauseLayout(GetString(clauses, "groupByLayout", "auto")),
                 ParseClauseLayout(GetString(clauses, "orderByLayout", "auto"))));
+    }
+
+    private static ConfigurationParseResult Failed(string message) => new(
+        null,
+        Array.AsReadOnly(new[] { Diagnostic(message) }));
+
+    private static FormatterDiagnostic Diagnostic(string message) => new(
+        "TSF2000", message, FormatterDiagnosticSeverity.Error);
+
+    private static void ValidateRoot(JObject root, List<FormatterDiagnostic> diagnostics)
+    {
+        foreach (var property in root.Properties())
+        {
+            switch (property.Name)
+            {
+                case "version":
+                case "general":
+                case "indent":
+                case "keywords":
+                case "select":
+                case "clauses":
+                    break;
+                default:
+                    diagnostics.Add(Diagnostic($"Unknown configuration property '{property.Name}'."));
+                    break;
+            }
+        }
+
+        var version = root["version"];
+        if (version is null || version.Type != JTokenType.Integer ||
+            !int.TryParse(version.ToString(Formatting.None), NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out var versionNumber) || versionNumber != 1)
+        {
+            diagnostics.Add(Diagnostic("'version' must be the integer 1."));
+        }
+
+        ValidateSection(root, "general", diagnostics);
+        ValidateSection(root, "indent", diagnostics);
+        ValidateSection(root, "keywords", diagnostics);
+        ValidateSection(root, "select", diagnostics);
+        ValidateSection(root, "clauses", diagnostics);
+    }
+
+    private static void ValidateSection(JObject root, string name, List<FormatterDiagnostic> diagnostics)
+    {
+        var section = root[name];
+        if (section is null) return;
+        if (section is not JObject properties)
+        {
+            diagnostics.Add(Diagnostic($"'{name}' must be an object."));
+            return;
+        }
+
+        foreach (var property in properties.Properties())
+        {
+            var path = $"{name}.{property.Name}";
+            switch (path)
+            {
+                case "general.maxLineLength":
+                    ValidateInteger(property.Value, path, 1, diagnostics);
+                    break;
+                case "general.lineEnding":
+                    ValidateChoice(property.Value, path, diagnostics, "lf", "crlf", "cr");
+                    break;
+                case "general.finalNewLine":
+                    if (property.Value.Type != JTokenType.Boolean)
+                        diagnostics.Add(Diagnostic($"'{path}' must be a boolean."));
+                    break;
+                case "indent.style":
+                    ValidateChoice(property.Value, path, diagnostics, "spaces", "tabs");
+                    break;
+                case "indent.size":
+                    ValidateInteger(property.Value, path, 0, diagnostics);
+                    break;
+                case "keywords.case":
+                    ValidateChoice(property.Value, path, diagnostics, "upper", "lower", "preserve");
+                    break;
+                case "select.columns":
+                case "clauses.groupByLayout":
+                case "clauses.orderByLayout":
+                    ValidateChoice(property.Value, path, diagnostics, "auto", "onePerLine");
+                    break;
+                default:
+                    diagnostics.Add(Diagnostic($"Unknown configuration property '{path}'."));
+                    break;
+            }
+        }
+    }
+
+    private static void ValidateInteger(JToken value, string path, int minimum,
+        List<FormatterDiagnostic> diagnostics)
+    {
+        if (value.Type != JTokenType.Integer ||
+            !int.TryParse(value.ToString(Formatting.None), NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out var number) || number < minimum)
+        {
+            diagnostics.Add(Diagnostic($"'{path}' must be an integer of at least {minimum}."));
+        }
+    }
+
+    private static void ValidateChoice(JToken value, string path,
+        List<FormatterDiagnostic> diagnostics, params string[] choices)
+    {
+        if (value.Type != JTokenType.String ||
+            !choices.Contains(value.Value<string>(), StringComparer.Ordinal))
+        {
+            diagnostics.Add(Diagnostic($"'{path}' must be one of: {string.Join(", ", choices)}."));
+        }
     }
 
     private static JObject? GetSection(JObject root, string name)
