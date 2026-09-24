@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\TSqlFormatter.Core\TSqlFormatter.Core.csproj" />
+    <ProjectReference Include="..\..\src\TSqlFormatter.Configuration\TSqlFormatter.Configuration.csproj" />
   </ItemGroup>
 
   <ItemGroup>

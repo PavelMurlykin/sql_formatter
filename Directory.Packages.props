@@ -6,6 +6,7 @@
   <ItemGroup>
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageVersion Include="Microsoft.SqlServer.TransactSql.ScriptDom" Version="180.107.0" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageVersion Include="xunit" Version="2.5.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.3" />

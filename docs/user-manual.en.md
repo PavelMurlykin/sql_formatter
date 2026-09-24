@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and formatting for supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms are available through `TSqlFormatter.Core`, including CTEs, subqueries, `CASE`, window functions, `FROM`, `JOIN`, `APPLY`, and comments in supported positions. Configuration loading and CLI commands are not implemented yet. There is no installable package.
+This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and formatting for supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms are available through `TSqlFormatter.Core`, including CTEs, subqueries, `CASE`, window functions, `FROM`, `JOIN`, `APPLY`, and comments in supported positions. JSON settings serialization is available through `TSqlFormatter.Configuration`. Automatic config-file discovery and CLI commands are not implemented yet. There is no installable package.
 
 ## Setup
 
@@ -15,6 +15,37 @@ dotnet test TSqlFormatter.sln --no-build --no-restore
 ```
 
 To use the parser in your C# project, add a reference to `src/TSqlFormatter.Core/TSqlFormatter.Core.csproj`.
+
+## JSON configuration
+
+To read and write settings, reference `src/TSqlFormatter.Configuration/TSqlFormatter.Configuration.csproj`. Version 1 of `.tsqlformatter.json` supports the current options-model sections:
+
+```json
+{
+  "version": 1,
+  "general": { "maxLineLength": 100, "lineEnding": "lf", "finalNewLine": false },
+  "indent": { "style": "spaces", "size": 4 },
+  "keywords": { "case": "upper" },
+  "select": { "columns": "auto" },
+  "clauses": { "groupByLayout": "auto", "orderByLayout": "auto" }
+}
+```
+
+`lineEnding` accepts `lf`, `crlf`, or `cr`; `indent.style` accepts `spaces` or `tabs`; `keywords.case` accepts `upper`, `lower`, or `preserve`; layouts accept `auto` or `onePerLine`. Missing sections and properties use built-in defaults. Serialization writes all supported properties and a final LF. Deserialization does not yet check unknown properties; strict validation is the next stage.
+
+```csharp
+using System.IO;
+using TSqlFormatter.Configuration;
+using TSqlFormatter.Core.Formatting;
+
+var serializer = new SqlFormatterConfigurationSerializer();
+var options = serializer.Deserialize(File.ReadAllText(".tsqlformatter.json"));
+var result = new ScriptDomSqlFormatter().Format(
+    "select Id from T", options, new FormatRequest());
+File.WriteAllText(".tsqlformatter.json", serializer.Serialize(options));
+```
+
+This explicitly reads a file in your application: neither the CLI nor the formatter discovers config files automatically yet. The plan's example also shows future fields (`joins`, `expressions`, `aliases`, and others); the current serializer does not apply them.
 
 To check comment preservation separately, run the golden suite:
 

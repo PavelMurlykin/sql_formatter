@@ -2,7 +2,7 @@
 
 ## Текущее состояние
 
-Это ранний прототип. Через `TSqlFormatter.Core` доступны разбор T-SQL, навигация по токенам, классификация комментариев, перевод между смещениями и позициями строк, построение и рендеринг layout-документа, изменение регистра ключевых слов и форматирование поддержанных форм `SELECT`, `INSERT`, `UPDATE`, `DELETE` и `MERGE`, включая CTE, подзапросы, `CASE`, оконные функции, `FROM`, `JOIN` и `APPLY`, а также комментарии в поддержанных позициях. Загрузка конфигурации и команды CLI ещё не реализованы. Готового пакета для установки нет.
+Это ранний прототип. Через `TSqlFormatter.Core` доступны разбор T-SQL, навигация по токенам, классификация комментариев, перевод между смещениями и позициями строк, построение и рендеринг layout-документа, изменение регистра ключевых слов и форматирование поддержанных форм `SELECT`, `INSERT`, `UPDATE`, `DELETE` и `MERGE`, включая CTE, подзапросы, `CASE`, оконные функции, `FROM`, `JOIN` и `APPLY`, а также комментарии в поддержанных позициях. Через `TSqlFormatter.Configuration` доступна сериализация настроек в JSON. Автоматический поиск файла конфигурации и команды CLI ещё не реализованы. Готового пакета для установки нет.
 
 ## Подготовка
 
@@ -15,6 +15,37 @@ dotnet test TSqlFormatter.sln --no-build --no-restore
 ```
 
 Чтобы использовать парсер в своём C# проекте, добавьте ссылку на `src/TSqlFormatter.Core/TSqlFormatter.Core.csproj`.
+
+## Конфигурация JSON
+
+Для чтения и записи настроек добавьте ссылку на `src/TSqlFormatter.Configuration/TSqlFormatter.Configuration.csproj`. Поддерживается файл `.tsqlformatter.json` версии 1 с текущими разделами модели настроек:
+
+```json
+{
+  "version": 1,
+  "general": { "maxLineLength": 100, "lineEnding": "lf", "finalNewLine": false },
+  "indent": { "style": "spaces", "size": 4 },
+  "keywords": { "case": "upper" },
+  "select": { "columns": "auto" },
+  "clauses": { "groupByLayout": "auto", "orderByLayout": "auto" }
+}
+```
+
+`lineEnding` принимает `lf`, `crlf` или `cr`; `indent.style` — `spaces` или `tabs`; `keywords.case` — `upper`, `lower` или `preserve`; раскладки — `auto` или `onePerLine`. Отсутствующие разделы и поля получают встроенные значения по умолчанию. Сериализатор записывает все поддержанные поля и завершающий LF. Десериализация пока не проверяет неизвестные поля; строгая проверка появится на следующем этапе.
+
+```csharp
+using System.IO;
+using TSqlFormatter.Configuration;
+using TSqlFormatter.Core.Formatting;
+
+var serializer = new SqlFormatterConfigurationSerializer();
+var options = serializer.Deserialize(File.ReadAllText(".tsqlformatter.json"));
+var result = new ScriptDomSqlFormatter().Format(
+    "select Id from T", options, new FormatRequest());
+File.WriteAllText(".tsqlformatter.json", serializer.Serialize(options));
+```
+
+Это явное чтение файла приложением: CLI и сам форматтер пока не ищут конфигурацию автоматически. Файл плана показывает также будущие поля (`joins`, `expressions`, `aliases` и другие); текущий сериализатор их не применяет.
 
 Для проверки сохранности комментариев отдельно запустите golden-набор:
 
