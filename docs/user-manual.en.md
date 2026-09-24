@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and formatting for supported `SELECT`, `INSERT`, and `UPDATE` forms are available through `TSqlFormatter.Core`, including CTEs, subqueries, `CASE`, window functions, `FROM`, `JOIN`, `APPLY`, and comments in supported positions. Configuration loading and CLI commands are not implemented yet. There is no installable package.
+This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and formatting for supported `SELECT`, `INSERT`, `UPDATE`, and `DELETE` forms are available through `TSqlFormatter.Core`, including CTEs, subqueries, `CASE`, window functions, `FROM`, `JOIN`, `APPLY`, and comments in supported positions. Configuration loading and CLI commands are not implemented yet. There is no installable package.
 
 ## Setup
 
@@ -167,7 +167,7 @@ System.Console.WriteLine(result.Text); // SELECT 'from' FROM dbo.Items
 
 `FormatRequest` defaults to whole-document scope (`Document`), the `Auto` dialect, and strict parse-failure behavior (`Strict`). `Selection` requires a `SqlTextSpan`; `Selection` and `Statement` currently return unchanged source with a `TSF3000` warning. On a parse error, source remains unchanged, `ParseSucceeded` is `false`, and a `TSF1000` diagnostic is reported for all of `Strict`, `Safe`, and `TokenFallback`.
 
-`FormattingOptions` groups settings into `General` (width 100, LF, no final newline), `Indent` (4 spaces, no tabs), `Keywords` (`Upper`), `Select` (`Auto`), and `Clauses` (`Auto` for `GROUP BY` and `ORDER BY`). Indentation and EOL apply to supported `SELECT`, `INSERT`, and `UPDATE` output; width and list layouts affect supported `SELECT` lists. Otherwise, only keyword casing currently changes. `FormatResult` carries final text, `TextEdit` changes, diagnostics, change status, and parse success.
+`FormattingOptions` groups settings into `General` (width 100, LF, no final newline), `Indent` (4 spaces, no tabs), `Keywords` (`Upper`), `Select` (`Auto`), and `Clauses` (`Auto` for `GROUP BY` and `ORDER BY`). Indentation and EOL apply to supported `SELECT`, `INSERT`, `UPDATE`, and `DELETE` output; width and list layouts affect supported `SELECT` lists. Otherwise, only keyword casing currently changes. `FormatResult` carries final text, `TextEdit` changes, diagnostics, change status, and parse success.
 
 ## Basic SELECT
 
@@ -425,6 +425,21 @@ WHERE
 
 Assignment order is retained. Compound assignments such as `+=`, `TOP`, `OUTPUT`, and a CTE before `UPDATE` do not yet receive structural formatting. Unsupported constructs retain their original layout, though recognized keywords may change case.
 
+## DELETE
+
+A simple `DELETE FROM table [WHERE ...]` and alias-targeted deletion with `FROM` and `JOIN` are supported. `FROM` and `WHERE` start on new lines, and the `WHERE` condition is indented:
+
+```sql
+DELETE t
+FROM dbo.T t
+JOIN dbo.U u
+    ON t.Id = u.Id
+WHERE
+    u.Flag = 1;
+```
+
+`DELETE TOP`, `OUTPUT`, and a CTE before `DELETE` retain their original layout for now; recognized keywords may change case. Other `FROM` and `WHERE` limitations match those described for supported `SELECT` and `UPDATE`.
+
 ## Building a `Doc` from the AST
 
 `SqlDocBuilder` creates a layout document from a parse result. With no additional builders, it preserves the entire source, including comments and `GO` separators:
@@ -440,10 +455,10 @@ var document = new SqlDocBuilder().BuildDocument(parsed);
 Console.Write(new DocRenderer().Render(document)); // unchanged source
 ```
 
-When parsing fails, `BuildDocument` also returns the unchanged source. You can register custom `ISqlFragmentDocBuilder` implementations for specific AST node types; earlier builders take precedence. `SqlFragmentWalker` traverses ScriptDom nodes. `ScriptDomSqlFormatter`, rather than a bare `SqlDocBuilder`, installs the built-in structural rules for `SELECT`, `INSERT`, and `UPDATE`.
+When parsing fails, `BuildDocument` also returns the unchanged source. You can register custom `ISqlFragmentDocBuilder` implementations for specific AST node types; earlier builders take precedence. `SqlFragmentWalker` traverses ScriptDom nodes. `ScriptDomSqlFormatter`, rather than a bare `SqlDocBuilder`, installs the built-in structural rules for `SELECT`, `INSERT`, `UPDATE`, and `DELETE`.
 
 ## Limitations
 
 - The CLI is a placeholder: it does not format SQL or provide user commands yet.
-- Structural formatting covers only the `SELECT`, `INSERT`, and `UPDATE` forms described above; other constructs retain their original layout.
+- Structural formatting covers only the `SELECT`, `INSERT`, `UPDATE`, and `DELETE` forms described above; other constructs retain their original layout.
 - The renderer accepts a prepared `Doc` tree; it does not parse SQL on its own.
