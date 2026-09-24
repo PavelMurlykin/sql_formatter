@@ -2,7 +2,7 @@
 
 An extensible T-SQL formatter under active development. The current Core exposes
 a ScriptDom-based parser, token helpers, a line map, a layout renderer, an
-AST-to-document builder, and programmatic formatting for supported SELECT/INSERT/CTE/subquery/CASE/window/set-operator/FROM/JOIN
+AST-to-document builder, and programmatic formatting for supported SELECT/INSERT/UPDATE/CTE/subquery/CASE/window/set-operator/FROM/JOIN
 queries. CLI commands and broader SQL coverage are planned in
 [`CODEX_DEVELOPMENT_PLAN.md`](CODEX_DEVELOPMENT_PLAN.md).
 
