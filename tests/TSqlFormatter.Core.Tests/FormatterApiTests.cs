@@ -65,6 +65,28 @@ public sealed class FormatterApiTests
     }
 
     [Fact]
+    public void FormattingOptions_DefaultMatchesConstructorAndWithKeepsOtherSections()
+    {
+        var defaults = FormattingOptions.Default;
+        var constructed = new FormattingOptions();
+        Assert.Equal(constructed.General.MaxLineWidth, defaults.General.MaxLineWidth);
+        Assert.Equal(constructed.Indent.Size, defaults.Indent.Size);
+        Assert.Equal(constructed.Keywords.Case, defaults.Keywords.Case);
+        Assert.Equal(constructed.Select.ColumnLayout, defaults.Select.ColumnLayout);
+        Assert.Equal(constructed.Clauses.GroupByLayout, defaults.Clauses.GroupByLayout);
+
+        var newGeneral = new GeneralOptions(maxLineWidth: 120);
+        var modified = defaults.With(general: newGeneral);
+        Assert.NotSame(defaults, modified);
+        Assert.Same(newGeneral, modified.General);
+        Assert.Same(defaults.Indent, modified.Indent);
+        Assert.Same(defaults.Keywords, modified.Keywords);
+        Assert.Same(defaults.Select, modified.Select);
+        Assert.Same(defaults.Clauses, modified.Clauses);
+        Assert.Equal(100, defaults.General.MaxLineWidth);
+    }
+
+    [Fact]
     public void FormattingOptions_RejectInvalidValues()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => new GeneralOptions(maxLineWidth: 0));

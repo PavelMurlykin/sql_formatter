@@ -169,6 +169,16 @@ System.Console.WriteLine(result.Text); // SELECT 'from' FROM dbo.Items
 
 `FormattingOptions` groups settings into `General` (width 100, LF, no final newline), `Indent` (4 spaces, no tabs), `Keywords` (`Upper`), `Select` (`Auto`), and `Clauses` (`Auto` for `GROUP BY` and `ORDER BY`). Indentation and EOL apply to supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` output; width and list layouts affect supported `SELECT` lists. Otherwise, only keyword casing currently changes. `FormatResult` carries final text, `TextEdit` changes, diagnostics, change status, and parse success.
 
+`FormattingOptions.Default` supplies the same values as `new FormattingOptions()`. `With` creates a new option set by replacing only the supplied sections, leaving the original unchanged:
+
+```csharp
+var options = FormattingOptions.Default.With(
+    general: new GeneralOptions(maxLineWidth: 120),
+    keywords: new KeywordOptions(KeywordCase.Lower));
+```
+
+The public sections currently include only options backed by implemented behavior. Planned `JOIN`, `CASE`, comment, and other settings are not part of the API yet.
+
 ## Basic SELECT
 
 For a simple `SELECT` of literals or columns, the formatter normalizes spacing between items, retains names and aliases, and places `FROM` on a separate line:

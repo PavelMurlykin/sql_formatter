@@ -169,6 +169,16 @@ System.Console.WriteLine(result.Text); // SELECT 'from' FROM dbo.Items
 
 `FormattingOptions` разделяет параметры на `General` (ширина 100, LF, без конечного перевода строки), `Indent` (4 пробела, без табуляции), `Keywords` (`Upper`), `Select` (`Auto`) и `Clauses` (`Auto` для `GROUP BY` и `ORDER BY`). Для поддержанных `SELECT`, `INSERT`, `UPDATE`, `DELETE` и `MERGE` применяются отступ и EOL; ширина и параметры раскладки списков влияют на поддержанные списки `SELECT`. В остальных случаях пока меняется только регистр ключевых слов. `FormatResult` содержит итоговый текст, правки `TextEdit`, диагностики, признаки изменения и успешности разбора.
 
+`FormattingOptions.Default` предоставляет те же значения, что и `new FormattingOptions()`. Метод `With` создаёт новый набор настроек с заменой только указанных секций, не изменяя исходный:
+
+```csharp
+var options = FormattingOptions.Default.With(
+    general: new GeneralOptions(maxLineWidth: 120),
+    keywords: new KeywordOptions(KeywordCase.Lower));
+```
+
+Публичный набор секций сейчас ограничен реально поддержанными параметрами. Настройки `JOIN`, `CASE`, комментариев и других правил из плана пока не входят в API.
+
 ## Базовый SELECT
 
 Для простого `SELECT` с литералами или колонками форматтер упорядочивает пробелы между элементами, сохраняет имена и алиасы, а `FROM` переносит на отдельную строку:
