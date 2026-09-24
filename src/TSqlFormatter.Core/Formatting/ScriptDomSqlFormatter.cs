@@ -47,10 +47,12 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         var insertBuilder = new InsertDocBuilder(options);
         var updateBuilder = new UpdateDocBuilder(options);
         var deleteBuilder = new DeleteDocBuilder(options);
+        var mergeBuilder = new MergeDocBuilder(options);
         var document = new SqlDocBuilder(new ISqlFragmentDocBuilder[]
-            { builder, insertBuilder, updateBuilder, deleteBuilder })
+            { builder, insertBuilder, updateBuilder, deleteBuilder, mergeBuilder })
             .BuildDocument(parsed, cancellationToken);
-        if (builder.Applied || insertBuilder.Applied || updateBuilder.Applied || deleteBuilder.Applied)
+        if (builder.Applied || insertBuilder.Applied || updateBuilder.Applied
+            || deleteBuilder.Applied || mergeBuilder.Applied)
         {
             var rendered = new DocRenderer().Render(document, new DocRenderOptions(
                 options.General.MaxLineWidth, options.Indent.Size, options.General.LineEnding,

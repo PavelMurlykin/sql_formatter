@@ -129,7 +129,7 @@ internal sealed class InsertDocBuilder : ISqlFragmentDocBuilder
         return new ConcatDoc(parts);
     }
 
-    private static Doc? BuildValues(ValuesInsertSource values, SqlDocBuilderContext context)
+    internal static Doc? BuildValues(ValuesInsertSource values, SqlDocBuilderContext context)
     {
         if (values.IsDefaultValues || values.RowValues.Count == 0) return null;
         var sql = context.ParseResult.Source;
