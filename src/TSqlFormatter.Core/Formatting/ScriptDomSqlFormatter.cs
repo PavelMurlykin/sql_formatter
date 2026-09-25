@@ -34,10 +34,10 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
                 FormatterDiagnosticSeverity.Warning));
         }
 
-        if (request.ParseFailureBehavior != ParseFailureBehavior.Strict)
+        if (request.ParseFailureBehavior == ParseFailureBehavior.TokenFallback)
         {
             return Unchanged(source, false, new FormatterDiagnostic(
-                "TSF3002", "Only strict parse-failure behavior is currently supported.",
+                "TSF3002", "Token fallback formatting is not currently supported.",
                 FormatterDiagnosticSeverity.Error));
         }
 
@@ -50,7 +50,9 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
                 : parsed.Diagnostics.Select(error => new FormatterDiagnostic(
                     "TSF1000", error.Message, FormatterDiagnosticSeverity.Error,
                     new SqlTextSpan(error.Offset, 0))).ToArray();
-            return new FormatResult(source, false, false, diagnostics: diagnostics);
+            return request.ParseFailureBehavior == ParseFailureBehavior.Safe
+                ? FormatSafeFragments(source, options, request, parsed, diagnostics, cancellationToken)
+                : new FormatResult(source, false, false, diagnostics: diagnostics);
         }
 
         var builder = new BasicSelectDocBuilder(options);
@@ -94,6 +96,61 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
 
         var output = KeywordCasing.Apply(source, edits);
         return new FormatResult(output, true, true, edits);
+    }
+
+    private FormatResult FormatSafeFragments(string source, FormattingOptions options,
+        FormatRequest request, SqlParseResult parsed, IReadOnlyList<FormatterDiagnostic> diagnostics,
+        CancellationToken cancellationToken)
+    {
+        if (parsed.Root is not TSqlScript script)
+            return new FormatResult(source, false, false, diagnostics: diagnostics);
+
+        var edits = new List<TextEdit>();
+        var safeOptions = options.With(general: new GeneralOptions(
+            options.General.MaxLineWidth, options.General.LineEnding, finalNewline: false));
+        var nextAvailableOffset = 0;
+        foreach (var statement in script.Batches.SelectMany(batch => batch.Statements)
+                     .OrderBy(statement => statement.StartOffset))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var start = statement.StartOffset;
+            var length = statement.FragmentLength;
+            if (length <= 0 || start < nextAvailableOffset || start < 0 ||
+                length > source.Length - start)
+                continue;
+
+            var end = start + length;
+            nextAvailableOffset = end;
+            if (parsed.Diagnostics.Any(error => error.Offset >= start && error.Offset <= end))
+                continue;
+
+            var fragment = source.Substring(start, length);
+            var isolated = _parser.Parse(fragment, request.Dialect, cancellationToken);
+            if (!isolated.ParseSucceeded) continue;
+
+            var formatted = Format(fragment, safeOptions,
+                new FormatRequest(dialect: request.Dialect,
+                    parseFailureBehavior: ParseFailureBehavior.Strict), cancellationToken);
+            if (!formatted.ParseSucceeded || formatted.Diagnostics.Any(diagnostic =>
+                    diagnostic.Severity == FormatterDiagnosticSeverity.Error) || !formatted.Changed)
+                continue;
+
+            edits.Add(new TextEdit(new SqlTextSpan(start, length), formatted.Text));
+        }
+
+        if (edits.Count == 0)
+            return new FormatResult(source, false, false, diagnostics: diagnostics);
+
+        var output = new StringBuilder(source.Length);
+        var position = 0;
+        foreach (var edit in edits)
+        {
+            output.Append(source, position, edit.Span.StartOffset - position);
+            output.Append(edit.NewText);
+            position = edit.Span.EndOffset;
+        }
+        output.Append(source, position, source.Length - position);
+        return new FormatResult(output.ToString(), true, false, edits, diagnostics);
     }
 
     private static FormatResult Unchanged(string source, bool parseSucceeded, FormatterDiagnostic? diagnostic = null)

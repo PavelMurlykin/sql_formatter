@@ -57,15 +57,13 @@ public sealed class StrictParseBehaviorTests
         Assert.Equal(FormatterDiagnosticSeverity.Error, diagnostic.Severity);
     }
 
-    [Theory]
-    [InlineData(ParseFailureBehavior.Safe)]
-    [InlineData(ParseFailureBehavior.TokenFallback)]
-    public void Unsupported_parse_failure_modes_are_not_silently_treated_as_strict(
-        ParseFailureBehavior behavior)
+    [Fact]
+    public void Token_fallback_is_not_silently_treated_as_strict()
     {
         const string source = "select Id from T";
         var result = new ScriptDomSqlFormatter().Format(source,
-            FormattingOptions.Default, new FormatRequest(parseFailureBehavior: behavior));
+            FormattingOptions.Default,
+            new FormatRequest(parseFailureBehavior: ParseFailureBehavior.TokenFallback));
 
         Assert.False(result.Changed);
         Assert.Equal(source, result.Text);
