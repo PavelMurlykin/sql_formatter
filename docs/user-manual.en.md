@@ -65,7 +65,7 @@ Unknown sections and properties, unsupported versions, duplicate keys, wrong typ
 
 ### Option precedence
 
-`SqlFormatterConfigurationResolver` combines built-in defaults, an explicitly supplied file's contents, and explicitly supplied options in that order. The final layer replaces only specified fields; other file settings remain intact. Pass `null` for a missing file. Invalid JSON returns diagnostics and no partially applied options.
+`SqlFormatterConfigurationResolver` combines the selected profile (`Default` by default), an explicitly supplied file's contents, and explicitly supplied options in that order. The final layer replaces only specified fields; other file and profile settings remain intact. Pass `null` for a missing file. Invalid JSON returns diagnostics and no partially applied options.
 
 ```csharp
 var json = File.ReadAllText(".tsqlformatter.json");
@@ -78,6 +78,20 @@ var effectiveOptions = resolved.Options!;
 ```
 
 `FormattingOptionsOverrides` parameters map to the supported JSON fields: `maxLineLength`, `lineEnding`, `finalNewLine`, `indentSize`, `useTabs`, `keywordCase`, `selectColumns`, `groupByLayout`, and `orderByLayout`. This is an application API; the CLI does not yet accept option flags or load files automatically.
+
+### Named profiles
+
+`FormattingProfileCatalog` provides `Default` (standard values), `Compact` (line width 120), and `Expanded` (line width 80; `SELECT` columns and `GROUP BY`/`ORDER BY` items one per line). IDs are matched case-insensitively. Select a profile with `profileId`:
+
+```csharp
+var projectProfile = new FormattingProfile(
+    "project", "Project", FormattingOptions.Default.With(indent: new IndentOptions(2)));
+var catalog = new FormattingProfileCatalog(new[] { projectProfile });
+var configured = new SqlFormatterConfigurationResolver(catalog).Resolve(
+    json, profileId: "project");
+```
+
+An application can supply custom user or project profiles when creating the catalog. Duplicate IDs, including collisions with built-ins, are rejected. An unknown `profileId` returns `TSF2000` with `Options == null`. File fields overlay the profile rather than resetting it to `Default`. Persisting profiles in JSON, CLI profile selection, and a profile UI are not implemented yet.
 
 To check comment preservation separately, run the golden suite:
 

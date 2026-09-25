@@ -65,7 +65,7 @@ var validatedOptions = parsed.Options!;
 
 ### Приоритет настроек
 
-`SqlFormatterConfigurationResolver` объединяет встроенные значения, содержимое явно переданного файла и явно заданные параметры в таком порядке. Последний слой переопределяет только указанные поля; остальные настройки файла сохраняются. Отсутствующий файл передавайте как `null`. При ошибке JSON результат содержит диагностики и не содержит частично применённых настроек.
+`SqlFormatterConfigurationResolver` объединяет выбранный профиль (по умолчанию `Default`), содержимое явно переданного файла и явно заданные параметры в таком порядке. Последний слой переопределяет только указанные поля; остальные настройки файла и профиля сохраняются. Отсутствующий файл передавайте как `null`. При ошибке JSON результат содержит диагностики и не содержит частично применённых настроек.
 
 ```csharp
 var json = File.ReadAllText(".tsqlformatter.json");
@@ -78,6 +78,20 @@ var effectiveOptions = resolved.Options!;
 ```
 
 Параметры `FormattingOptionsOverrides` соответствуют поддержанным полям JSON: `maxLineLength`, `lineEnding`, `finalNewLine`, `indentSize`, `useTabs`, `keywordCase`, `selectColumns`, `groupByLayout` и `orderByLayout`. Это API для приложений; CLI пока не принимает флаги настроек и не загружает файл автоматически.
+
+### Именованные профили
+
+`FormattingProfileCatalog` содержит `Default` (обычные значения), `Compact` (ширина строки 120) и `Expanded` (ширина 80, колонки `SELECT` и элементы `GROUP BY`/`ORDER BY` по одному на строку). Идентификаторы сравниваются без учёта регистра. Выберите профиль через `profileId`:
+
+```csharp
+var projectProfile = new FormattingProfile(
+    "project", "Project", FormattingOptions.Default.With(indent: new IndentOptions(2)));
+var catalog = new FormattingProfileCatalog(new[] { projectProfile });
+var configured = new SqlFormatterConfigurationResolver(catalog).Resolve(
+    json, profileId: "project");
+```
+
+Приложение может передать свои пользовательские или проектные профили при создании каталога. Повторяющиеся идентификаторы, включая совпадение со встроенными, отклоняются. Неизвестный `profileId` даёт `TSF2000` и `Options == null`. Поля файла накладываются на профиль, а не сбрасывают его к `Default`. Хранение профилей в JSON, переключение через CLI и интерфейс профилей пока не реализованы.
 
 Для проверки сохранности комментариев отдельно запустите golden-набор:
 

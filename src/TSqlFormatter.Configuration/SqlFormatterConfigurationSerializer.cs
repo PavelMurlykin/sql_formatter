@@ -22,13 +22,7 @@ public sealed class SqlFormatterConfigurationSerializer
             ["general"] = new JObject
             {
                 ["maxLineLength"] = options.General.MaxLineWidth,
-                ["lineEnding"] = options.General.LineEnding switch
-                {
-                    DocLineEnding.Lf => "lf",
-                    DocLineEnding.CrLf => "crlf",
-                    DocLineEnding.Cr => "cr",
-                    _ => throw new ArgumentOutOfRangeException(nameof(options))
-                },
+                ["lineEnding"] = FormatLineEnding(options.General.LineEnding),
                 ["finalNewLine"] = options.General.FinalNewline
             },
             ["indent"] = new JObject
@@ -38,13 +32,7 @@ public sealed class SqlFormatterConfigurationSerializer
             },
             ["keywords"] = new JObject
             {
-                ["case"] = options.Keywords.Case switch
-                {
-                    KeywordCase.Upper => "upper",
-                    KeywordCase.Lower => "lower",
-                    KeywordCase.Preserve => "preserve",
-                    _ => throw new ArgumentOutOfRangeException(nameof(options))
-                }
+                ["case"] = FormatKeywordCase(options.Keywords.Case)
             },
             ["select"] = new JObject
             {
@@ -84,7 +72,7 @@ public sealed class SqlFormatterConfigurationSerializer
     }
 
     /// <summary>Validates a configuration and returns TSF2000 diagnostics without applying partial settings.</summary>
-    public ConfigurationParseResult Parse(string json)
+    public ConfigurationParseResult Parse(string json, FormattingOptions? baseline = null)
     {
         if (json is null) throw new ArgumentNullException(nameof(json));
 
@@ -108,13 +96,12 @@ public sealed class SqlFormatterConfigurationSerializer
             return new ConfigurationParseResult(null, Array.AsReadOnly(diagnostics.ToArray()));
         }
 
-        return new ConfigurationParseResult(DeserializeValid(root), Array.Empty<FormatterDiagnostic>());
+        return new ConfigurationParseResult(DeserializeValid(root, baseline ?? FormattingOptions.Default),
+            Array.Empty<FormatterDiagnostic>());
     }
 
-    private static FormattingOptions DeserializeValid(JObject root)
+    private static FormattingOptions DeserializeValid(JObject root, FormattingOptions baseline)
     {
-
-        var defaults = FormattingOptions.Default;
         var general = GetSection(root, "general");
         var indent = GetSection(root, "indent");
         var keywords = GetSection(root, "keywords");
@@ -123,19 +110,19 @@ public sealed class SqlFormatterConfigurationSerializer
 
         return new FormattingOptions(
             general: new GeneralOptions(
-                GetInt32(general, "maxLineLength", defaults.General.MaxLineWidth),
-                ParseLineEnding(GetString(general, "lineEnding", "lf")),
-                GetBoolean(general, "finalNewLine", defaults.General.FinalNewline)),
+                GetInt32(general, "maxLineLength", baseline.General.MaxLineWidth),
+                ParseLineEnding(GetString(general, "lineEnding", FormatLineEnding(baseline.General.LineEnding))),
+                GetBoolean(general, "finalNewLine", baseline.General.FinalNewline)),
             indent: new IndentOptions(
-                GetInt32(indent, "size", defaults.Indent.Size),
-                ParseIndentStyle(GetString(indent, "style", "spaces"))),
+                GetInt32(indent, "size", baseline.Indent.Size),
+                ParseIndentStyle(GetString(indent, "style", baseline.Indent.UseTabs ? "tabs" : "spaces"))),
             keywords: new KeywordOptions(
-                ParseKeywordCase(GetString(keywords, "case", "upper"))),
+                ParseKeywordCase(GetString(keywords, "case", FormatKeywordCase(baseline.Keywords.Case)))),
             select: new SelectOptions(
-                ParseSelectLayout(GetString(select, "columns", "auto"))),
+                ParseSelectLayout(GetString(select, "columns", FormatLayout(baseline.Select.ColumnLayout)))),
             clauses: new QueryClauseOptions(
-                ParseClauseLayout(GetString(clauses, "groupByLayout", "auto")),
-                ParseClauseLayout(GetString(clauses, "orderByLayout", "auto"))));
+                ParseClauseLayout(GetString(clauses, "groupByLayout", FormatLayout(baseline.Clauses.GroupByLayout))),
+                ParseClauseLayout(GetString(clauses, "orderByLayout", FormatLayout(baseline.Clauses.OrderByLayout)))));
     }
 
     private static ConfigurationParseResult Failed(string message) => new(
@@ -316,6 +303,22 @@ public sealed class SqlFormatterConfigurationSerializer
         "auto" => ClauseItemLayout.Auto,
         "onePerLine" => ClauseItemLayout.OnePerLine,
         _ => throw new JsonSerializationException($"Unsupported clause item layout '{value}'.")
+    };
+
+    private static string FormatLineEnding(DocLineEnding value) => value switch
+    {
+        DocLineEnding.Lf => "lf",
+        DocLineEnding.CrLf => "crlf",
+        DocLineEnding.Cr => "cr",
+        _ => throw new ArgumentOutOfRangeException(nameof(value))
+    };
+
+    private static string FormatKeywordCase(KeywordCase value) => value switch
+    {
+        KeywordCase.Upper => "upper",
+        KeywordCase.Lower => "lower",
+        KeywordCase.Preserve => "preserve",
+        _ => throw new ArgumentOutOfRangeException(nameof(value))
     };
 
     private static string FormatLayout(SelectColumnLayout value) => value switch
