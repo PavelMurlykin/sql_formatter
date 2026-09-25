@@ -63,6 +63,22 @@ var validatedOptions = parsed.Options!;
 
 Неизвестные разделы и поля, неподдерживаемая версия, дублирующиеся ключи, неправильные типы и недопустимые значения дают диагностику `TSF2000` уровня `Error`. При любой ошибке `Options` равен `null`; независимые ошибки полей собираются вместе. `Deserialize` для невалидной конфигурации выбрасывает `JsonSerializationException`. Например, показанный в плане `lineEnding: "auto"` пока не поддерживается; его нужно заменить на `lf`, `crlf` или `cr`.
 
+### Приоритет настроек
+
+`SqlFormatterConfigurationResolver` объединяет встроенные значения, содержимое явно переданного файла и явно заданные параметры в таком порядке. Последний слой переопределяет только указанные поля; остальные настройки файла сохраняются. Отсутствующий файл передавайте как `null`. При ошибке JSON результат содержит диагностики и не содержит частично применённых настроек.
+
+```csharp
+var json = File.ReadAllText(".tsqlformatter.json");
+var resolved = new SqlFormatterConfigurationResolver().Resolve(
+    json,
+    new FormattingOptionsOverrides(maxLineLength: 120, keywordCase: KeywordCase.Lower));
+if (!resolved.Succeeded)
+    throw new System.InvalidOperationException(resolved.Diagnostics[0].Message);
+var effectiveOptions = resolved.Options!;
+```
+
+Параметры `FormattingOptionsOverrides` соответствуют поддержанным полям JSON: `maxLineLength`, `lineEnding`, `finalNewLine`, `indentSize`, `useTabs`, `keywordCase`, `selectColumns`, `groupByLayout` и `orderByLayout`. Это API для приложений; CLI пока не принимает флаги настроек и не загружает файл автоматически.
+
 Для проверки сохранности комментариев отдельно запустите golden-набор:
 
 ```powershell

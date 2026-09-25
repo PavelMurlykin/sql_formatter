@@ -63,6 +63,22 @@ var validatedOptions = parsed.Options!;
 
 Unknown sections and properties, unsupported versions, duplicate keys, wrong types, and invalid values produce `TSF2000` diagnostics with `Error` severity. On any error, `Options` is `null`; independent field errors are collected together. `Deserialize` throws `JsonSerializationException` for invalid configuration. For example, the plan's `lineEnding: "auto"` is not supported yet; use `lf`, `crlf`, or `cr` instead.
 
+### Option precedence
+
+`SqlFormatterConfigurationResolver` combines built-in defaults, an explicitly supplied file's contents, and explicitly supplied options in that order. The final layer replaces only specified fields; other file settings remain intact. Pass `null` for a missing file. Invalid JSON returns diagnostics and no partially applied options.
+
+```csharp
+var json = File.ReadAllText(".tsqlformatter.json");
+var resolved = new SqlFormatterConfigurationResolver().Resolve(
+    json,
+    new FormattingOptionsOverrides(maxLineLength: 120, keywordCase: KeywordCase.Lower));
+if (!resolved.Succeeded)
+    throw new System.InvalidOperationException(resolved.Diagnostics[0].Message);
+var effectiveOptions = resolved.Options!;
+```
+
+`FormattingOptionsOverrides` parameters map to the supported JSON fields: `maxLineLength`, `lineEnding`, `finalNewLine`, `indentSize`, `useTabs`, `keywordCase`, `selectColumns`, `groupByLayout`, and `orderByLayout`. This is an application API; the CLI does not yet accept option flags or load files automatically.
+
 To check comment preservation separately, run the golden suite:
 
 ```powershell
