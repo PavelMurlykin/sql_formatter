@@ -7,6 +7,9 @@ namespace TSqlFormatter.Cli;
 /// <summary>Runs the command-line formatter against redirected standard streams.</summary>
 public static class SqlFormatterCli
 {
+    public const long MaxInputBytes = 64L * 1024 * 1024;
+    public const int MaxInputCharacters = 16 * 1024 * 1024;
+
     public static async Task<int> RunAsync(string[] args, TextReader input, TextWriter output,
         TextWriter error, CancellationToken cancellationToken = default)
     {
@@ -44,8 +47,13 @@ public static class SqlFormatterCli
             }
             else
             {
-                source = await input.ReadToEndAsync();
+                source = await ReadBoundedAsync(input, cancellationToken);
             }
+        }
+        catch (InputTooLargeException exception)
+        {
+            await error.WriteLineAsync($"TSF9001: {exception.Message}");
+            return 2;
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException
             or DecoderFallbackException)
@@ -75,6 +83,11 @@ public static class SqlFormatterCli
                 try
                 {
                     (configJson, _) = await ReadUtf8FileAsync(configPath, cancellationToken);
+                }
+                catch (InputTooLargeException exception)
+                {
+                    await error.WriteLineAsync($"TSF9001: {configPath}: {exception.Message}");
+                    return 2;
                 }
                 catch (Exception exception) when (exception is IOException or UnauthorizedAccessException
                     or DecoderFallbackException)
@@ -128,11 +141,40 @@ public static class SqlFormatterCli
     private static async Task<(string Text, bool HasBom)> ReadUtf8FileAsync(string path,
         CancellationToken cancellationToken)
     {
-        var bytes = await File.ReadAllBytesAsync(path, cancellationToken);
-        var hasBom = bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF;
-        var text = new UTF8Encoding(false, true).GetString(bytes, hasBom ? 3 : 0,
-            bytes.Length - (hasBom ? 3 : 0));
+        using var stream = new FileStream(path, FileMode.Open, FileAccess.Read,
+            FileShare.Read, bufferSize: 8192, useAsync: true);
+        if (stream.Length > MaxInputBytes)
+            throw new InputTooLargeException($"Input exceeds {MaxInputBytes} UTF-8 bytes.");
+
+        var header = new byte[3];
+        var headerLength = 0;
+        while (headerLength < header.Length)
+        {
+            var read = await stream.ReadAsync(header.AsMemory(headerLength), cancellationToken);
+            if (read == 0) break;
+            headerLength += read;
+        }
+        var hasBom = headerLength == 3 && header[0] == 0xEF && header[1] == 0xBB && header[2] == 0xBF;
+        stream.Position = hasBom ? 3 : 0;
+        using var reader = new StreamReader(stream, new UTF8Encoding(false, true),
+            detectEncodingFromByteOrderMarks: false, bufferSize: 8192);
+        var text = await ReadBoundedAsync(reader, cancellationToken);
         return (text, hasBom);
+    }
+
+    private static async Task<string> ReadBoundedAsync(TextReader reader,
+        CancellationToken cancellationToken)
+    {
+        var text = new StringBuilder();
+        var buffer = new char[8192];
+        int count;
+        while ((count = await reader.ReadAsync(buffer.AsMemory(), cancellationToken)) > 0)
+        {
+            if (text.Length > MaxInputCharacters - count)
+                throw new InputTooLargeException($"Input exceeds {MaxInputCharacters} UTF-16 characters.");
+            text.Append(buffer, 0, count);
+        }
+        return text.ToString();
     }
 
     private static async Task WriteFileAtomicallyAsync(string path, string text, bool hasBom,
@@ -143,15 +185,24 @@ public static class SqlFormatterCli
         var temporaryPath = Path.Combine(directory, $".tsqlformat-{Guid.NewGuid():N}.tmp");
         try
         {
-            var bytes = new UTF8Encoding(hasBom).GetBytes(text);
-            if (hasBom)
-                bytes = new byte[] { 0xEF, 0xBB, 0xBF }.Concat(bytes).ToArray();
-            await File.WriteAllBytesAsync(temporaryPath, bytes, cancellationToken);
+            await using (var stream = new FileStream(temporaryPath, FileMode.CreateNew,
+                             FileAccess.Write, FileShare.None, bufferSize: 8192, useAsync: true))
+            await using (var writer = new StreamWriter(stream, new UTF8Encoding(hasBom),
+                             bufferSize: 8192))
+            {
+                await writer.WriteAsync(text.AsMemory(), cancellationToken);
+                await writer.FlushAsync(cancellationToken);
+            }
             File.Move(temporaryPath, absolutePath, true);
         }
         finally
         {
             if (File.Exists(temporaryPath)) File.Delete(temporaryPath);
         }
+    }
+
+    private sealed class InputTooLargeException : Exception
+    {
+        public InputTooLargeException(string message) : base(message) { }
     }
 }

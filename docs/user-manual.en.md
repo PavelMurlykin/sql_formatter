@@ -57,6 +57,10 @@ For `query.sql`, including `--write` and `--check`, the CLI first checks the SQL
 
 The file is read as UTF-8, validated as version 1, and its settings overlay `Default`. Invalid configuration produces `TSF2000` and the config path on stderr, returns `2`, prints no SQL, and does not perform `--write`. Read failures produce `TSF9000`. If no configuration exists, built-in options apply.
 
+### Large inputs
+
+The CLI limits each SQL or configuration file to 64 MiB and decoded input to 16 Mi UTF-16 code units (stdin has the character limit). Exceeding a limit returns code `2` with `TSF9001` on stderr: no SQL is printed and `--write` does not run. Invalid UTF-8 produces `TSF9000`. File reads and writes avoid an additional full-size byte-array copy; the parser still operates on a complete string, so arbitrarily large files are not supported yet.
+
 ## JSON configuration
 
 To read and write settings, reference `src/TSqlFormatter.Configuration/TSqlFormatter.Configuration.csproj`. Version 1 of `.tsqlformatter.json` supports the current options-model sections:
