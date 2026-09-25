@@ -1,4 +1,5 @@
 using System.Text;
+using TSqlFormatter.Configuration;
 using TSqlFormatter.Core.Formatting;
 
 namespace TSqlFormatter.Cli;
@@ -39,10 +40,7 @@ public static class SqlFormatterCli
         {
             if (isFile)
             {
-                var bytes = await File.ReadAllBytesAsync(args[0], cancellationToken);
-                hasBom = bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF;
-                source = new UTF8Encoding(false, true).GetString(bytes, hasBom ? 3 : 0,
-                    bytes.Length - (hasBom ? 3 : 0));
+                (source, hasBom) = await ReadUtf8FileAsync(args[0], cancellationToken);
             }
             else
             {
@@ -57,8 +55,48 @@ public static class SqlFormatterCli
         }
 
         cancellationToken.ThrowIfCancellationRequested();
+        var options = FormattingOptions.Default;
+        if (isFile)
+        {
+            string? configPath;
+            try
+            {
+                configPath = new SqlFormatterConfigurationDiscovery().FindForFile(args[0]);
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                await error.WriteLineAsync($"TSF9000: Failed to find configuration: {exception.Message}");
+                return 2;
+            }
+
+            if (configPath is not null)
+            {
+                string configJson;
+                try
+                {
+                    (configJson, _) = await ReadUtf8FileAsync(configPath, cancellationToken);
+                }
+                catch (Exception exception) when (exception is IOException or UnauthorizedAccessException
+                    or DecoderFallbackException)
+                {
+                    await error.WriteLineAsync($"TSF9000: Failed to read configuration '{configPath}': {exception.Message}");
+                    return 2;
+                }
+
+                var resolved = new SqlFormatterConfigurationResolver().Resolve(configJson);
+                if (!resolved.Succeeded)
+                {
+                    foreach (var diagnostic in resolved.Diagnostics)
+                        await error.WriteLineAsync($"{diagnostic.Code}: {configPath}: {diagnostic.Message}");
+                    return 2;
+                }
+
+                options = resolved.Options!;
+            }
+        }
+
         var result = new ScriptDomSqlFormatter().Format(
-            source, FormattingOptions.Default, new FormatRequest(), cancellationToken);
+            source, options, new FormatRequest(), cancellationToken);
         foreach (var diagnostic in result.Diagnostics)
             await error.WriteLineAsync($"{diagnostic.Code}: {diagnostic.Message}");
 
@@ -85,6 +123,16 @@ public static class SqlFormatterCli
 
         await output.WriteAsync(result.Text);
         return 0;
+    }
+
+    private static async Task<(string Text, bool HasBom)> ReadUtf8FileAsync(string path,
+        CancellationToken cancellationToken)
+    {
+        var bytes = await File.ReadAllBytesAsync(path, cancellationToken);
+        var hasBom = bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF;
+        var text = new UTF8Encoding(false, true).GetString(bytes, hasBom ? 3 : 0,
+            bytes.Length - (hasBom ? 3 : 0));
+        return (text, hasBom);
     }
 
     private static async Task WriteFileAtomicallyAsync(string path, string text, bool hasBom,

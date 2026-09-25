@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and formatting for supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms are available through `TSqlFormatter.Core`, including CTEs, subqueries, `CASE`, window functions, `FROM`, `JOIN`, `APPLY`, and comments in supported positions. JSON settings and named profiles are available through `TSqlFormatter.Configuration`. The CLI formats SQL from stdin or one file to stdout and supports `--write` and `--check`; automatic config-file discovery is not implemented yet. There is no installable package.
+This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and formatting for supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms are available through `TSqlFormatter.Core`, including CTEs, subqueries, `CASE`, window functions, `FROM`, `JOIN`, `APPLY`, and comments in supported positions. JSON settings and named profiles are available through `TSqlFormatter.Configuration`. The CLI formats SQL from stdin or one file to stdout and supports `--write`, `--check`, and automatic config discovery for files. There is no installable package.
 
 ## Setup
 
@@ -24,7 +24,7 @@ After building, pass SQL through stdin from the repository root:
 'select Id from T' | dotnet run --project src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj --no-restore
 ```
 
-Formatted SQL goes to stdout; `-` can be passed instead of no argument. `--help` shows brief usage. Diagnostics go to stderr. Exit code `0` means formatting succeeded; `2` means a SQL parse, I/O, or argument error. Code `1` is used only with `--check` when formatting is required. No SQL is printed on a parse error. The CLI uses built-in `Default` options, does not search for `.tsqlformatter.json`, and does not yet accept settings flags.
+Formatted SQL goes to stdout; `-` can be passed instead of no argument. `--help` shows brief usage. Diagnostics go to stderr. Exit code `0` means formatting succeeded; `2` means a SQL parse, configuration, I/O, or argument error. Code `1` is used only with `--check` when formatting is required. No SQL is printed on a parse error. The CLI uses `Default` for stdin and searches for `.tsqlformatter.json` for files. Settings flags are not yet supported.
 
 To read one `query.sql` file from the current directory:
 
@@ -49,7 +49,13 @@ dotnet run --project src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj --no-restore
 $LASTEXITCODE
 ```
 
-Code `0` means the file is already formatted; `1` means formatting is needed; `2` means a SQL, read, or argument error. `--check` never writes the file and leaves stdout empty. It is not available for stdin (`-`) yet.
+Code `0` means the file is already formatted; `1` means formatting is needed; `2` means a SQL, configuration, read, or argument error. `--check` never writes the file and leaves stdout empty. It is not available for stdin (`-`) yet.
+
+### Configuration discovery for files
+
+For `query.sql`, including `--write` and `--check`, the CLI first checks the SQL file's directory for `.tsqlformatter.json`, then each parent. The nearest file wins. The directory containing a `.git` directory or marker file is checked last; searching stops there. Without such a marker, searching continues to the filesystem root. A relative SQL path is made absolute from the current directory; parent traversal does not resolve symbolic links. Stdin does not trigger discovery.
+
+The file is read as UTF-8, validated as version 1, and its settings overlay `Default`. Invalid configuration produces `TSF2000` and the config path on stderr, returns `2`, prints no SQL, and does not perform `--write`. Read failures produce `TSF9000`. If no configuration exists, built-in options apply.
 
 ## JSON configuration
 
@@ -80,7 +86,7 @@ var result = new ScriptDomSqlFormatter().Format(
 File.WriteAllText(".tsqlformatter.json", serializer.Serialize(options));
 ```
 
-This explicitly reads a file in your application: neither the CLI nor the formatter discovers config files automatically yet. The plan's example also shows future fields (`joins`, `expressions`, `aliases`, and others); the current serializer rejects them as unknown.
+This explicitly reads a file in your application. The CLI discovers configuration automatically only for a named SQL file; `ScriptDomSqlFormatter` itself does not. The plan's example also shows future fields (`joins`, `expressions`, `aliases`, and others); the current serializer rejects them as unknown.
 
 To handle invalid input without an exception, use `Parse`:
 
@@ -112,7 +118,7 @@ if (!resolved.Succeeded)
 var effectiveOptions = resolved.Options!;
 ```
 
-`FormattingOptionsOverrides` parameters map to the supported JSON fields: `maxLineLength`, `lineEnding`, `finalNewLine`, `indentSize`, `useTabs`, `keywordCase`, `selectColumns`, `groupByLayout`, and `orderByLayout`. This is an application API; the CLI does not yet accept option flags or load files automatically.
+`FormattingOptionsOverrides` parameters map to the supported JSON fields: `maxLineLength`, `lineEnding`, `finalNewLine`, `indentSize`, `useTabs`, `keywordCase`, `selectColumns`, `groupByLayout`, and `orderByLayout`. This is an application API; the CLI loads a discovered file automatically but does not yet accept settings flags.
 
 ### Named profiles
 
@@ -613,6 +619,6 @@ When parsing fails, `BuildDocument` also returns the unchanged source. You can r
 
 ## Limitations
 
-- The CLI accepts stdin or one file; `--write` and `--check` are available for files only. Configuration discovery is not implemented yet.
+- The CLI accepts stdin or one file; `--write`, `--check`, and configuration discovery apply to files only. Custom settings flags are not implemented yet.
 - Structural formatting covers only the `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms described above; other constructs retain their original layout.
 - The renderer accepts a prepared `Doc` tree; it does not parse SQL on its own.
