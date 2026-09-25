@@ -61,6 +61,8 @@ The file is read as UTF-8, validated as version 1, and its settings overlay `Def
 
 The CLI limits each SQL or configuration file to 64 MiB and decoded input to 16 Mi UTF-16 code units (stdin has the character limit). Exceeding a limit returns code `2` with `TSF9001` on stderr: no SQL is printed and `--write` does not run. Invalid UTF-8 produces `TSF9000`. File reads and writes avoid an additional full-size byte-array copy; the parser still operates on a complete string, so arbitrarily large files are not supported yet.
 
+Ctrl+C requests cancellation, prints `TSF9002` on stderr, and exits with code `130`. If canceled before file replacement, `--write` leaves the original file unchanged and removes its temporary file. ScriptDom parsing is synchronous, so cancellation may be observed only after the current parser call finishes.
+
 ## JSON configuration
 
 To read and write settings, reference `src/TSqlFormatter.Configuration/TSqlFormatter.Configuration.csproj`. Version 1 of `.tsqlformatter.json` supports the current options-model sections:
@@ -288,6 +290,8 @@ System.Console.WriteLine(result.Text); // SELECT 'from' FROM dbo.Items
 ```
 
 `FormatRequest` defaults to whole-document scope (`Document`), the `Auto` dialect, and strict parse-failure behavior (`Strict`). `Selection` requires a `SqlTextSpan`; `Selection` and `Statement` currently return unchanged source with a `TSF3000` warning. In `Strict` mode, a syntax error leaves the source unchanged and produces no edits: `ParseSucceeded == false` with one or more `TSF1000` diagnostics of `Error` severity. If generated SQL fails re-parsing, the original source is also preserved and `TSF3001` is an error (`ParseSucceeded` still describes the successful parse of the original SQL).
+
+The supplied `cancellationToken` is checked during AST traversal, rendering, and edit application. Cancellation throws `OperationCanceledException` rather than returning a partial `FormatResult`; a synchronous ScriptDom parse call cannot be interrupted midway.
 
 Experimental `Safe` is available through `new FormatRequest(parseFailureBehavior: ParseFailureBehavior.Safe)`. When the whole script fails to parse, it attempts to format only separate statements found in the partial AST and successfully parsed in isolation; invalid statements and the gaps between them remain untouched. The result can have `Changed == true` while `ParseSucceeded == false` and retains `TSF1000` diagnostics; the full script may still be syntactically invalid. For wholly valid SQL, `Safe` acts like `Strict`. The CLI always uses `Strict` and never writes a partial result. `TokenFallback` is not implemented yet: requesting it returns `TSF3002` without changes.
 

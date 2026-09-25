@@ -68,7 +68,7 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         {
             var rendered = new DocRenderer().Render(document, new DocRenderOptions(
                 options.General.MaxLineWidth, options.Indent.Size, options.General.LineEnding,
-                options.General.FinalNewline, options.Indent.UseTabs));
+                options.General.FinalNewline, options.Indent.UseTabs), cancellationToken);
             var reparsed = _parser.Parse(rendered, request.Dialect, cancellationToken);
             if (!reparsed.ParseSucceeded)
             {
@@ -78,7 +78,8 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
             }
 
             rendered = KeywordCasing.Apply(rendered,
-                KeywordCasing.GetEdits(reparsed, options.Keywords.Case, cancellationToken));
+                KeywordCasing.GetEdits(reparsed, options.Keywords.Case, cancellationToken),
+                cancellationToken);
             if (string.Equals(rendered, source, StringComparison.Ordinal))
             {
                 return Unchanged(source, true);
@@ -94,7 +95,7 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
             return Unchanged(source, true);
         }
 
-        var output = KeywordCasing.Apply(source, edits);
+        var output = KeywordCasing.Apply(source, edits, cancellationToken);
         return new FormatResult(output, true, true, edits);
     }
 
@@ -145,6 +146,7 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         var position = 0;
         foreach (var edit in edits)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             output.Append(source, position, edit.Span.StartOffset - position);
             output.Append(edit.NewText);
             position = edit.Span.EndOffset;
@@ -191,17 +193,20 @@ internal static class KeywordCasing
         return edits;
     }
 
-    public static string Apply(string source, IReadOnlyList<TextEdit> edits)
+    public static string Apply(string source, IReadOnlyList<TextEdit> edits,
+        CancellationToken cancellationToken = default)
     {
         var result = new StringBuilder(source.Length);
         var cursor = 0;
         foreach (var edit in edits)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             result.Append(source, cursor, edit.Span.StartOffset - cursor);
             result.Append(edit.NewText);
             cursor = edit.Span.EndOffset;
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
         result.Append(source, cursor, source.Length - cursor);
         return result.ToString();
     }

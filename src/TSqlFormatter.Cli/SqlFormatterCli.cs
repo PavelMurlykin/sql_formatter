@@ -17,6 +17,7 @@ public static class SqlFormatterCli
         if (input is null) throw new ArgumentNullException(nameof(input));
         if (output is null) throw new ArgumentNullException(nameof(output));
         if (error is null) throw new ArgumentNullException(nameof(error));
+        cancellationToken.ThrowIfCancellationRequested();
 
         if (args.Length == 1 && args[0] == "--help")
         {
@@ -97,6 +98,7 @@ public static class SqlFormatterCli
                 }
 
                 var resolved = new SqlFormatterConfigurationResolver().Resolve(configJson);
+                cancellationToken.ThrowIfCancellationRequested();
                 if (!resolved.Succeeded)
                 {
                     foreach (var diagnostic in resolved.Diagnostics)
@@ -193,6 +195,7 @@ public static class SqlFormatterCli
                 await writer.WriteAsync(text.AsMemory(), cancellationToken);
                 await writer.FlushAsync(cancellationToken);
             }
+            cancellationToken.ThrowIfCancellationRequested();
             File.Move(temporaryPath, absolutePath, true);
         }
         finally

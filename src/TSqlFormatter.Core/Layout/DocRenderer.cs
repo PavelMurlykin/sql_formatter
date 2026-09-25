@@ -5,7 +5,8 @@ namespace TSqlFormatter.Core.Layout;
 /// <summary>Renders layout documents without any knowledge of SQL syntax trees.</summary>
 public sealed class DocRenderer
 {
-    public string Render(Doc document, DocRenderOptions? options = null)
+    public string Render(Doc document, DocRenderOptions? options = null,
+        CancellationToken cancellationToken = default)
     {
         if (document is null)
         {
@@ -13,17 +14,19 @@ public sealed class DocRenderer
         }
 
         options ??= new DocRenderOptions();
+        cancellationToken.ThrowIfCancellationRequested();
         var state = new RenderState(options);
         var pending = new Stack<Frame>();
         pending.Push(new Frame(document, 0, false, false));
 
         while (pending.Count > 0)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var frame = pending.Pop();
             switch (frame.Node)
             {
                 case TextDoc text:
-                    state.AppendLiteral(text.Text, frame.IndentLevel);
+                    state.AppendLiteral(text.Text, frame.IndentLevel, cancellationToken);
                     break;
                 case ConcatDoc concat:
                     PushChildren(pending, concat, frame);
@@ -45,7 +48,8 @@ public sealed class DocRenderer
                     pending.Push(new Frame(indent.Content, checked(frame.IndentLevel + indent.Levels), frame.Flat, false));
                     break;
                 case GroupDoc group:
-                    var flat = frame.Flat || Fits(group.Content, frame.IndentLevel, state, pending, options);
+                    var flat = frame.Flat || Fits(group.Content, frame.IndentLevel, state,
+                        pending, options, cancellationToken);
                     pending.Push(new Frame(group.Content, frame.IndentLevel, flat, false));
                     break;
                 case IfBreakDoc conditional:
@@ -56,6 +60,7 @@ public sealed class DocRenderer
             }
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
         return state.Finish();
     }
 
@@ -64,7 +69,8 @@ public sealed class DocRenderer
         int indentLevel,
         RenderState state,
         Stack<Frame> pending,
-        DocRenderOptions options)
+        DocRenderOptions options,
+        CancellationToken cancellationToken)
     {
         var probe = new Stack<Frame>();
         var remaining = pending.ToArray();
@@ -79,6 +85,7 @@ public sealed class DocRenderer
 
         while (probe.Count > 0)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var frame = probe.Pop();
             switch (frame.Node)
             {
@@ -192,11 +199,12 @@ public sealed class DocRenderer
 
         public bool AtLineStart { get; private set; } = true;
 
-        public void AppendLiteral(string value, int indentLevel)
+        public void AppendLiteral(string value, int indentLevel, CancellationToken cancellationToken)
         {
             var allowIndent = true;
             for (var index = 0; index < value.Length; index++)
             {
+                if ((index & 4095) == 0) cancellationToken.ThrowIfCancellationRequested();
                 var character = value[index];
                 if (character == '\r' || character == '\n')
                 {
