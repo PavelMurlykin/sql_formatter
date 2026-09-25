@@ -15,12 +15,14 @@ public static class SqlFormatterCli
 
         if (args.Length == 1 && args[0] == "--help")
         {
-            await output.WriteLineAsync("Usage: tsqlformat [--help]");
-            await output.WriteLineAsync("Reads T-SQL from stdin and writes formatted SQL to stdout.");
+            await output.WriteLineAsync("Usage: tsqlformat [file.sql | -]");
+            await output.WriteLineAsync("Reads T-SQL from one file or stdin and writes formatted SQL to stdout.");
             return 0;
         }
 
-        if (args.Length != 0 && !(args.Length == 1 && args[0] == "-"))
+        if (args.Length > 1 || (args.Length == 1 &&
+            (string.IsNullOrWhiteSpace(args[0]) ||
+             (args[0].StartsWith("-", StringComparison.Ordinal) && args[0] != "-"))))
         {
             await error.WriteLineAsync("TSF9000: Unsupported arguments. Use --help for usage.");
             return 2;
@@ -29,11 +31,13 @@ public static class SqlFormatterCli
         string source;
         try
         {
-            source = await input.ReadToEndAsync();
+            source = args.Length == 0 || args[0] == "-"
+                ? await input.ReadToEndAsync()
+                : await File.ReadAllTextAsync(args[0], cancellationToken);
         }
-        catch (IOException exception)
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
-            await error.WriteLineAsync($"TSF9000: Failed to read stdin: {exception.Message}");
+            await error.WriteLineAsync($"TSF9000: Failed to read SQL input: {exception.Message}");
             return 2;
         }
 

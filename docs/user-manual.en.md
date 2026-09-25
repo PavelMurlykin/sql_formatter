@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and formatting for supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms are available through `TSqlFormatter.Core`, including CTEs, subqueries, `CASE`, window functions, `FROM`, `JOIN`, `APPLY`, and comments in supported positions. JSON settings and named profiles are available through `TSqlFormatter.Configuration`. The CLI formats SQL from stdin to stdout; reading a named file and automatic config-file discovery are not implemented yet. There is no installable package.
+This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and formatting for supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms are available through `TSqlFormatter.Core`, including CTEs, subqueries, `CASE`, window functions, `FROM`, `JOIN`, `APPLY`, and comments in supported positions. JSON settings and named profiles are available through `TSqlFormatter.Configuration`. The CLI formats SQL from stdin or one file to stdout; automatic config-file discovery is not implemented yet. There is no installable package.
 
 ## Setup
 
@@ -16,7 +16,7 @@ dotnet test TSqlFormatter.sln --no-build --no-restore
 
 To use the parser in your C# project, add a reference to `src/TSqlFormatter.Core/TSqlFormatter.Core.csproj`.
 
-## CLI: stdin → stdout
+## CLI: stdin or one file → stdout
 
 After building, pass SQL through stdin from the repository root:
 
@@ -24,7 +24,15 @@ After building, pass SQL through stdin from the repository root:
 'select Id from T' | dotnet run --project src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj --no-restore
 ```
 
-Formatted SQL goes to stdout; `-` can be passed instead of no argument. `--help` shows brief usage. Diagnostics go to stderr. Exit code `0` means formatting succeeded; `2` means a SQL parse, stdin read, or argument error; code `1` is not used yet. No SQL is printed on a parse error. The CLI uses built-in `Default` options, does not search for `.tsqlformatter.json`, and does not yet accept a filename, `--write`, `--check`, or settings flags.
+Formatted SQL goes to stdout; `-` can be passed instead of no argument. `--help` shows brief usage. Diagnostics go to stderr. Exit code `0` means formatting succeeded; `2` means a SQL parse, input read, or argument error; code `1` is not used yet. No SQL is printed on a parse error. The CLI uses built-in `Default` options, does not search for `.tsqlformatter.json`, and does not yet accept `--write`, `--check`, or settings flags.
+
+To read one `query.sql` file from the current directory:
+
+```powershell
+dotnet run --project src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj --no-restore -- query.sql
+```
+
+The CLI reads the file as UTF-8 (including BOM support), writes formatted SQL to stdout, and does not modify the source file. A missing or unreadable file returns code `2`, writes an error to stderr, and leaves stdout empty. Multiple files in one invocation are not supported yet.
 
 ## JSON configuration
 
@@ -588,6 +596,6 @@ When parsing fails, `BuildDocument` also returns the unchanged source. You can r
 
 ## Limitations
 
-- The CLI currently supports stdin/stdout only; file input, `--write`, `--check`, and configuration discovery are not implemented yet.
+- The CLI accepts stdin or one file; `--write`, `--check`, and configuration discovery are not implemented yet.
 - Structural formatting covers only the `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms described above; other constructs retain their original layout.
 - The renderer accepts a prepared `Doc` tree; it does not parse SQL on its own.
