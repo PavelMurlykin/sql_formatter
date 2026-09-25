@@ -34,12 +34,22 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
                 FormatterDiagnosticSeverity.Warning));
         }
 
+        if (request.ParseFailureBehavior != ParseFailureBehavior.Strict)
+        {
+            return Unchanged(source, false, new FormatterDiagnostic(
+                "TSF3002", "Only strict parse-failure behavior is currently supported.",
+                FormatterDiagnosticSeverity.Error));
+        }
+
         var parsed = _parser.Parse(source, request.Dialect, cancellationToken);
         if (!parsed.ParseSucceeded)
         {
-            var diagnostics = parsed.Diagnostics.Select(error => new FormatterDiagnostic(
-                "TSF1000", error.Message, FormatterDiagnosticSeverity.Error,
-                new SqlTextSpan(error.Offset, 0))).ToArray();
+            var diagnostics = parsed.Diagnostics.Count == 0
+                ? new[] { new FormatterDiagnostic("TSF1000", "Parser did not produce a syntax tree.",
+                    FormatterDiagnosticSeverity.Error) }
+                : parsed.Diagnostics.Select(error => new FormatterDiagnostic(
+                    "TSF1000", error.Message, FormatterDiagnosticSeverity.Error,
+                    new SqlTextSpan(error.Offset, 0))).ToArray();
             return new FormatResult(source, false, false, diagnostics: diagnostics);
         }
 
@@ -62,7 +72,7 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
             {
                 return Unchanged(source, true, new FormatterDiagnostic(
                     "TSF3001", "Formatted SQL failed validation and was left unchanged.",
-                    FormatterDiagnosticSeverity.Warning));
+                    FormatterDiagnosticSeverity.Error));
             }
 
             rendered = KeywordCasing.Apply(rendered,
