@@ -16,14 +16,15 @@ public static class SqlFormatterCli
 
         if (args.Length == 1 && args[0] == "--help")
         {
-            await output.WriteLineAsync("Usage: tsqlformat [file.sql [--write] | -]");
+            await output.WriteLineAsync("Usage: tsqlformat [file.sql [--write | --check] | -]");
             await output.WriteLineAsync("Reads T-SQL from one file or stdin and writes formatted SQL to stdout.");
             return 0;
         }
 
         var isFile = args.Length > 0 && args[0] != "-";
         var write = args.Length == 2 && args[1] == "--write";
-        if (args.Length > 2 || (args.Length == 2 && (!isFile || !write)) ||
+        var check = args.Length == 2 && args[1] == "--check";
+        if (args.Length > 2 || (args.Length == 2 && (!isFile || (!write && !check))) ||
             (args.Length > 0 &&
              (string.IsNullOrWhiteSpace(args[0]) ||
               (args[0].StartsWith("-", StringComparison.Ordinal) && args[0] != "-"))))
@@ -64,6 +65,8 @@ public static class SqlFormatterCli
         if (!result.ParseSucceeded || result.Diagnostics.Any(d =>
             d.Severity == FormatterDiagnosticSeverity.Error))
             return 2;
+
+        if (check) return result.Changed ? 1 : 0;
 
         if (write)
         {
