@@ -47,8 +47,9 @@ pinned in `Directory.Packages.props`.
 
 The test suite includes real CLI-process integration checks for stdout, exit codes,
 file writing, and configuration discovery, plus seeded property/fuzz checks for
-formatting and configuration parsing. See the architecture decision records in
-`docs/adr/`.
+formatting and configuration parsing. Add minimal crash reproducers to
+`tests/TSqlFormatter.Core.Tests/CrashCorpus/`; they run with the normal suite.
+See the architecture decision records in `docs/adr/`.
 
 ## Projects
 
