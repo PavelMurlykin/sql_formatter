@@ -129,6 +129,7 @@ internal sealed class ActiveSqlEditor
 
     private static int MapOffset(int offset, int editStart, int oldLength, int newLength)
     {
+        if (oldLength == 0 && offset == editStart) return editStart + newLength;
         int editEnd = editStart + oldLength;
         if (offset <= editStart) return offset;
         if (offset >= editEnd) return offset + newLength - oldLength;

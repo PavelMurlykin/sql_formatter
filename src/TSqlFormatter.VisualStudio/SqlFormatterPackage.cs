@@ -66,6 +66,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
             commands.AddCommand(new MenuCommand(ExecuteFormatStatement, new CommandID(CommandSet, 0x0202)));
             commands.AddCommand(new MenuCommand(ExecuteImportProfile, new CommandID(CommandSet, 0x0300)));
             commands.AddCommand(new MenuCommand(ExecuteExportProfile, new CommandID(CommandSet, 0x0301)));
+            commands.AddCommand(new MenuCommand(ExecutePasteFormatted, new CommandID(CommandSet, 0x0302)));
         }
     }
 
@@ -220,6 +221,90 @@ public sealed class SqlFormatterPackage : AsyncPackage
     private void ExecuteExportProfile(object sender, EventArgs e)
     {
         JoinableTaskFactory.RunAsync(ExportProfileAsync).FileAndForget("TSqlFormatter/ExportProfile");
+    }
+
+    private void ExecutePasteFormatted(object sender, EventArgs e)
+    {
+        JoinableTaskFactory.RunAsync(PasteFormattedAsync).FileAndForget("TSqlFormatter/PasteFormatted");
+    }
+
+    private async Task PasteFormattedAsync()
+    {
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor) ||
+            editorAdapters == null || undoRegistry == null)
+        {
+            NotifyFormat("Open a .sql file in the text editor before pasting.", true);
+            return;
+        }
+
+        string clipboard;
+        try { clipboard = Clipboard.ContainsText() ? Clipboard.GetText() : string.Empty; }
+        catch (Exception ex)
+        {
+            NotifyFormat($"Cannot read text from the clipboard: {ex.Message}", true);
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(clipboard) || clipboard.Length > 64 * 1024)
+        {
+            NotifyFormat("Clipboard must contain SQL text of at most 64 Ki characters.", true);
+            return;
+        }
+
+        if (!editor.TryCaptureCaret(editorAdapters, out var snapshot, out int caret) ||
+            snapshot.Length > 16 * 1024 * 1024)
+        {
+            NotifyFormat("SQL buffer is unavailable or exceeds 16 Mi characters.", true);
+            return;
+        }
+
+        int start = caret;
+        int length = 0;
+        if (editor.TryCaptureSelection(editorAdapters, out var selectedSnapshot, out var selected) &&
+            ReferenceEquals(selectedSnapshot, snapshot))
+        {
+            start = selected.Start;
+            length = selected.Length;
+        }
+
+        try
+        {
+            FormattingOptions defaults = CreateIdeOptions();
+            var configured = await Task.Run(() => FormatConfigured(
+                editor.Path, clipboard, new FormatRequest(), defaults, DisposalToken), DisposalToken);
+            await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+            if (configured.Error != null)
+            {
+                NotifyFormat($"{configured.Error.Code}: {configured.Error.Message}", true);
+                return;
+            }
+
+            FormatResult result = configured.Result!;
+            var error = result.Diagnostics.FirstOrDefault(d => d.Severity == FormatterDiagnosticSeverity.Error);
+            if (error != null || !result.ParseSucceeded)
+            {
+                NotifyFormat(error == null ? "Clipboard SQL could not be parsed."
+                    : $"{error.Code}: {error.Message}", true);
+                return;
+            }
+
+            if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor current) ||
+                !ReferenceEquals(current.Buffer, editor.Buffer) ||
+                !editor.TryApplyEdit(snapshot, start, length, result.Text,
+                    "Paste formatted T-SQL", editorAdapters, undoRegistry))
+            {
+                NotifyFormat("SQL buffer changed during paste formatting; no edit was applied.", true);
+                return;
+            }
+
+            NotifyFormat("Formatted clipboard SQL pasted.");
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex)
+        {
+            await JoinableTaskFactory.SwitchToMainThreadAsync();
+            NotifyFormat($"Formatted paste failed: {ex.Message}", true);
+        }
     }
 
     private async Task ImportProfileAsync()

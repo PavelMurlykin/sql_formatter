@@ -46,6 +46,8 @@ The `SELECT`, `JOIN`, and `WHERE` pages under `Tools → Options → T-SQL Forma
 
 `General → Save exclusions` accepts semicolon-separated, case-insensitive globs, for example `*.generated.sql; generated/**`. A pattern without a slash matches the file name; a pattern with a slash matches a path from any directory. `*` matches within a path segment, `**` crosses directories, and `?` matches one character. Exclusions apply to both save modes but never to manual formatting commands. An empty value excludes nothing.
 
+`Tools → T-SQL Formatter: Paste Formatted SQL (Prototype)` reads up to 64 Ki characters of SQL text from the clipboard, formats that fragment with the selected IDE profile and project configuration, then replaces the current selection or inserts at the caret in an active `.sql` document. The edit is one Undo transaction; on insertion the caret moves after the text. Invalid or empty clipboard SQL, a changed editor buffer, or a parse/configuration error leaves the document unchanged. Only the pasted fragment is validated, not the combined document. This is an explicit opt-in command: ordinary `Ctrl+V` is unaffected, and automatic Format on Paste is not implemented. Test this prototype in a disposable file; runtime behavior still needs manual Visual Studio validation.
+
 Formatting status and errors appear in the Visual Studio status bar and the **T-SQL Formatter** Output pane; errors activate that pane. The messages include diagnostic codes when available. Formatting commands no longer open modal message boxes, while the three diagnostic probe commands still do. This notification behavior has been build-verified but still needs a manual check in an installed Visual Studio instance.
 
 ## CLI: stdin or one file → stdout
