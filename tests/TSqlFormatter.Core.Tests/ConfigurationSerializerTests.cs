@@ -23,6 +23,8 @@ public sealed class ConfigurationSerializerTests
         Assert.False(root.GetProperty("general").GetProperty("finalNewLine").GetBoolean());
         Assert.Equal("spaces", root.GetProperty("indent").GetProperty("style").GetString());
         Assert.Equal("upper", root.GetProperty("keywords").GetProperty("case").GetString());
+        Assert.True(root.GetProperty("joins").GetProperty("clauseNewLine").GetBoolean());
+        Assert.True(root.GetProperty("where").GetProperty("booleanOperatorNewLine").GetBoolean());
         Assert.EndsWith("\n", json);
         Assert.DoesNotContain("\r", json);
         Assert.Equal(json, _serializer.Serialize(_serializer.Deserialize(json)));
@@ -64,6 +66,22 @@ public sealed class ConfigurationSerializerTests
         Assert.Equal(ClauseItemLayout.OnePerLine, options.Clauses.GroupByLayout);
     }
 
+    [Fact]
+    public void Join_and_where_settings_round_trip_and_affect_formatter()
+    {
+        var options = _serializer.Deserialize("""
+            {"version":1,"joins":{"clauseNewLine":false,"conditionNewLine":false},
+             "where":{"conditionNewLine":false,"booleanOperatorNewLine":false}}
+            """);
+        var formatted = new ScriptDomSqlFormatter().Format(
+            "select a.Id from A a join B b on a.Id=b.Id where a.Id=1 and b.Id=2",
+            options, new FormatRequest());
+
+        Assert.Equal("SELECT a.Id\nFROM A a JOIN B b ON a.Id = b.Id\nWHERE a.Id = 1 AND b.Id = 2", formatted.Text);
+        Assert.False(_serializer.Deserialize(_serializer.Serialize(options)).Joins.ClauseNewLine);
+        Assert.False(_serializer.Deserialize(_serializer.Serialize(options)).Where.BooleanOperatorNewLine);
+    }
+
     [Theory]
     [InlineData("{}")]
     [InlineData("{\"version\":2}")]
@@ -103,6 +121,8 @@ public sealed class ConfigurationSerializerTests
     [InlineData("{\"version\":1,\"keywords\":{\"case\":null}}", "keywords.case")]
     [InlineData("{\"version\":1,\"select\":{\"commaStyle\":\"trailing\"}}", "select.commaStyle")]
     [InlineData("{\"version\":1,\"clauses\":{\"groupByLayout\":false}}", "clauses.groupByLayout")]
+    [InlineData("{\"version\":1,\"joins\":{\"clauseNewLine\":0}}", "joins.clauseNewLine")]
+    [InlineData("{\"version\":1,\"where\":{\"booleanOperatorNewLine\":\"no\"}}", "where.booleanOperatorNewLine")]
     public void Parse_reports_invalid_configuration_without_options(string json, string expectedMessage)
     {
         var result = _serializer.Parse(json);

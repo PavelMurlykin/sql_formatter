@@ -34,7 +34,9 @@ To test buffer edits in a **disposable** `.sql` file, select text and invoke `To
 
 The VSIX adds `Tools → Options → T-SQL Formatter → General` with maximum line length (1–4096, default 100), LF/CRLF/CR line ending (default LF), final newline (off), indent size (0–32, default 4), tabs (off), and keyword casing (Upper by default). These IDE-local values are the baseline for all three formatting commands. They are not CLI settings and do not write a project file. All three commands search for `.tsqlformatter.json` from the open SQL file's directory upward to a `.git` marker or the filesystem root; the nearest file wins and its specified fields override the IDE baseline. Without a file, the IDE options apply. The config is read as UTF-8 with limits of 64 MiB and 16 Mi decoded characters. File (`TSF9000`/`TSF9001`) or settings (`TSF2000`) errors are displayed without editing the buffer. Profiles can only be selected through the API, not the VSIX.
 
-`Tools → Options → T-SQL Formatter → SQL Preview` provides an editable SQL sample (up to 4096 characters) and a formatted result. After a 300 ms pause in typing it runs the same Core formatter as the commands; returning to the page refreshes the preview with the current General settings. The preview uses IDE options only, not a project config, and never edits the open SQL document. Invalid sample SQL displays a diagnostic instead of formatted output. Runtime behavior in an installed Visual Studio instance remains to be checked manually.
+`Tools → Options → T-SQL Formatter → SQL Preview` provides an editable SQL sample (up to 4096 characters) and a formatted result. After a 300 ms pause in typing it runs the same Core formatter as the commands; returning to the page refreshes the preview with the current IDE settings. The preview uses IDE options only, not a project config, and never edits the open SQL document. Invalid sample SQL displays a diagnostic instead of formatted output. Runtime behavior in an installed Visual Studio instance remains to be checked manually.
+
+The `SELECT`, `JOIN`, and `WHERE` pages under `Tools → Options → T-SQL Formatter` configure supported layouts. SELECT offers `Auto` or `OnePerLine` for columns and for GROUP BY/ORDER BY items. JOIN can place supported JOIN/APPLY clauses and ON conditions on a new line (both on by default). WHERE can place supported WHERE/HAVING conditions and AND/OR operators on a new line (both on by default). These are IDE-local defaults used by formatting commands and SQL Preview; matching fields in a project config override them for commands. Unsupported SQL constructs retain their original layout. Page behavior in a running IDE still needs manual verification.
 
 Formatting status and errors appear in the Visual Studio status bar and the **T-SQL Formatter** Output pane; errors activate that pane. The messages include diagnostic codes when available. Formatting commands no longer open modal message boxes, while the three diagnostic probe commands still do. This notification behavior has been build-verified but still needs a manual check in an installed Visual Studio instance.
 
@@ -96,11 +98,13 @@ To read and write settings, reference `src/TSqlFormatter.Configuration/TSqlForma
   "indent": { "style": "spaces", "size": 4 },
   "keywords": { "case": "upper" },
   "select": { "columns": "auto" },
+  "joins": { "clauseNewLine": true, "conditionNewLine": true },
+  "where": { "conditionNewLine": true, "booleanOperatorNewLine": true },
   "clauses": { "groupByLayout": "auto", "orderByLayout": "auto" }
 }
 ```
 
-`lineEnding` accepts `lf`, `crlf`, or `cr`; `indent.style` accepts `spaces` or `tabs`; `keywords.case` accepts `upper`, `lower`, or `preserve`; layouts accept `auto` or `onePerLine`. `general.maxLineLength` must be an integer of at least 1, and `indent.size` an integer of at least 0. Missing sections and properties use built-in defaults. Serialization writes all supported properties and a final LF.
+`lineEnding` accepts `lf`, `crlf`, or `cr`; `indent.style` accepts `spaces` or `tabs`; `keywords.case` accepts `upper`, `lower`, or `preserve`; layouts accept `auto` or `onePerLine`. The four JOIN/WHERE line-break fields are booleans. `general.maxLineLength` must be an integer of at least 1, and `indent.size` an integer of at least 0. Missing sections and properties use built-in defaults (or IDE defaults in the VSIX). Serialization writes all supported properties and a final LF.
 
 ```csharp
 using System.IO;
@@ -114,7 +118,7 @@ var result = new ScriptDomSqlFormatter().Format(
 File.WriteAllText(".tsqlformatter.json", serializer.Serialize(options));
 ```
 
-This explicitly reads a file in your application. The CLI and VSIX discover configuration automatically for a named SQL file; `ScriptDomSqlFormatter` itself does not. Other integrations can call `new SqlFormatterConfigurationResolver().ResolveForSqlFile("query.sql")` for `Default` or validated settings and error diagnostics. The plan's example also shows future fields (`joins`, `expressions`, `aliases`, and others); the current serializer rejects them as unknown.
+This explicitly reads a file in your application. The CLI and VSIX discover configuration automatically for a named SQL file; `ScriptDomSqlFormatter` itself does not. Other integrations can call `new SqlFormatterConfigurationResolver().ResolveForSqlFile("query.sql")` for `Default` or validated settings and error diagnostics. The plan's example also shows future fields (`expressions`, `aliases`, and others); the current serializer rejects them as unknown.
 
 To handle invalid input without an exception, use `Parse`:
 
@@ -317,7 +321,7 @@ The supplied `cancellationToken` is checked during AST traversal, rendering, and
 
 Experimental `Safe` is available through `new FormatRequest(parseFailureBehavior: ParseFailureBehavior.Safe)`. When the whole script fails to parse, it attempts to format only separate statements found in the partial AST and successfully parsed in isolation; invalid statements and the gaps between them remain untouched. The result can have `Changed == true` while `ParseSucceeded == false` and retains `TSF1000` diagnostics; the full script may still be syntactically invalid. For wholly valid SQL, `Safe` acts like `Strict`. The CLI always uses `Strict` and never writes a partial result. `TokenFallback` is not implemented yet: requesting it returns `TSF3002` without changes.
 
-`FormattingOptions` groups settings into `General` (width 100, LF, no final newline), `Indent` (4 spaces, no tabs), `Keywords` (`Upper`), `Select` (`Auto`), and `Clauses` (`Auto` for `GROUP BY` and `ORDER BY`). Indentation and EOL apply to supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` output; width and list layouts affect supported `SELECT` lists. Otherwise, only keyword casing currently changes. `FormatResult` carries final text, `TextEdit` changes, diagnostics, change status, and parse success.
+`FormattingOptions` groups settings into `General` (width 100, LF, no final newline), `Indent` (4 spaces, no tabs), `Keywords` (`Upper`), `Select` (`Auto`), `Clauses` (`Auto` for `GROUP BY` and `ORDER BY`), `Joins`, and `Where` (line breaks on). Indentation and EOL apply to supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` output; width and list layouts affect supported `SELECT` lists. JOIN/ON and WHERE/HAVING/AND/OR line-break settings apply only to supported constructs. `FormatResult` carries final text, `TextEdit` changes, diagnostics, change status, and parse success.
 
 `FormattingOptions.Default` supplies the same values as `new FormattingOptions()`. `With` creates a new option set by replacing only the supplied sections, leaving the original unchanged:
 
@@ -327,7 +331,7 @@ var options = FormattingOptions.Default.With(
     keywords: new KeywordOptions(KeywordCase.Lower));
 ```
 
-The public sections currently include only options backed by implemented behavior. Planned `JOIN`, `CASE`, comment, and other settings are not part of the API yet.
+The public sections currently include only options backed by implemented behavior. Planned `CASE`, comment, and other settings are not part of the API yet.
 
 ## Basic SELECT
 

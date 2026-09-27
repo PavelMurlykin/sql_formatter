@@ -53,11 +53,14 @@ internal sealed class WhereDocBuilder
         var condition = BuildCondition(expression, context);
         var originalKeyword = Regex.Match(prefix, "^" + keyword,
             RegexOptions.IgnoreCase | RegexOptions.CultureInvariant).Value;
-        return condition is null ? null : new ConcatDoc(new Doc[]
-        {
-            new TextDoc(originalKeyword),
-            new IndentDoc(1, new ConcatDoc(new Doc[] { HardLineDoc.Instance, condition }))
-        });
+        if (condition is null) return null;
+        return _options.Where.ConditionNewLine
+            ? new ConcatDoc(new Doc[]
+            {
+                new TextDoc(originalKeyword),
+                new IndentDoc(1, new ConcatDoc(new Doc[] { HardLineDoc.Instance, condition }))
+            })
+            : new ConcatDoc(new Doc[] { new TextDoc(originalKeyword + " "), condition });
     }
 
     internal Doc? BuildCondition(BooleanExpression expression, SqlDocBuilderContext context)
@@ -116,7 +119,7 @@ internal sealed class WhereDocBuilder
 
             return new ConcatDoc(new Doc[]
             {
-                leftDoc, HardLineDoc.Instance,
+                leftDoc, _options.Where.BooleanOperatorNewLine ? HardLineDoc.Instance : new TextDoc(" "),
                 new TextDoc(Regex.Match(op, @"AND|OR", RegexOptions.IgnoreCase).Value),
                 new TextDoc(" "), rightDoc
             });

@@ -21,6 +21,9 @@ namespace TSqlFormatter.VisualStudio;
 [ProvideMenuResource("Menus.ctmenu", 1)]
 [ProvideOptionPage(typeof(GeneralOptionsPage), "T-SQL Formatter", "General", 0, 0, true)]
 [ProvideOptionPage(typeof(PreviewOptionsPage), "T-SQL Formatter", "SQL Preview", 0, 0, true)]
+[ProvideOptionPage(typeof(SelectOptionsPage), "T-SQL Formatter", "SELECT", 0, 0, true)]
+[ProvideOptionPage(typeof(JoinOptionsPage), "T-SQL Formatter", "JOIN", 0, 0, true)]
+[ProvideOptionPage(typeof(WhereOptionsPage), "T-SQL Formatter", "WHERE", 0, 0, true)]
 [Guid(PackageGuid)]
 public sealed class SqlFormatterPackage : AsyncPackage
 {
@@ -43,7 +46,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
         editorAdapters = components?.GetService<IVsEditorAdaptersFactoryService>();
         undoRegistry = components?.GetService<ITextUndoHistoryRegistry>();
         ((PreviewOptionsPage)GetDialogPage(typeof(PreviewOptionsPage))).OptionsProvider =
-            () => ((GeneralOptionsPage)GetDialogPage(typeof(GeneralOptionsPage))).CreateOptions();
+            CreateIdeOptions;
         if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService commands)
         {
             commands.AddCommand(new MenuCommand(ExecuteProbe, new CommandID(CommandSet, 0x0100)));
@@ -142,7 +145,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
         string source = snapshot.GetText();
         try
         {
-            FormattingOptions defaults = ((GeneralOptionsPage)GetDialogPage(typeof(GeneralOptionsPage))).CreateOptions();
+            FormattingOptions defaults = CreateIdeOptions();
             var configured = await Task.Run(() => FormatConfigured(
                 editor.Path, source, new FormatRequest(FormatScope.Statement,
                     new SqlTextSpan(caret, 0)), defaults, DisposalToken), DisposalToken);
@@ -212,7 +215,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
         string source = snapshot.GetText();
         try
         {
-            FormattingOptions defaults = ((GeneralOptionsPage)GetDialogPage(typeof(GeneralOptionsPage))).CreateOptions();
+            FormattingOptions defaults = CreateIdeOptions();
             var span = new SqlTextSpan(selected.Start, selected.Length);
             var configured = await Task.Run(() => FormatConfigured(
                 editor.Path, source, new FormatRequest(FormatScope.Selection, span), defaults, DisposalToken), DisposalToken);
@@ -277,7 +280,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
         string source = snapshot.GetText();
         try
         {
-            FormattingOptions defaults = ((GeneralOptionsPage)GetDialogPage(typeof(GeneralOptionsPage))).CreateOptions();
+            FormattingOptions defaults = CreateIdeOptions();
             var configured = await Task.Run(() => FormatConfigured(
                 editor.Path, source, new FormatRequest(), defaults, DisposalToken), DisposalToken);
             await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
@@ -386,6 +389,20 @@ public sealed class SqlFormatterPackage : AsyncPackage
         }
 
         return (new ScriptDomSqlFormatter().Format(source, config.Options!, request, cancellationToken), null);
+    }
+
+    private FormattingOptions CreateIdeOptions()
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        var general = (GeneralOptionsPage)GetDialogPage(typeof(GeneralOptionsPage));
+        var select = (SelectOptionsPage)GetDialogPage(typeof(SelectOptionsPage));
+        var joins = (JoinOptionsPage)GetDialogPage(typeof(JoinOptionsPage));
+        var where = (WhereOptionsPage)GetDialogPage(typeof(WhereOptionsPage));
+        return general.CreateOptions().With(
+            select: new SelectOptions(select.Columns),
+            clauses: new QueryClauseOptions(select.GroupByItems, select.OrderByItems),
+            joins: new JoinOptions(joins.ClauseNewLine, joins.ConditionNewLine),
+            where: new WhereOptions(where.ConditionNewLine, where.BooleanOperatorNewLine));
     }
 
     private void ShowProbeMessage(string message)

@@ -15,7 +15,11 @@ public sealed class FormattingOptionsOverrides
         KeywordCase? keywordCase = null,
         SelectColumnLayout? selectColumns = null,
         ClauseItemLayout? groupByLayout = null,
-        ClauseItemLayout? orderByLayout = null)
+        ClauseItemLayout? orderByLayout = null,
+        bool? joinClauseNewLine = null,
+        bool? joinConditionNewLine = null,
+        bool? whereConditionNewLine = null,
+        bool? booleanOperatorNewLine = null)
     {
         MaxLineLength = maxLineLength;
         LineEnding = lineEnding;
@@ -26,6 +30,10 @@ public sealed class FormattingOptionsOverrides
         SelectColumns = selectColumns;
         GroupByLayout = groupByLayout;
         OrderByLayout = orderByLayout;
+        JoinClauseNewLine = joinClauseNewLine;
+        JoinConditionNewLine = joinConditionNewLine;
+        WhereConditionNewLine = whereConditionNewLine;
+        BooleanOperatorNewLine = booleanOperatorNewLine;
     }
 
     public int? MaxLineLength { get; }
@@ -37,6 +45,10 @@ public sealed class FormattingOptionsOverrides
     public SelectColumnLayout? SelectColumns { get; }
     public ClauseItemLayout? GroupByLayout { get; }
     public ClauseItemLayout? OrderByLayout { get; }
+    public bool? JoinClauseNewLine { get; }
+    public bool? JoinConditionNewLine { get; }
+    public bool? WhereConditionNewLine { get; }
+    public bool? BooleanOperatorNewLine { get; }
 
     public FormattingOptions ApplyTo(FormattingOptions baseline)
     {
@@ -54,6 +66,12 @@ public sealed class FormattingOptionsOverrides
             new SelectOptions(SelectColumns ?? baseline.Select.ColumnLayout),
             new QueryClauseOptions(
                 GroupByLayout ?? baseline.Clauses.GroupByLayout,
-                OrderByLayout ?? baseline.Clauses.OrderByLayout));
+                OrderByLayout ?? baseline.Clauses.OrderByLayout),
+            new JoinOptions(
+                JoinClauseNewLine ?? baseline.Joins.ClauseNewLine,
+                JoinConditionNewLine ?? baseline.Joins.ConditionNewLine),
+            new WhereOptions(
+                WhereConditionNewLine ?? baseline.Where.ConditionNewLine,
+                BooleanOperatorNewLine ?? baseline.Where.BooleanOperatorNewLine));
     }
 }

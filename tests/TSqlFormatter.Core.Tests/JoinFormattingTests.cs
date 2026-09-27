@@ -57,6 +57,19 @@ public sealed class JoinFormattingTests
     }
 
     [Fact]
+    public void Join_line_break_options_keep_clause_and_on_inline()
+    {
+        const string source = "select a.Id from A a join B b on a.Id=b.Id";
+        var options = FormattingOptions.Default.With(joins: new JoinOptions(false, false));
+
+        var result = _formatter.Format(source, options, new FormatRequest());
+        var repeated = _formatter.Format(result.Text, options, new FormatRequest());
+
+        Assert.Equal("SELECT a.Id\nFROM A a JOIN B b ON a.Id = b.Id", result.Text);
+        Assert.False(repeated.Changed);
+    }
+
+    [Fact]
     public void Unsupported_join_hint_preserves_layout()
     {
         const string source = "select a.Id from A a inner hash join B b on a.Id=b.Id";

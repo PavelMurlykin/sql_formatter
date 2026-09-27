@@ -67,14 +67,16 @@ internal sealed class JoinDocBuilder
                 ?? new TextDoc(context.GetOriginalText(condition).Trim());
             return new ConcatDoc(new Doc[]
             {
-                left, HardLineDoc.Instance,
+                left, _options.Joins.ClauseNewLine ? HardLineDoc.Instance : new TextDoc(" "),
                 new TextDoc(Normalize(separator)), new TextDoc(" "), right,
-                HardLineDoc.Instance,
-                new IndentDoc(1, new ConcatDoc(new Doc[]
-                {
+                _options.Joins.ConditionNewLine ? HardLineDoc.Instance : new TextDoc(" "),
+                _options.Joins.ConditionNewLine ? new IndentDoc(1, BuildOn()) : BuildOn()
+            });
+
+            Doc BuildOn() => new ConcatDoc(new Doc[]
+            {
                     new TextDoc(Regex.Match(onPrefix, @"ON", RegexOptions.IgnoreCase).Value),
                     new TextDoc(" "), conditionDoc
-                }))
             });
         }
 
@@ -85,7 +87,7 @@ internal sealed class JoinDocBuilder
         {
             return new ConcatDoc(new Doc[]
             {
-                left, HardLineDoc.Instance,
+                left, _options.Joins.ClauseNewLine ? HardLineDoc.Instance : new TextDoc(" "),
                 new TextDoc(Normalize(separator)), new TextDoc(" "), right
             });
         }

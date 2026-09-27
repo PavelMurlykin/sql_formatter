@@ -38,6 +38,16 @@ public sealed class SqlFormatterConfigurationSerializer
             {
                 ["columns"] = FormatLayout(options.Select.ColumnLayout)
             },
+            ["joins"] = new JObject
+            {
+                ["clauseNewLine"] = options.Joins.ClauseNewLine,
+                ["conditionNewLine"] = options.Joins.ConditionNewLine
+            },
+            ["where"] = new JObject
+            {
+                ["conditionNewLine"] = options.Where.ConditionNewLine,
+                ["booleanOperatorNewLine"] = options.Where.BooleanOperatorNewLine
+            },
             ["clauses"] = new JObject
             {
                 ["groupByLayout"] = FormatLayout(options.Clauses.GroupByLayout),
@@ -106,6 +116,8 @@ public sealed class SqlFormatterConfigurationSerializer
         var indent = GetSection(root, "indent");
         var keywords = GetSection(root, "keywords");
         var select = GetSection(root, "select");
+        var joins = GetSection(root, "joins");
+        var where = GetSection(root, "where");
         var clauses = GetSection(root, "clauses");
 
         return new FormattingOptions(
@@ -120,6 +132,12 @@ public sealed class SqlFormatterConfigurationSerializer
                 ParseKeywordCase(GetString(keywords, "case", FormatKeywordCase(baseline.Keywords.Case)))),
             select: new SelectOptions(
                 ParseSelectLayout(GetString(select, "columns", FormatLayout(baseline.Select.ColumnLayout)))),
+            joins: new JoinOptions(
+                GetBoolean(joins, "clauseNewLine", baseline.Joins.ClauseNewLine),
+                GetBoolean(joins, "conditionNewLine", baseline.Joins.ConditionNewLine)),
+            where: new WhereOptions(
+                GetBoolean(where, "conditionNewLine", baseline.Where.ConditionNewLine),
+                GetBoolean(where, "booleanOperatorNewLine", baseline.Where.BooleanOperatorNewLine)),
             clauses: new QueryClauseOptions(
                 ParseClauseLayout(GetString(clauses, "groupByLayout", FormatLayout(baseline.Clauses.GroupByLayout))),
                 ParseClauseLayout(GetString(clauses, "orderByLayout", FormatLayout(baseline.Clauses.OrderByLayout)))));
@@ -143,6 +161,8 @@ public sealed class SqlFormatterConfigurationSerializer
                 case "indent":
                 case "keywords":
                 case "select":
+                case "joins":
+                case "where":
                 case "clauses":
                     break;
                 default:
@@ -163,6 +183,8 @@ public sealed class SqlFormatterConfigurationSerializer
         ValidateSection(root, "indent", diagnostics);
         ValidateSection(root, "keywords", diagnostics);
         ValidateSection(root, "select", diagnostics);
+        ValidateSection(root, "joins", diagnostics);
+        ValidateSection(root, "where", diagnostics);
         ValidateSection(root, "clauses", diagnostics);
     }
 
@@ -188,6 +210,10 @@ public sealed class SqlFormatterConfigurationSerializer
                     ValidateChoice(property.Value, path, diagnostics, "lf", "crlf", "cr");
                     break;
                 case "general.finalNewLine":
+                case "joins.clauseNewLine":
+                case "joins.conditionNewLine":
+                case "where.conditionNewLine":
+                case "where.booleanOperatorNewLine":
                     if (property.Value.Type != JTokenType.Boolean)
                         diagnostics.Add(Diagnostic($"'{path}' must be a boolean."));
                     break;

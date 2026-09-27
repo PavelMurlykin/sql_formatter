@@ -32,6 +32,19 @@ public sealed class WhereFormattingTests
     }
 
     [Fact]
+    public void Where_line_break_options_keep_condition_and_connective_inline()
+    {
+        const string source = "select Id from Items where Id=1 and State='open'";
+        var options = FormattingOptions.Default.With(where: new WhereOptions(false, false));
+
+        var result = _formatter.Format(source, options, new FormatRequest());
+        var repeated = _formatter.Format(result.Text, options, new FormatRequest());
+
+        Assert.Equal("SELECT Id\nFROM Items\nWHERE Id = 1 AND State = 'open'", result.Text);
+        Assert.False(repeated.Changed);
+    }
+
+    [Fact]
     public void Format_is_idempotent()
     {
         const string source = "select Id from Items where Id=1 and State='open'";
