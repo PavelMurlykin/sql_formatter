@@ -29,12 +29,43 @@ internal sealed class ActiveSqlEditor
         return adapters.GetWpfTextView(View)?.TextBuffer.CurrentSnapshot;
     }
 
+    public bool TryCaptureSelection(IVsEditorAdaptersFactoryService adapters,
+        out ITextSnapshot snapshot, out Span span)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        snapshot = null!;
+        span = default;
+        var textView = adapters.GetWpfTextView(View);
+        if (textView == null || textView.Selection.IsEmpty)
+        {
+            return false;
+        }
+
+        var selected = textView.Selection.StreamSelectionSpan.SnapshotSpan;
+        snapshot = textView.TextBuffer.CurrentSnapshot;
+        if (!ReferenceEquals(selected.Snapshot, snapshot))
+        {
+            return false;
+        }
+
+        span = selected.Span;
+        return true;
+    }
+
     public bool TryApplyDocument(ITextSnapshot original, string replacement,
         IVsEditorAdaptersFactoryService adapters, ITextUndoHistoryRegistry undoRegistry)
     {
         ThreadHelper.ThrowIfNotOnUIThread();
+        return TryApplyEdit(original, 0, original.Length, replacement, "Format T-SQL Document", adapters, undoRegistry);
+    }
+
+    public bool TryApplyEdit(ITextSnapshot original, int start, int length, string replacement,
+        string description, IVsEditorAdaptersFactoryService adapters, ITextUndoHistoryRegistry undoRegistry)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
         var textView = adapters.GetWpfTextView(View);
-        if (textView == null || !ReferenceEquals(textView.TextBuffer.CurrentSnapshot, original))
+        if (textView == null || !ReferenceEquals(textView.TextBuffer.CurrentSnapshot, original) ||
+            start < 0 || length < 0 || start > original.Length - length)
         {
             return false;
         }
@@ -44,11 +75,11 @@ internal sealed class ActiveSqlEditor
         bool reversed = textView.Selection.IsReversed;
         int caret = textView.Caret.Position.BufferPosition.Position;
         ITextUndoHistory history = undoRegistry.RegisterHistory(textView.TextBuffer);
-        using (ITextUndoTransaction transaction = history.CreateTransaction("Format T-SQL Document"))
+        using (ITextUndoTransaction transaction = history.CreateTransaction(description))
         {
             using (ITextEdit edit = textView.TextBuffer.CreateEdit())
             {
-                if (!edit.Replace(new Span(0, original.Length), replacement))
+                if (!edit.Replace(new Span(start, length), replacement))
                 {
                     return false;
                 }
@@ -56,13 +87,14 @@ internal sealed class ActiveSqlEditor
                 ITextSnapshot updated = edit.Apply();
                 if (hasSelection)
                 {
-                    int start = Math.Min(selection.Start.Position, updated.Length);
-                    int end = Math.Min(selection.End.Position, updated.Length);
-                    textView.Selection.Select(new SnapshotSpan(updated, start, end - start), reversed);
+                    int mappedStart = MapOffset(selection.Start.Position, start, length, replacement.Length);
+                    int mappedEnd = MapOffset(selection.End.Position, start, length, replacement.Length);
+                    textView.Selection.Select(new SnapshotSpan(updated, mappedStart, mappedEnd - mappedStart), reversed);
                 }
                 else
                 {
-                    textView.Caret.MoveTo(new SnapshotPoint(updated, Math.Min(caret, updated.Length)));
+                    textView.Caret.MoveTo(new SnapshotPoint(updated,
+                        MapOffset(caret, start, length, replacement.Length)));
                 }
             }
 
@@ -70,6 +102,14 @@ internal sealed class ActiveSqlEditor
         }
 
         return true;
+    }
+
+    private static int MapOffset(int offset, int editStart, int oldLength, int newLength)
+    {
+        int editEnd = editStart + oldLength;
+        if (offset <= editStart) return offset;
+        if (offset >= editEnd) return offset + newLength - oldLength;
+        return editStart + Math.Min(offset - editStart, newLength);
     }
 
     public bool TryReplaceSelection(string replacement, IVsEditorAdaptersFactoryService adapters, ITextUndoHistoryRegistry undoRegistry)

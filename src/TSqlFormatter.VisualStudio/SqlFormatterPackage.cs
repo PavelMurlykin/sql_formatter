@@ -12,6 +12,7 @@ using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Threading;
 using TSqlFormatter.Core.Formatting;
+using TSqlFormatter.Core.Parsing;
 
 namespace TSqlFormatter.VisualStudio;
 
@@ -39,6 +40,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
             commands.AddCommand(new MenuCommand(ExecuteReplaceProbe, new CommandID(CommandSet, 0x0101)));
             commands.AddCommand(new MenuCommand(ExecuteBackgroundProbe, new CommandID(CommandSet, 0x0102)));
             commands.AddCommand(new MenuCommand(ExecuteFormatDocument, new CommandID(CommandSet, 0x0200)));
+            commands.AddCommand(new MenuCommand(ExecuteFormatSelection, new CommandID(CommandSet, 0x0201)));
         }
     }
 
@@ -93,6 +95,70 @@ public sealed class SqlFormatterPackage : AsyncPackage
     private void ExecuteFormatDocument(object sender, EventArgs e)
     {
         JoinableTaskFactory.RunAsync(FormatDocumentAsync).FileAndForget("TSqlFormatter/FormatDocument");
+    }
+
+    private void ExecuteFormatSelection(object sender, EventArgs e)
+    {
+        JoinableTaskFactory.RunAsync(FormatSelectionAsync).FileAndForget("TSqlFormatter/FormatSelection");
+    }
+
+    private async Task FormatSelectionAsync()
+    {
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor) || editorAdapters == null || undoRegistry == null)
+        {
+            ShowProbeMessage("Open a .sql file in the text editor first.");
+            return;
+        }
+
+        if (!editor.TryCaptureSelection(editorAdapters, out var snapshot, out var selected))
+        {
+            ShowProbeMessage("Select SQL text in a .sql document first.");
+            return;
+        }
+
+        if (snapshot.Length > 16 * 1024 * 1024)
+        {
+            ShowProbeMessage("The SQL buffer exceeds 16 Mi characters.");
+            return;
+        }
+
+        string source = snapshot.GetText();
+        try
+        {
+            var span = new SqlTextSpan(selected.Start, selected.Length);
+            FormatResult result = await Task.Run(() => new ScriptDomSqlFormatter().Format(
+                source, FormattingOptions.Default,
+                new FormatRequest(FormatScope.Selection, span), DisposalToken), DisposalToken);
+            await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+            if (result.Diagnostics.Count > 0)
+            {
+                var diagnostic = result.Diagnostics[0];
+                ShowProbeMessage($"{diagnostic.Code}: {diagnostic.Message}");
+            }
+            else if (!result.Changed)
+            {
+                ShowProbeMessage("The selected SQL statement is already formatted.");
+            }
+            else if (result.Edits.Count != 1 ||
+                     !ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor current) ||
+                     !ReferenceEquals(current.Buffer, editor.Buffer) ||
+                     !editor.TryApplyEdit(snapshot, result.Edits[0].Span.StartOffset,
+                         result.Edits[0].Span.Length, result.Edits[0].NewText,
+                         "Format T-SQL Selection", editorAdapters, undoRegistry))
+            {
+                ShowProbeMessage("The SQL buffer changed during formatting; no edit was applied.");
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Package shutdown cancels formatting without applying an edit.
+        }
+        catch (Exception ex)
+        {
+            await JoinableTaskFactory.SwitchToMainThreadAsync();
+            ShowProbeMessage($"Selection formatting failed: {ex.Message}");
+        }
     }
 
     private async Task FormatDocumentAsync()

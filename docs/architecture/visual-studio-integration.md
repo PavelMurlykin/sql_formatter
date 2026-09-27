@@ -15,7 +15,7 @@ These APIs compile against `Microsoft.VisualStudio.SDK` 17.14.40265 and `Microso
 
 ## Next production path
 
-The MVP Format Document command uses Core formatting of a captured SQL snapshot and rejects stale results before applying an edit. Selection and Statement commands, project configuration, and richer diagnostics remain. Limit commands to recognized SQL documents. Never parse SQL on the UI thread; keep the final buffer edit and caret handling on that thread. Do not treat the spike's background character scan as a formatter benchmark.
+The MVP Document and Selection commands use Core formatting of a captured SQL snapshot and reject stale results before applying an edit. Selection currently chooses a top-level statement; nested minimal-ancestor selection, Statement by caret, project configuration, and richer diagnostics remain. Limit commands to recognized SQL documents. Never parse SQL on the UI thread; keep the final buffer edit and caret handling on that thread. Do not treat the spike's background character scan as a formatter benchmark.
 
 ## Manual validation checklist
 

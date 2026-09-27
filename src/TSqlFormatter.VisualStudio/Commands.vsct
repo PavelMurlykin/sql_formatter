@@ -33,6 +33,12 @@
           <ButtonText>Format T-SQL Document</ButtonText>
         </Strings>
       </Button>
+      <Button guid="guidCommandSet" id="cmdFormatSelection" priority="0x0210" type="Button">
+        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
+        <Strings>
+          <ButtonText>Format T-SQL Selection</ButtonText>
+        </Strings>
+      </Button>
     </Buttons>
   </Commands>
   <Symbols>
@@ -43,6 +49,7 @@
       <IDSymbol name="cmdReplaceSelectionProbe" value="0x0101" />
       <IDSymbol name="cmdBackgroundProbe" value="0x0102" />
       <IDSymbol name="cmdFormatDocument" value="0x0200" />
+      <IDSymbol name="cmdFormatSelection" value="0x0201" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

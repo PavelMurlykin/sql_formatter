@@ -27,10 +27,10 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         if (request is null) throw new ArgumentNullException(nameof(request));
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (request.Scope != FormatScope.Document)
+        if (request.Scope == FormatScope.Statement)
         {
             return Unchanged(source, false, new FormatterDiagnostic(
-                "TSF3000", "Only document formatting is currently supported.",
+                "TSF3000", "Statement formatting is not currently supported.",
                 FormatterDiagnosticSeverity.Warning));
         }
 
@@ -53,6 +53,11 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
             return request.ParseFailureBehavior == ParseFailureBehavior.Safe
                 ? FormatSafeFragments(source, options, request, parsed, diagnostics, cancellationToken)
                 : new FormatResult(source, false, false, diagnostics: diagnostics);
+        }
+
+        if (request.Scope == FormatScope.Selection)
+        {
+            return FormatSelection(source, options, request, parsed, cancellationToken);
         }
 
         var builder = new BasicSelectDocBuilder(options);
@@ -97,6 +102,76 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
 
         var output = KeywordCasing.Apply(source, edits, cancellationToken);
         return new FormatResult(output, true, true, edits);
+    }
+
+    private FormatResult FormatSelection(string source, FormattingOptions options,
+        FormatRequest request, SqlParseResult parsed, CancellationToken cancellationToken)
+    {
+        var selection = request.Selection!.Value;
+        if (selection.Length == 0 || selection.EndOffset > source.Length ||
+            BoundaryCutsToken(parsed, selection.StartOffset) || BoundaryCutsToken(parsed, selection.EndOffset))
+        {
+            return Unchanged(source, true, new FormatterDiagnostic(
+                "TSF3003", "Selection is empty, outside the document, or cuts through a token.",
+                FormatterDiagnosticSeverity.Warning, selection));
+        }
+
+        int start = selection.StartOffset;
+        int end = selection.EndOffset;
+        while (start < end && char.IsWhiteSpace(source[start])) start++;
+        while (end > start && char.IsWhiteSpace(source[end - 1])) end--;
+        if (start == end || parsed.Root is not TSqlScript script)
+        {
+            return Unchanged(source, true, new FormatterDiagnostic(
+                "TSF3003", "Selection does not contain a formatable statement.",
+                FormatterDiagnosticSeverity.Warning, selection));
+        }
+
+        var statement = script.Batches.SelectMany(batch => batch.Statements)
+            .Where(candidate => candidate.StartOffset <= start &&
+                candidate.StartOffset + candidate.FragmentLength >= end)
+            .OrderBy(candidate => candidate.FragmentLength)
+            .FirstOrDefault();
+        if (statement is null || statement.FragmentLength <= 0 ||
+            statement.StartOffset < 0 || statement.FragmentLength > source.Length - statement.StartOffset)
+        {
+            return Unchanged(source, true, new FormatterDiagnostic(
+                "TSF3003", "Selection must be within one complete SQL statement.",
+                FormatterDiagnosticSeverity.Warning, selection));
+        }
+
+        int statementStart = statement.StartOffset;
+        int statementLength = statement.FragmentLength;
+        string fragment = source.Substring(statementStart, statementLength);
+        var scopedOptions = options.With(general: new GeneralOptions(
+            options.General.MaxLineWidth, options.General.LineEnding, finalNewline: false));
+        var formatted = Format(fragment, scopedOptions,
+            new FormatRequest(dialect: request.Dialect), cancellationToken);
+        if (!formatted.ParseSucceeded || formatted.Diagnostics.Any(d => d.Severity == FormatterDiagnosticSeverity.Error))
+        {
+            return Unchanged(source, true, new FormatterDiagnostic(
+                "TSF3003", "Selected statement cannot be formatted independently.",
+                FormatterDiagnosticSeverity.Warning, selection));
+        }
+
+        if (!formatted.Changed) return Unchanged(source, true);
+        string output = source.Substring(0, statementStart) + formatted.Text +
+            source.Substring(statementStart + statementLength);
+        if (!_parser.Parse(output, request.Dialect, cancellationToken).ParseSucceeded)
+        {
+            return Unchanged(source, true, new FormatterDiagnostic(
+                "TSF3001", "Formatted SQL failed validation and was left unchanged.",
+                FormatterDiagnosticSeverity.Error));
+        }
+
+        return new FormatResult(output, true, true,
+            new[] { new TextEdit(new SqlTextSpan(statementStart, statementLength), formatted.Text) });
+    }
+
+    private static bool BoundaryCutsToken(SqlParseResult parsed, int offset)
+    {
+        return parsed.Tokens.Any(token => token.TokenType != TSqlTokenType.WhiteSpace &&
+            token.Offset < offset && offset < token.Offset + token.Text.Length);
     }
 
     private FormatResult FormatSafeFragments(string source, FormattingOptions options,
