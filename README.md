@@ -13,6 +13,7 @@ Current usage: [English manual](docs/user-manual.en.md) ·
 ## Prerequisites
 
 - .NET SDK 8.0 or newer
+- For the VSIX project and the full solution build: Windows and Visual Studio 2026 with the Visual Studio extension development component
 
 ## Build
 

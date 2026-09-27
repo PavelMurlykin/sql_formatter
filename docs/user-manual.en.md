@@ -2,11 +2,11 @@
 
 ## Current status
 
-This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and formatting for supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms are available through `TSqlFormatter.Core`, including CTEs, subqueries, `CASE`, window functions, `FROM`, `JOIN`, `APPLY`, and comments in supported positions. JSON settings and named profiles are available through `TSqlFormatter.Configuration`. The CLI formats SQL from stdin or one file to stdout and supports `--write`, `--check`, and automatic config discovery for files. There is no installable package.
+This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and formatting for supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms are available through `TSqlFormatter.Core`, including CTEs, subqueries, `CASE`, window functions, `FROM`, `JOIN`, `APPLY`, and comments in supported positions. JSON settings and named profiles are available through `TSqlFormatter.Configuration`. The CLI formats SQL from stdin or one file to stdout and supports `--write`, `--check`, and automatic config discovery for files. A VSIX scaffold builds, but it has no commands and does not format text in Visual Studio yet. There is no user-ready installable package.
 
 ## Setup
 
-You need the project source and .NET SDK 8.0 or newer. Run these commands from the repository root:
+You need the project source and .NET SDK 8.0 or newer. Building the whole solution, including the VSIX scaffold, also requires Windows, Visual Studio 2026 with the Visual Studio extension development component, and NuGet access. To use only the CLI, you can build `src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj` without Visual Studio. Run these commands from the repository root:
 
 ```powershell
 dotnet restore TSqlFormatter.sln
