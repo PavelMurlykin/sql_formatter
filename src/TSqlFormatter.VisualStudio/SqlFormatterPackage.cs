@@ -24,6 +24,7 @@ namespace TSqlFormatter.VisualStudio;
 [ProvideOptionPage(typeof(SelectOptionsPage), "T-SQL Formatter", "SELECT", 0, 0, true)]
 [ProvideOptionPage(typeof(JoinOptionsPage), "T-SQL Formatter", "JOIN", 0, 0, true)]
 [ProvideOptionPage(typeof(WhereOptionsPage), "T-SQL Formatter", "WHERE", 0, 0, true)]
+[ProvideOptionPage(typeof(ProfileOptionsPage), "T-SQL Formatter", "Profile", 0, 0, true)]
 [Guid(PackageGuid)]
 public sealed class SqlFormatterPackage : AsyncPackage
 {
@@ -394,6 +395,15 @@ public sealed class SqlFormatterPackage : AsyncPackage
     private FormattingOptions CreateIdeOptions()
     {
         ThreadHelper.ThrowIfNotOnUIThread();
+        var profilePage = (ProfileOptionsPage)GetDialogPage(typeof(ProfileOptionsPage));
+        if (profilePage.Profile != IdeProfileId.Default)
+        {
+            if (!new FormattingProfileCatalog().TryGet(profilePage.Profile.ToString(), out var profile)
+                || profile == null)
+                throw new InvalidOperationException($"Unknown IDE formatting profile '{profilePage.Profile}'.");
+            return profile.Options;
+        }
+
         var general = (GeneralOptionsPage)GetDialogPage(typeof(GeneralOptionsPage));
         var select = (SelectOptionsPage)GetDialogPage(typeof(SelectOptionsPage));
         var joins = (JoinOptionsPage)GetDialogPage(typeof(JoinOptionsPage));

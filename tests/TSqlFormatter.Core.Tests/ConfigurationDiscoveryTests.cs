@@ -92,6 +92,26 @@ public sealed class ConfigurationDiscoveryTests
     }
 
     [Fact]
+    public void Project_configuration_overlays_selected_profile_baseline()
+    {
+        using var tree = new TemporaryTree();
+        var repo = tree.Directory("repo");
+        tree.Directory("repo", ".git");
+        File.WriteAllText(Path.Combine(repo, SqlFormatterConfigurationSerializer.FileName),
+            """{"version":1,"keywords":{"case":"lower"}}""");
+        var catalog = new FormattingProfileCatalog();
+        Assert.True(catalog.TryGet("Expanded", out var expanded));
+
+        var result = new SqlFormatterConfigurationResolver(catalog)
+            .ResolveForSqlFile(Path.Combine(repo, "query.sql"), expanded!.Options);
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(80, result.Options!.General.MaxLineWidth);
+        Assert.Equal(SelectColumnLayout.OnePerLine, result.Options.Select.ColumnLayout);
+        Assert.Equal(KeywordCase.Lower, result.Options.Keywords.Case);
+    }
+
+    [Fact]
     public void Finds_nearest_configuration_upward_from_sql_file()
     {
         using var tree = new TemporaryTree();
