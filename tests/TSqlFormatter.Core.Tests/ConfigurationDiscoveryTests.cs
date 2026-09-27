@@ -1,10 +1,61 @@
 using TSqlFormatter.Cli;
 using TSqlFormatter.Configuration;
+using TSqlFormatter.Core.Formatting;
 
 namespace TSqlFormatter.Core.Tests;
 
 public sealed class ConfigurationDiscoveryTests
 {
+    [Fact]
+    public void Resolver_loads_nearest_file_for_editor_path()
+    {
+        using var tree = new TemporaryTree();
+        var repo = tree.Directory("repo");
+        tree.Directory("repo", ".git");
+        var nested = tree.Directory("repo", "nested");
+        File.WriteAllText(Path.Combine(repo, SqlFormatterConfigurationSerializer.FileName),
+            """{"version":1,"keywords":{"case":"upper"}}""");
+        File.WriteAllText(Path.Combine(nested, SqlFormatterConfigurationSerializer.FileName),
+            """{"version":1,"keywords":{"case":"lower"}}""");
+
+        var result = new SqlFormatterConfigurationResolver()
+            .ResolveForSqlFile(Path.Combine(nested, "query.sql"));
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(KeywordCase.Lower, result.Options!.Keywords.Case);
+    }
+
+    [Fact]
+    public void Invalid_editor_configuration_returns_diagnostic_without_options()
+    {
+        using var tree = new TemporaryTree();
+        var repo = tree.Directory("repo");
+        tree.Directory("repo", ".git");
+        var path = Path.Combine(repo, SqlFormatterConfigurationSerializer.FileName);
+        File.WriteAllText(path, """{"version":1,"keywords":{"case":"bad"}}""");
+
+        var result = new SqlFormatterConfigurationResolver()
+            .ResolveForSqlFile(Path.Combine(repo, "query.sql"));
+
+        Assert.False(result.Succeeded);
+        Assert.Null(result.Options);
+        Assert.Contains(result.Diagnostics, d => d.Code == "TSF2000" && d.Message.Contains(path));
+    }
+
+    [Fact]
+    public void Editor_configuration_without_file_uses_defaults()
+    {
+        using var tree = new TemporaryTree();
+        var repo = tree.Directory("repo");
+        tree.Directory("repo", ".git");
+
+        var result = new SqlFormatterConfigurationResolver()
+            .ResolveForSqlFile(Path.Combine(repo, "query.sql"));
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(KeywordCase.Upper, result.Options!.Keywords.Case);
+    }
+
     [Fact]
     public void Finds_nearest_configuration_upward_from_sql_file()
     {

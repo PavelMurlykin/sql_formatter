@@ -11,6 +11,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Threading;
+using TSqlFormatter.Configuration;
 using TSqlFormatter.Core.Formatting;
 using TSqlFormatter.Core.Parsing;
 
@@ -132,10 +133,17 @@ public sealed class SqlFormatterPackage : AsyncPackage
         string source = snapshot.GetText();
         try
         {
-            FormatResult result = await Task.Run(() => new ScriptDomSqlFormatter().Format(
-                source, FormattingOptions.Default,
-                new FormatRequest(FormatScope.Statement, new SqlTextSpan(caret, 0)), DisposalToken), DisposalToken);
+            var configured = await Task.Run(() => FormatConfigured(
+                editor.Path, source, new FormatRequest(FormatScope.Statement,
+                    new SqlTextSpan(caret, 0)), DisposalToken), DisposalToken);
             await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+            if (configured.Error != null)
+            {
+                ShowProbeMessage($"{configured.Error.Code}: {configured.Error.Message}");
+                return;
+            }
+
+            FormatResult result = configured.Result!;
             if (result.Diagnostics.Count > 0)
             {
                 var diagnostic = result.Diagnostics[0];
@@ -191,10 +199,16 @@ public sealed class SqlFormatterPackage : AsyncPackage
         try
         {
             var span = new SqlTextSpan(selected.Start, selected.Length);
-            FormatResult result = await Task.Run(() => new ScriptDomSqlFormatter().Format(
-                source, FormattingOptions.Default,
-                new FormatRequest(FormatScope.Selection, span), DisposalToken), DisposalToken);
+            var configured = await Task.Run(() => FormatConfigured(
+                editor.Path, source, new FormatRequest(FormatScope.Selection, span), DisposalToken), DisposalToken);
             await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+            if (configured.Error != null)
+            {
+                ShowProbeMessage($"{configured.Error.Code}: {configured.Error.Message}");
+                return;
+            }
+
+            FormatResult result = configured.Result!;
             if (result.Diagnostics.Count > 0)
             {
                 var diagnostic = result.Diagnostics[0];
@@ -244,9 +258,16 @@ public sealed class SqlFormatterPackage : AsyncPackage
         string source = snapshot.GetText();
         try
         {
-            FormatResult result = await Task.Run(() => new ScriptDomSqlFormatter().Format(
-                source, FormattingOptions.Default, new FormatRequest(), DisposalToken), DisposalToken);
+            var configured = await Task.Run(() => FormatConfigured(
+                editor.Path, source, new FormatRequest(), DisposalToken), DisposalToken);
             await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+            if (configured.Error != null)
+            {
+                ShowProbeMessage($"{configured.Error.Code}: {configured.Error.Message}");
+                return;
+            }
+
+            FormatResult result = configured.Result!;
             if (!result.ParseSucceeded || result.Diagnostics.Any(d => d.Severity == FormatterDiagnosticSeverity.Error))
             {
                 var error = result.Diagnostics.FirstOrDefault();
@@ -326,6 +347,20 @@ public sealed class SqlFormatterPackage : AsyncPackage
         }
 
         return count;
+    }
+
+    private static (FormatResult? Result, FormatterDiagnostic? Error) FormatConfigured(
+        string filePath, string source, FormatRequest request, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var config = new SqlFormatterConfigurationResolver().ResolveForSqlFile(filePath);
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!config.Succeeded)
+        {
+            return (null, config.Diagnostics.First());
+        }
+
+        return (new ScriptDomSqlFormatter().Format(source, config.Options!, request, cancellationToken), null);
     }
 
     private void ShowProbeMessage(string message)
