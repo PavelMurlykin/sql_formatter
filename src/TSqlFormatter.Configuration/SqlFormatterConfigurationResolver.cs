@@ -38,13 +38,15 @@ public sealed class SqlFormatterConfigurationResolver
     }
 
     /// <summary>Discovers and loads settings for an SQL file using the same search boundary as the CLI.</summary>
-    public ConfigurationParseResult ResolveForSqlFile(string filePath)
+    public ConfigurationParseResult ResolveForSqlFile(string filePath, FormattingOptions? baseline = null)
     {
         string? configPath;
         try
         {
             configPath = new SqlFormatterConfigurationDiscovery().FindForFile(filePath);
-            if (configPath is null) return Resolve();
+            if (configPath is null)
+                return new ConfigurationParseResult(baseline ?? FormattingOptions.Default,
+                    Array.Empty<FormatterDiagnostic>());
 
             if (new FileInfo(configPath).Length > MaxConfigurationBytes)
                 return FileError("TSF9001", $"{configPath}: configuration exceeds {MaxConfigurationBytes} bytes.");
@@ -53,7 +55,7 @@ public sealed class SqlFormatterConfigurationResolver
             if (json.Length > MaxConfigurationCharacters)
                 return FileError("TSF9001", $"{configPath}: configuration exceeds {MaxConfigurationCharacters} characters.");
 
-            var result = Resolve(json);
+            var result = _serializer.Parse(json, baseline);
             if (result.Succeeded) return result;
             var diagnostics = result.Diagnostics.Select(d => new FormatterDiagnostic(
                 d.Code, $"{configPath}: {d.Message}", d.Severity, d.Span)).ToArray();

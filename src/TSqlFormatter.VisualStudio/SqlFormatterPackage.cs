@@ -19,6 +19,7 @@ namespace TSqlFormatter.VisualStudio;
 
 [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
 [ProvideMenuResource("Menus.ctmenu", 1)]
+[ProvideOptionPage(typeof(GeneralOptionsPage), "T-SQL Formatter", "General", 0, 0, true)]
 [Guid(PackageGuid)]
 public sealed class SqlFormatterPackage : AsyncPackage
 {
@@ -138,9 +139,10 @@ public sealed class SqlFormatterPackage : AsyncPackage
         string source = snapshot.GetText();
         try
         {
+            FormattingOptions defaults = ((GeneralOptionsPage)GetDialogPage(typeof(GeneralOptionsPage))).CreateOptions();
             var configured = await Task.Run(() => FormatConfigured(
                 editor.Path, source, new FormatRequest(FormatScope.Statement,
-                    new SqlTextSpan(caret, 0)), DisposalToken), DisposalToken);
+                    new SqlTextSpan(caret, 0)), defaults, DisposalToken), DisposalToken);
             await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
             if (configured.Error != null)
             {
@@ -207,9 +209,10 @@ public sealed class SqlFormatterPackage : AsyncPackage
         string source = snapshot.GetText();
         try
         {
+            FormattingOptions defaults = ((GeneralOptionsPage)GetDialogPage(typeof(GeneralOptionsPage))).CreateOptions();
             var span = new SqlTextSpan(selected.Start, selected.Length);
             var configured = await Task.Run(() => FormatConfigured(
-                editor.Path, source, new FormatRequest(FormatScope.Selection, span), DisposalToken), DisposalToken);
+                editor.Path, source, new FormatRequest(FormatScope.Selection, span), defaults, DisposalToken), DisposalToken);
             await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
             if (configured.Error != null)
             {
@@ -271,8 +274,9 @@ public sealed class SqlFormatterPackage : AsyncPackage
         string source = snapshot.GetText();
         try
         {
+            FormattingOptions defaults = ((GeneralOptionsPage)GetDialogPage(typeof(GeneralOptionsPage))).CreateOptions();
             var configured = await Task.Run(() => FormatConfigured(
-                editor.Path, source, new FormatRequest(), DisposalToken), DisposalToken);
+                editor.Path, source, new FormatRequest(), defaults, DisposalToken), DisposalToken);
             await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
             if (configured.Error != null)
             {
@@ -367,10 +371,11 @@ public sealed class SqlFormatterPackage : AsyncPackage
     }
 
     private static (FormatResult? Result, FormatterDiagnostic? Error) FormatConfigured(
-        string filePath, string source, FormatRequest request, CancellationToken cancellationToken)
+        string filePath, string source, FormatRequest request, FormattingOptions defaults,
+        CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var config = new SqlFormatterConfigurationResolver().ResolveForSqlFile(filePath);
+        var config = new SqlFormatterConfigurationResolver().ResolveForSqlFile(filePath, defaults);
         cancellationToken.ThrowIfCancellationRequested();
         if (!config.Succeeded)
         {

@@ -57,6 +57,41 @@ public sealed class ConfigurationDiscoveryTests
     }
 
     [Fact]
+    public void Editor_configuration_uses_ide_baseline_when_no_file_exists()
+    {
+        using var tree = new TemporaryTree();
+        var repo = tree.Directory("repo");
+        tree.Directory("repo", ".git");
+        var baseline = FormattingOptions.Default.With(keywords: new KeywordOptions(KeywordCase.Lower));
+
+        var result = new SqlFormatterConfigurationResolver()
+            .ResolveForSqlFile(Path.Combine(repo, "query.sql"), baseline);
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(KeywordCase.Lower, result.Options!.Keywords.Case);
+    }
+
+    [Fact]
+    public void Editor_configuration_overlays_ide_baseline_by_property()
+    {
+        using var tree = new TemporaryTree();
+        var repo = tree.Directory("repo");
+        tree.Directory("repo", ".git");
+        File.WriteAllText(Path.Combine(repo, SqlFormatterConfigurationSerializer.FileName),
+            """{"version":1,"keywords":{"case":"upper"}}""");
+        var baseline = FormattingOptions.Default.With(
+            general: new GeneralOptions(maxLineWidth: 72),
+            keywords: new KeywordOptions(KeywordCase.Lower));
+
+        var result = new SqlFormatterConfigurationResolver()
+            .ResolveForSqlFile(Path.Combine(repo, "query.sql"), baseline);
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(KeywordCase.Upper, result.Options!.Keywords.Case);
+        Assert.Equal(72, result.Options.General.MaxLineWidth);
+    }
+
+    [Fact]
     public void Finds_nearest_configuration_upward_from_sql_file()
     {
         using var tree = new TemporaryTree();
