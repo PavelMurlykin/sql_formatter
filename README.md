@@ -9,6 +9,7 @@ discovery. Broader SQL coverage is planned in
 An experimental Visual Studio VSIX provides Document, Selection, and Statement
 commands for `.sql` files and discovers the nearest `.tsqlformatter.json`. Host
 behavior still requires manual validation before a user-ready release.
+The Release VSIX can be checked with `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Verify-Vsix.ps1`.
 
 Current usage: [English manual](docs/user-manual.en.md) ·
 [Русское руководство](docs/user-manual.ru.md).
