@@ -23,6 +23,55 @@ internal sealed class ActiveSqlEditor
     public IVsTextView View { get; }
     public IVsTextLines Buffer { get; }
 
+    public ITextSnapshot? CaptureSnapshot(IVsEditorAdaptersFactoryService adapters)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        return adapters.GetWpfTextView(View)?.TextBuffer.CurrentSnapshot;
+    }
+
+    public bool TryApplyDocument(ITextSnapshot original, string replacement,
+        IVsEditorAdaptersFactoryService adapters, ITextUndoHistoryRegistry undoRegistry)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        var textView = adapters.GetWpfTextView(View);
+        if (textView == null || !ReferenceEquals(textView.TextBuffer.CurrentSnapshot, original))
+        {
+            return false;
+        }
+
+        var selection = textView.Selection.StreamSelectionSpan.SnapshotSpan;
+        bool hasSelection = !textView.Selection.IsEmpty && ReferenceEquals(selection.Snapshot, original);
+        bool reversed = textView.Selection.IsReversed;
+        int caret = textView.Caret.Position.BufferPosition.Position;
+        ITextUndoHistory history = undoRegistry.RegisterHistory(textView.TextBuffer);
+        using (ITextUndoTransaction transaction = history.CreateTransaction("Format T-SQL Document"))
+        {
+            using (ITextEdit edit = textView.TextBuffer.CreateEdit())
+            {
+                if (!edit.Replace(new Span(0, original.Length), replacement))
+                {
+                    return false;
+                }
+
+                ITextSnapshot updated = edit.Apply();
+                if (hasSelection)
+                {
+                    int start = Math.Min(selection.Start.Position, updated.Length);
+                    int end = Math.Min(selection.End.Position, updated.Length);
+                    textView.Selection.Select(new SnapshotSpan(updated, start, end - start), reversed);
+                }
+                else
+                {
+                    textView.Caret.MoveTo(new SnapshotPoint(updated, Math.Min(caret, updated.Length)));
+                }
+            }
+
+            transaction.Complete();
+        }
+
+        return true;
+    }
+
     public bool TryReplaceSelection(string replacement, IVsEditorAdaptersFactoryService adapters, ITextUndoHistoryRegistry undoRegistry)
     {
         ThreadHelper.ThrowIfNotOnUIThread();

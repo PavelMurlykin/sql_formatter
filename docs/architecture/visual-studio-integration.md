@@ -2,7 +2,7 @@
 
 ## Boundary
 
-`TSqlFormatter.VisualStudio` is a `net472` in-process VSSDK VSIX. It owns commands and editor state only; formatting rules stay in `TSqlFormatter.Core` (`netstandard2.0`). The VSIX currently contains diagnostic probes, not a production formatting command. Its assets are the package assembly, compiled command table and `.pkgdef`.
+`TSqlFormatter.VisualStudio` is a `net472` in-process VSSDK VSIX. It owns commands and editor state only; formatting rules stay in `TSqlFormatter.Core` (`netstandard2.0`). The VSIX now has a prototype Format Document command and diagnostic probes. Its assets include the package assembly, Core and ScriptDom assemblies, compiled command table and `.pkgdef`.
 
 ## Confirmed compile-time API path
 
@@ -15,7 +15,7 @@ These APIs compile against `Microsoft.VisualStudio.SDK` 17.14.40265 and `Microso
 
 ## Next production path
 
-The MVP should replace the probe marker with Core formatting of a captured SQL snapshot, reject stale results before applying edits, expose Document/Selection/Statement commands, discover project configuration, and report diagnostics. Limit commands to recognized SQL documents. Never parse SQL on the UI thread; keep the final buffer edit and caret handling on that thread. Do not treat the spike's background character scan as a formatter benchmark.
+The MVP Format Document command uses Core formatting of a captured SQL snapshot and rejects stale results before applying an edit. Selection and Statement commands, project configuration, and richer diagnostics remain. Limit commands to recognized SQL documents. Never parse SQL on the UI thread; keep the final buffer edit and caret handling on that thread. Do not treat the spike's background character scan as a formatter benchmark.
 
 ## Manual validation checklist
 

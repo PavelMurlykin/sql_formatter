@@ -10,6 +10,8 @@
     <ProjectCapability Include="CreateVsixContainer" />
     <PackageReference Include="Microsoft.VisualStudio.SDK" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.VSSDK.BuildTools" />
+    <PackageReference Include="Microsoft.SqlServer.TransactSql.ScriptDom" />
+    <ProjectReference Include="..\TSqlFormatter.Core\TSqlFormatter.Core.csproj" />
     <Reference Include="System.Design" />
     <VSCTCompile Include="Commands.vsct" />
   </ItemGroup>

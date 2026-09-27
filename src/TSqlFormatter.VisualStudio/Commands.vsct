@@ -27,6 +27,12 @@
           <ButtonText>T-SQL Formatter: Background Probe</ButtonText>
         </Strings>
       </Button>
+      <Button guid="guidCommandSet" id="cmdFormatDocument" priority="0x0200" type="Button">
+        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
+        <Strings>
+          <ButtonText>Format T-SQL Document</ButtonText>
+        </Strings>
+      </Button>
     </Buttons>
   </Commands>
   <Symbols>
@@ -36,6 +42,7 @@
       <IDSymbol name="cmdEditorProbe" value="0x0100" />
       <IDSymbol name="cmdReplaceSelectionProbe" value="0x0101" />
       <IDSymbol name="cmdBackgroundProbe" value="0x0102" />
+      <IDSymbol name="cmdFormatDocument" value="0x0200" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>
