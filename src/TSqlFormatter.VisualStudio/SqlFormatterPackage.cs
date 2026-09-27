@@ -4,8 +4,11 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.TextManager.Interop;
 
 namespace TSqlFormatter.VisualStudio;
@@ -18,11 +21,16 @@ public sealed class SqlFormatterPackage : AsyncPackage
     public const string PackageGuid = "C8BAF105-2C0F-484C-93DB-DC653596796B";
     private static readonly Guid CommandSet = new("164528C8-0EC5-4EEC-8380-7C17745D9701");
     private IVsTextManager? textManager;
+    private IVsEditorAdaptersFactoryService? editorAdapters;
+    private ITextUndoHistoryRegistry? undoRegistry;
 
     protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
     {
         await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
         textManager = await GetServiceAsync(typeof(SVsTextManager)) as IVsTextManager;
+        var components = await GetServiceAsync(typeof(SComponentModel)) as IComponentModel;
+        editorAdapters = components?.GetService<IVsEditorAdaptersFactoryService>();
+        undoRegistry = components?.GetService<ITextUndoHistoryRegistry>();
         if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService commands)
         {
             commands.AddCommand(new MenuCommand(ExecuteProbe, new CommandID(CommandSet, 0x0100)));
@@ -57,9 +65,13 @@ public sealed class SqlFormatterPackage : AsyncPackage
         {
             message = "Select SQL text to run the replacement probe.";
         }
+        else if (editorAdapters == null || undoRegistry == null)
+        {
+            message = "Visual Studio editor services are unavailable.";
+        }
         else
         {
-            message = editor.TryReplaceSelection(selected + " /* VSIX probe */")
+            message = editor.TryReplaceSelection(selected + " /* VSIX probe */", editorAdapters, undoRegistry)
                 ? "Selection replaced with the original text plus a probe marker. Use Undo to revert."
                 : "Selection could not be replaced.";
         }

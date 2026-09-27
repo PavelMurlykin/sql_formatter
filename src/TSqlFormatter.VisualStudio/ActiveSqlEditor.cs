@@ -1,7 +1,9 @@
 using System;
-using System.Runtime.InteropServices;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.TextManager.Interop;
 
 namespace TSqlFormatter.VisualStudio;
@@ -21,32 +23,43 @@ internal sealed class ActiveSqlEditor
     public IVsTextView View { get; }
     public IVsTextLines Buffer { get; }
 
-    public bool TryReplaceSelection(string replacement)
+    public bool TryReplaceSelection(string replacement, IVsEditorAdaptersFactoryService adapters, ITextUndoHistoryRegistry undoRegistry)
     {
         ThreadHelper.ThrowIfNotOnUIThread();
-        var spans = new TextSpan[1];
-        if (ErrorHandler.Failed(View.GetSelectionSpan(spans)))
+        var textView = adapters.GetWpfTextView(View);
+        if (textView == null || textView.Selection.IsEmpty)
         {
             return false;
         }
 
-        TextSpan span = spans[0];
-        if (span.iStartLine == span.iEndLine && span.iStartIndex == span.iEndIndex)
+        SnapshotSpan selected = textView.Selection.StreamSelectionSpan.SnapshotSpan;
+        ITextBuffer textBuffer = textView.TextBuffer;
+        if (!ReferenceEquals(selected.Snapshot.TextBuffer, textBuffer))
         {
             return false;
         }
 
-        IntPtr nativeText = Marshal.StringToCoTaskMemUni(replacement);
-        try
+        bool reversed = textView.Selection.IsReversed;
+        int start = selected.Start.Position;
+        int originalLength = selected.Length;
+        ITextUndoHistory history = undoRegistry.RegisterHistory(textBuffer);
+        using (ITextUndoTransaction transaction = history.CreateTransaction("T-SQL Formatter selection probe"))
         {
-            return ErrorHandler.Succeeded(Buffer.ReplaceLines(
-                span.iStartLine, span.iStartIndex, span.iEndLine, span.iEndIndex,
-                nativeText, replacement.Length, new TextSpan[1]));
+            using (ITextEdit edit = textBuffer.CreateEdit())
+            {
+                if (!edit.Replace(selected.Span, replacement))
+                {
+                    return false;
+                }
+
+                ITextSnapshot updated = edit.Apply();
+                textView.Selection.Select(new SnapshotSpan(updated, start, originalLength), reversed);
+            }
+
+            transaction.Complete();
         }
-        finally
-        {
-            Marshal.FreeCoTaskMem(nativeText);
-        }
+
+        return true;
     }
 
     public static bool TryRead(IVsTextManager? textManager, out ActiveSqlEditor editor)
