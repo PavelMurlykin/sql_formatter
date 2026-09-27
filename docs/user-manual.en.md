@@ -32,6 +32,8 @@ To test buffer edits in a **disposable** `.sql` file, select text and invoke `To
 
 All three formatting commands search for `.tsqlformatter.json` from the open SQL file's directory upward to a `.git` marker or the filesystem root; the nearest file wins. Without a file, `Default` applies. The config is read as UTF-8 with limits of 64 MiB and 16 Mi decoded characters. File (`TSF9000`/`TSF9001`) or settings (`TSF2000`) errors are displayed without editing the buffer. Profiles can only be selected through the API, not the VSIX.
 
+Formatting status and errors appear in the Visual Studio status bar and the **T-SQL Formatter** Output pane; errors activate that pane. The messages include diagnostic codes when available. Formatting commands no longer open modal message boxes, while the three diagnostic probe commands still do. This notification behavior has been build-verified but still needs a manual check in an installed Visual Studio instance.
+
 ## CLI: stdin or one file → stdout
 
 After building, pass SQL through stdin from the repository root:

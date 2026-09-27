@@ -24,14 +24,19 @@ public sealed class SqlFormatterPackage : AsyncPackage
 {
     public const string PackageGuid = "C8BAF105-2C0F-484C-93DB-DC653596796B";
     private static readonly Guid CommandSet = new("164528C8-0EC5-4EEC-8380-7C17745D9701");
+    private static readonly Guid OutputPaneGuid = new("AB9C0A91-8A8C-4413-9B11-94F73D59DE7D");
     private IVsTextManager? textManager;
     private IVsEditorAdaptersFactoryService? editorAdapters;
     private ITextUndoHistoryRegistry? undoRegistry;
+    private IVsStatusbar? statusbar;
+    private IVsOutputWindow? outputWindow;
 
     protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
     {
         await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
         textManager = await GetServiceAsync(typeof(SVsTextManager)) as IVsTextManager;
+        statusbar = await GetServiceAsync(typeof(SVsStatusbar)) as IVsStatusbar;
+        outputWindow = await GetServiceAsync(typeof(SVsOutputWindow)) as IVsOutputWindow;
         var components = await GetServiceAsync(typeof(SComponentModel)) as IComponentModel;
         editorAdapters = components?.GetService<IVsEditorAdaptersFactoryService>();
         undoRegistry = components?.GetService<ITextUndoHistoryRegistry>();
@@ -114,19 +119,19 @@ public sealed class SqlFormatterPackage : AsyncPackage
         await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
         if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor) || editorAdapters == null || undoRegistry == null)
         {
-            ShowProbeMessage("Open a .sql file in the text editor first.");
+            NotifyFormat("Open a .sql file in the text editor first.", true);
             return;
         }
 
         if (!editor.TryCaptureCaret(editorAdapters, out var snapshot, out int caret))
         {
-            ShowProbeMessage("The SQL caret is unavailable.");
+            NotifyFormat("The SQL caret is unavailable.", true);
             return;
         }
 
         if (snapshot.Length > 16 * 1024 * 1024)
         {
-            ShowProbeMessage("The SQL buffer exceeds 16 Mi characters.");
+            NotifyFormat("The SQL buffer exceeds 16 Mi characters.", true);
             return;
         }
 
@@ -139,7 +144,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
             await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
             if (configured.Error != null)
             {
-                ShowProbeMessage($"{configured.Error.Code}: {configured.Error.Message}");
+                NotifyFormat($"{configured.Error.Code}: {configured.Error.Message}", true);
                 return;
             }
 
@@ -147,11 +152,11 @@ public sealed class SqlFormatterPackage : AsyncPackage
             if (result.Diagnostics.Count > 0)
             {
                 var diagnostic = result.Diagnostics[0];
-                ShowProbeMessage($"{diagnostic.Code}: {diagnostic.Message}");
+                NotifyFormat($"{diagnostic.Code}: {diagnostic.Message}", true);
             }
             else if (!result.Changed)
             {
-                ShowProbeMessage("The SQL statement is already formatted.");
+                NotifyFormat("The SQL statement is already formatted.");
             }
             else if (result.Edits.Count != 1 ||
                      !ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor current) ||
@@ -160,7 +165,11 @@ public sealed class SqlFormatterPackage : AsyncPackage
                          result.Edits[0].Span.Length, result.Edits[0].NewText,
                          "Format T-SQL Statement", editorAdapters, undoRegistry))
             {
-                ShowProbeMessage("The SQL buffer changed during formatting; no edit was applied.");
+                NotifyFormat("The SQL buffer changed during formatting; no edit was applied.", true);
+            }
+            else
+            {
+                NotifyFormat("SQL statement formatted.");
             }
         }
         catch (OperationCanceledException)
@@ -170,7 +179,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
         catch (Exception ex)
         {
             await JoinableTaskFactory.SwitchToMainThreadAsync();
-            ShowProbeMessage($"Statement formatting failed: {ex.Message}");
+            NotifyFormat($"Statement formatting failed: {ex.Message}", true);
         }
     }
 
@@ -179,19 +188,19 @@ public sealed class SqlFormatterPackage : AsyncPackage
         await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
         if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor) || editorAdapters == null || undoRegistry == null)
         {
-            ShowProbeMessage("Open a .sql file in the text editor first.");
+            NotifyFormat("Open a .sql file in the text editor first.", true);
             return;
         }
 
         if (!editor.TryCaptureSelection(editorAdapters, out var snapshot, out var selected))
         {
-            ShowProbeMessage("Select SQL text in a .sql document first.");
+            NotifyFormat("Select SQL text in a .sql document first.", true);
             return;
         }
 
         if (snapshot.Length > 16 * 1024 * 1024)
         {
-            ShowProbeMessage("The SQL buffer exceeds 16 Mi characters.");
+            NotifyFormat("The SQL buffer exceeds 16 Mi characters.", true);
             return;
         }
 
@@ -204,7 +213,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
             await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
             if (configured.Error != null)
             {
-                ShowProbeMessage($"{configured.Error.Code}: {configured.Error.Message}");
+                NotifyFormat($"{configured.Error.Code}: {configured.Error.Message}", true);
                 return;
             }
 
@@ -212,11 +221,11 @@ public sealed class SqlFormatterPackage : AsyncPackage
             if (result.Diagnostics.Count > 0)
             {
                 var diagnostic = result.Diagnostics[0];
-                ShowProbeMessage($"{diagnostic.Code}: {diagnostic.Message}");
+                NotifyFormat($"{diagnostic.Code}: {diagnostic.Message}", true);
             }
             else if (!result.Changed)
             {
-                ShowProbeMessage("The selected SQL statement is already formatted.");
+                NotifyFormat("The selected SQL statement is already formatted.");
             }
             else if (result.Edits.Count != 1 ||
                      !ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor current) ||
@@ -225,7 +234,11 @@ public sealed class SqlFormatterPackage : AsyncPackage
                          result.Edits[0].Span.Length, result.Edits[0].NewText,
                          "Format T-SQL Selection", editorAdapters, undoRegistry))
             {
-                ShowProbeMessage("The SQL buffer changed during formatting; no edit was applied.");
+                NotifyFormat("The SQL buffer changed during formatting; no edit was applied.", true);
+            }
+            else
+            {
+                NotifyFormat("Selected SQL statement formatted.");
             }
         }
         catch (OperationCanceledException)
@@ -235,7 +248,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
         catch (Exception ex)
         {
             await JoinableTaskFactory.SwitchToMainThreadAsync();
-            ShowProbeMessage($"Selection formatting failed: {ex.Message}");
+            NotifyFormat($"Selection formatting failed: {ex.Message}", true);
         }
     }
 
@@ -244,14 +257,14 @@ public sealed class SqlFormatterPackage : AsyncPackage
         await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
         if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor) || editorAdapters == null || undoRegistry == null)
         {
-            ShowProbeMessage("Open a .sql file in the text editor first.");
+            NotifyFormat("Open a .sql file in the text editor first.", true);
             return;
         }
 
         var snapshot = editor.CaptureSnapshot(editorAdapters);
         if (snapshot == null || snapshot.Length > 16 * 1024 * 1024)
         {
-            ShowProbeMessage("The SQL buffer is unavailable or exceeds 16 Mi characters.");
+            NotifyFormat("The SQL buffer is unavailable or exceeds 16 Mi characters.", true);
             return;
         }
 
@@ -263,7 +276,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
             await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
             if (configured.Error != null)
             {
-                ShowProbeMessage($"{configured.Error.Code}: {configured.Error.Message}");
+                NotifyFormat($"{configured.Error.Code}: {configured.Error.Message}", true);
                 return;
             }
 
@@ -271,17 +284,21 @@ public sealed class SqlFormatterPackage : AsyncPackage
             if (!result.ParseSucceeded || result.Diagnostics.Any(d => d.Severity == FormatterDiagnosticSeverity.Error))
             {
                 var error = result.Diagnostics.FirstOrDefault();
-                ShowProbeMessage(error == null ? "SQL could not be parsed." : $"{error.Code}: {error.Message}");
+                NotifyFormat(error == null ? "SQL could not be parsed." : $"{error.Code}: {error.Message}", true);
             }
             else if (!result.Changed)
             {
-                ShowProbeMessage("The SQL document is already formatted.");
+                NotifyFormat("The SQL document is already formatted.");
             }
             else if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor current) ||
                      !ReferenceEquals(current.Buffer, editor.Buffer) ||
                      !editor.TryApplyDocument(snapshot, result.Text, editorAdapters, undoRegistry))
             {
-                ShowProbeMessage("The SQL buffer changed during formatting; no edit was applied.");
+                NotifyFormat("The SQL buffer changed during formatting; no edit was applied.", true);
+            }
+            else
+            {
+                NotifyFormat("SQL document formatted.");
             }
         }
         catch (OperationCanceledException)
@@ -291,7 +308,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
         catch (Exception ex)
         {
             await JoinableTaskFactory.SwitchToMainThreadAsync();
-            ShowProbeMessage($"Formatting failed: {ex.Message}");
+            NotifyFormat($"Formatting failed: {ex.Message}", true);
         }
     }
 
@@ -369,5 +386,24 @@ public sealed class SqlFormatterPackage : AsyncPackage
         VsShellUtilities.ShowMessageBox(this, message, "T-SQL Formatter spike",
             OLEMSGICON.OLEMSGICON_INFO, OLEMSGBUTTON.OLEMSGBUTTON_OK,
             OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+    }
+
+    private void NotifyFormat(string message, bool isError = false)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        string text = $"T-SQL Formatter: {(isError ? "Error: " : string.Empty)}{message}";
+        statusbar?.SetText(text);
+        if (outputWindow == null) return;
+
+        Guid paneId = OutputPaneGuid;
+        if (ErrorHandler.Failed(outputWindow.GetPane(ref paneId, out IVsOutputWindowPane pane)) || pane == null)
+        {
+            outputWindow.CreatePane(ref paneId, "T-SQL Formatter", 1, 1);
+            if (ErrorHandler.Failed(outputWindow.GetPane(ref paneId, out pane)) || pane == null)
+                return;
+        }
+
+        pane.OutputStringThreadSafe(text + Environment.NewLine);
+        if (isError) pane.Activate();
     }
 }
