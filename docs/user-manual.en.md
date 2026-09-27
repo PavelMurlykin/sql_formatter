@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and formatting for supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms are available through `TSqlFormatter.Core`, including CTEs, subqueries, `CASE`, window functions, `FROM`, `JOIN`, `APPLY`, and comments in supported positions. JSON settings and named profiles are available through `TSqlFormatter.Configuration`. The CLI formats SQL from stdin or one file to stdout and supports `--write`, `--check`, and automatic config discovery for files. An experimental VSIX reads the active `.sql` buffer through `Tools → T-SQL Formatter: Editor Probe`, but does not yet edit or format it. There is no user-ready installable package.
+This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and formatting for supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms are available through `TSqlFormatter.Core`, including CTEs, subqueries, `CASE`, window functions, `FROM`, `JOIN`, `APPLY`, and comments in supported positions. JSON settings and named profiles are available through `TSqlFormatter.Configuration`. The CLI formats SQL from stdin or one file to stdout and supports `--write`, `--check`, and automatic config discovery for files. An experimental VSIX reads the active `.sql` buffer and can replace a selection to probe the editor API, but it does not yet format SQL in Visual Studio. There is no user-ready installable package.
 
 ## Setup
 
@@ -18,7 +18,9 @@ To use the parser in your C# project, add a reference to `src/TSqlFormatter.Core
 
 ## Visual Studio: experimental command
 
-On Windows with Visual Studio 2026 and the Visual Studio extension development component, build `src/TSqlFormatter.VisualStudio/TSqlFormatter.VisualStudio.csproj` in Release configuration. The resulting `src/TSqlFormatter.VisualStudio/bin/Release/net472/TSqlFormatter.VisualStudio.vsix` is for integration testing only. After installing the VSIX and restarting Visual Studio, open a `.sql` file and invoke `Tools → T-SQL Formatter: Editor Probe`. The command reads the current editor buffer, including unsaved changes, and displays the file name and character count; it does not disclose the SQL text in the message. For other file types, it asks you to open a `.sql` file. It is currently available regardless of the open file type and does not change the document. Execution in an installed Visual Studio instance has not yet been confirmed by an automated test.
+On Windows with Visual Studio 2026 and the Visual Studio extension development component, build `src/TSqlFormatter.VisualStudio/TSqlFormatter.VisualStudio.csproj` in Release configuration. The resulting `src/TSqlFormatter.VisualStudio/bin/Release/net472/TSqlFormatter.VisualStudio.vsix` is for integration testing only. After installing the VSIX and restarting Visual Studio, open a `.sql` file and invoke `Tools → T-SQL Formatter: Editor Probe`. The command reads the current editor buffer, including unsaved changes, and displays the file name and character count; it does not disclose the SQL text in the message. For other file types, it asks you to open a `.sql` file.
+
+To test buffer edits in a **disposable** `.sql` file, select text and invoke `Tools → T-SQL Formatter: Replace Selection Probe`. The selected text is preserved and ` /* VSIX probe */` is appended to it. Without a selection, the document is unchanged. This is not SQL formatting; use Undo or discard the test file to remove the marker. Both commands are currently visible regardless of the open file type. Execution in an installed Visual Studio instance has not yet been confirmed by an automated test.
 
 ## CLI: stdin or one file → stdout
 

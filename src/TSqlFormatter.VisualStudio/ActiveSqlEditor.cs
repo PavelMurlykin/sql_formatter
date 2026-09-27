@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TextManager.Interop;
@@ -19,6 +20,34 @@ internal sealed class ActiveSqlEditor
     public string Text { get; }
     public IVsTextView View { get; }
     public IVsTextLines Buffer { get; }
+
+    public bool TryReplaceSelection(string replacement)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        var spans = new TextSpan[1];
+        if (ErrorHandler.Failed(View.GetSelectionSpan(spans)))
+        {
+            return false;
+        }
+
+        TextSpan span = spans[0];
+        if (span.iStartLine == span.iEndLine && span.iStartIndex == span.iEndIndex)
+        {
+            return false;
+        }
+
+        IntPtr nativeText = Marshal.StringToCoTaskMemUni(replacement);
+        try
+        {
+            return ErrorHandler.Succeeded(Buffer.ReplaceLines(
+                span.iStartLine, span.iStartIndex, span.iEndLine, span.iEndIndex,
+                nativeText, replacement.Length, new TextSpan[1]));
+        }
+        finally
+        {
+            Marshal.FreeCoTaskMem(nativeText);
+        }
+    }
 
     public static bool TryRead(IVsTextManager? textManager, out ActiveSqlEditor editor)
     {

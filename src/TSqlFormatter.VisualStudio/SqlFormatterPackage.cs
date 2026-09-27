@@ -3,6 +3,7 @@ using System.ComponentModel.Design;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TextManager.Interop;
@@ -25,6 +26,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
         if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService commands)
         {
             commands.AddCommand(new MenuCommand(ExecuteProbe, new CommandID(CommandSet, 0x0100)));
+            commands.AddCommand(new MenuCommand(ExecuteReplaceProbe, new CommandID(CommandSet, 0x0101)));
         }
     }
 
@@ -40,6 +42,30 @@ public sealed class SqlFormatterPackage : AsyncPackage
             "T-SQL Formatter spike",
             OLEMSGICON.OLEMSGICON_INFO,
             OLEMSGBUTTON.OLEMSGBUTTON_OK,
+            OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+    }
+
+    private void ExecuteReplaceProbe(object sender, EventArgs e)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        string message;
+        if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor))
+        {
+            message = "Open a .sql file in the text editor first.";
+        }
+        else if (ErrorHandler.Failed(editor.View.GetSelectedText(out string selected)) || string.IsNullOrEmpty(selected))
+        {
+            message = "Select SQL text to run the replacement probe.";
+        }
+        else
+        {
+            message = editor.TryReplaceSelection(selected + " /* VSIX probe */")
+                ? "Selection replaced with the original text plus a probe marker. Use Undo to revert."
+                : "Selection could not be replaced.";
+        }
+
+        VsShellUtilities.ShowMessageBox(this, message, "T-SQL Formatter spike",
+            OLEMSGICON.OLEMSGICON_INFO, OLEMSGBUTTON.OLEMSGBUTTON_OK,
             OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
     }
 }

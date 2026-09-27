@@ -15,6 +15,12 @@
           <ButtonText>T-SQL Formatter: Editor Probe</ButtonText>
         </Strings>
       </Button>
+      <Button guid="guidCommandSet" id="cmdReplaceSelectionProbe" priority="0x0110" type="Button">
+        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
+        <Strings>
+          <ButtonText>T-SQL Formatter: Replace Selection Probe</ButtonText>
+        </Strings>
+      </Button>
     </Buttons>
   </Commands>
   <Symbols>
@@ -22,6 +28,7 @@
     <GuidSymbol name="guidCommandSet" value="{164528C8-0EC5-4EEC-8380-7C17745D9701}">
       <IDSymbol name="grpSqlFormatter" value="0x1020" />
       <IDSymbol name="cmdEditorProbe" value="0x0100" />
+      <IDSymbol name="cmdReplaceSelectionProbe" value="0x0101" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>
