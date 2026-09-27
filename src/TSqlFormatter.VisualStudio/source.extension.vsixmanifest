@@ -16,4 +16,7 @@
   <Prerequisites>
     <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,)" DisplayName="Visual Studio core editor" />
   </Prerequisites>
+  <Assets>
+    <Asset Type="Microsoft.VisualStudio.VsPackage" Path="|TSqlFormatter.VisualStudio;PkgdefProjectOutputGroup|" />
+  </Assets>
 </PackageManifest>

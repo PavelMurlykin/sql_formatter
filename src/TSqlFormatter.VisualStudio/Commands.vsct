@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable">
+  <Extern href="stdidcmd.h" />
+  <Extern href="vsshlids.h" />
+  <Commands package="guidPackage">
+    <Groups>
+      <Group guid="guidCommandSet" id="grpSqlFormatter" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
+      </Group>
+    </Groups>
+    <Buttons>
+      <Button guid="guidCommandSet" id="cmdEditorProbe" priority="0x0100" type="Button">
+        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
+        <Strings>
+          <ButtonText>T-SQL Formatter: Editor Probe</ButtonText>
+        </Strings>
+      </Button>
+    </Buttons>
+  </Commands>
+  <Symbols>
+    <GuidSymbol name="guidPackage" value="{C8BAF105-2C0F-484C-93DB-DC653596796B}" />
+    <GuidSymbol name="guidCommandSet" value="{164528C8-0EC5-4EEC-8380-7C17745D9701}">
+      <IDSymbol name="grpSqlFormatter" value="0x1020" />
+      <IDSymbol name="cmdEditorProbe" value="0x0100" />
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>

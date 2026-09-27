@@ -6,6 +6,7 @@ AST-to-document builder, and programmatic formatting for supported SELECT/INSERT
 queries. The CLI supports stdin, one file, `--write`, `--check`, and configuration
 discovery. Broader SQL coverage is planned in
 [`CODEX_DEVELOPMENT_PLAN.md`](CODEX_DEVELOPMENT_PLAN.md).
+An experimental Visual Studio VSIX currently exposes an editor-probe command only.
 
 Current usage: [English manual](docs/user-manual.en.md) ·
 [Русское руководство](docs/user-manual.ru.md).

@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and formatting for supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms are available through `TSqlFormatter.Core`, including CTEs, subqueries, `CASE`, window functions, `FROM`, `JOIN`, `APPLY`, and comments in supported positions. JSON settings and named profiles are available through `TSqlFormatter.Configuration`. The CLI formats SQL from stdin or one file to stdout and supports `--write`, `--check`, and automatic config discovery for files. A VSIX scaffold builds, but it has no commands and does not format text in Visual Studio yet. There is no user-ready installable package.
+This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and formatting for supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms are available through `TSqlFormatter.Core`, including CTEs, subqueries, `CASE`, window functions, `FROM`, `JOIN`, `APPLY`, and comments in supported positions. JSON settings and named profiles are available through `TSqlFormatter.Configuration`. The CLI formats SQL from stdin or one file to stdout and supports `--write`, `--check`, and automatic config discovery for files. An experimental VSIX adds `Tools → T-SQL Formatter: Editor Probe`, which currently only confirms registration with a message; it does not read or format text in Visual Studio. There is no user-ready installable package.
 
 ## Setup
 
@@ -15,6 +15,10 @@ dotnet test TSqlFormatter.sln --no-build --no-restore
 ```
 
 To use the parser in your C# project, add a reference to `src/TSqlFormatter.Core/TSqlFormatter.Core.csproj`.
+
+## Visual Studio: experimental command
+
+On Windows with Visual Studio 2026 and the Visual Studio extension development component, build `src/TSqlFormatter.VisualStudio/TSqlFormatter.VisualStudio.csproj` in Release configuration. The resulting `src/TSqlFormatter.VisualStudio/bin/Release/net472/TSqlFormatter.VisualStudio.vsix` is for integration testing only. After installing the VSIX and restarting Visual Studio, `Tools → T-SQL Formatter: Editor Probe` displays a registration message. It is currently available regardless of the open file type and does not change the document. Execution in an installed Visual Studio instance has not yet been confirmed by an automated test.
 
 ## CLI: stdin or one file → stdout
 
