@@ -27,10 +27,10 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         if (request is null) throw new ArgumentNullException(nameof(request));
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (request.Scope == FormatScope.Statement)
+        if (request.Scope == FormatScope.Statement && request.Selection is null)
         {
             return Unchanged(source, false, new FormatterDiagnostic(
-                "TSF3000", "Statement formatting is not currently supported.",
+                "TSF3000", "Statement formatting requires a caret position.",
                 FormatterDiagnosticSeverity.Warning));
         }
 
@@ -58,6 +58,11 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         if (request.Scope == FormatScope.Selection)
         {
             return FormatSelection(source, options, request, parsed, cancellationToken);
+        }
+
+        if (request.Scope == FormatScope.Statement)
+        {
+            return FormatStatement(source, options, request, parsed, cancellationToken);
         }
 
         var builder = new BasicSelectDocBuilder(options);
@@ -140,6 +145,49 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
                 FormatterDiagnosticSeverity.Warning, selection));
         }
 
+        return FormatStatementFragment(source, options, request, statement, selection, cancellationToken);
+    }
+
+    private FormatResult FormatStatement(string source, FormattingOptions options,
+        FormatRequest request, SqlParseResult parsed, CancellationToken cancellationToken)
+    {
+        var caret = request.Selection!.Value;
+        if (caret.StartOffset > source.Length || parsed.Root is not TSqlScript script)
+        {
+            return Unchanged(source, true, new FormatterDiagnostic(
+                "TSF3004", "Caret is outside a formatable SQL script.",
+                FormatterDiagnosticSeverity.Warning, caret));
+        }
+
+        var statement = script.Batches.SelectMany(batch => batch.Statements)
+            .Where(candidate => candidate.FragmentLength > 0 && candidate.StartOffset >= 0 &&
+                candidate.FragmentLength <= source.Length - candidate.StartOffset)
+            .OrderBy(candidate => DistanceToStatement(caret.StartOffset, candidate))
+            .ThenBy(candidate => candidate.StartOffset)
+            .FirstOrDefault();
+        if (statement is null)
+        {
+            return Unchanged(source, true, new FormatterDiagnostic(
+                "TSF3004", "No SQL statement was found near the caret.",
+                FormatterDiagnosticSeverity.Warning, caret));
+        }
+
+        return FormatStatementFragment(source, options, request, statement, caret, cancellationToken);
+    }
+
+    private static int DistanceToStatement(int position, TSqlStatement statement)
+    {
+        int start = statement.StartOffset;
+        int end = start + statement.FragmentLength;
+        if (position < start) return start - position;
+        if (position > end) return position - end;
+        return 0;
+    }
+
+    private FormatResult FormatStatementFragment(string source, FormattingOptions options,
+        FormatRequest request, TSqlStatement statement, SqlTextSpan requestSpan,
+        CancellationToken cancellationToken)
+    {
         int statementStart = statement.StartOffset;
         int statementLength = statement.FragmentLength;
         string fragment = source.Substring(statementStart, statementLength);
@@ -150,8 +198,9 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         if (!formatted.ParseSucceeded || formatted.Diagnostics.Any(d => d.Severity == FormatterDiagnosticSeverity.Error))
         {
             return Unchanged(source, true, new FormatterDiagnostic(
-                "TSF3003", "Selected statement cannot be formatted independently.",
-                FormatterDiagnosticSeverity.Warning, selection));
+                request.Scope == FormatScope.Statement ? "TSF3004" : "TSF3003",
+                "SQL statement cannot be formatted independently.",
+                FormatterDiagnosticSeverity.Warning, requestSpan));
         }
 
         if (!formatted.Changed) return Unchanged(source, true);

@@ -41,6 +41,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
             commands.AddCommand(new MenuCommand(ExecuteBackgroundProbe, new CommandID(CommandSet, 0x0102)));
             commands.AddCommand(new MenuCommand(ExecuteFormatDocument, new CommandID(CommandSet, 0x0200)));
             commands.AddCommand(new MenuCommand(ExecuteFormatSelection, new CommandID(CommandSet, 0x0201)));
+            commands.AddCommand(new MenuCommand(ExecuteFormatStatement, new CommandID(CommandSet, 0x0202)));
         }
     }
 
@@ -100,6 +101,69 @@ public sealed class SqlFormatterPackage : AsyncPackage
     private void ExecuteFormatSelection(object sender, EventArgs e)
     {
         JoinableTaskFactory.RunAsync(FormatSelectionAsync).FileAndForget("TSqlFormatter/FormatSelection");
+    }
+
+    private void ExecuteFormatStatement(object sender, EventArgs e)
+    {
+        JoinableTaskFactory.RunAsync(FormatStatementAsync).FileAndForget("TSqlFormatter/FormatStatement");
+    }
+
+    private async Task FormatStatementAsync()
+    {
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor) || editorAdapters == null || undoRegistry == null)
+        {
+            ShowProbeMessage("Open a .sql file in the text editor first.");
+            return;
+        }
+
+        if (!editor.TryCaptureCaret(editorAdapters, out var snapshot, out int caret))
+        {
+            ShowProbeMessage("The SQL caret is unavailable.");
+            return;
+        }
+
+        if (snapshot.Length > 16 * 1024 * 1024)
+        {
+            ShowProbeMessage("The SQL buffer exceeds 16 Mi characters.");
+            return;
+        }
+
+        string source = snapshot.GetText();
+        try
+        {
+            FormatResult result = await Task.Run(() => new ScriptDomSqlFormatter().Format(
+                source, FormattingOptions.Default,
+                new FormatRequest(FormatScope.Statement, new SqlTextSpan(caret, 0)), DisposalToken), DisposalToken);
+            await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+            if (result.Diagnostics.Count > 0)
+            {
+                var diagnostic = result.Diagnostics[0];
+                ShowProbeMessage($"{diagnostic.Code}: {diagnostic.Message}");
+            }
+            else if (!result.Changed)
+            {
+                ShowProbeMessage("The SQL statement is already formatted.");
+            }
+            else if (result.Edits.Count != 1 ||
+                     !ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor current) ||
+                     !ReferenceEquals(current.Buffer, editor.Buffer) ||
+                     !editor.TryApplyEdit(snapshot, result.Edits[0].Span.StartOffset,
+                         result.Edits[0].Span.Length, result.Edits[0].NewText,
+                         "Format T-SQL Statement", editorAdapters, undoRegistry))
+            {
+                ShowProbeMessage("The SQL buffer changed during formatting; no edit was applied.");
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Package shutdown cancels formatting without applying an edit.
+        }
+        catch (Exception ex)
+        {
+            await JoinableTaskFactory.SwitchToMainThreadAsync();
+            ShowProbeMessage($"Statement formatting failed: {ex.Message}");
+        }
     }
 
     private async Task FormatSelectionAsync()

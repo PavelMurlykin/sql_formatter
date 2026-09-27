@@ -52,6 +52,29 @@ internal sealed class ActiveSqlEditor
         return true;
     }
 
+    public bool TryCaptureCaret(IVsEditorAdaptersFactoryService adapters,
+        out ITextSnapshot snapshot, out int offset)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        snapshot = null!;
+        offset = 0;
+        var textView = adapters.GetWpfTextView(View);
+        if (textView == null)
+        {
+            return false;
+        }
+
+        snapshot = textView.TextBuffer.CurrentSnapshot;
+        var caret = textView.Caret.Position.BufferPosition;
+        if (!ReferenceEquals(caret.Snapshot, snapshot))
+        {
+            return false;
+        }
+
+        offset = caret.Position;
+        return true;
+    }
+
     public bool TryApplyDocument(ITextSnapshot original, string replacement,
         IVsEditorAdaptersFactoryService adapters, ITextUndoHistoryRegistry undoRegistry)
     {
