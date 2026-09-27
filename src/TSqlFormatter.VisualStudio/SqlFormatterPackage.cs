@@ -91,7 +91,8 @@ public sealed class SqlFormatterPackage : AsyncPackage
 
         try
         {
-            var mode = ((GeneralOptionsPage)GetDialogPage(typeof(GeneralOptionsPage))).FormatOnSave;
+            var automation = (GeneralOptionsPage)GetDialogPage(typeof(GeneralOptionsPage));
+            var mode = automation.FormatOnSave;
             if (mode == SqlSaveFormattingMode.Off || runningDocumentTable == null ||
                 editorAdapters == null || undoRegistry == null)
                 return VSConstants.S_OK;
@@ -102,7 +103,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
             if (ErrorHandler.Failed(hr) ||
                 !ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor) ||
                 !string.Equals(moniker, editor.Path, StringComparison.OrdinalIgnoreCase) ||
-                !new SqlSaveFormattingPolicy().ShouldFormat(editor.Path, mode))
+                !new SqlSaveFormattingPolicy().ShouldFormat(editor.Path, mode, automation.SaveExclusions))
                 return VSConstants.S_OK;
 
             var snapshot = editor.CaptureSnapshot(editorAdapters);

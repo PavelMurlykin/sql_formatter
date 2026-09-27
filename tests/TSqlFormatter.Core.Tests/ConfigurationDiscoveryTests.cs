@@ -33,6 +33,31 @@ public sealed class ConfigurationDiscoveryTests
             """{"version":1}""");
         Assert.True(policy.ShouldFormat(sql, SqlSaveFormattingMode.OnlyWhenProjectConfigExists));
     }
+
+    [Theory]
+    [InlineData("report.generated.sql", "*.generated.sql", true)]
+    [InlineData("REPORT.GENERATED.SQL", "*.generated.sql", true)]
+    [InlineData("query.sql", "*.generated.sql", false)]
+    public void Save_exclusions_match_file_names(string fileName, string patterns, bool expected)
+    {
+        var path = Path.Combine(Path.GetTempPath(), fileName);
+        Assert.Equal(expected, new SqlSaveExclusionMatcher().IsExcluded(path, patterns));
+    }
+
+    [Fact]
+    public void Save_exclusions_match_any_directory_and_policy_skips_the_file()
+    {
+        using var tree = new TemporaryTree();
+        var generated = tree.Directory("repo", "generated");
+        var path = Path.Combine(generated, "query.sql");
+        var patterns = "*.bak.sql; generated/**";
+
+        Assert.True(new SqlSaveExclusionMatcher().IsExcluded(path, patterns));
+        Assert.False(new SqlSaveFormattingPolicy().ShouldFormat(
+            path, SqlSaveFormattingMode.CurrentDocument, patterns));
+        Assert.False(new SqlSaveExclusionMatcher().IsExcluded(
+            Path.Combine(tree.Root, "repo", "ordinary", "query.sql"), patterns));
+    }
     [Fact]
     public void Profile_exchange_exports_and_imports_current_options()
     {

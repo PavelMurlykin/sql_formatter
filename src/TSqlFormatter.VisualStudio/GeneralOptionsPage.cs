@@ -58,6 +58,11 @@ public sealed class GeneralOptionsPage : DialogPage
     [DefaultValue(SqlSaveFormattingMode.Off)]
     public SqlSaveFormattingMode FormatOnSave { get; set; } = SqlSaveFormattingMode.Off;
 
+    [Category("Automation"), DisplayName("Save exclusions")]
+    [Description("Semicolon-separated globs: *.generated.sql; generated/**. A pattern without / matches the file name; a path pattern matches from any directory.")]
+    [DefaultValue("")]
+    public string SaveExclusions { get; set; } = string.Empty;
+
     public FormattingOptions CreateOptions() => FormattingOptions.Default.With(
         general: new GeneralOptions(MaxLineLength, LineEnding, FinalNewLine),
         indent: new IndentOptions(IndentSize, UseTabs),
