@@ -7,6 +7,33 @@ namespace TSqlFormatter.Core.Tests;
 public sealed class ConfigurationDiscoveryTests
 {
     [Fact]
+    public void Save_formatting_policy_is_off_by_default_and_requires_sql_document()
+    {
+        using var tree = new TemporaryTree();
+        var sql = Path.Combine(tree.Root, "query.sql");
+        var policy = new SqlSaveFormattingPolicy();
+
+        Assert.False(policy.ShouldFormat(sql, SqlSaveFormattingMode.Off));
+        Assert.True(policy.ShouldFormat(sql, SqlSaveFormattingMode.CurrentDocument));
+        Assert.False(policy.ShouldFormat(Path.Combine(tree.Root, "notes.txt"),
+            SqlSaveFormattingMode.CurrentDocument));
+    }
+
+    [Fact]
+    public void Save_formatting_policy_can_require_nearest_project_config()
+    {
+        using var tree = new TemporaryTree();
+        var repo = tree.Directory("repo");
+        tree.Directory("repo", ".git");
+        var sql = Path.Combine(repo, "query.sql");
+        var policy = new SqlSaveFormattingPolicy();
+
+        Assert.False(policy.ShouldFormat(sql, SqlSaveFormattingMode.OnlyWhenProjectConfigExists));
+        File.WriteAllText(Path.Combine(repo, SqlFormatterConfigurationSerializer.FileName),
+            """{"version":1}""");
+        Assert.True(policy.ShouldFormat(sql, SqlSaveFormattingMode.OnlyWhenProjectConfigExists));
+    }
+    [Fact]
     public void Profile_exchange_exports_and_imports_current_options()
     {
         using var tree = new TemporaryTree();

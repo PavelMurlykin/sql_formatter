@@ -37,6 +37,9 @@ public sealed class SqlFormatterPackage : AsyncPackage
     private ITextUndoHistoryRegistry? undoRegistry;
     private IVsStatusbar? statusbar;
     private IVsOutputWindow? outputWindow;
+    private IVsRunningDocumentTable? runningDocumentTable;
+    private uint runningDocumentTableCookie;
+    private readonly System.Collections.Generic.HashSet<uint> savesInProgress = new();
 
     protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
     {
@@ -44,6 +47,10 @@ public sealed class SqlFormatterPackage : AsyncPackage
         textManager = await GetServiceAsync(typeof(SVsTextManager)) as IVsTextManager;
         statusbar = await GetServiceAsync(typeof(SVsStatusbar)) as IVsStatusbar;
         outputWindow = await GetServiceAsync(typeof(SVsOutputWindow)) as IVsOutputWindow;
+        runningDocumentTable = await GetServiceAsync(typeof(SVsRunningDocumentTable)) as IVsRunningDocumentTable;
+        if (runningDocumentTable != null)
+            ErrorHandler.ThrowOnFailure(runningDocumentTable.AdviseRunningDocTableEvents(
+                new SaveEventSink(HandleBeforeSave), out runningDocumentTableCookie));
         var components = await GetServiceAsync(typeof(SComponentModel)) as IComponentModel;
         editorAdapters = components?.GetService<IVsEditorAdaptersFactoryService>();
         undoRegistry = components?.GetService<ITextUndoHistoryRegistry>();
@@ -60,6 +67,85 @@ public sealed class SqlFormatterPackage : AsyncPackage
             commands.AddCommand(new MenuCommand(ExecuteImportProfile, new CommandID(CommandSet, 0x0300)));
             commands.AddCommand(new MenuCommand(ExecuteExportProfile, new CommandID(CommandSet, 0x0301)));
         }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing && runningDocumentTable != null && runningDocumentTableCookie != 0)
+        {
+            JoinableTaskFactory.Run(async () =>
+            {
+                await JoinableTaskFactory.SwitchToMainThreadAsync();
+                runningDocumentTable.UnadviseRunningDocTableEvents(runningDocumentTableCookie);
+                runningDocumentTableCookie = 0;
+            });
+        }
+
+        base.Dispose(disposing);
+    }
+
+    private int HandleBeforeSave(uint docCookie)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        if (savesInProgress.Contains(docCookie)) return VSConstants.S_OK;
+
+        try
+        {
+            var mode = ((GeneralOptionsPage)GetDialogPage(typeof(GeneralOptionsPage))).FormatOnSave;
+            if (mode == SqlSaveFormattingMode.Off || runningDocumentTable == null ||
+                editorAdapters == null || undoRegistry == null)
+                return VSConstants.S_OK;
+
+            int hr = runningDocumentTable.GetDocumentInfo(docCookie, out _, out _, out _,
+                out string moniker, out _, out _, out IntPtr docData);
+            if (docData != IntPtr.Zero) Marshal.Release(docData);
+            if (ErrorHandler.Failed(hr) ||
+                !ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor) ||
+                !string.Equals(moniker, editor.Path, StringComparison.OrdinalIgnoreCase) ||
+                !new SqlSaveFormattingPolicy().ShouldFormat(editor.Path, mode))
+                return VSConstants.S_OK;
+
+            var snapshot = editor.CaptureSnapshot(editorAdapters);
+            if (snapshot == null || snapshot.Length > 16 * 1024 * 1024)
+            {
+                NotifyFormat("Save formatting skipped: SQL buffer is unavailable or too large.", true);
+                return VSConstants.S_OK;
+            }
+
+            savesInProgress.Add(docCookie);
+            var defaults = CreateIdeOptions();
+            string source = snapshot.GetText();
+            var configured = JoinableTaskFactory.Run(async () => await Task.Run(() =>
+                FormatConfigured(editor.Path, source, new FormatRequest(), defaults, DisposalToken), DisposalToken));
+            if (configured.Error != null)
+                NotifyFormat($"Save formatting skipped: {configured.Error.Code}: {configured.Error.Message}", true);
+            else if (configured.Result is { } result)
+            {
+                var error = result.Diagnostics.FirstOrDefault(d => d.Severity == FormatterDiagnosticSeverity.Error);
+                if (error != null)
+                    NotifyFormat($"Save formatting skipped: {error.Code}: {error.Message}", true);
+                else if (result.Changed)
+                {
+                    if (ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor current) &&
+                        ReferenceEquals(current.Buffer, editor.Buffer) &&
+                        editor.TryApplyDocument(snapshot, result.Text, editorAdapters, undoRegistry))
+                        NotifyFormat("SQL formatted before save.");
+                    else
+                        NotifyFormat("Save formatting skipped: SQL buffer changed.", true);
+                }
+            }
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex)
+        {
+            NotifyFormat($"Save formatting failed: {ex.Message}", true);
+        }
+        finally
+        {
+            savesInProgress.Remove(docCookie);
+        }
+
+        return VSConstants.S_OK;
     }
 
     private void ExecuteProbe(object sender, EventArgs e)

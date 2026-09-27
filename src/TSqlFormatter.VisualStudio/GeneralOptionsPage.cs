@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using Microsoft.VisualStudio.Shell;
+using TSqlFormatter.Configuration;
 using TSqlFormatter.Core.Formatting;
 using TSqlFormatter.Core.Layout;
 
@@ -51,6 +52,11 @@ public sealed class GeneralOptionsPage : DialogPage
     [Description("Case of generated SQL keywords.")]
     [DefaultValue(KeywordCase.Upper)]
     public KeywordCase KeywordCase { get; set; } = KeywordCase.Upper;
+
+    [Category("Automation"), DisplayName("Format on save")]
+    [Description("Off by default. Formats only the active SQL document before saving it; optionally require a project config.")]
+    [DefaultValue(SqlSaveFormattingMode.Off)]
+    public SqlSaveFormattingMode FormatOnSave { get; set; } = SqlSaveFormattingMode.Off;
 
     public FormattingOptions CreateOptions() => FormattingOptions.Default.With(
         general: new GeneralOptions(MaxLineLength, LineEnding, FinalNewLine),
