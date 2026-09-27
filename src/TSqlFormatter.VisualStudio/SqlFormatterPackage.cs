@@ -10,6 +10,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.TextManager.Interop;
+using Microsoft.VisualStudio.Threading;
 
 namespace TSqlFormatter.VisualStudio;
 
@@ -35,6 +36,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
         {
             commands.AddCommand(new MenuCommand(ExecuteProbe, new CommandID(CommandSet, 0x0100)));
             commands.AddCommand(new MenuCommand(ExecuteReplaceProbe, new CommandID(CommandSet, 0x0101)));
+            commands.AddCommand(new MenuCommand(ExecuteBackgroundProbe, new CommandID(CommandSet, 0x0102)));
         }
     }
 
@@ -76,6 +78,73 @@ public sealed class SqlFormatterPackage : AsyncPackage
                 : "Selection could not be replaced.";
         }
 
+        VsShellUtilities.ShowMessageBox(this, message, "T-SQL Formatter spike",
+            OLEMSGICON.OLEMSGICON_INFO, OLEMSGBUTTON.OLEMSGBUTTON_OK,
+            OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+    }
+
+    private void ExecuteBackgroundProbe(object sender, EventArgs e)
+    {
+        JoinableTaskFactory.RunAsync(BackgroundProbeAsync).FileAndForget("TSqlFormatter/BackgroundProbe");
+    }
+
+    private async Task BackgroundProbeAsync()
+    {
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor))
+        {
+            ShowProbeMessage("Open a .sql file in the text editor first.");
+            return;
+        }
+
+        string snapshot = editor.Text;
+        try
+        {
+            int nonWhitespace = await Task.Run(() => CountNonWhitespace(snapshot, DisposalToken), DisposalToken);
+            await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+            if (ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor current) &&
+                ReferenceEquals(current.Buffer, editor.Buffer) && current.Text == snapshot)
+            {
+                ShowProbeMessage($"Background scan completed: {nonWhitespace} non-whitespace characters.");
+            }
+            else
+            {
+                ShowProbeMessage("The SQL buffer changed during the background scan; the result was discarded.");
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Package shutdown cancels the probe without touching the editor.
+        }
+        catch (Exception ex)
+        {
+            await JoinableTaskFactory.SwitchToMainThreadAsync();
+            ShowProbeMessage($"Background scan failed: {ex.Message}");
+        }
+    }
+
+    private static int CountNonWhitespace(string text, CancellationToken cancellationToken)
+    {
+        int count = 0;
+        for (int i = 0; i < text.Length; i++)
+        {
+            if ((i & 0x3fff) == 0)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+
+            if (!char.IsWhiteSpace(text[i]))
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    private void ShowProbeMessage(string message)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
         VsShellUtilities.ShowMessageBox(this, message, "T-SQL Formatter spike",
             OLEMSGICON.OLEMSGICON_INFO, OLEMSGBUTTON.OLEMSGBUTTON_OK,
             OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
