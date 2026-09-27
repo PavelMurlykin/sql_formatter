@@ -20,6 +20,7 @@ namespace TSqlFormatter.VisualStudio;
 [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
 [ProvideMenuResource("Menus.ctmenu", 1)]
 [ProvideOptionPage(typeof(GeneralOptionsPage), "T-SQL Formatter", "General", 0, 0, true)]
+[ProvideOptionPage(typeof(PreviewOptionsPage), "T-SQL Formatter", "SQL Preview", 0, 0, true)]
 [Guid(PackageGuid)]
 public sealed class SqlFormatterPackage : AsyncPackage
 {
@@ -41,6 +42,8 @@ public sealed class SqlFormatterPackage : AsyncPackage
         var components = await GetServiceAsync(typeof(SComponentModel)) as IComponentModel;
         editorAdapters = components?.GetService<IVsEditorAdaptersFactoryService>();
         undoRegistry = components?.GetService<ITextUndoHistoryRegistry>();
+        ((PreviewOptionsPage)GetDialogPage(typeof(PreviewOptionsPage))).OptionsProvider =
+            () => ((GeneralOptionsPage)GetDialogPage(typeof(GeneralOptionsPage))).CreateOptions();
         if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService commands)
         {
             commands.AddCommand(new MenuCommand(ExecuteProbe, new CommandID(CommandSet, 0x0100)));
