@@ -7,6 +7,14 @@ namespace TSqlFormatter.Core.Tests;
 public sealed class ConfigurationDiscoveryTests
 {
     [Fact]
+    public void Automation_length_guard_has_an_inclusive_eight_kib_limit()
+    {
+        Assert.True(SqlAutomationLimits.CanProcess(0));
+        Assert.True(SqlAutomationLimits.CanProcess(SqlAutomationLimits.MaxAutomaticCharacters));
+        Assert.False(SqlAutomationLimits.CanProcess(SqlAutomationLimits.MaxAutomaticCharacters + 1));
+        Assert.False(SqlAutomationLimits.CanProcess(-1));
+    }
+    [Fact]
     public void Save_formatting_policy_is_off_by_default_and_requires_sql_document()
     {
         using var tree = new TemporaryTree();

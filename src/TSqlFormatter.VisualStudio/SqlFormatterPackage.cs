@@ -108,17 +108,19 @@ public sealed class SqlFormatterPackage : AsyncPackage
                 return VSConstants.S_OK;
 
             var snapshot = editor.CaptureSnapshot(editorAdapters);
-            if (snapshot == null || snapshot.Length > 16 * 1024 * 1024)
+            if (snapshot == null || !SqlAutomationLimits.CanProcess(snapshot.Length))
             {
-                NotifyFormat("Save formatting skipped: SQL buffer is unavailable or too large.", true);
+                NotifyFormat("Save formatting skipped: SQL buffer is unavailable or exceeds 8 Ki characters.", true);
                 return VSConstants.S_OK;
             }
 
             savesInProgress.Add(docCookie);
             var defaults = CreateIdeOptions();
             string source = snapshot.GetText();
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(DisposalToken);
+            timeout.CancelAfter(TimeSpan.FromSeconds(2));
             var configured = JoinableTaskFactory.Run(async () => await Task.Run(() =>
-                FormatConfigured(editor.Path, source, new FormatRequest(), defaults, DisposalToken), DisposalToken));
+                FormatConfigured(editor.Path, source, new FormatRequest(), defaults, timeout.Token), timeout.Token));
             if (configured.Error != null)
                 NotifyFormat($"Save formatting skipped: {configured.Error.Code}: {configured.Error.Message}", true);
             else if (configured.Result is { } result)
@@ -136,6 +138,10 @@ public sealed class SqlFormatterPackage : AsyncPackage
                         NotifyFormat("Save formatting skipped: SQL buffer changed.", true);
                 }
             }
+        }
+        catch (OperationCanceledException) when (!DisposalToken.IsCancellationRequested)
+        {
+            NotifyFormat("Save formatting timed out after 2 seconds; saving unformatted SQL.", true);
         }
         catch (OperationCanceledException) { }
         catch (Exception ex)
@@ -245,9 +251,9 @@ public sealed class SqlFormatterPackage : AsyncPackage
             NotifyFormat($"Cannot read text from the clipboard: {ex.Message}", true);
             return;
         }
-        if (string.IsNullOrWhiteSpace(clipboard) || clipboard.Length > 64 * 1024)
+        if (string.IsNullOrWhiteSpace(clipboard) || !SqlAutomationLimits.CanProcess(clipboard.Length))
         {
-            NotifyFormat("Clipboard must contain SQL text of at most 64 Ki characters.", true);
+            NotifyFormat("Clipboard must contain SQL text of at most 8 Ki characters.", true);
             return;
         }
 
@@ -270,8 +276,10 @@ public sealed class SqlFormatterPackage : AsyncPackage
         try
         {
             FormattingOptions defaults = CreateIdeOptions();
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(DisposalToken);
+            timeout.CancelAfter(TimeSpan.FromSeconds(2));
             var configured = await Task.Run(() => FormatConfigured(
-                editor.Path, clipboard, new FormatRequest(), defaults, DisposalToken), DisposalToken);
+                editor.Path, clipboard, new FormatRequest(), defaults, timeout.Token), timeout.Token);
             await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
             if (configured.Error != null)
             {
@@ -298,6 +306,11 @@ public sealed class SqlFormatterPackage : AsyncPackage
             }
 
             NotifyFormat("Formatted clipboard SQL pasted.");
+        }
+        catch (OperationCanceledException) when (!DisposalToken.IsCancellationRequested)
+        {
+            await JoinableTaskFactory.SwitchToMainThreadAsync();
+            NotifyFormat("Formatted paste timed out after 2 seconds; no edit was applied.", true);
         }
         catch (OperationCanceledException) { }
         catch (Exception ex)
