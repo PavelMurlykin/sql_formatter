@@ -3,6 +3,7 @@ using System.ComponentModel.Design;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Editor;
@@ -56,6 +57,8 @@ public sealed class SqlFormatterPackage : AsyncPackage
             commands.AddCommand(new MenuCommand(ExecuteFormatDocument, new CommandID(CommandSet, 0x0200)));
             commands.AddCommand(new MenuCommand(ExecuteFormatSelection, new CommandID(CommandSet, 0x0201)));
             commands.AddCommand(new MenuCommand(ExecuteFormatStatement, new CommandID(CommandSet, 0x0202)));
+            commands.AddCommand(new MenuCommand(ExecuteImportProfile, new CommandID(CommandSet, 0x0300)));
+            commands.AddCommand(new MenuCommand(ExecuteExportProfile, new CommandID(CommandSet, 0x0301)));
         }
     }
 
@@ -120,6 +123,123 @@ public sealed class SqlFormatterPackage : AsyncPackage
     private void ExecuteFormatStatement(object sender, EventArgs e)
     {
         JoinableTaskFactory.RunAsync(FormatStatementAsync).FileAndForget("TSqlFormatter/FormatStatement");
+    }
+
+    private void ExecuteImportProfile(object sender, EventArgs e)
+    {
+        JoinableTaskFactory.RunAsync(ImportProfileAsync).FileAndForget("TSqlFormatter/ImportProfile");
+    }
+
+    private void ExecuteExportProfile(object sender, EventArgs e)
+    {
+        JoinableTaskFactory.RunAsync(ExportProfileAsync).FileAndForget("TSqlFormatter/ExportProfile");
+    }
+
+    private async Task ImportProfileAsync()
+    {
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        using var dialog = new OpenFileDialog
+        {
+            Title = "Import T-SQL formatter profile",
+            Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*",
+            CheckFileExists = true
+        };
+        if (dialog.ShowDialog() != DialogResult.OK) return;
+
+        try
+        {
+            var imported = await Task.Run(() =>
+                new SqlFormatterProfileExchange().Import(dialog.FileName), DisposalToken);
+            await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+            if (!imported.Succeeded)
+            {
+                var diagnostic = imported.Diagnostics[0];
+                NotifyFormat($"{diagnostic.Code}: {diagnostic.Message}", true);
+                return;
+            }
+
+            var options = imported.Options!;
+            if (options.General.MaxLineWidth > 4096 || options.Indent.Size > 32)
+            {
+                NotifyFormat("Profile exceeds the IDE limits (line length 4096, indent size 32).", true);
+                return;
+            }
+
+            ApplyImportedProfile(options);
+            NotifyFormat("Profile imported into IDE settings; the Default profile is now selected.");
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex)
+        {
+            await JoinableTaskFactory.SwitchToMainThreadAsync();
+            NotifyFormat($"Profile import failed: {ex.Message}", true);
+        }
+    }
+
+    private async Task ExportProfileAsync()
+    {
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        FormattingOptions options;
+        try { options = CreateIdeOptions(); }
+        catch (Exception ex)
+        {
+            NotifyFormat($"Cannot export IDE options: {ex.Message}", true);
+            return;
+        }
+
+        using var dialog = new SaveFileDialog
+        {
+            Title = "Export T-SQL formatter profile",
+            Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*",
+            DefaultExt = "json",
+            FileName = "tsqlformatter-profile.json",
+            OverwritePrompt = true
+        };
+        if (dialog.ShowDialog() != DialogResult.OK) return;
+
+        try
+        {
+            await Task.Run(() => new SqlFormatterProfileExchange().Export(dialog.FileName, options), DisposalToken);
+            await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+            NotifyFormat($"Profile exported: {dialog.FileName}");
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex)
+        {
+            await JoinableTaskFactory.SwitchToMainThreadAsync();
+            NotifyFormat($"Profile export failed: {ex.Message}", true);
+        }
+    }
+
+    private void ApplyImportedProfile(FormattingOptions options)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        var general = (GeneralOptionsPage)GetDialogPage(typeof(GeneralOptionsPage));
+        var select = (SelectOptionsPage)GetDialogPage(typeof(SelectOptionsPage));
+        var joins = (JoinOptionsPage)GetDialogPage(typeof(JoinOptionsPage));
+        var where = (WhereOptionsPage)GetDialogPage(typeof(WhereOptionsPage));
+        var profile = (ProfileOptionsPage)GetDialogPage(typeof(ProfileOptionsPage));
+
+        general.MaxLineLength = options.General.MaxLineWidth;
+        general.LineEnding = options.General.LineEnding;
+        general.FinalNewLine = options.General.FinalNewline;
+        general.IndentSize = options.Indent.Size;
+        general.UseTabs = options.Indent.UseTabs;
+        general.KeywordCase = options.Keywords.Case;
+        select.Columns = options.Select.ColumnLayout;
+        select.GroupByItems = options.Clauses.GroupByLayout;
+        select.OrderByItems = options.Clauses.OrderByLayout;
+        joins.ClauseNewLine = options.Joins.ClauseNewLine;
+        joins.ConditionNewLine = options.Joins.ConditionNewLine;
+        where.ConditionNewLine = options.Where.ConditionNewLine;
+        where.BooleanOperatorNewLine = options.Where.BooleanOperatorNewLine;
+        profile.Profile = IdeProfileId.Default;
+
+        general.SaveSettingsToStorage();
+        select.SaveSettingsToStorage();
+        joins.SaveSettingsToStorage();
+        where.SaveSettingsToStorage();
+        profile.SaveSettingsToStorage();
     }
 
     private async Task FormatStatementAsync()

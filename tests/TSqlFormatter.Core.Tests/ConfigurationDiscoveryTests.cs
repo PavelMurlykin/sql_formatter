@@ -7,6 +7,50 @@ namespace TSqlFormatter.Core.Tests;
 public sealed class ConfigurationDiscoveryTests
 {
     [Fact]
+    public void Profile_exchange_exports_and_imports_current_options()
+    {
+        using var tree = new TemporaryTree();
+        var path = Path.Combine(tree.Root, "profile.json");
+        var options = FormattingOptions.Default.With(
+            general: new GeneralOptions(maxLineWidth: 72),
+            joins: new JoinOptions(false, true));
+        var exchange = new SqlFormatterProfileExchange();
+
+        exchange.Export(path, options);
+        var imported = exchange.Import(path);
+
+        Assert.True(imported.Succeeded);
+        Assert.Equal(72, imported.Options!.General.MaxLineWidth);
+        Assert.False(imported.Options.Joins.ClauseNewLine);
+    }
+
+    [Fact]
+    public void Profile_exchange_rejects_invalid_content_without_options()
+    {
+        using var tree = new TemporaryTree();
+        var path = Path.Combine(tree.Root, "profile.json");
+        File.WriteAllText(path, """{"version":1,"keywords":{"case":"invalid"}}""");
+
+        var imported = new SqlFormatterProfileExchange().Import(path);
+
+        Assert.False(imported.Succeeded);
+        Assert.Null(imported.Options);
+        Assert.Contains(imported.Diagnostics, d => d.Code == "TSF2000" && d.Message.Contains(path));
+    }
+
+    [Fact]
+    public void Profile_exchange_rejects_oversized_file()
+    {
+        using var tree = new TemporaryTree();
+        var path = Path.Combine(tree.Root, "profile.json");
+        using (var stream = File.Create(path)) stream.SetLength(SqlFormatterProfileExchange.MaxProfileBytes + 1);
+
+        var imported = new SqlFormatterProfileExchange().Import(path);
+
+        Assert.False(imported.Succeeded);
+        Assert.Equal("TSF9001", Assert.Single(imported.Diagnostics).Code);
+    }
+    [Fact]
     public void Resolver_loads_nearest_file_for_editor_path()
     {
         using var tree = new TemporaryTree();

@@ -40,6 +40,8 @@ The `SELECT`, `JOIN`, and `WHERE` pages under `Tools → Options → T-SQL Forma
 
 `Tools → Options → T-SQL Formatter → Profile` selects `Default`, `Compact`, or `Expanded`. `Default` uses the General/SELECT/JOIN/WHERE page values; `Compact` uses its built-in 120-character width, while `Expanded` uses width 80 and one item per line for SELECT, GROUP BY, and ORDER BY. With `Compact` or `Expanded`, the other IDE pages are ignored until you switch back to `Default`; matching project-config fields still override the selected profile for formatting commands. SQL Preview uses the selected profile but not project configuration. Profile selection in the installed IDE needs manual verification.
 
+`Tools → T-SQL Formatter: Export Profile...` writes the currently effective IDE options to a version-1 JSON file after a save dialog. `Tools → T-SQL Formatter: Import Profile...` accepts a version-1 JSON file (at most 1 MiB, strict UTF-8), applies its values to the IDE option pages, persists them, and selects `Default`. It does not edit the open SQL document or a project config. Invalid input or a value above the IDE limits (line length 4096, indent size 32) leaves the current IDE settings unchanged and reports an error. Exported JSON is a full options snapshot that can also be copied to `.tsqlformatter.json`; it is not a named custom profile. These commands need manual verification in an installed Visual Studio instance.
+
 Formatting status and errors appear in the Visual Studio status bar and the **T-SQL Formatter** Output pane; errors activate that pane. The messages include diagnostic codes when available. Formatting commands no longer open modal message boxes, while the three diagnostic probe commands still do. This notification behavior has been build-verified but still needs a manual check in an installed Visual Studio instance.
 
 ## CLI: stdin or one file → stdout
@@ -166,7 +168,7 @@ var configured = new SqlFormatterConfigurationResolver(catalog).Resolve(
     json, profileId: "project");
 ```
 
-An application can supply custom user or project profiles when creating the catalog. Duplicate IDs, including collisions with built-ins, are rejected. An unknown `profileId` returns `TSF2000` with `Options == null`. File fields overlay the profile rather than resetting it to `Default`. The VSIX exposes built-in profile selection; persisting profiles in JSON, CLI profile selection, and custom profiles in the VSIX are not implemented yet.
+An application can supply custom user or project profiles when creating the catalog. Duplicate IDs, including collisions with built-ins, are rejected. An unknown `profileId` returns `TSF2000` with `Options == null`. File fields overlay the profile rather than resetting it to `Default`. The VSIX exposes built-in profile selection and portable options import/export, but named custom profiles in JSON, CLI profile selection, and custom profile IDs in the VSIX are not implemented yet.
 
 To check comment preservation separately, run the golden suite:
 

@@ -45,6 +45,18 @@
           <ButtonText>Format T-SQL Statement</ButtonText>
         </Strings>
       </Button>
+      <Button guid="guidCommandSet" id="cmdImportProfile" priority="0x0300" type="Button">
+        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
+        <Strings>
+          <ButtonText>T-SQL Formatter: Import Profile...</ButtonText>
+        </Strings>
+      </Button>
+      <Button guid="guidCommandSet" id="cmdExportProfile" priority="0x0310" type="Button">
+        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
+        <Strings>
+          <ButtonText>T-SQL Formatter: Export Profile...</ButtonText>
+        </Strings>
+      </Button>
     </Buttons>
   </Commands>
   <Symbols>
@@ -57,6 +69,8 @@
       <IDSymbol name="cmdFormatDocument" value="0x0200" />
       <IDSymbol name="cmdFormatSelection" value="0x0201" />
       <IDSymbol name="cmdFormatStatement" value="0x0202" />
+      <IDSymbol name="cmdImportProfile" value="0x0300" />
+      <IDSymbol name="cmdExportProfile" value="0x0301" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>
