@@ -38,4 +38,40 @@ public sealed class CteFormattingTests
         Assert.Equal(first.Text, second.Text);
         Assert.False(second.Changed);
     }
+
+    [Theory]
+    [InlineData("with X as (select Id from T) delete from X where Id=1;",
+        "WITH X AS (\n    SELECT Id\n    FROM T\n)\nDELETE FROM X\nWHERE\n    Id = 1;")]
+    [InlineData("with X as (select Id from T) update X set Id=2 where Id=1;",
+        "WITH X AS (\n    SELECT Id\n    FROM T\n)\nUPDATE X\nSET\n    Id = 2\nWHERE\n    Id = 1;")]
+    [InlineData("with X as (select Id from T) insert into U(Id) select Id from X;",
+        "WITH X AS (\n    SELECT Id\n    FROM T\n)\nINSERT INTO U (Id)\nSELECT Id\nFROM X;")]
+    public void Formats_cte_before_dml(string source, string expected)
+    {
+        var first = _formatter.Format(source, new FormattingOptions(), new FormatRequest());
+        var second = _formatter.Format(first.Text, new FormattingOptions(), new FormatRequest());
+        Assert.True(first.ParseSucceeded);
+        Assert.Equal(expected, first.Text);
+        Assert.Equal(first.Text, second.Text);
+    }
+
+    [Fact]
+    public void Multiple_ctes_before_delete_keep_literal_and_reparse()
+    {
+        const string source = "with A as (select Id from T where Note='a  b'), B as (select Id from A) delete from B where Id=1;";
+        var first = _formatter.Format(source, new FormattingOptions(), new FormatRequest());
+        Assert.True(first.ParseSucceeded);
+        Assert.Contains("'a  b'", first.Text);
+        Assert.Contains("DELETE FROM B\nWHERE", first.Text);
+        Assert.Equal(first.Text, _formatter.Format(first.Text, new FormattingOptions(), new FormatRequest()).Text);
+    }
+
+    [Fact]
+    public void Comment_between_cte_and_dml_preserves_original_layout()
+    {
+        const string source = "with X as (select Id from T) /* keep */ delete from X where Id=1;";
+        var result = _formatter.Format(source,
+            new FormattingOptions(keywords: new KeywordOptions(KeywordCase.Preserve)), new FormatRequest());
+        Assert.Equal(source, result.Text);
+    }
 }

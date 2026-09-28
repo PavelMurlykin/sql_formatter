@@ -33,13 +33,26 @@ public sealed class DeleteFormattingTests
     }
 
     [Fact]
-    public void Leaves_top_delete_in_original_layout()
+    public void Formats_integer_top_delete()
     {
         const string source = "delete top (2) from T where Id=1";
         var result = _formatter.Format(source,
             new FormattingOptions(keywords: new KeywordOptions(KeywordCase.Preserve)),
             new FormatRequest());
 
+        Assert.Equal("delete top (2) from T\nwhere\n    Id = 1", result.Text);
+        Assert.Equal(result.Text, _formatter.Format(result.Text,
+            new FormattingOptions(keywords: new KeywordOptions(KeywordCase.Preserve)),
+            new FormatRequest()).Text);
+    }
+
+    [Fact]
+    public void Leaves_top_expression_or_comment_untouched()
+    {
+        const string source = "delete top (@n) /* reason */ from T where Id=1";
+        var result = _formatter.Format(source,
+            new FormattingOptions(keywords: new KeywordOptions(KeywordCase.Preserve)),
+            new FormatRequest());
         Assert.Equal(source, result.Text);
     }
 }

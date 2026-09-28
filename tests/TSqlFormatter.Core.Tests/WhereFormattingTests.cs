@@ -23,12 +23,46 @@ public sealed class WhereFormattingTests
     }
 
     [Fact]
-    public void Unsupported_predicate_keeps_original_layout()
+    public void Formats_is_null_predicate()
     {
         const string source = "select Id from Items where Id is null";
         var result = _formatter.Format(source, new FormattingOptions(), new FormatRequest());
 
-        Assert.Equal("SELECT Id FROM Items WHERE Id IS NULL", result.Text);
+        Assert.Equal("SELECT Id\nFROM Items\nWHERE\n    Id IS NULL", result.Text);
+    }
+
+    [Theory]
+    [InlineData("select Id from Items where Id is not null and Name like 'A%'",
+        "SELECT Id\nFROM Items\nWHERE\n    Id IS NOT NULL\n    AND Name LIKE 'A%'")]
+    [InlineData("select Id from Items where Name not like '%x' or Id=2",
+        "SELECT Id\nFROM Items\nWHERE\n    Name NOT LIKE '%x'\n    OR Id = 2")]
+    public void Formats_null_and_like_with_boolean_connectives(string source, string expected)
+    {
+        var first = _formatter.Format(source, new FormattingOptions(), new FormatRequest());
+        Assert.Equal(expected, first.Text);
+        Assert.Equal(first.Text, _formatter.Format(first.Text,
+            new FormattingOptions(), new FormatRequest()).Text);
+    }
+
+    [Fact]
+    public void Leaves_escape_like_and_adjacent_comment_untouched()
+    {
+        const string source = "select Id from Items where Name like 'A%' escape '!' /* keep */ and Id=2";
+        var result = _formatter.Format(source,
+            new FormattingOptions(keywords: new KeywordOptions(KeywordCase.Preserve)),
+            new FormatRequest());
+        Assert.Equal(source, result.Text);
+    }
+
+    [Fact]
+    public void Nested_predicates_preserve_literal_and_reparse()
+    {
+        const string source = "select Id from Items where (Name like 'a  %' or Id is null) and Flag=1";
+        var first = _formatter.Format(source, new FormattingOptions(), new FormatRequest());
+        Assert.True(first.ParseSucceeded);
+        Assert.Contains("'a  %'", first.Text);
+        Assert.Contains("Name LIKE", first.Text);
+        Assert.Equal(first.Text, _formatter.Format(first.Text, new FormattingOptions(), new FormatRequest()).Text);
     }
 
     [Fact]

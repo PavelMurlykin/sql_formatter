@@ -24,12 +24,15 @@ internal sealed class UpdateDocBuilder : ISqlFragmentDocBuilder
         var spec = statement.UpdateSpecification;
         if (spec?.Target is not NamedTableReference target
             || spec.SetClauses.Count == 0
-            || spec.TopRowFilter is not null || statement.WithCtesAndXmlNamespaces is not null
-            || (spec.OutputClause is not null && spec.OutputIntoClause is not null)
-            || spec.StartOffset != statement.StartOffset)
+            || spec.TopRowFilter is not null
+            || (spec.OutputClause is not null && spec.OutputIntoClause is not null))
         {
             return new TextDoc(context.GetOriginalText(statement));
         }
+
+        var ctePrefix = new DmlCtePrefixDocBuilder(_options).Build(
+            statement, statement.WithCtesAndXmlNamespaces, spec, context);
+        if (ctePrefix is null) return new TextDoc(context.GetOriginalText(statement));
 
         var source = context.ParseResult.Source;
         var prefix = source.Substring(spec.StartOffset, target.StartOffset - spec.StartOffset);
@@ -46,6 +49,7 @@ internal sealed class UpdateDocBuilder : ISqlFragmentDocBuilder
 
         var parts = new List<Doc>
         {
+            ctePrefix,
             new TextDoc(prefix.Trim() + " " + context.GetOriginalText(target).Trim()),
             HardLineDoc.Instance,
             new TextDoc(Regex.Match(setPrefix, @"SET", RegexOptions.IgnoreCase).Value)

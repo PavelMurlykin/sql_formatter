@@ -37,13 +37,37 @@ public sealed class WindowFunctionFormattingTests
     }
 
     [Fact]
-    public void Leaves_window_frame_in_original_layout()
+    public void Formats_basic_window_frame()
     {
         const string source = "select sum(Amount) over(order by Id rows between unbounded preceding and current row) from T";
         var result = _formatter.Format(source,
             new FormattingOptions(keywords: new KeywordOptions(KeywordCase.Preserve)),
             new FormatRequest());
 
+        Assert.Equal("select\n    sum(Amount) over (\n        order by Id\n        rows between unbounded preceding and current row\n    )\nfrom T", result.Text);
+        Assert.Equal(result.Text, _formatter.Format(result.Text,
+            new FormattingOptions(keywords: new KeywordOptions(KeywordCase.Preserve)),
+            new FormatRequest()).Text);
+    }
+
+    [Fact]
+    public void Leaves_window_frame_with_comment_in_original_layout()
+    {
+        const string source = "select sum(Amount) over(order by Id rows /* keep */ between unbounded preceding and current row) from T";
+        var result = _formatter.Format(source,
+            new FormattingOptions(keywords: new KeywordOptions(KeywordCase.Preserve)),
+            new FormatRequest());
         Assert.Equal(source, result.Text);
+    }
+
+    [Theory]
+    [InlineData("select sum(Amount) over(partition by Region order by Id rows between 2 preceding and current row) from T")]
+    [InlineData("select sum(Amount) over(order by Id range between unbounded preceding and current row) from T")]
+    public void Numeric_rows_and_range_frames_reparse_and_are_idempotent(string source)
+    {
+        var first = _formatter.Format(source, new FormattingOptions(), new FormatRequest());
+        Assert.True(first.ParseSucceeded);
+        Assert.Contains("OVER (\n", first.Text);
+        Assert.Equal(first.Text, _formatter.Format(first.Text, new FormattingOptions(), new FormatRequest()).Text);
     }
 }

@@ -40,7 +40,7 @@ public sealed class ValidCorpusTests
     }
 
     [Fact]
-    public async Task Unsupported_predicate_operators_are_not_rewritten()
+    public async Task Supported_predicates_are_formatted_without_changing_tokens()
     {
         var path = Path.Combine(AppContext.BaseDirectory, "ValidCorpus", "unsupported-predicates.sql");
         var source = await File.ReadAllTextAsync(path);
@@ -49,7 +49,9 @@ public sealed class ValidCorpusTests
             new FormatRequest());
 
         Assert.True(result.ParseSucceeded);
-        Assert.Contains("LIKE N'A%' AND DeletedAt IS NULL", result.Text);
+        Assert.Contains("DisplayName LIKE N'A%'", result.Text);
+        Assert.Contains("DeletedAt IS NULL", result.Text);
+        Assert.True(result.Changed);
     }
 
     private static string[] ProtectedTokens(SqlParseResult parsed) => parsed.Tokens

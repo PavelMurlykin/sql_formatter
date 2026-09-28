@@ -25,12 +25,15 @@ internal sealed class InsertDocBuilder : ISqlFragmentDocBuilder
         var target = spec?.Target;
         var source = spec?.InsertSource;
         if (spec is null || target is not NamedTableReference || source is null
-            || spec.TopRowFilter is not null || statement.WithCtesAndXmlNamespaces is not null
-            || (spec.OutputClause is not null && spec.OutputIntoClause is not null)
-            || statement.StartOffset != spec.StartOffset)
+            || spec.TopRowFilter is not null
+            || (spec.OutputClause is not null && spec.OutputIntoClause is not null))
         {
             return new TextDoc(context.GetOriginalText(statement));
         }
+
+        var ctePrefix = new DmlCtePrefixDocBuilder(_options).Build(
+            statement, statement.WithCtesAndXmlNamespaces, spec, context);
+        if (ctePrefix is null) return new TextDoc(context.GetOriginalText(statement));
 
         var sql = context.ParseResult.Source;
         var prefix = sql.Substring(spec.StartOffset, target.StartOffset - spec.StartOffset);
@@ -116,7 +119,7 @@ internal sealed class InsertDocBuilder : ISqlFragmentDocBuilder
         Applied = true;
         var parts = new List<Doc>
         {
-            new TextDoc(header), HardLineDoc.Instance
+            ctePrefix, new TextDoc(header), HardLineDoc.Instance
         };
         if (outputDoc is not null)
         {

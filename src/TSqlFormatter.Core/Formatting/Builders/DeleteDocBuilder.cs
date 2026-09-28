@@ -23,16 +23,18 @@ internal sealed class DeleteDocBuilder : ISqlFragmentDocBuilder
         var statement = (DeleteStatement)fragment;
         var spec = statement.DeleteSpecification;
         if (spec?.Target is not NamedTableReference target
-            || spec.TopRowFilter is not null || statement.WithCtesAndXmlNamespaces is not null
-            || (spec.OutputClause is not null && spec.OutputIntoClause is not null)
-            || spec.StartOffset != statement.StartOffset)
+            || (spec.OutputClause is not null && spec.OutputIntoClause is not null))
         {
             return new TextDoc(context.GetOriginalText(statement));
         }
 
+        var ctePrefix = new DmlCtePrefixDocBuilder(_options).Build(
+            statement, statement.WithCtesAndXmlNamespaces, spec, context);
+        if (ctePrefix is null) return new TextDoc(context.GetOriginalText(statement));
+
         var source = context.ParseResult.Source;
         var prefix = source.Substring(spec.StartOffset, target.StartOffset - spec.StartOffset);
-        if (!Regex.IsMatch(prefix, @"^DELETE\s+(?:FROM\s+)?$",
+        if (!Regex.IsMatch(prefix, @"^DELETE\s+(?:TOP\s*\(\s*\d+\s*\)\s+)?(?:FROM\s+)?$",
                 RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
         {
             return new TextDoc(context.GetOriginalText(statement));
@@ -40,7 +42,9 @@ internal sealed class DeleteDocBuilder : ISqlFragmentDocBuilder
 
         var parts = new List<Doc>
         {
+            ctePrefix,
             new TextDoc(Regex.Replace(prefix.Trim(), @"\s+", " ")
+                .Replace("( ", "(").Replace(" )", ")")
                 + " " + context.GetOriginalText(target).Trim())
         };
         var cursor = target.StartOffset + target.FragmentLength;

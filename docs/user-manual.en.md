@@ -26,11 +26,11 @@ To use the parser in your C# project, add a reference to `src/TSqlFormatter.Core
 
 ## Local dotnet tool and CI examples
 
-The CLI packs as `TSqlFormatter.Tool` version `0.1.0-preview.4` with the `tsqlformat` command. Building needs a .NET 10 SDK and running needs a .NET 10 Runtime; a .NET 8 Runtime alone is insufficient. From the repository root, build and install into a Git-ignored directory (PowerShell):
+The CLI packs as `TSqlFormatter.Tool` version `0.1.0-preview.5` with the `tsqlformat` command. Building needs a .NET 10 SDK and running needs a .NET 10 Runtime; a .NET 8 Runtime alone is insufficient. From the repository root, build and install into a Git-ignored directory (PowerShell):
 
 ```powershell
 dotnet pack src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj -c Release -o artifacts/tool
-dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source artifacts/tool --version 0.1.0-preview.4
+dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source artifacts/tool --version 0.1.0-preview.5
 .\artifacts\tool-bin\tsqlformat.exe query.sql --check
 ```
 
@@ -419,7 +419,7 @@ WHERE
     AND State = 'open';
 ```
 
-Predicates such as `IS NULL` and `LIKE` are not supported yet. They retain their original layout, although keyword casing may change. Internal whitespace in expressions on either side of a comparison is preserved.
+`IS NULL`, `IS NOT NULL`, `LIKE`, and `NOT LIKE` are supported in the same `WHERE`/`HAVING`/`ON` boolean trees. `LIKE ... ESCAPE` and predicates with comments inside the operator retain their original layout, although keyword casing may change. Internal whitespace in scalar expressions is preserved.
 
 ### Nested parentheses
 
@@ -453,7 +453,7 @@ ORDER BY Total DESC;
 
 ### Common table expressions (CTEs)
 
-One or more simple CTEs before the main `SELECT` are supported. Each CTE's nested query is indented; an optional column-name list is preserved:
+One or more simple CTEs before the main `SELECT`, `INSERT`, `UPDATE`, or `DELETE` are supported. Each CTE's nested query is indented; an optional column-name list is preserved:
 
 ```sql
 WITH A (Id) AS (
@@ -468,7 +468,7 @@ SELECT Id
 FROM B;
 ```
 
-CTEs with `XMLNAMESPACES`, nested `WITH`, or an unsupported query expression retain their original layout for now. CTE formatting does not yet cover `INSERT`/`UPDATE`/`DELETE`.
+CTEs with `XMLNAMESPACES`, nested `WITH`, an unsupported query expression, or a comment between the CTE block and DML retain their original layout for now.
 
 ### Subqueries
 
@@ -534,7 +534,7 @@ SELECT
 FROM T
 ```
 
-The function arguments retain their original text. Window frames (`ROWS`/`RANGE`), named windows, and window functions embedded in more complex scalar expressions do not yet receive structural formatting. In these cases, original layout is retained, though recognized keywords may change case.
+The function arguments retain their original text. Simple `ROWS`/`RANGE` frames with `BETWEEN` bounds (unbounded, current row, or an integer offset) or one such bound are placed on a separate line after `ORDER BY`. Frame comments, complex bounds, named windows, and window functions embedded in more complex scalar expressions retain their original layout, though recognized keywords may change case.
 
 ### FROM source
 
@@ -640,7 +640,7 @@ VALUES
     (2, 'b');
 ```
 
-In `INSERT ... SELECT`, the nested query follows the supported `SELECT` formatting rules. Column and value order is retained. `INSERT ... EXEC`, `DEFAULT VALUES`, a CTE before `INSERT`, and comments between value rows retain their original layout for now; recognized keywords may still change case.
+In `INSERT ... SELECT`, the nested query follows the supported `SELECT` formatting rules. Column and value order is retained. A supported CTE before `INSERT` is formatted above the statement. `INSERT ... EXEC`, `DEFAULT VALUES`, and comments between value rows retain their original layout for now; recognized keywords may still change case.
 
 ## UPDATE
 
@@ -656,7 +656,7 @@ WHERE
     t.Id = 1;
 ```
 
-Assignment order is retained. Compound assignments such as `+=`, `TOP`, and a CTE before `UPDATE` do not yet receive structural formatting. Unsupported constructs retain their original layout, though recognized keywords may change case.
+Assignment order is retained. A supported CTE before `UPDATE` is formatted above the statement. Compound assignments such as `+=` and `TOP` do not yet receive structural formatting. Unsupported constructs retain their original layout, though recognized keywords may change case.
 
 ## DELETE
 
@@ -671,7 +671,7 @@ WHERE
     u.Flag = 1;
 ```
 
-`DELETE TOP` and a CTE before `DELETE` retain their original layout for now; recognized keywords may change case. Other `FROM` and `WHERE` limitations match those described for supported `SELECT` and `UPDATE`.
+`DELETE TOP (integer)` and a supported CTE before `DELETE` are formatted structurally. Other `TOP` expressions and comments inside the `DELETE` header retain their original layout; recognized keywords may change case. Other `FROM` and `WHERE` limitations match those described for supported `SELECT` and `UPDATE`.
 
 ## OUTPUT
 

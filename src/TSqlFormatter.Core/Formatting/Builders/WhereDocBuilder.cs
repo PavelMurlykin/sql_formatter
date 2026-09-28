@@ -91,6 +91,43 @@ internal sealed class WhereDocBuilder
             });
         }
 
+        if (expression is BooleanIsNullExpression isNull && isNull.Expression is not null)
+        {
+            var value = isNull.Expression;
+            var prefix = source.Substring(expression.StartOffset, value.StartOffset - expression.StartOffset);
+            var suffix = source.Substring(value.StartOffset + value.FragmentLength,
+                expression.StartOffset + expression.FragmentLength - value.StartOffset - value.FragmentLength);
+            if (!string.IsNullOrWhiteSpace(prefix)
+                || !Regex.IsMatch(suffix, isNull.IsNot ? @"^\s+IS\s+NOT\s+NULL$" : @"^\s+IS\s+NULL$",
+                    RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)) return null;
+            var valueDoc = BuildScalar(value, context);
+            if (valueDoc is null) return null;
+            return new ConcatDoc(new Doc[] { valueDoc,
+                new TextDoc(" " + Regex.Replace(suffix.Trim(), @"\s+", " ")) });
+        }
+
+        if (expression is LikePredicate like && like.FirstExpression is not null
+            && like.SecondExpression is not null && like.EscapeExpression is null
+            && !like.OdbcEscape)
+        {
+            var left = like.FirstExpression;
+            var right = like.SecondExpression;
+            var prefix = source.Substring(expression.StartOffset, left.StartOffset - expression.StartOffset);
+            var op = source.Substring(left.StartOffset + left.FragmentLength,
+                right.StartOffset - left.StartOffset - left.FragmentLength);
+            var tail = source.Substring(right.StartOffset + right.FragmentLength,
+                expression.StartOffset + expression.FragmentLength - right.StartOffset - right.FragmentLength);
+            if (!string.IsNullOrWhiteSpace(prefix) || !string.IsNullOrWhiteSpace(tail)
+                || !Regex.IsMatch(op, like.NotDefined ? @"^\s+NOT\s+LIKE\s+$" : @"^\s+LIKE\s+$",
+                    RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)) return null;
+            var leftDoc = BuildScalar(left, context);
+            var rightDoc = BuildScalar(right, context);
+            return leftDoc is null || rightDoc is null ? null : new ConcatDoc(new Doc[]
+            {
+                leftDoc, new TextDoc(" " + Regex.Replace(op.Trim(), @"\s+", " ") + " "), rightDoc
+            });
+        }
+
         if (expression is BooleanBinaryExpression binary
             && binary.FirstExpression is not null
             && binary.SecondExpression is not null)

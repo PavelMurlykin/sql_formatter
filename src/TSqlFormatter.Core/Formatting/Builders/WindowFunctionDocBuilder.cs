@@ -17,7 +17,7 @@ internal sealed class WindowFunctionDocBuilder
     public Doc? Build(FunctionCall function, SqlDocBuilderContext context)
     {
         var over = function.OverClause;
-        if (over is null || over.WindowName is not null || over.WindowFrameClause is not null)
+        if (over is null || over.WindowName is not null)
         {
             return null;
         }
@@ -32,8 +32,9 @@ internal sealed class WindowFunctionDocBuilder
 
         var partitions = over.Partitions;
         var order = over.OrderByClause;
+        var frame = over.WindowFrameClause;
         var firstStart = partitions.Count > 0 ? partitions[0].StartOffset
-            : order?.StartOffset ?? over.StartOffset + over.FragmentLength - 1;
+            : order?.StartOffset ?? frame?.StartOffset ?? over.StartOffset + over.FragmentLength - 1;
         var header = source.Substring(over.StartOffset, firstStart - over.StartOffset);
         var headerPattern = partitions.Count > 0
             ? @"^OVER\s*\(\s*PARTITION\s+BY\s+$"
@@ -84,6 +85,24 @@ internal sealed class WindowFunctionDocBuilder
             content.Add(HardLineDoc.Instance);
             content.Add(orderDoc);
             cursor = order.StartOffset + order.FragmentLength;
+        }
+
+        if (frame is not null)
+        {
+            var gap = source.Substring(cursor, frame.StartOffset - cursor);
+            // ScriptDom's frame span can omit the final ROW token; use the enclosing
+            // OVER span through its closing parenthesis and validate the entire text.
+            var closingOffset = over.StartOffset + over.FragmentLength - 1;
+            if (source[closingOffset] != ')') return null;
+            var frameText = source.Substring(frame.StartOffset, closingOffset - frame.StartOffset).Trim();
+            const string boundary = @"(?:UNBOUNDED\s+PRECEDING|CURRENT\s+ROW|\d+\s+(?:PRECEDING|FOLLOWING)|UNBOUNDED\s+FOLLOWING)";
+            var framePattern = @"^(?:ROWS|RANGE)\s+(?:BETWEEN\s+" + boundary
+                + @"\s+AND\s+" + boundary + "|" + boundary + ")$";
+            if (!string.IsNullOrWhiteSpace(gap) || !Regex.IsMatch(frameText, framePattern,
+                    RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)) return null;
+            content.Add(HardLineDoc.Instance);
+            content.Add(new TextDoc(Regex.Replace(frameText, @"\s+", " ")));
+            cursor = closingOffset;
         }
 
         var suffix = source.Substring(cursor,
