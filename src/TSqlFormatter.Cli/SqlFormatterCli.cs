@@ -67,47 +67,16 @@ public static class SqlFormatterCli
         var options = FormattingOptions.Default;
         if (isFile)
         {
-            string? configPath;
-            try
+            var resolved = new SqlFormatterConfigurationResolver().ResolveForSqlFile(args[0]);
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!resolved.Succeeded)
             {
-                configPath = new SqlFormatterConfigurationDiscovery().FindForFile(args[0]);
-            }
-            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
-            {
-                await error.WriteLineAsync($"TSF9000: Failed to find configuration: {exception.Message}");
+                foreach (var diagnostic in resolved.Diagnostics)
+                    await error.WriteLineAsync($"{diagnostic.Code}: {diagnostic.Message}");
                 return 2;
             }
 
-            if (configPath is not null)
-            {
-                string configJson;
-                try
-                {
-                    (configJson, _) = await ReadUtf8FileAsync(configPath, cancellationToken);
-                }
-                catch (InputTooLargeException exception)
-                {
-                    await error.WriteLineAsync($"TSF9001: {configPath}: {exception.Message}");
-                    return 2;
-                }
-                catch (Exception exception) when (exception is IOException or UnauthorizedAccessException
-                    or DecoderFallbackException)
-                {
-                    await error.WriteLineAsync($"TSF9000: Failed to read configuration '{configPath}': {exception.Message}");
-                    return 2;
-                }
-
-                var resolved = new SqlFormatterConfigurationResolver().Resolve(configJson);
-                cancellationToken.ThrowIfCancellationRequested();
-                if (!resolved.Succeeded)
-                {
-                    foreach (var diagnostic in resolved.Diagnostics)
-                        await error.WriteLineAsync($"{diagnostic.Code}: {configPath}: {diagnostic.Message}");
-                    return 2;
-                }
-
-                options = resolved.Options!;
-            }
+            options = resolved.Options!;
         }
 
         var result = new ScriptDomSqlFormatter().Format(
