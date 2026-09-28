@@ -1,0 +1,20 @@
+# Example: copy to azure-pipelines.yml and replace database/.
+trigger:
+  - main
+pr:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - checkout: self
+  - task: UseDotNet@2
+    inputs:
+      packageType: sdk
+      version: '8.0.x'
+  - script: |
+      dotnet pack src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj -c Release -o "$(Agent.TempDirectory)/tsqlformatter-package"
+      dotnet tool install TSqlFormatter.Tool --tool-path "$(Agent.TempDirectory)/tsqlformatter-bin" --source "$(Agent.TempDirectory)/tsqlformatter-package"
+      python3 examples/ci/check_sql_files.py --tool "$(Agent.TempDirectory)/tsqlformatter-bin/tsqlformat" --directory database
+    displayName: Check SQL formatting

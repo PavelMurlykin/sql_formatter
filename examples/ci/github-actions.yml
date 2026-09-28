@@ -1,0 +1,29 @@
+# Example: copy to .github/workflows/sql-format.yml and replace database/.
+name: SQL formatting example
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sql-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Pack and install local formatter tool
+        run: |
+          dotnet pack src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj -c Release -o "$RUNNER_TEMP/tsqlformatter-package"
+          dotnet tool install TSqlFormatter.Tool --tool-path "$RUNNER_TEMP/tsqlformatter-bin" --source "$RUNNER_TEMP/tsqlformatter-package"
+      - name: Check SQL files
+        run: python examples/ci/check_sql_files.py --tool "$RUNNER_TEMP/tsqlformatter-bin/tsqlformat" --directory database

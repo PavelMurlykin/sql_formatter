@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and formatting for supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms are available through `TSqlFormatter.Core`, including CTEs, subqueries, `CASE`, window functions, `FROM`, `JOIN`, `APPLY`, and simple control-flow and stored-code forms. JSON settings, named profiles, and a limited `.editorconfig` subset are available through `TSqlFormatter.Configuration`. The CLI formats SQL from stdin or one file to stdout and supports `--write`, `--check`, and automatic config discovery for files. An experimental VSIX formats the entire open `.sql` document, a statement containing a selection, or the statement nearest the caret and loads file configuration. A separate SSMS 22 VSIX can format the active `.sql` document experimentally. There is no user-ready installable package.
+This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and formatting for supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms are available through `TSqlFormatter.Core`, including CTEs, subqueries, `CASE`, window functions, `FROM`, `JOIN`, `APPLY`, and simple control-flow and stored-code forms. JSON settings, named profiles, and a limited `.editorconfig` subset are available through `TSqlFormatter.Configuration`. The CLI formats SQL from stdin or one file to stdout and supports `--write`, `--check`, and automatic config discovery for files. The CLI can be built and installed as a local preview `dotnet tool`; no stable package has been published. An experimental VSIX formats the entire open `.sql` document, a statement containing a selection, or the statement nearest the caret and loads file configuration. A separate SSMS 22 VSIX can format the active `.sql` document experimentally.
 
 ### Control flow and stored code
 
@@ -23,6 +23,20 @@ dotnet test TSqlFormatter.sln --no-build --no-restore
 ```
 
 To use the parser in your C# project, add a reference to `src/TSqlFormatter.Core/TSqlFormatter.Core.csproj`.
+
+## Local dotnet tool and CI examples
+
+The CLI packs as `TSqlFormatter.Tool` version `0.1.0-preview.1` with the `tsqlformat` command. Building needs .NET SDK 8+; running needs .NET Runtime 8. From the repository root, build and install into a Git-ignored directory (PowerShell):
+
+```powershell
+dotnet pack src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj -c Release -o artifacts/tool
+dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source artifacts/tool --version 0.1.0-preview.1
+.\artifacts\tool-bin\tsqlformat.exe query.sql --check
+```
+
+The tool is not published on NuGet; these commands install only the locally built package, so the CI examples assume this project's source tree is available. `tsqlformat` still accepts stdin or one SQL file, not a directory; for each file, `--check` returns `0` (formatted), `1` (formatting needed), or `2` (error). Packaging does not change those rules.
+
+`examples/ci/` contains a [GitHub Actions example](../examples/ci/github-actions.yml), an [Azure Pipelines example](../examples/ci/azure-pipelines.yml), a [pre-commit example](../examples/ci/.pre-commit-config.yaml), and their shared `check_sql_files.py` script. They are not active in this repository. Replace `database` with your SQL directory and copy the YAML into the appropriate project location; once copied, the CI examples run on pushes/PRs to the main branch. The CI examples build and install the local package, passing its path through `--tool`; pre-commit requires `tsqlformat` installed and its directory on `PATH` beforehand. The script checks without writing: exit code `0` means all files are formatted, `1` means changes are needed, and `2` means an error, missing tool, or missing/empty directory. For pre-commit it checks the passed `.sql` files; with `--directory database` it finds SQL files recursively. Python 3 is needed for the script and pre-commit.
 
 ## SSMS 22: experimental extension
 

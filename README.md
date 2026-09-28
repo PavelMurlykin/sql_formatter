@@ -3,8 +3,8 @@
 An extensible T-SQL formatter under active development. The current Core exposes
 a ScriptDom-based parser, token helpers, a line map, a layout renderer, an
 AST-to-document builder, and programmatic formatting for supported SELECT/INSERT/UPDATE/DELETE/MERGE/OUTPUT/CTE/subquery/CASE/window/set-operator/FROM/JOIN
-queries. The CLI supports stdin, one file, `--write`, `--check`, and configuration
-discovery. Broader SQL coverage is planned in
+queries. The CLI supports stdin, one file, `--write`, `--check`, configuration
+discovery, and local preview `dotnet tool` packaging. Broader SQL coverage is planned in
 [`CODEX_DEVELOPMENT_PLAN.md`](CODEX_DEVELOPMENT_PLAN.md).
 An experimental Visual Studio VSIX provides Document, Selection, and Statement
 commands for `.sql` files and discovers the nearest `.tsqlformatter.json`. Host
@@ -36,6 +36,18 @@ dotnet run --project src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj --no-restore
 
 `--check` returns 0 for an already formatted file, 1 when formatting is needed,
 or 2 on an error. See the manuals for stdin and `.tsqlformatter.json` behavior.
+
+To build and install the preview tool from this repository:
+
+```powershell
+dotnet pack src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj -c Release -o artifacts/tool
+dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source artifacts/tool --version 0.1.0-preview.1
+.\artifacts\tool-bin\tsqlformat.exe query.sql --check
+```
+
+The package is not published. Inactive GitHub Actions, Azure Pipelines, and
+pre-commit examples are under [`examples/ci`](examples/ci/); set their SQL
+directory before enabling them. The CI examples build the tool from source.
 
 ## Test
 

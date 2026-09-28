@@ -1,0 +1,10 @@
+# Example: copy to the repository root; install tsqlformat on PATH first.
+repos:
+  - repo: local
+    hooks:
+      - id: tsqlformat-check
+        name: Check T-SQL formatting
+        entry: python examples/ci/check_sql_files.py
+        language: system
+        files: '\.sql$'
+        types: [file]

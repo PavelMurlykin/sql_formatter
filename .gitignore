@@ -3,5 +3,6 @@ obj/
 .vs/
 TestResults/
 BenchmarkDotNet.Artifacts/
+artifacts/
 *.suo
 *.user
