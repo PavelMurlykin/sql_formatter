@@ -51,6 +51,7 @@ internal sealed class UpdateDocBuilder : ISqlFragmentDocBuilder
             new TextDoc(Regex.Match(setPrefix, @"SET", RegexOptions.IgnoreCase).Value)
         };
         var assignments = new List<Doc>();
+        int alignmentWidth = GetAssignmentAlignmentWidth(spec.SetClauses, context);
         for (var index = 0; index < spec.SetClauses.Count; index++)
         {
             var clause = spec.SetClauses[index];
@@ -89,7 +90,7 @@ internal sealed class UpdateDocBuilder : ISqlFragmentDocBuilder
             assignments.Add(new IndentDoc(1, new ConcatDoc(new Doc[]
             {
                 HardLineDoc.Instance,
-                new TextDoc(context.GetOriginalText(column).Trim() + " = "
+                new TextDoc(context.GetOriginalText(column).Trim().PadRight(alignmentWidth) + " = "
                     + context.GetOriginalText(value).Trim())
             })));
         }
@@ -156,5 +157,29 @@ internal sealed class UpdateDocBuilder : ISqlFragmentDocBuilder
         parts.Add(new TextDoc(statementTail.Trim()));
         Applied = true;
         return new ConcatDoc(parts);
+    }
+
+    private int GetAssignmentAlignmentWidth(IList<SetClause> clauses, SqlDocBuilderContext context)
+    {
+        if (!_options.Alignment.SetAssignments || _options.Indent.UseTabs || clauses.Count < 2)
+            return 0;
+        var columns = new List<string>();
+        var values = new List<string>();
+        foreach (var clause in clauses)
+        {
+            if (clause is not AssignmentSetClause { Variable: null, Column: { } column,
+                    NewValue: { } value }) return 0;
+            var columnText = context.GetOriginalText(column).Trim();
+            var valueText = context.GetOriginalText(value).Trim();
+            if (columnText.IndexOfAny(new[] { '\r', '\n' }) >= 0
+                || valueText.IndexOfAny(new[] { '\r', '\n' }) >= 0
+                || columnText.Contains("/*") || columnText.Contains("--")) return 0;
+            columns.Add(columnText);
+            values.Add(valueText);
+        }
+        int width = columns.Max(column => column.Length);
+        if (Enumerable.Range(0, columns.Count).Any(index => _options.Indent.Size + width + 3
+                + values[index].Length + 1 > _options.General.MaxLineWidth)) return 0;
+        return width;
     }
 }

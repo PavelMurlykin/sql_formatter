@@ -8,6 +8,10 @@
 
 CLI и команды редактора используют один движок. Для простых операторов он расставляет переносы/отступы у `DECLARE` (несколько переменных), `SET`, `IF`/`ELSE`, `BEGIN`/`END`, `WHILE`, `BEGIN TRY`/`BEGIN CATCH`, `THROW`, а также у тела `CREATE`/`ALTER PROCEDURE`, `FUNCTION` и запроса `VIEW`. Например, `begin set @a=1; set @b=2; end` превращается в `BEGIN` с двумя операторами `SET` на отдельных строках с отступом и заключительным `END`. Форматирование не меняет строковые литералы и не выполняет SQL. Если в управляющем заголовке или между операторами есть комментарии либо форма не поддержана, исходная раскладка сохраняется; регистр распознанных ключевых слов всё же может измениться согласно настройке. Проверьте результат перед сохранением важного скрипта.
 
+### Выравнивание по столбцам
+
+В JSON-конфигурации можно включить `alignment.selectAliases`, `alignment.setAssignments` и `alignment.declareTypes` (по умолчанию все `false`). Первое выравнивает явные `AS` и псевдонимы в простом списке `SELECT`, второе — знаки `=` простых присваиваний в `UPDATE ... SET`, третье — типы нескольких переменных в `DECLARE`. Например, при `"selectAliases": true` выражения `Id AS CustomerId, LongName AS Name` располагаются на отдельных строках с `AS` в одном столбце. Выравнивание отключается для конкретного списка при комментариях, сложной форме, табуляции или если оно превысит `general.maxLineLength`; тогда действует прежняя раскладка. Для одиночного `SET @x = ...` и неявных псевдонимов это выравнивание не применяется. Страницы параметров VS/SSMS пока не содержат этих переключателей; для редакторов используйте `.tsqlformatter.json`. Импорт профиля в VS не переносит эти переключатели на страницы параметров.
+
 ## Подготовка
 
 Нужны исходный код проекта и .NET SDK 8.0 или новее. Для сборки всего solution, включая каркас VSIX, дополнительно нужны Windows, Visual Studio 2026 с компонентом Visual Studio extension development и доступ к NuGet. Для работы только с CLI можно собирать проект `src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj` без Visual Studio. Из корня репозитория выполните:
@@ -120,6 +124,7 @@ CLI читает SQL и конфигурацию с ограничением: н
   "indent": { "style": "spaces", "size": 4 },
   "keywords": { "case": "upper" },
   "select": { "columns": "auto" },
+  "alignment": { "selectAliases": false, "setAssignments": false, "declareTypes": false },
   "joins": { "clauseNewLine": true, "conditionNewLine": true },
   "where": { "conditionNewLine": true, "booleanOperatorNewLine": true },
   "clauses": { "groupByLayout": "auto", "orderByLayout": "auto" }
@@ -172,7 +177,7 @@ if (!resolved.Succeeded)
 var effectiveOptions = resolved.Options!;
 ```
 
-Параметры `FormattingOptionsOverrides` соответствуют поддержанным полям JSON: `maxLineLength`, `lineEnding`, `finalNewLine`, `indentSize`, `useTabs`, `keywordCase`, `selectColumns`, `groupByLayout` и `orderByLayout`. Это API для приложений; CLI загружает найденный файл автоматически, но пока не принимает флаги настроек.
+Параметры `FormattingOptionsOverrides` соответствуют поддержанным полям JSON, включая `maxLineLength`, `lineEnding`, `finalNewLine`, `indentSize`, `useTabs`, `keywordCase`, `selectColumns`, `groupByLayout`, `orderByLayout`, `alignSelectAliases`, `alignSetAssignments` и `alignDeclareTypes`. Это API для приложений; CLI загружает найденный файл автоматически, но пока не принимает флаги настроек.
 
 ### Именованные профили
 

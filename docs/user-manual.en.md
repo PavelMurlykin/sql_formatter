@@ -8,6 +8,10 @@ This is an early prototype. T-SQL parsing, token navigation, comment classificat
 
 The CLI and editor commands use the same engine. For simple statements it lays out multiple-variable `DECLARE`, `SET`, `IF`/`ELSE`, `BEGIN`/`END`, `WHILE`, `BEGIN TRY`/`BEGIN CATCH`, `THROW`, and the bodies of `CREATE`/`ALTER PROCEDURE`, `FUNCTION`, and `VIEW` queries. For example, `begin set @a=1; set @b=2; end` becomes a `BEGIN` line, two indented `SET` lines, and a closing `END`. Formatting does not change string literals or execute SQL. If control-flow headers or statement gaps contain comments, or a shape is unsupported, the original layout is retained; recognized keyword casing may still change according to settings. Review the result before saving an important script.
 
+### Column alignment
+
+JSON configuration can enable `alignment.selectAliases`, `alignment.setAssignments`, and `alignment.declareTypes` (all `false` by default). The first aligns explicit `AS` keywords and aliases in a simple `SELECT` list; the second aligns `=` signs in simple `UPDATE ... SET` assignments; the third aligns data types in a multi-variable `DECLARE`. For example, with `"selectAliases": true`, `Id AS CustomerId, LongName AS Name` is placed on separate lines with the `AS` keywords in one column. Alignment falls back to the previous layout for a particular list when it contains comments or complex forms, uses tabs, or would exceed `general.maxLineLength`. It does not align a standalone `SET @x = ...` or implicit aliases. The VS/SSMS option pages do not yet expose these switches; use `.tsqlformatter.json` with the editors. Importing a profile in VS does not transfer these switches to its option pages.
+
 ## Setup
 
 You need the project source and .NET SDK 8.0 or newer. Building the whole solution, including the VSIX scaffold, also requires Windows, Visual Studio 2026 with the Visual Studio extension development component, and NuGet access. To use only the CLI, you can build `src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj` without Visual Studio. Run these commands from the repository root:
@@ -120,6 +124,7 @@ To read and write settings, reference `src/TSqlFormatter.Configuration/TSqlForma
   "indent": { "style": "spaces", "size": 4 },
   "keywords": { "case": "upper" },
   "select": { "columns": "auto" },
+  "alignment": { "selectAliases": false, "setAssignments": false, "declareTypes": false },
   "joins": { "clauseNewLine": true, "conditionNewLine": true },
   "where": { "conditionNewLine": true, "booleanOperatorNewLine": true },
   "clauses": { "groupByLayout": "auto", "orderByLayout": "auto" }
@@ -172,7 +177,7 @@ if (!resolved.Succeeded)
 var effectiveOptions = resolved.Options!;
 ```
 
-`FormattingOptionsOverrides` parameters map to the supported JSON fields: `maxLineLength`, `lineEnding`, `finalNewLine`, `indentSize`, `useTabs`, `keywordCase`, `selectColumns`, `groupByLayout`, and `orderByLayout`. This is an application API; the CLI loads a discovered file automatically but does not yet accept settings flags.
+`FormattingOptionsOverrides` parameters map to supported JSON fields, including `maxLineLength`, `lineEnding`, `finalNewLine`, `indentSize`, `useTabs`, `keywordCase`, `selectColumns`, `groupByLayout`, `orderByLayout`, `alignSelectAliases`, `alignSetAssignments`, and `alignDeclareTypes`. This is an application API; the CLI loads a discovered file automatically but does not yet accept settings flags.
 
 ### Named profiles
 

@@ -19,7 +19,10 @@ public sealed class FormattingOptionsOverrides
         bool? joinClauseNewLine = null,
         bool? joinConditionNewLine = null,
         bool? whereConditionNewLine = null,
-        bool? booleanOperatorNewLine = null)
+        bool? booleanOperatorNewLine = null,
+        bool? alignSelectAliases = null,
+        bool? alignSetAssignments = null,
+        bool? alignDeclareTypes = null)
     {
         MaxLineLength = maxLineLength;
         LineEnding = lineEnding;
@@ -34,6 +37,9 @@ public sealed class FormattingOptionsOverrides
         JoinConditionNewLine = joinConditionNewLine;
         WhereConditionNewLine = whereConditionNewLine;
         BooleanOperatorNewLine = booleanOperatorNewLine;
+        AlignSelectAliases = alignSelectAliases;
+        AlignSetAssignments = alignSetAssignments;
+        AlignDeclareTypes = alignDeclareTypes;
     }
 
     public int? MaxLineLength { get; }
@@ -49,6 +55,9 @@ public sealed class FormattingOptionsOverrides
     public bool? JoinConditionNewLine { get; }
     public bool? WhereConditionNewLine { get; }
     public bool? BooleanOperatorNewLine { get; }
+    public bool? AlignSelectAliases { get; }
+    public bool? AlignSetAssignments { get; }
+    public bool? AlignDeclareTypes { get; }
 
     public FormattingOptions ApplyTo(FormattingOptions baseline)
     {
@@ -72,6 +81,10 @@ public sealed class FormattingOptionsOverrides
                 JoinConditionNewLine ?? baseline.Joins.ConditionNewLine),
             new WhereOptions(
                 WhereConditionNewLine ?? baseline.Where.ConditionNewLine,
-                BooleanOperatorNewLine ?? baseline.Where.BooleanOperatorNewLine));
+                BooleanOperatorNewLine ?? baseline.Where.BooleanOperatorNewLine),
+            new AlignmentOptions(
+                AlignSelectAliases ?? baseline.Alignment.SelectAliases,
+                AlignSetAssignments ?? baseline.Alignment.SetAssignments,
+                AlignDeclareTypes ?? baseline.Alignment.DeclareTypes));
     }
 }

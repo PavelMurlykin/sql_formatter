@@ -13,7 +13,8 @@ public sealed class FormattingOptions
         SelectOptions? select = null,
         QueryClauseOptions? clauses = null,
         JoinOptions? joins = null,
-        WhereOptions? where = null)
+        WhereOptions? where = null,
+        AlignmentOptions? alignment = null)
     {
         General = general ?? new GeneralOptions();
         Indent = indent ?? new IndentOptions();
@@ -22,6 +23,7 @@ public sealed class FormattingOptions
         Clauses = clauses ?? new QueryClauseOptions();
         Joins = joins ?? new JoinOptions();
         Where = where ?? new WhereOptions();
+        Alignment = alignment ?? new AlignmentOptions();
     }
 
     public GeneralOptions General { get; }
@@ -38,6 +40,8 @@ public sealed class FormattingOptions
 
     public WhereOptions Where { get; }
 
+    public AlignmentOptions Alignment { get; }
+
     /// <summary>Creates a new option set, replacing only the supplied sections.</summary>
     public FormattingOptions With(
         GeneralOptions? general = null,
@@ -46,7 +50,8 @@ public sealed class FormattingOptions
         SelectOptions? select = null,
         QueryClauseOptions? clauses = null,
         JoinOptions? joins = null,
-        WhereOptions? where = null)
+        WhereOptions? where = null,
+        AlignmentOptions? alignment = null)
     {
         return new FormattingOptions(
             general ?? General,
@@ -55,6 +60,7 @@ public sealed class FormattingOptions
             select ?? Select,
             clauses ?? Clauses,
             joins ?? Joins,
-            where ?? Where);
+            where ?? Where,
+            alignment ?? Alignment);
     }
 }

@@ -8,6 +8,12 @@ namespace TSqlFormatter.Core.Formatting.Builders;
 internal sealed class StoredCodeDocBuilder : ISqlFragmentDocBuilder
 {
     private static readonly RegexOptions IgnoreCase = RegexOptions.IgnoreCase | RegexOptions.CultureInvariant;
+    private readonly FormattingOptions options;
+
+    public StoredCodeDocBuilder(FormattingOptions options)
+    {
+        this.options = options;
+    }
 
     public bool Applied { get; private set; }
 
@@ -106,30 +112,62 @@ internal sealed class StoredCodeDocBuilder : ISqlFragmentDocBuilder
             HardLineDoc.Instance, new TextDoc("END CATCH"));
     }
 
-    private static Doc? BuildDeclare(DeclareVariableStatement statement, SqlDocBuilderContext context)
+    private Doc? BuildDeclare(DeclareVariableStatement statement, SqlDocBuilderContext context)
     {
         var variables = statement.Declarations;
         if (variables.Count == 0
             || !Matches(Between(context, statement.StartOffset, variables[0].StartOffset), @"^\s*DECLARE\s+$")
             || !Matches(Between(context, End(variables[variables.Count - 1]), End(statement)), @"^\s*;?\s*$"))
             return null;
-        var parts = new List<Doc> { new TextDoc("DECLARE ") };
+        int alignmentWidth = GetDeclareAlignmentWidth(variables, context);
+        var parts = new List<Doc> { new TextDoc(alignmentWidth == 0 ? "DECLARE " : "DECLARE") };
         for (int index = 0; index < variables.Count; index++)
         {
+            string declaration = alignmentWidth == 0
+                ? context.GetOriginalText(variables[index]).Trim()
+                : context.GetOriginalText(variables[index].VariableName).Trim().PadRight(alignmentWidth)
+                    + " " + context.GetOriginalText(variables[index].DataType).Trim();
             if (index > 0)
             {
                 if (!Matches(Between(context, End(variables[index - 1]), variables[index].StartOffset), @"^\s*,\s*$"))
                     return null;
                 parts.Add(new TextDoc(","));
                 parts.Add(new IndentDoc(1, Join(HardLineDoc.Instance,
-                    new TextDoc(context.GetOriginalText(variables[index]).Trim()))));
+                    new TextDoc(declaration))));
                 continue;
             }
-            parts.Add(new TextDoc(context.GetOriginalText(variables[index]).Trim()));
+            parts.Add(alignmentWidth == 0 ? new TextDoc(declaration)
+                : new IndentDoc(1, Join(HardLineDoc.Instance, new TextDoc(declaration))));
         }
         if (Between(context, End(variables[variables.Count - 1]), End(statement)).Contains(';'))
             parts.Add(new TextDoc(";"));
         return Join(parts);
+    }
+
+    private int GetDeclareAlignmentWidth(IList<DeclareVariableElement> variables,
+        SqlDocBuilderContext context)
+    {
+        if (!options.Alignment.DeclareTypes || options.Indent.UseTabs || variables.Count < 2)
+            return 0;
+        var names = new List<string>();
+        var types = new List<string>();
+        foreach (var variable in variables)
+        {
+            if (variable.VariableName is null || variable.DataType is null
+                || variable.Value is not null || variable.Nullable is not null
+                || !Matches(Between(context, End(variable.VariableName), variable.DataType.StartOffset), @"^\s+$")
+                || !White(Between(context, End(variable.DataType), End(variable)))) return 0;
+            var name = context.GetOriginalText(variable.VariableName).Trim();
+            var type = context.GetOriginalText(variable.DataType).Trim();
+            if (name.IndexOfAny(new[] { '\r', '\n' }) >= 0
+                || type.IndexOfAny(new[] { '\r', '\n' }) >= 0) return 0;
+            names.Add(name);
+            types.Add(type);
+        }
+        int width = names.Max(name => name.Length);
+        if (Enumerable.Range(0, names.Count).Any(index => options.Indent.Size + width + 1
+                + types[index].Length > options.General.MaxLineWidth)) return 0;
+        return width;
     }
 
     private static Doc? BuildSet(SetVariableStatement statement, SqlDocBuilderContext context)

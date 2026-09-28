@@ -65,7 +65,9 @@ internal sealed class SelectColumnDocBuilder
             hasInline = true;
         }
 
-        var breakEvery = hasInline || _options.Select.ColumnLayout == SelectColumnLayout.OnePerLine;
+        var aligned = !hasInline ? TryAlignAliases(elements, context) : null;
+        var breakEvery = hasInline || aligned is not null
+            || _options.Select.ColumnLayout == SelectColumnLayout.OnePerLine;
         var parts = new List<Doc> { breakEvery ? HardLineDoc.Instance : SoftLineDoc.Instance };
         for (var index = 0; index < elements.Count; index++)
         {
@@ -85,13 +87,47 @@ internal sealed class SelectColumnDocBuilder
                 }
             }
 
-            var column = BuildElement(elements[index], context);
+            var column = aligned is not null
+                ? new TextDoc(aligned[index]) : BuildElement(elements[index], context);
             if (column is null) return null;
             parts.Add(column);
         }
 
         var body = new IndentDoc(1, new ConcatDoc(parts));
         return breakEvery ? body : new GroupDoc(body);
+    }
+
+    private string[]? TryAlignAliases(IList<SelectElement> elements, SqlDocBuilderContext context)
+    {
+        if (!_options.Alignment.SelectAliases || _options.Indent.UseTabs || elements.Count < 2)
+            return null;
+        var expressions = new string[elements.Count];
+        var aliases = new string[elements.Count];
+        for (int index = 0; index < elements.Count; index++)
+        {
+            if (elements[index] is not SelectScalarExpression { Expression: { } expression,
+                    ColumnName: { } alias } scalar) return null;
+            var source = context.ParseResult.Source;
+            var before = source.Substring(scalar.StartOffset, expression.StartOffset - scalar.StartOffset);
+            var gap = source.Substring(expression.StartOffset + expression.FragmentLength,
+                alias.StartOffset - expression.StartOffset - expression.FragmentLength);
+            var after = source.Substring(alias.StartOffset + alias.FragmentLength,
+                scalar.StartOffset + scalar.FragmentLength - alias.StartOffset - alias.FragmentLength);
+            if (!string.IsNullOrWhiteSpace(before) || !string.IsNullOrWhiteSpace(after)
+                || !Regex.IsMatch(gap, @"^\s+AS\s+$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+                return null;
+            expressions[index] = context.GetOriginalText(expression).Trim();
+            aliases[index] = context.GetOriginalText(alias).Trim();
+            if (expressions[index].IndexOfAny(new[] { '\r', '\n' }) >= 0
+                || aliases[index].IndexOfAny(new[] { '\r', '\n' }) >= 0
+                || expressions[index].Contains("/*") || expressions[index].Contains("--")) return null;
+        }
+
+        int width = expressions.Max(value => value.Length);
+        if (Enumerable.Range(0, expressions.Length).Any(index => _options.Indent.Size + width + 4
+                + aliases[index].Length > _options.General.MaxLineWidth)) return null;
+        return expressions.Select((value, index) =>
+            value.PadRight(width) + " AS " + aliases[index]).ToArray();
     }
 
     private Doc? BuildElement(SelectElement element, SqlDocBuilderContext context)

@@ -52,6 +52,12 @@ public sealed class SqlFormatterConfigurationSerializer
             {
                 ["groupByLayout"] = FormatLayout(options.Clauses.GroupByLayout),
                 ["orderByLayout"] = FormatLayout(options.Clauses.OrderByLayout)
+            },
+            ["alignment"] = new JObject
+            {
+                ["selectAliases"] = options.Alignment.SelectAliases,
+                ["setAssignments"] = options.Alignment.SetAssignments,
+                ["declareTypes"] = options.Alignment.DeclareTypes
             }
         };
 
@@ -119,6 +125,7 @@ public sealed class SqlFormatterConfigurationSerializer
         var joins = GetSection(root, "joins");
         var where = GetSection(root, "where");
         var clauses = GetSection(root, "clauses");
+        var alignment = GetSection(root, "alignment");
 
         return new FormattingOptions(
             general: new GeneralOptions(
@@ -140,7 +147,11 @@ public sealed class SqlFormatterConfigurationSerializer
                 GetBoolean(where, "booleanOperatorNewLine", baseline.Where.BooleanOperatorNewLine)),
             clauses: new QueryClauseOptions(
                 ParseClauseLayout(GetString(clauses, "groupByLayout", FormatLayout(baseline.Clauses.GroupByLayout))),
-                ParseClauseLayout(GetString(clauses, "orderByLayout", FormatLayout(baseline.Clauses.OrderByLayout)))));
+                ParseClauseLayout(GetString(clauses, "orderByLayout", FormatLayout(baseline.Clauses.OrderByLayout)))),
+            alignment: new AlignmentOptions(
+                GetBoolean(alignment, "selectAliases", baseline.Alignment.SelectAliases),
+                GetBoolean(alignment, "setAssignments", baseline.Alignment.SetAssignments),
+                GetBoolean(alignment, "declareTypes", baseline.Alignment.DeclareTypes)));
     }
 
     private static ConfigurationParseResult Failed(string message) => new(
@@ -164,6 +175,7 @@ public sealed class SqlFormatterConfigurationSerializer
                 case "joins":
                 case "where":
                 case "clauses":
+                case "alignment":
                     break;
                 default:
                     diagnostics.Add(Diagnostic($"Unknown configuration property '{property.Name}'."));
@@ -186,6 +198,7 @@ public sealed class SqlFormatterConfigurationSerializer
         ValidateSection(root, "joins", diagnostics);
         ValidateSection(root, "where", diagnostics);
         ValidateSection(root, "clauses", diagnostics);
+        ValidateSection(root, "alignment", diagnostics);
     }
 
     private static void ValidateSection(JObject root, string name, List<FormatterDiagnostic> diagnostics)
@@ -214,6 +227,9 @@ public sealed class SqlFormatterConfigurationSerializer
                 case "joins.conditionNewLine":
                 case "where.conditionNewLine":
                 case "where.booleanOperatorNewLine":
+                case "alignment.selectAliases":
+                case "alignment.setAssignments":
+                case "alignment.declareTypes":
                     if (property.Value.Type != JTokenType.Boolean)
                         diagnostics.Add(Diagnostic($"'{path}' must be a boolean."));
                     break;

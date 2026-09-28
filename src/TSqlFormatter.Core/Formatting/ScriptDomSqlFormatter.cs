@@ -70,7 +70,7 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         var updateBuilder = new UpdateDocBuilder(options);
         var deleteBuilder = new DeleteDocBuilder(options);
         var mergeBuilder = new MergeDocBuilder(options);
-        var storedCodeBuilder = new StoredCodeDocBuilder();
+        var storedCodeBuilder = new StoredCodeDocBuilder(options);
         var document = new SqlDocBuilder(new ISqlFragmentDocBuilder[]
             { builder, insertBuilder, updateBuilder, deleteBuilder, mergeBuilder, storedCodeBuilder })
             .BuildDocument(parsed, cancellationToken);
