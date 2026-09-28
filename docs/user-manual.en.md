@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and formatting for supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms are available through `TSqlFormatter.Core`, including CTEs, subqueries, `CASE`, window functions, `FROM`, `JOIN`, `APPLY`, and comments in supported positions. JSON settings and named profiles are available through `TSqlFormatter.Configuration`. The CLI formats SQL from stdin or one file to stdout and supports `--write`, `--check`, and automatic config discovery for files. An experimental VSIX formats the entire open `.sql` document, a statement containing a selection, or the statement nearest the caret and loads the nearest `.tsqlformatter.json`. A separate SSMS 22 VSIX currently contains only a package-load probe. There is no user-ready installable package.
+This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and formatting for supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms are available through `TSqlFormatter.Core`, including CTEs, subqueries, `CASE`, window functions, `FROM`, `JOIN`, `APPLY`, and comments in supported positions. JSON settings and named profiles are available through `TSqlFormatter.Configuration`. The CLI formats SQL from stdin or one file to stdout and supports `--write`, `--check`, and automatic config discovery for files. An experimental VSIX formats the entire open `.sql` document, a statement containing a selection, or the statement nearest the caret and loads the nearest `.tsqlformatter.json`. A separate SSMS 22 VSIX currently probes package loading and the active SQL editor. There is no user-ready installable package.
 
 ## Setup
 
@@ -16,9 +16,9 @@ dotnet test TSqlFormatter.sln --no-build --no-restore
 
 To use the parser in your C# project, add a reference to `src/TSqlFormatter.Core/TSqlFormatter.Core.csproj`.
 
-## SSMS 22: experimental loading probe
+## SSMS 22: experimental editor probe
 
-Build `src/TSqlFormatter.Ssms/TSqlFormatter.Ssms.csproj` in Release. The resulting `src/TSqlFormatter.Ssms/bin/Release/net472/TSqlFormatter.Ssms.vsix` targets 64-bit SSMS 22; install it into SSMS, not Visual Studio. After restarting SSMS, the Tools menu contains `T-SQL Formatter (SSMS): Load Probe`, which shows a package-loaded message. VSIX installation and package initialization were verified in SSMS 22.10.1 via ActivityLog. The command neither reads nor edits SQL; SSMS editor access, formatting, and options are not implemented yet. Microsoft does not officially support third-party SSMS extensions, so this VSIX is experimental only.
+Build `src/TSqlFormatter.Ssms/TSqlFormatter.Ssms.csproj` in Release. The resulting `src/TSqlFormatter.Ssms/bin/Release/net472/TSqlFormatter.Ssms.vsix` targets 64-bit SSMS 22; install it into SSMS, not Visual Studio. After restarting SSMS, the Tools menu contains `T-SQL Formatter (SSMS): Load Probe` and `T-SQL Formatter (SSMS): Query Editor Probe`. Open a `.sql` file in the query editor and invoke the latter command: it reads the active in-memory buffer, including unsaved changes, and displays only the file name and character count, not the SQL text. If another editor is active, it asks you to open a `.sql` file. Both menu visibility and the editor probe were verified in SSMS 22.10.1 without a database connection. Neither command edits SQL; formatting and options are not implemented yet. Microsoft does not officially support third-party SSMS extensions, so this VSIX is experimental only.
 
 ## Visual Studio: experimental command
 

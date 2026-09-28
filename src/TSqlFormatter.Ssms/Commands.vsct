@@ -13,6 +13,10 @@
         <Parent guid="guidCommandSet" id="grpSqlFormatter" />
         <Strings><ButtonText>T-SQL Formatter (SSMS): Load Probe</ButtonText></Strings>
       </Button>
+      <Button guid="guidCommandSet" id="cmdEditorProbe" priority="0x0110" type="Button">
+        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
+        <Strings><ButtonText>T-SQL Formatter (SSMS): Query Editor Probe</ButtonText></Strings>
+      </Button>
     </Buttons>
   </Commands>
   <Symbols>
@@ -20,6 +24,7 @@
     <GuidSymbol name="guidCommandSet" value="{4EE4F956-58EC-490D-9DCA-D2D198570CEC}">
       <IDSymbol name="grpSqlFormatter" value="0x1020" />
       <IDSymbol name="cmdLoadProbe" value="0x0100" />
+      <IDSymbol name="cmdEditorProbe" value="0x0101" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

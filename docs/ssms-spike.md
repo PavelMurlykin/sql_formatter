@@ -10,3 +10,10 @@ Target: SSMS 22.10.1 (build 22.10.12210.168), x64, installed as instance `411fbe
 - The package auto-loads in the `NoSolution` UI context. The Tools menu command is a separate manual probe; its click has not been automated.
 
 This confirms extension loading for this particular installation, not stability across SSMS versions or functionality of later spike stages.
+
+## P15-002 — active query editor
+
+- The command table must be embedded as `Menus.ctmenu` to match `ProvideMenuResource`; without the explicit VSCT resource name, the package loaded but the Tools commands were absent. The same resource metadata was corrected in the Visual Studio project.
+- After installing SSMS VSIX 0.2.4, both probe commands appeared in the SSMS 22.10.1 Tools menu.
+- With `ssms-editor-probe.sql` open and no database connection, Query Editor Probe reported its file name and 10 characters. After an unsaved edit, it reported 19 characters. The command reads the live `IVsTextLines` buffer and never logs SQL content.
+- Editing, formatting, options and compatibility across other SSMS versions remain unverified.
