@@ -10,6 +10,12 @@
     <ProjectCapability Include="CreateVsixContainer" />
     <PackageReference Include="Microsoft.VisualStudio.SDK" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.VSSDK.BuildTools" />
+    <PackageReference Include="Microsoft.SqlServer.TransactSql.ScriptDom" />
+    <PackageReference Include="Newtonsoft.Json">
+      <ForceIncludeInVSIX>true</ForceIncludeInVSIX>
+    </PackageReference>
+    <ProjectReference Include="..\TSqlFormatter.Core\TSqlFormatter.Core.csproj" />
+    <ProjectReference Include="..\TSqlFormatter.Configuration\TSqlFormatter.Configuration.csproj" />
     <Reference Include="System.Design" />
     <VSCTCompile Include="Commands.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>

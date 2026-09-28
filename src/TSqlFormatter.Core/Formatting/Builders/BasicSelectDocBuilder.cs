@@ -160,7 +160,7 @@ internal sealed class BasicSelectDocBuilder : ISqlFragmentDocBuilder
         {
             var order = query.OrderByClause;
             var leading = new LeadingCommentDocBuilder().Build(cursor, order.StartOffset, context);
-            var orderDoc = order.All ? null : new ListClauseDocBuilder().Build(order,
+            var orderDoc = OrderByClauseCompatibility.IsAll(order) ? null : new ListClauseDocBuilder().Build(order,
                 order.OrderByElements, @"ORDER\s+BY", _options.Clauses.OrderByLayout, context);
             if (leading is null || orderDoc is null)
             {

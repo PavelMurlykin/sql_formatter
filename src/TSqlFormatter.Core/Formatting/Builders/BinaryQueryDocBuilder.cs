@@ -57,7 +57,7 @@ internal sealed class BinaryQueryDocBuilder
         {
             var order = binary.OrderByClause;
             var gap = source.Substring(cursor, order.StartOffset - cursor);
-            var orderDoc = order.All ? null : new ListClauseDocBuilder().Build(order,
+            var orderDoc = OrderByClauseCompatibility.IsAll(order) ? null : new ListClauseDocBuilder().Build(order,
                 order.OrderByElements, @"ORDER\s+BY", _options.Clauses.OrderByLayout, context);
             if (!string.IsNullOrWhiteSpace(gap) || orderDoc is null) return null;
             parts.Add(HardLineDoc.Instance);

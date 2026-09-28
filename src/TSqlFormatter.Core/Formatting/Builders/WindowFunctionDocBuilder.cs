@@ -78,7 +78,7 @@ internal sealed class WindowFunctionDocBuilder
         if (order is not null)
         {
             var gap = source.Substring(cursor, order.StartOffset - cursor);
-            var orderDoc = order.All ? null : new ListClauseDocBuilder().Build(order,
+            var orderDoc = OrderByClauseCompatibility.IsAll(order) ? null : new ListClauseDocBuilder().Build(order,
                 order.OrderByElements, @"ORDER\s+BY", _options.Clauses.OrderByLayout, context);
             if (!string.IsNullOrWhiteSpace(gap) || orderDoc is null) return null;
             content.Add(HardLineDoc.Instance);

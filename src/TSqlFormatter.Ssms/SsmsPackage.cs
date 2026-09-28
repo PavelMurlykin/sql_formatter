@@ -5,7 +5,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.TextManager.Interop;
+using Microsoft.VisualStudio.Threading;
+using TSqlFormatter.Configuration;
+using TSqlFormatter.Core.Formatting;
+using TSqlFormatter.Core.Parsing;
 
 namespace TSqlFormatter.Ssms;
 
@@ -19,16 +26,22 @@ public sealed class SsmsPackage : AsyncPackage
     public const string PackageGuid = "908068E6-40D9-4543-AB9F-1B952930F1E3";
     private static readonly Guid CommandSet = new("4EE4F956-58EC-490D-9DCA-D2D198570CEC");
     private IVsTextManager? textManager;
+    private IVsEditorAdaptersFactoryService? editorAdapters;
+    private ITextUndoHistoryRegistry? undoRegistry;
 
     protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
     {
         await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
         textManager = await GetServiceAsync(typeof(SVsTextManager)) as IVsTextManager;
+        var components = await GetServiceAsync(typeof(SComponentModel)) as IComponentModel;
+        editorAdapters = components?.GetService<IVsEditorAdaptersFactoryService>();
+        undoRegistry = components?.GetService<ITextUndoHistoryRegistry>();
         ActivityLog.LogInformation("T-SQL Formatter SSMS", "SSMS spike package initialized.");
         if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService commands)
         {
             commands.AddCommand(new MenuCommand(ExecuteLoadProbe, new CommandID(CommandSet, 0x0100)));
             commands.AddCommand(new MenuCommand(ExecuteEditorProbe, new CommandID(CommandSet, 0x0101)));
+            commands.AddCommand(new MenuCommand(ExecuteFormatDocument, new CommandID(CommandSet, 0x0200)));
         }
     }
 
@@ -51,5 +64,68 @@ public sealed class SsmsPackage : AsyncPackage
         VsShellUtilities.ShowMessageBox(this, message, "T-SQL Formatter (SSMS)",
             OLEMSGICON.OLEMSGICON_INFO, OLEMSGBUTTON.OLEMSGBUTTON_OK,
             OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+    }
+
+    private void ExecuteFormatDocument(object sender, EventArgs e)
+    {
+        JoinableTaskFactory.RunAsync(FormatDocumentAsync).FileAndForget("TSqlFormatter.Ssms/FormatDocument");
+    }
+
+    private async Task FormatDocumentAsync()
+    {
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (!ActiveQueryEditor.TryRead(textManager, out var editor) || editorAdapters == null || undoRegistry == null)
+        {
+            ShowMessage("Open a .sql file in the SSMS query editor first.", true);
+            return;
+        }
+
+        var snapshot = editor.CaptureSnapshot(editorAdapters);
+        if (snapshot == null || snapshot.Length > 16 * 1024 * 1024)
+        {
+            ShowMessage("The SQL buffer is unavailable or exceeds 16 Mi characters.", true);
+            return;
+        }
+
+        try
+        {
+            string source = snapshot.GetText();
+            var configured = await Task.Run(() =>
+            {
+                var config = new SqlFormatterConfigurationResolver().ResolveForSqlFile(editor.Path);
+                if (!config.Succeeded) return (Result: (FormatResult?)null, Error: config.Diagnostics[0]);
+                var result = new ScriptDomSqlFormatter().Format(source, config.Options!, new FormatRequest(), DisposalToken);
+                return (Result: result, Error: (FormatterDiagnostic?)null);
+            }, DisposalToken);
+            await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+            if (configured.Error != null)
+                ShowMessage($"{configured.Error.Code}: {configured.Error.Message}", true);
+            else if (configured.Result is not { } result || !result.ParseSucceeded ||
+                     System.Linq.Enumerable.Any(result.Diagnostics, d => d.Severity == FormatterDiagnosticSeverity.Error))
+                ShowMessage("SQL could not be parsed; no edit was applied.", true);
+            else if (!result.Changed)
+                ShowMessage("The SQL document is already formatted.");
+            else if (!ActiveQueryEditor.TryRead(textManager, out var current) ||
+                     !ReferenceEquals(current.Buffer, editor.Buffer) ||
+                     !editor.TryApplyDocument(snapshot, result.Text, editorAdapters, undoRegistry))
+                ShowMessage("The SQL buffer changed during formatting; no edit was applied.", true);
+            else
+                ShowMessage("SQL document formatted. Use Undo to revert.");
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex)
+        {
+            await JoinableTaskFactory.SwitchToMainThreadAsync();
+            ShowMessage($"Formatting failed: {ex.Message}", true);
+        }
+    }
+
+    private void ShowMessage(string message, bool error = false)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        ActivityLog.LogInformation("T-SQL Formatter SSMS", message);
+        VsShellUtilities.ShowMessageBox(this, message, "T-SQL Formatter (SSMS)",
+            error ? OLEMSGICON.OLEMSGICON_CRITICAL : OLEMSGICON.OLEMSGICON_INFO,
+            OLEMSGBUTTON.OLEMSGBUTTON_OK, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
     }
 }
