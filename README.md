@@ -68,8 +68,11 @@ pinned in `Directory.Packages.props`.
 
 The test suite includes real CLI-process integration checks for stdout, exit codes,
 file writing, and configuration discovery, plus seeded property/fuzz checks for
-formatting and configuration parsing. Add minimal crash reproducers to
-`tests/TSqlFormatter.Core.Tests/CrashCorpus/`; they run with the normal suite.
+formatting and configuration parsing. The representative `ValidCorpus` and malformed
+`CrashCorpus` cases run with the normal suite. Add minimal crash reproducers to
+`tests/TSqlFormatter.Core.Tests/CrashCorpus/`.
+The [large-procedure baseline](docs/performance/large-procedure-baseline.md) is a
+separate reproducible, non-gating smoke measurement.
 See the architecture decision records in `docs/adr/`.
 
 ## Projects

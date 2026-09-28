@@ -7,4 +7,10 @@ if (args.Contains("--editor-validation", StringComparer.Ordinal))
     return;
 }
 
+if (args.Contains("--large-procedure-validation", StringComparer.Ordinal))
+{
+    LargeProcedureValidation.Run();
+    return;
+}
+
 BenchmarkSwitcher.FromAssembly(typeof(DocRendererBenchmarks).Assembly).Run(args);

@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <None Include="CrashCorpus\*.sql" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="ValidCorpus\*.sql" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
