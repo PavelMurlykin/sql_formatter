@@ -1,0 +1,64 @@
+name: Build and test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  core-cli:
+    name: Core and CLI (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-2025]
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - name: Restore Core tests
+        run: dotnet restore tests/TSqlFormatter.Core.Tests/TSqlFormatter.Core.Tests.csproj
+      - name: Restore golden tests
+        run: dotnet restore tests/TSqlFormatter.GoldenTests/TSqlFormatter.GoldenTests.csproj
+      - name: Test Core and CLI
+        run: dotnet test tests/TSqlFormatter.Core.Tests/TSqlFormatter.Core.Tests.csproj -c Release --no-restore
+      - name: Test golden cases
+        run: dotnet test tests/TSqlFormatter.GoldenTests/TSqlFormatter.GoldenTests.csproj -c Release --no-restore
+      - name: Pack CLI tool
+        run: dotnet pack src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj -c Release --no-restore -o "$env:RUNNER_TEMP/tsqlformatter-package"
+      - name: Install CLI tool
+        run: dotnet tool install TSqlFormatter.Tool --tool-path "$env:RUNNER_TEMP/tsqlformatter-bin" --source "$env:RUNNER_TEMP/tsqlformatter-package"
+      - name: Smoke-test installed CLI tool
+        run: |
+          $tool = Join-Path $env:RUNNER_TEMP 'tsqlformatter-bin/tsqlformat'
+          if ($IsWindows) { $tool += '.exe' }
+          $formatted = 'select 1;' | & $tool -
+          if ($LASTEXITCODE -ne 0 -or ($formatted | Out-String).Trim() -ne 'SELECT 1;') {
+            throw "Installed tool did not format the smoke test: $formatted"
+          }
+
+  vsix:
+    name: VSIX package (Windows 2025 / VS 2026)
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - name: Restore solution
+        run: dotnet restore TSqlFormatter.sln
+      - name: Build solution
+        run: dotnet build TSqlFormatter.sln -c Release --no-restore
+      - name: Verify Visual Studio VSIX
+        shell: pwsh
+        run: ./scripts/Verify-Vsix.ps1

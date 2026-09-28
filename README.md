@@ -45,9 +45,11 @@ dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source a
 .\artifacts\tool-bin\tsqlformat.exe query.sql --check
 ```
 
-The package is not published. Inactive GitHub Actions, Azure Pipelines, and
-pre-commit examples are under [`examples/ci`](examples/ci/); set their SQL
-directory before enabling them. The CI examples build the tool from source.
+The package is not published. The active [GitHub Actions workflow](.github/workflows/ci.yml)
+builds and tests Core/CLI on Linux and Windows, verifies the VSIX package on Windows,
+and smoke-tests the locally packed CLI tool. It does not check a user SQL directory.
+Optional GitHub Actions, Azure Pipelines, and pre-commit examples are under
+[`examples/ci`](examples/ci/); set their SQL directory before enabling them.
 
 ## Test
 
