@@ -20,6 +20,7 @@ namespace TSqlFormatter.Ssms;
 [ProvideAutoLoad(UIContextGuids80.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
 [ProvideAutoLoad(UIContextGuids80.SolutionExists, PackageAutoLoadFlags.BackgroundLoad)]
 [ProvideMenuResource("Menus.ctmenu", 1)]
+[ProvideOptionPage(typeof(SsmsOptionsPage), "T-SQL Formatter (SSMS)", "General", 0, 0, true)]
 [Guid(PackageGuid)]
 public sealed class SsmsPackage : AsyncPackage
 {
@@ -124,9 +125,10 @@ public sealed class SsmsPackage : AsyncPackage
         try
         {
             string source = snapshot.GetText();
+            FormattingOptions defaults = ((SsmsOptionsPage)GetDialogPage(typeof(SsmsOptionsPage))).CreateOptions();
             var configured = await Task.Run(() =>
             {
-                var config = new SqlFormatterConfigurationResolver().ResolveForSqlFile(editor.Path);
+                var config = new SqlFormatterConfigurationResolver().ResolveForSqlFile(editor.Path, defaults);
                 if (!config.Succeeded) return (Result: (FormatResult?)null, Error: config.Diagnostics[0]);
                 var result = new ScriptDomSqlFormatter().Format(source, config.Options!,
                     target == null ? new FormatRequest() : new FormatRequest(scope, target), DisposalToken);

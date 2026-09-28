@@ -30,3 +30,9 @@ This confirms extension loading for this particular installation, not stability 
 - SSMS VSIX 0.4.0 adds Format Selection and Format Statement. Each uses a single scoped `FormatResult` edit, maps the selection/caret through that edit, and completes one editor Undo transaction only after applying the replacement.
 - In SSMS 22.10.1, selecting the first of two `select` statements formatted only the first, kept its text selected, and one Ctrl+Z restored it. With the caret in the second statement, Format Statement changed only the second, left the caret on its line, and one Ctrl+Z restored it.
 - The SQL test document remains unsaved; other SSMS versions and more complex editor states have not been checked.
+
+## P15-005 — options
+
+- SSMS VSIX 0.5.0 registers a per-user `T-SQL Formatter (SSMS) → General` options page with Default/Compact/Expanded profiles and Default-profile controls for line width/ending, final newline, indentation, tabs, and keyword casing. A nearby JSON config still takes precedence.
+- In SSMS 22.10.1, the page appeared under Tools → Options. Setting Keyword casing to Lower made Format Document turn a temporary uppercase `SELECT` into lowercase `select`. The original Upper setting was restored, and the temporary SQL edit was discarded without saving.
+- This verifies one option-to-command path, not every option or profile on this host.
