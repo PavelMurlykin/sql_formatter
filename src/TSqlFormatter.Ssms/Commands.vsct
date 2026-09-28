@@ -9,14 +9,6 @@
       </Group>
     </Groups>
     <Buttons>
-      <Button guid="guidCommandSet" id="cmdLoadProbe" priority="0x0100" type="Button">
-        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
-        <Strings><ButtonText>T-SQL Formatter (SSMS): Load Probe</ButtonText></Strings>
-      </Button>
-      <Button guid="guidCommandSet" id="cmdEditorProbe" priority="0x0110" type="Button">
-        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
-        <Strings><ButtonText>T-SQL Formatter (SSMS): Query Editor Probe</ButtonText></Strings>
-      </Button>
       <Button guid="guidCommandSet" id="cmdFormatDocument" priority="0x0120" type="Button">
         <Parent guid="guidCommandSet" id="grpSqlFormatter" />
         <Strings><ButtonText>T-SQL Formatter (SSMS): Format Document</ButtonText></Strings>
@@ -35,8 +27,6 @@
     <GuidSymbol name="guidPackage" value="{908068E6-40D9-4543-AB9F-1B952930F1E3}" />
     <GuidSymbol name="guidCommandSet" value="{4EE4F956-58EC-490D-9DCA-D2D198570CEC}">
       <IDSymbol name="grpSqlFormatter" value="0x1020" />
-      <IDSymbol name="cmdLoadProbe" value="0x0100" />
-      <IDSymbol name="cmdEditorProbe" value="0x0101" />
       <IDSymbol name="cmdFormatDocument" value="0x0200" />
       <IDSymbol name="cmdFormatSelection" value="0x0201" />
       <IDSymbol name="cmdFormatStatement" value="0x0202" />

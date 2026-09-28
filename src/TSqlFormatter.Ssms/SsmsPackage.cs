@@ -40,33 +40,10 @@ public sealed class SsmsPackage : AsyncPackage
         ActivityLog.LogInformation("T-SQL Formatter SSMS", "SSMS spike package initialized.");
         if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService commands)
         {
-            commands.AddCommand(new MenuCommand(ExecuteLoadProbe, new CommandID(CommandSet, 0x0100)));
-            commands.AddCommand(new MenuCommand(ExecuteEditorProbe, new CommandID(CommandSet, 0x0101)));
             commands.AddCommand(new MenuCommand(ExecuteFormatDocument, new CommandID(CommandSet, 0x0200)));
             commands.AddCommand(new MenuCommand(ExecuteFormatSelection, new CommandID(CommandSet, 0x0201)));
             commands.AddCommand(new MenuCommand(ExecuteFormatStatement, new CommandID(CommandSet, 0x0202)));
         }
-    }
-
-    private void ExecuteLoadProbe(object sender, EventArgs e)
-    {
-        ThreadHelper.ThrowIfNotOnUIThread();
-        ActivityLog.LogInformation("T-SQL Formatter SSMS", "Load Probe command executed.");
-        VsShellUtilities.ShowMessageBox(this, "SSMS spike package loaded.", "T-SQL Formatter (SSMS)",
-            OLEMSGICON.OLEMSGICON_INFO, OLEMSGBUTTON.OLEMSGBUTTON_OK,
-            OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-    }
-
-    private void ExecuteEditorProbe(object sender, EventArgs e)
-    {
-        ThreadHelper.ThrowIfNotOnUIThread();
-        string message = ActiveQueryEditor.TryRead(textManager, out ActiveQueryEditor editor)
-            ? $"Active SQL query: {System.IO.Path.GetFileName(editor.Path)} ({editor.Text.Length} characters)."
-            : "Open a .sql file in the SSMS query editor first.";
-        ActivityLog.LogInformation("T-SQL Formatter SSMS", message);
-        VsShellUtilities.ShowMessageBox(this, message, "T-SQL Formatter (SSMS)",
-            OLEMSGICON.OLEMSGICON_INFO, OLEMSGBUTTON.OLEMSGBUTTON_OK,
-            OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
     }
 
     private void ExecuteFormatDocument(object sender, EventArgs e)
@@ -141,7 +118,11 @@ public sealed class SsmsPackage : AsyncPackage
                      System.Linq.Enumerable.Any(result.Diagnostics, d => d.Severity == FormatterDiagnosticSeverity.Error))
                 ShowMessage("SQL could not be parsed; no edit was applied.", true);
             else if (!result.Changed)
-                ShowMessage("The SQL target is already formatted.");
+            {
+                var diagnostic = System.Linq.Enumerable.FirstOrDefault(result.Diagnostics);
+                ShowMessage(diagnostic == null ? "The SQL target is already formatted."
+                    : $"{diagnostic.Code}: {diagnostic.Message}", diagnostic != null);
+            }
             else if (!ActiveQueryEditor.TryRead(textManager, out var current) ||
                      !ReferenceEquals(current.Buffer, editor.Buffer) ||
                      (scope == FormatScope.Document
