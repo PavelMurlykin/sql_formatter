@@ -16,5 +16,5 @@ steps:
   - script: |
       dotnet pack src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj -c Release -o "$(Agent.TempDirectory)/tsqlformatter-package"
       dotnet tool install TSqlFormatter.Tool --tool-path "$(Agent.TempDirectory)/tsqlformatter-bin" --source "$(Agent.TempDirectory)/tsqlformatter-package"
-      python3 examples/ci/check_sql_files.py --tool "$(Agent.TempDirectory)/tsqlformatter-bin/tsqlformat" --directory database
+      "$(Agent.TempDirectory)/tsqlformatter-bin/tsqlformat" database --check
     displayName: Check SQL formatting

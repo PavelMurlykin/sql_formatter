@@ -2,7 +2,7 @@
 
 ## Current status
 
-This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and formatting for supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms are available through `TSqlFormatter.Core`, including CTEs, subqueries, `CASE`, window functions, `FROM`, `JOIN`, `APPLY`, and simple control-flow and stored-code forms. JSON settings, named profiles, and a limited `.editorconfig` subset are available through `TSqlFormatter.Configuration`. The CLI formats SQL from stdin or one file to stdout and supports `--write`, `--check`, and automatic config discovery for files. The CLI can be built and installed as a local preview `dotnet tool`; no stable package has been published. An experimental VSIX formats the entire open `.sql` document, a statement containing a selection, or the statement nearest the caret and loads file configuration. A separate SSMS 22 VSIX can format the active `.sql` document experimentally.
+This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and formatting for supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms are available through `TSqlFormatter.Core`, including CTEs, subqueries, `CASE`, window functions, `FROM`, `JOIN`, `APPLY`, and simple control-flow and stored-code forms. JSON settings, named profiles, and a limited `.editorconfig` subset are available through `TSqlFormatter.Configuration`. The CLI formats SQL from stdin or one file to stdout; multiple files and directories support `--write` and `--check` with configuration discovery for each file. The CLI can be built and installed as a local preview `dotnet tool`; no stable package has been published. An experimental VSIX formats the entire open `.sql` document, a statement containing a selection, or the statement nearest the caret and loads file configuration. A separate SSMS 22 VSIX can format the active `.sql` document experimentally.
 
 ### Control flow and stored code
 
@@ -26,17 +26,17 @@ To use the parser in your C# project, add a reference to `src/TSqlFormatter.Core
 
 ## Local dotnet tool and CI examples
 
-The CLI packs as `TSqlFormatter.Tool` version `0.1.0-preview.2` with the `tsqlformat` command. Building needs a .NET 10 SDK and running needs a .NET 10 Runtime; a .NET 8 Runtime alone is insufficient. From the repository root, build and install into a Git-ignored directory (PowerShell):
+The CLI packs as `TSqlFormatter.Tool` version `0.1.0-preview.3` with the `tsqlformat` command. Building needs a .NET 10 SDK and running needs a .NET 10 Runtime; a .NET 8 Runtime alone is insufficient. From the repository root, build and install into a Git-ignored directory (PowerShell):
 
 ```powershell
 dotnet pack src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj -c Release -o artifacts/tool
-dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source artifacts/tool --version 0.1.0-preview.2
+dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source artifacts/tool --version 0.1.0-preview.3
 .\artifacts\tool-bin\tsqlformat.exe query.sql --check
 ```
 
-The tool is not published on NuGet; these commands install only the locally built package, so the CI examples assume this project's source tree is available. When upgrading from preview `0.1.0-preview.1`, install the .NET 10 Runtime and reinstall the package. `tsqlformat` still accepts stdin or one SQL file, not a directory; for each file, `--check` returns `0` (formatted), `1` (formatting needed), or `2` (error). Packaging does not change those rules.
+The tool is not published on NuGet; these commands install only the locally built package, so the CI examples assume this project's source tree is available. When upgrading from preview `0.1.0-preview.1`, install the .NET 10 Runtime and reinstall the package. `tsqlformat` accepts stdin or one SQL file for stdout, and multiple files or a directory with `--check` or `--write`. For each file, `--check` returns `0` (formatted), `1` (formatting needed), or `2` (error); batch exit-code rules are described below.
 
-`examples/ci/` contains a [GitHub Actions example](../examples/ci/github-actions.yml), an [Azure Pipelines example](../examples/ci/azure-pipelines.yml), a [pre-commit example](../examples/ci/.pre-commit-config.yaml), and their shared `check_sql_files.py` script. They are not active in this repository. Replace `database` with your SQL directory and copy the YAML into the appropriate project location; once copied, the CI examples run on pushes/PRs to the main branch. The CI examples build and install the local package, passing its path through `--tool`; pre-commit requires `tsqlformat` installed and its directory on `PATH` beforehand. The script checks without writing: exit code `0` means all files are formatted, `1` means changes are needed, and `2` means an error, missing tool, or missing/empty directory. For pre-commit it checks the passed `.sql` files; with `--directory database` it finds SQL files recursively. Python 3 is needed for the script and pre-commit.
+`examples/ci/` contains optional [GitHub Actions](../examples/ci/github-actions.yml), [Azure Pipelines](../examples/ci/azure-pipelines.yml), and [pre-commit](../examples/ci/.pre-commit-config.yaml) examples plus the helper `check_sql_files.py`. Checking user SQL through these examples is not active in this repository. Replace `database` with your SQL directory and copy the YAML into the appropriate project location. The GitHub Actions and Azure Pipelines examples build the local package and run `tsqlformat database --check` directly, without Python. Pre-commit still uses Python 3 and the helper for passed `.sql` files; install `tsqlformat` beforehand and add its directory to `PATH`. The helper returns `0` if all files are formatted, `1` if changes are needed, and `2` on errors or a missing tool.
 
 The repository also has an active [GitHub Actions workflow](../.github/workflows/ci.yml) for pushes/PRs to `main` and manual runs. It builds and tests Core/CLI on Linux and Windows, packs, installs, and smoke-tests the CLI, and builds the solution and verifies the Visual Studio VSIX package on Windows. The workflow does not publish a package, run the extension inside an IDE, or check user SQL files. Making checks mandatory for merging requires separate GitHub branch-protection settings.
 
@@ -82,7 +82,7 @@ The automation limits follow a [synthetic local measurement](performance/editor-
 
 Formatting status and errors appear in the Visual Studio status bar and the **T-SQL Formatter** Output pane; errors activate that pane. The messages include diagnostic codes when available. Formatting commands no longer open modal message boxes, while the three diagnostic probe commands still do. This notification behavior has been build-verified but still needs a manual check in an installed Visual Studio instance.
 
-## CLI: stdin or one file → stdout
+## CLI: stdin, files, and directories
 
 After building, pass SQL through stdin from the repository root:
 
@@ -98,7 +98,7 @@ To read one `query.sql` file from the current directory:
 dotnet run --project src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj --no-restore -- query.sql
 ```
 
-The CLI reads the file as UTF-8 (including BOM support), writes formatted SQL to stdout, and does not modify the source file. A missing or unreadable file returns code `2`, writes an error to stderr, and leaves stdout empty. Multiple files in one invocation are not supported yet.
+The CLI reads one file as UTF-8 (including BOM support), writes formatted SQL to stdout, and does not modify the source file. A missing or unreadable file returns code `2`, writes an error to stderr, and leaves stdout empty. Multiple files without `--check` or `--write` are rejected: there is no combined stdout format.
 
 To write the result back to the same file, add `--write` after its path:
 
@@ -116,6 +116,20 @@ $LASTEXITCODE
 ```
 
 Code `0` means the file is already formatted; `1` means formatting is needed; `2` means a SQL, configuration, read, or argument error. `--check` never writes the file and leaves stdout empty. It is not available for stdin (`-`) yet.
+
+### Batch checking and writing
+
+A directory or multiple files require `--check` or `--write`; without either mode the CLI returns `2`. For example:
+
+```powershell
+tsqlformat ./sql --check
+tsqlformat first.sql second.sql --write
+tsqlformat ./sql --check --exclude generated --exclude reports/legacy.sql
+```
+
+Directories are scanned recursively for `.sql` extensions case-insensitively, including hidden files; file and directory links are not followed. An explicitly named file may have any extension. Duplicate and overlapping paths are processed once in sorted order. Repeat `--exclude` only with a directory operand: it is a literal path relative to each specified directory, naming a file or subtree. The named path and everything beneath a named directory are skipped; globs, absolute paths, and `..` are not supported. Path matching is case-insensitive on Windows and case-sensitive elsewhere. A directory with no selected SQL files reports `TSF9000` and makes the overall exit code `2`.
+
+Batch `--check` keeps stdout empty and lists files needing changes on stderr as `Would reformat: path`. The overall exit code is `2` if any path, SQL, or configuration fails; otherwise `1` if any file needs formatting; otherwise `0`. Batch `--write` also keeps stdout empty and handles files independently: an error in one file does not prevent successful files from being written, but the failing file is left untouched. Its overall code is `2` on any error, otherwise `0`; there is no transaction across the batch. Each file uses its own discovered configuration. A single file without a mode still writes its result to stdout.
 
 ### Configuration discovery for files
 
@@ -700,6 +714,6 @@ When parsing fails, `BuildDocument` also returns the unchanged source. You can r
 
 ## Limitations
 
-- The CLI accepts stdin or one file; `--write`, `--check`, and configuration discovery apply to files only. Custom settings flags are not implemented yet.
+- The CLI writes only stdin or one file to stdout; directories and multiple files require `--write` or `--check`. Configuration discovery applies to files; custom settings flags are not implemented yet.
 - Structural formatting covers only the `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms described above; other constructs retain their original layout.
 - The renderer accepts a prepared `Doc` tree; it does not parse SQL on its own.

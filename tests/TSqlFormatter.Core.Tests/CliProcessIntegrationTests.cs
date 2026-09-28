@@ -78,6 +78,44 @@ public sealed class CliProcessIntegrationTests
         Assert.Contains("TSF1000", run.Stderr);
     }
 
+    [Fact]
+    public async Task Directory_check_and_write_work_in_the_real_process()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"tsqlformatter-process-batch-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(Path.Combine(root, "nested"));
+        var first = Path.Combine(root, "a.sql");
+        var second = Path.Combine(root, "nested", "b.SQL");
+        await File.WriteAllTextAsync(first, "select 1");
+        await File.WriteAllTextAsync(second, "select 2");
+        try
+        {
+            var check = await RunProcessAsync(null, root, "--check");
+            Assert.Equal(1, check.ExitCode);
+            Assert.Equal(string.Empty, check.Stdout);
+            Assert.Contains("Would reformat:", check.Stderr);
+
+            var write = await RunProcessAsync(null, root, "--write");
+            Assert.Equal(0, write.ExitCode);
+            Assert.Equal(string.Empty, write.Stdout);
+            Assert.Equal("SELECT 1", await File.ReadAllTextAsync(first));
+            Assert.Equal("SELECT 2", await File.ReadAllTextAsync(second));
+
+            var clean = await RunProcessAsync(null, root, "--check");
+            Assert.Equal(0, clean.ExitCode);
+            Assert.Equal(string.Empty, clean.Stdout);
+            Assert.Equal(string.Empty, clean.Stderr);
+        }
+        finally
+        {
+            var absoluteRoot = Path.GetFullPath(root);
+            var tempRoot = Path.GetFullPath(Path.GetTempPath()).TrimEnd(Path.DirectorySeparatorChar) +
+                Path.DirectorySeparatorChar;
+            if (!absoluteRoot.StartsWith(tempRoot, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Integration fixture escaped the temp directory.");
+            Directory.Delete(absoluteRoot, recursive: true);
+        }
+    }
+
     private static async Task<ProcessResult> RunProcessAsync(string? stdin, params string[] args)
     {
         var start = new ProcessStartInfo("dotnet")
