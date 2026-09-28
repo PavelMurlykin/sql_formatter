@@ -16,7 +16,7 @@ Current usage: [English manual](docs/user-manual.en.md) ·
 
 ## Prerequisites
 
-- .NET SDK 8.0 or newer
+- .NET 10 SDK (the repository accepts newer 10.0 feature bands)
 - For the VSIX project and the full solution build: Windows and Visual Studio 2026 with the Visual Studio extension development component
 
 ## Build
@@ -41,7 +41,7 @@ To build and install the preview tool from this repository:
 
 ```powershell
 dotnet pack src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj -c Release -o artifacts/tool
-dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source artifacts/tool --version 0.1.0-preview.1
+dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source artifacts/tool --version 0.1.0-preview.2
 .\artifacts\tool-bin\tsqlformat.exe query.sql --check
 ```
 
@@ -72,10 +72,10 @@ See the architecture decision records in `docs/adr/`.
 
 - `src/TSqlFormatter.Core` — parser, token helpers, line map, and layout engine (`netstandard2.0`).
 - `src/TSqlFormatter.Configuration` — JSON settings, profiles, and discovery (`netstandard2.0`).
-- `src/TSqlFormatter.Cli` — command-line formatter (`net8.0`).
-- `tests/TSqlFormatter.Core.Tests` — Core, configuration, and CLI tests (`net8.0`).
-- `tests/TSqlFormatter.GoldenTests` — golden formatting tests (`net8.0`).
-- `benchmarks/TSqlFormatter.Benchmarks` — renderer microbenchmarks (`net8.0`).
+- `src/TSqlFormatter.Cli` — command-line formatter (`net10.0`; .NET 10 runtime required).
+- `tests/TSqlFormatter.Core.Tests` — Core, configuration, and CLI tests (`net10.0`).
+- `tests/TSqlFormatter.GoldenTests` — golden formatting tests (`net10.0`).
+- `benchmarks/TSqlFormatter.Benchmarks` — renderer microbenchmarks (`net10.0`).
 
 Further formatting rules and CLI options are planned for later roadmap tasks. See
 the manuals for the supported subset.

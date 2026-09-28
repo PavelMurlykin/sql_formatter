@@ -12,7 +12,7 @@ steps:
   - task: UseDotNet@2
     inputs:
       packageType: sdk
-      version: '8.0.x'
+      version: '10.0.x'
   - script: |
       dotnet pack src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj -c Release -o "$(Agent.TempDirectory)/tsqlformatter-package"
       dotnet tool install TSqlFormatter.Tool --tool-path "$(Agent.TempDirectory)/tsqlformatter-bin" --source "$(Agent.TempDirectory)/tsqlformatter-package"

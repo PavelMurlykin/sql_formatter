@@ -4,6 +4,8 @@ Status: Accepted
 
 Date: 2026-09-22
 
+The CLI/test target recorded here was superseded by [ADR 0007](0007-cli-net10-runtime.md); the Core compatibility decision remains active.
+
 ## Context
 
 Core must run independently of Visual Studio and SSMS. Future in-process editor hosts may require .NET Framework compatibility, while the CLI targets .NET 8. Microsoft [recommends `netstandard2.0` for libraries that need broad compatibility](https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/cross-platform-targeting), and the current [ScriptDom package](https://www.nuget.org/packages/Microsoft.SqlServer.TransactSql.ScriptDom/180.107.0) provides a `netstandard2.0` asset.

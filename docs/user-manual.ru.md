@@ -14,7 +14,7 @@ CLI и команды редактора используют один движ�
 
 ## Подготовка
 
-Нужны исходный код проекта и .NET SDK 8.0 или новее. Для сборки всего solution, включая каркас VSIX, дополнительно нужны Windows, Visual Studio 2026 с компонентом Visual Studio extension development и доступ к NuGet. Для работы только с CLI можно собирать проект `src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj` без Visual Studio. Из корня репозитория выполните:
+Нужны исходный код проекта и .NET 10 SDK (допускаются новые feature-band версии 10.0). Для сборки всего solution, включая каркас VSIX, дополнительно нужны Windows, Visual Studio 2026 с компонентом Visual Studio extension development и доступ к NuGet. Для работы только с CLI можно собирать проект `src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj` без Visual Studio. Общий Core и Configuration остаются совместимы с `netstandard2.0`, а расширения IDE — с `net472`. Из корня репозитория выполните:
 
 ```powershell
 dotnet restore TSqlFormatter.sln
@@ -26,15 +26,15 @@ dotnet test TSqlFormatter.sln --no-build --no-restore
 
 ## Локальный dotnet tool и примеры CI
 
-CLI упаковывается как `TSqlFormatter.Tool` версии `0.1.0-preview.1` с командой `tsqlformat`. Нужны .NET SDK 8+ для сборки и .NET Runtime 8 для запуска. Из корня репозитория соберите пакет и установите его в игнорируемый Git каталог (PowerShell):
+CLI упаковывается как `TSqlFormatter.Tool` версии `0.1.0-preview.2` с командой `tsqlformat`. Нужны .NET 10 SDK для сборки и .NET 10 Runtime для запуска; установленного только .NET 8 Runtime недостаточно. Из корня репозитория соберите пакет и установите его в игнорируемый Git каталог (PowerShell):
 
 ```powershell
 dotnet pack src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj -c Release -o artifacts/tool
-dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source artifacts/tool --version 0.1.0-preview.1
+dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source artifacts/tool --version 0.1.0-preview.2
 .\artifacts\tool-bin\tsqlformat.exe query.sql --check
 ```
 
-Инструмент не опубликован в NuGet; команды выше устанавливают только локально собранный пакет, поэтому примеры CI предполагают наличие исходного кода этого проекта. `tsqlformat` по-прежнему принимает stdin либо один SQL-файл, а не каталог; для каждого файла `--check` возвращает `0` (готово), `1` (нужно форматирование) или `2` (ошибка). Пакет не меняет эти правила.
+Инструмент не опубликован в NuGet; команды выше устанавливают только локально собранный пакет, поэтому примеры CI предполагают наличие исходного кода этого проекта. При переходе с предварительной версии `0.1.0-preview.1` установите .NET 10 Runtime и переустановите пакет. `tsqlformat` по-прежнему принимает stdin либо один SQL-файл, а не каталог; для каждого файла `--check` возвращает `0` (готово), `1` (нужно форматирование) или `2` (ошибка). Пакет не меняет эти правила.
 
 В `examples/ci/` находятся [пример GitHub Actions](../examples/ci/github-actions.yml), [пример Azure Pipelines](../examples/ci/azure-pipelines.yml), [пример pre-commit](../examples/ci/.pre-commit-config.yaml) и общий скрипт `check_sql_files.py`. Они не активированы в этом репозитории. Перед использованием замените каталог `database` на свой SQL-каталог и скопируйте YAML в соответствующее место проекта; после копирования примеры CI запускаются при push/PR в основную ветку. CI-примеры сами собирают и устанавливают локальный пакет, передавая путь к нему через `--tool`; pre-commit требует заранее установить `tsqlformat` и добавить каталог инструмента в `PATH`. Скрипт проверяет файлы без записи: код `0` — все готовы, `1` — нужны изменения, `2` — ошибка, отсутствующий инструмент или пустой/несуществующий каталог. Для pre-commit он проверяет переданные `.sql`-файлы; с `--directory database` рекурсивно ищет SQL-файлы. Python 3 нужен для скрипта и pre-commit.
 

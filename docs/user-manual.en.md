@@ -14,7 +14,7 @@ JSON configuration can enable `alignment.selectAliases`, `alignment.setAssignmen
 
 ## Setup
 
-You need the project source and .NET SDK 8.0 or newer. Building the whole solution, including the VSIX scaffold, also requires Windows, Visual Studio 2026 with the Visual Studio extension development component, and NuGet access. To use only the CLI, you can build `src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj` without Visual Studio. Run these commands from the repository root:
+You need the project source and a .NET 10 SDK (newer 10.0 feature bands are accepted). Building the whole solution, including the VSIX scaffold, also requires Windows, Visual Studio 2026 with the Visual Studio extension development component, and NuGet access. To use only the CLI, you can build `src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj` without Visual Studio. The shared Core and Configuration remain compatible with `netstandard2.0`, and the IDE extensions with `net472`. Run these commands from the repository root:
 
 ```powershell
 dotnet restore TSqlFormatter.sln
@@ -26,15 +26,15 @@ To use the parser in your C# project, add a reference to `src/TSqlFormatter.Core
 
 ## Local dotnet tool and CI examples
 
-The CLI packs as `TSqlFormatter.Tool` version `0.1.0-preview.1` with the `tsqlformat` command. Building needs .NET SDK 8+; running needs .NET Runtime 8. From the repository root, build and install into a Git-ignored directory (PowerShell):
+The CLI packs as `TSqlFormatter.Tool` version `0.1.0-preview.2` with the `tsqlformat` command. Building needs a .NET 10 SDK and running needs a .NET 10 Runtime; a .NET 8 Runtime alone is insufficient. From the repository root, build and install into a Git-ignored directory (PowerShell):
 
 ```powershell
 dotnet pack src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj -c Release -o artifacts/tool
-dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source artifacts/tool --version 0.1.0-preview.1
+dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source artifacts/tool --version 0.1.0-preview.2
 .\artifacts\tool-bin\tsqlformat.exe query.sql --check
 ```
 
-The tool is not published on NuGet; these commands install only the locally built package, so the CI examples assume this project's source tree is available. `tsqlformat` still accepts stdin or one SQL file, not a directory; for each file, `--check` returns `0` (formatted), `1` (formatting needed), or `2` (error). Packaging does not change those rules.
+The tool is not published on NuGet; these commands install only the locally built package, so the CI examples assume this project's source tree is available. When upgrading from preview `0.1.0-preview.1`, install the .NET 10 Runtime and reinstall the package. `tsqlformat` still accepts stdin or one SQL file, not a directory; for each file, `--check` returns `0` (formatted), `1` (formatting needed), or `2` (error). Packaging does not change those rules.
 
 `examples/ci/` contains a [GitHub Actions example](../examples/ci/github-actions.yml), an [Azure Pipelines example](../examples/ci/azure-pipelines.yml), a [pre-commit example](../examples/ci/.pre-commit-config.yaml), and their shared `check_sql_files.py` script. They are not active in this repository. Replace `database` with your SQL directory and copy the YAML into the appropriate project location; once copied, the CI examples run on pushes/PRs to the main branch. The CI examples build and install the local package, passing its path through `--tool`; pre-commit requires `tsqlformat` installed and its directory on `PATH` beforehand. The script checks without writing: exit code `0` means all files are formatted, `1` means changes are needed, and `2` means an error, missing tool, or missing/empty directory. For pre-commit it checks the passed `.sql` files; with `--directory database` it finds SQL files recursively. Python 3 is needed for the script and pre-commit.
 
