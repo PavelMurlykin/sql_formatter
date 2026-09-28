@@ -6,7 +6,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>tsqlformat</ToolCommandName>
     <PackageId>TSqlFormatter.Tool</PackageId>
-    <Version>0.1.0-preview.5</Version>
+    <Version>0.1.0-preview.6</Version>
     <Authors>TSqlFormatter</Authors>
     <Description>Offline T-SQL formatter command-line tool.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>

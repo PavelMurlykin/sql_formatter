@@ -19,16 +19,45 @@ public static class SqlFormatterCli
         if (error is null) throw new ArgumentNullException(nameof(error));
         cancellationToken.ThrowIfCancellationRequested();
 
+        var profileId = "Default";
+        var effectiveArgs = new List<string>();
+        var profileSpecified = false;
+        for (var index = 0; index < args.Length; index++)
+        {
+            if (args[index] != "--profile")
+            {
+                effectiveArgs.Add(args[index]);
+                continue;
+            }
+
+            if (profileSpecified || ++index >= args.Length ||
+                string.IsNullOrWhiteSpace(args[index]) || args[index].StartsWith("-", StringComparison.Ordinal))
+            {
+                await error.WriteLineAsync("TSF9000: --profile requires one profile ID; use --help for usage.");
+                return 2;
+            }
+            profileId = args[index];
+            profileSpecified = true;
+        }
+
+        args = effectiveArgs.ToArray();
+
         if (args.Length == 1 && args[0] == "--help")
         {
-            await output.WriteLineAsync("Usage: tsqlformat [file.sql | -] [--write | --check]");
-            await output.WriteLineAsync("       tsqlformat <file-or-directory> [more-paths...] (--write | --check) [--exclude <relative-path>]...");
+            await output.WriteLineAsync("Usage: tsqlformat [file.sql | -] [--write | --check] [--profile Default|Compact|Expanded]");
+            await output.WriteLineAsync("       tsqlformat <file-or-directory> [more-paths...] (--write | --check) [--exclude <relative-path>]... [--profile <id>]");
             await output.WriteLineAsync("Reads T-SQL from stdin or one file to stdout; batch mode checks or writes .sql files recursively.");
             return 0;
         }
 
+        if (!new FormattingProfileCatalog().TryGet(profileId, out var profile))
+        {
+            await error.WriteLineAsync($"TSF2000: Unknown formatting profile '{profileId}'.");
+            return 2;
+        }
+
         if (ShouldUseBatchMode(args))
-            return await RunBatchAsync(args, input, output, error, cancellationToken);
+            return await RunBatchAsync(args, profileId, input, output, error, cancellationToken);
 
         var isFile = args.Length > 0 && args[0] != "-";
         var write = args.Length == 2 && args[1] == "--write";
@@ -68,10 +97,10 @@ public static class SqlFormatterCli
         }
 
         cancellationToken.ThrowIfCancellationRequested();
-        var options = FormattingOptions.Default;
+        var options = profile!.Options;
         if (isFile)
         {
-            var resolved = new SqlFormatterConfigurationResolver().ResolveForSqlFile(args[0]);
+            var resolved = new SqlFormatterConfigurationResolver().ResolveForSqlFile(args[0], options);
             cancellationToken.ThrowIfCancellationRequested();
             if (!resolved.Succeeded)
             {
@@ -121,7 +150,7 @@ public static class SqlFormatterCli
         return args.Count(arg => arg != "-" && !arg.StartsWith("--", StringComparison.Ordinal)) > 1;
     }
 
-    private static async Task<int> RunBatchAsync(string[] args, TextReader input,
+    private static async Task<int> RunBatchAsync(string[] args, string profileId, TextReader input,
         TextWriter output, TextWriter error, CancellationToken cancellationToken)
     {
         var paths = new List<string>();
@@ -203,7 +232,7 @@ public static class SqlFormatterCli
             cancellationToken.ThrowIfCancellationRequested();
             using var fileOutput = new StringWriter();
             using var fileError = new StringWriter();
-            var result = await RunAsync(new[] { file, write ? "--write" : "--check" }, input,
+            var result = await RunAsync(new[] { file, write ? "--write" : "--check", "--profile", profileId }, input,
                 fileOutput, fileError, cancellationToken);
             if (result == 1)
             {

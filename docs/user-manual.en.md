@@ -26,11 +26,11 @@ To use the parser in your C# project, add a reference to `src/TSqlFormatter.Core
 
 ## Local dotnet tool and CI examples
 
-The CLI packs as `TSqlFormatter.Tool` version `0.1.0-preview.5` with the `tsqlformat` command. Building needs a .NET 10 SDK and running needs a .NET 10 Runtime; a .NET 8 Runtime alone is insufficient. From the repository root, build and install into a Git-ignored directory (PowerShell):
+The CLI packs as `TSqlFormatter.Tool` version `0.1.0-preview.6` with the `tsqlformat` command. Building needs a .NET 10 SDK and running needs a .NET 10 Runtime; a .NET 8 Runtime alone is insufficient. From the repository root, build and install into a Git-ignored directory (PowerShell):
 
 ```powershell
 dotnet pack src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj -c Release -o artifacts/tool
-dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source artifacts/tool --version 0.1.0-preview.5
+dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source artifacts/tool --version 0.1.0-preview.6
 .\artifacts\tool-bin\tsqlformat.exe query.sql --check
 ```
 
@@ -90,7 +90,7 @@ After building, pass SQL through stdin from the repository root:
 'select Id from T' | dotnet run --project src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj --no-restore
 ```
 
-Formatted SQL goes to stdout; `-` can be passed instead of no argument. `--help` shows brief usage. Diagnostics go to stderr. Exit code `0` means formatting succeeded; `2` means a SQL parse, configuration, I/O, or argument error. Code `1` is used only with `--check` when formatting is required. No SQL is printed on a parse error. The CLI uses `Default` for stdin and searches for `.editorconfig` and `.tsqlformatter.json` for files. Settings flags are not yet supported.
+Formatted SQL goes to stdout; `-` can be passed instead of no argument. `--help` shows brief usage. Diagnostics go to stderr. Exit code `0` means formatting succeeded; `2` means a SQL parse, configuration, I/O, or argument error. Code `1` is used only with `--check` when formatting is required. No SQL is printed on a parse error. The CLI uses `Default` unless `--profile` selects `Default`, `Compact`, or `Expanded` (case-insensitive); this works for stdin, one file, and batches. No other settings flags are supported.
 
 To read one `query.sql` file from the current directory:
 
@@ -133,11 +133,13 @@ Batch `--check` keeps stdout empty and lists files needing changes on stderr as 
 
 ### Configuration discovery for files
 
-For `query.sql`, including `--write` and `--check`, the CLI overlays `.editorconfig` properties from the SQL file's directory and parents up to `root = true` or the filesystem root. A nearer file and a later matching section take precedence. It then searches for `.tsqlformatter.json` in the SQL file's directory and parents: the nearest file wins, and JSON search stops after the directory containing a `.git` marker or at the filesystem root. JSON properties override `.editorconfig`. A relative SQL path is made absolute from the current directory; parent traversal does not resolve symbolic links. Stdin does not trigger discovery.
+For `query.sql`, including `--write` and `--check`, the CLI starts with the selected built-in profile (`Default` when omitted), overlays `.editorconfig` properties from the SQL file's directory and parents up to `root = true` or the filesystem root, and finally overlays the nearest `.tsqlformatter.json`. A nearer `.editorconfig` and a later matching section take precedence; JSON search stops after the directory containing a `.git` marker or at the filesystem root. JSON properties override `.editorconfig` and the profile by field. A relative SQL path is made absolute from the current directory; parent traversal does not resolve symbolic links. Stdin uses only the selected profile and does not trigger discovery.
+
+For example, `tsqlformat query.sql --profile Expanded` uses one SELECT item per line unless the JSON file overrides `select.columns`. `tsqlformat ./sql --check --profile Compact` applies Compact separately to each selected file before that file's configuration. Unknown profile IDs return `TSF2000`; a missing or repeated `--profile` value returns `TSF9000`, code `2`, and no SQL output. The same resolver is used by CLI, Visual Studio, and SSMS: their baselines differ only when IDE option pages are set. For the same SQL text and effective options, all adapters call the same Core formatter.
 
 The limited `.editorconfig` subset supports `[*]` and `[*.sql]` sections and these properties: `indent_style` (`space`/`tab`), numeric `indent_size` from 0 to 32, `end_of_line` (`lf`/`crlf`/`cr`), and `insert_final_newline` (`true`/`false`). `unset` removes an inherited property. Other sections, properties, and invalid values are ignored; complex globs, `tab_width`, `charset`, and `trim_trailing_whitespace` are not supported. `.editorconfig` is read as UTF-8, up to 1 MiB; read or encoding errors produce `TSF9000`, and an oversized file produces `TSF9001`.
 
-The file is read as UTF-8, validated as version 1, and its settings overlay `Default`. Invalid configuration produces `TSF2000` and the config path on stderr, returns `2`, prints no SQL, and does not perform `--write`. Read failures produce `TSF9000`. If no configuration exists, built-in options apply.
+The file is read as UTF-8, validated as version 1, and its settings overlay the selected profile and `.editorconfig`. Invalid configuration produces `TSF2000` and the config path on stderr, returns `2`, prints no SQL, and does not perform `--write`. Read failures produce `TSF9000`. If no configuration exists, the profile and any applicable `.editorconfig` settings apply.
 
 ### Large inputs
 
@@ -209,7 +211,7 @@ if (!resolved.Succeeded)
 var effectiveOptions = resolved.Options!;
 ```
 
-`FormattingOptionsOverrides` parameters map to supported JSON fields, including `maxLineLength`, `lineEnding`, `finalNewLine`, `indentSize`, `useTabs`, `keywordCase`, `selectColumns`, `groupByLayout`, `orderByLayout`, `alignSelectAliases`, `alignSetAssignments`, and `alignDeclareTypes`. This is an application API; the CLI loads a discovered file automatically but does not yet accept settings flags.
+`FormattingOptionsOverrides` parameters map to supported JSON fields, including `maxLineLength`, `lineEnding`, `finalNewLine`, `indentSize`, `useTabs`, `keywordCase`, `selectColumns`, `groupByLayout`, `orderByLayout`, `alignSelectAliases`, `alignSetAssignments`, and `alignDeclareTypes`. This is an application API; the CLI loads a discovered file automatically and accepts `--profile`, but does not accept per-field settings flags.
 
 ### Named profiles
 
@@ -223,7 +225,7 @@ var configured = new SqlFormatterConfigurationResolver(catalog).Resolve(
     json, profileId: "project");
 ```
 
-An application can supply custom user or project profiles when creating the catalog. Duplicate IDs, including collisions with built-ins, are rejected. An unknown `profileId` returns `TSF2000` with `Options == null`. File fields overlay the profile rather than resetting it to `Default`. The VSIX exposes built-in profile selection and portable options import/export, but named custom profiles in JSON, CLI profile selection, and custom profile IDs in the VSIX are not implemented yet.
+An application can supply custom user or project profiles when creating the catalog. Duplicate IDs, including collisions with built-ins, are rejected. An unknown `profileId` returns `TSF2000` with `Options == null`. File fields overlay the profile rather than resetting it to `Default`. The CLI and VSIX expose built-in profile selection; the VSIX also supports portable options import/export. Named custom profiles in JSON and custom profile IDs in the CLI or VSIX are not implemented.
 
 To check comment preservation separately, run the golden suite:
 
