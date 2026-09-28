@@ -42,6 +42,8 @@ public sealed class SsmsPackage : AsyncPackage
             commands.AddCommand(new MenuCommand(ExecuteLoadProbe, new CommandID(CommandSet, 0x0100)));
             commands.AddCommand(new MenuCommand(ExecuteEditorProbe, new CommandID(CommandSet, 0x0101)));
             commands.AddCommand(new MenuCommand(ExecuteFormatDocument, new CommandID(CommandSet, 0x0200)));
+            commands.AddCommand(new MenuCommand(ExecuteFormatSelection, new CommandID(CommandSet, 0x0201)));
+            commands.AddCommand(new MenuCommand(ExecuteFormatStatement, new CommandID(CommandSet, 0x0202)));
         }
     }
 
@@ -68,10 +70,20 @@ public sealed class SsmsPackage : AsyncPackage
 
     private void ExecuteFormatDocument(object sender, EventArgs e)
     {
-        JoinableTaskFactory.RunAsync(FormatDocumentAsync).FileAndForget("TSqlFormatter.Ssms/FormatDocument");
+        JoinableTaskFactory.RunAsync(() => FormatAsync(FormatScope.Document)).FileAndForget("TSqlFormatter.Ssms/FormatDocument");
     }
 
-    private async Task FormatDocumentAsync()
+    private void ExecuteFormatSelection(object sender, EventArgs e)
+    {
+        JoinableTaskFactory.RunAsync(() => FormatAsync(FormatScope.Selection)).FileAndForget("TSqlFormatter.Ssms/FormatSelection");
+    }
+
+    private void ExecuteFormatStatement(object sender, EventArgs e)
+    {
+        JoinableTaskFactory.RunAsync(() => FormatAsync(FormatScope.Statement)).FileAndForget("TSqlFormatter.Ssms/FormatStatement");
+    }
+
+    private async Task FormatAsync(FormatScope scope)
     {
         await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
         if (!ActiveQueryEditor.TryRead(textManager, out var editor) || editorAdapters == null || undoRegistry == null)
@@ -80,7 +92,29 @@ public sealed class SsmsPackage : AsyncPackage
             return;
         }
 
-        var snapshot = editor.CaptureSnapshot(editorAdapters);
+        Microsoft.VisualStudio.Text.ITextSnapshot? snapshot;
+        SqlTextSpan? target = null;
+        if (scope == FormatScope.Selection)
+        {
+            if (!editor.TryCaptureSelection(editorAdapters, out var selectedSnapshot, out var selected))
+            {
+                ShowMessage("Select SQL text in a .sql query first.", true);
+                return;
+            }
+            snapshot = selectedSnapshot;
+            target = new SqlTextSpan(selected.Start, selected.Length);
+        }
+        else if (scope == FormatScope.Statement)
+        {
+            if (!editor.TryCaptureCaret(editorAdapters, out var caretSnapshot, out int caret))
+            {
+                ShowMessage("The SQL caret is unavailable.", true);
+                return;
+            }
+            snapshot = caretSnapshot;
+            target = new SqlTextSpan(caret, 0);
+        }
+        else snapshot = editor.CaptureSnapshot(editorAdapters);
         if (snapshot == null || snapshot.Length > 16 * 1024 * 1024)
         {
             ShowMessage("The SQL buffer is unavailable or exceeds 16 Mi characters.", true);
@@ -94,7 +128,8 @@ public sealed class SsmsPackage : AsyncPackage
             {
                 var config = new SqlFormatterConfigurationResolver().ResolveForSqlFile(editor.Path);
                 if (!config.Succeeded) return (Result: (FormatResult?)null, Error: config.Diagnostics[0]);
-                var result = new ScriptDomSqlFormatter().Format(source, config.Options!, new FormatRequest(), DisposalToken);
+                var result = new ScriptDomSqlFormatter().Format(source, config.Options!,
+                    target == null ? new FormatRequest() : new FormatRequest(scope, target), DisposalToken);
                 return (Result: result, Error: (FormatterDiagnostic?)null);
             }, DisposalToken);
             await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
@@ -104,13 +139,18 @@ public sealed class SsmsPackage : AsyncPackage
                      System.Linq.Enumerable.Any(result.Diagnostics, d => d.Severity == FormatterDiagnosticSeverity.Error))
                 ShowMessage("SQL could not be parsed; no edit was applied.", true);
             else if (!result.Changed)
-                ShowMessage("The SQL document is already formatted.");
+                ShowMessage("The SQL target is already formatted.");
             else if (!ActiveQueryEditor.TryRead(textManager, out var current) ||
                      !ReferenceEquals(current.Buffer, editor.Buffer) ||
-                     !editor.TryApplyDocument(snapshot, result.Text, editorAdapters, undoRegistry))
+                     (scope == FormatScope.Document
+                         ? !editor.TryApplyDocument(snapshot, result.Text, editorAdapters, undoRegistry)
+                         : result.Edits.Count != 1 || !editor.TryApplyEdit(snapshot,
+                             result.Edits[0].Span.StartOffset, result.Edits[0].Span.Length,
+                             result.Edits[0].NewText, scope == FormatScope.Selection
+                                 ? "Format T-SQL Selection" : "Format T-SQL Statement", editorAdapters, undoRegistry)))
                 ShowMessage("The SQL buffer changed during formatting; no edit was applied.", true);
             else
-                ShowMessage("SQL document formatted. Use Undo to revert.");
+                ShowMessage("SQL formatted. Use Undo to revert.");
         }
         catch (OperationCanceledException) { }
         catch (Exception ex)

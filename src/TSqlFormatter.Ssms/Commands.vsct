@@ -21,6 +21,14 @@
         <Parent guid="guidCommandSet" id="grpSqlFormatter" />
         <Strings><ButtonText>T-SQL Formatter (SSMS): Format Document</ButtonText></Strings>
       </Button>
+      <Button guid="guidCommandSet" id="cmdFormatSelection" priority="0x0130" type="Button">
+        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
+        <Strings><ButtonText>T-SQL Formatter (SSMS): Format Selection</ButtonText></Strings>
+      </Button>
+      <Button guid="guidCommandSet" id="cmdFormatStatement" priority="0x0140" type="Button">
+        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
+        <Strings><ButtonText>T-SQL Formatter (SSMS): Format Statement</ButtonText></Strings>
+      </Button>
     </Buttons>
   </Commands>
   <Symbols>
@@ -30,6 +38,8 @@
       <IDSymbol name="cmdLoadProbe" value="0x0100" />
       <IDSymbol name="cmdEditorProbe" value="0x0101" />
       <IDSymbol name="cmdFormatDocument" value="0x0200" />
+      <IDSymbol name="cmdFormatSelection" value="0x0201" />
+      <IDSymbol name="cmdFormatStatement" value="0x0202" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

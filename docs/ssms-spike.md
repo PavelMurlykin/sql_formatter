@@ -24,3 +24,9 @@ This confirms extension loading for this particular installation, not stability 
 - SSMS 22.10.1 loads its own ScriptDom 18.0.56.2 before the VSIX's 18.0.107.0. The older copy lacks `OrderByClause.All`; Core now queries this optional member late for compatibility with both copies.
 - In the installed SSMS, `select 1;` became `SELECT 1;` without a database connection. One Ctrl+Z restored the original lowercase text. The test edit was not saved.
 - This is a smoke test of one SQL example, not proof of compatibility across all ScriptDom APIs or SSMS versions.
+
+## P15-004 — selection, caret and Undo
+
+- SSMS VSIX 0.4.0 adds Format Selection and Format Statement. Each uses a single scoped `FormatResult` edit, maps the selection/caret through that edit, and completes one editor Undo transaction only after applying the replacement.
+- In SSMS 22.10.1, selecting the first of two `select` statements formatted only the first, kept its text selected, and one Ctrl+Z restored it. With the caret in the second statement, Format Statement changed only the second, left the caret on its line, and one Ctrl+Z restored it.
+- The SQL test document remains unsaved; other SSMS versions and more complex editor states have not been checked.
