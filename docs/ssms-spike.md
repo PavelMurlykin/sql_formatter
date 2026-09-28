@@ -36,3 +36,15 @@ This confirms extension loading for this particular installation, not stability 
 - SSMS VSIX 0.5.0 registers a per-user `T-SQL Formatter (SSMS) → General` options page with Default/Compact/Expanded profiles and Default-profile controls for line width/ending, final newline, indentation, tabs, and keyword casing. A nearby JSON config still takes precedence.
 - In SSMS 22.10.1, the page appeared under Tools → Options. Setting Keyword casing to Lower made Format Document turn a temporary uppercase `SELECT` into lowercase `select`. The original Upper setting was restored, and the temporary SQL edit was discarded without saving.
 - This verifies one option-to-command path, not every option or profile on this host.
+
+## P15-006 — compatibility matrix and decision
+
+The VSIX manifest targets **64-bit SSMS 22.x**, but a manifest range is not evidence that every 22.x release works. The matrix records observations for the installed package, not a support promise. “Not tested” must not be read as “works.”
+
+| SSMS version | Tested | Command | Selection | Options | Known issues / gaps |
+| --- | --- | --- | --- | --- | --- |
+| 22.10.1 (22.10.12210.168), x64 | Yes, manual smoke tests | Format Document, Format Selection and Format Statement executed on disposable SQL; each changed only the intended text and one Undo reverted it | One selected statement and one caret-targeted statement tested | General page displayed; `Keyword casing = Lower` affected Format Document and was restored to Upper | Host preloads ScriptDom 18.0.56.2; the packaged newer ScriptDom API cannot be assumed available. Only simple SELECT input was exercised. Multiple query windows, restart persistence, every setting/profile, and uninstall/reinstall were not tested. |
+| Other SSMS 22.x, x64 | No | Not tested | Not tested | Not tested | Manifest permits installation but runtime compatibility is unknown. |
+| SSMS 21 and earlier, or 32-bit hosts | No | Not supported by VSIX target | Not tested | Not tested | Outside the declared installation target. |
+
+**Decision: LIMITED SUPPORT.** The spike proves a working path for the three formatting commands and a basic option in one SSMS 22.10.1 installation. It does not justify a broad SSMS compatibility claim. Phase 16 may proceed as an explicitly experimental MVP for this tested host; a supported release remains gated on multi-window/restart/install-uninstall testing, complex SQL coverage against the host's ScriptDom, and a repeatable version-by-version regression run. Core, CLI and Visual Studio development do not depend on this adapter.
