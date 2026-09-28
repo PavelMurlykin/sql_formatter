@@ -22,51 +22,60 @@ internal sealed class SelectColumnDocBuilder
 
         var source = context.ParseResult.Source;
         var comments = new SqlTriviaScanner().Scan(context.ParseResult, context.CancellationToken);
-        var inline = new SqlCommentTrivia?[elements.Count - 1];
-        var hasInline = false;
+        var separators = new SqlCommentTrivia[elements.Count - 1][];
+        var hasSeparatorComments = false;
         for (var index = 1; index < elements.Count; index++)
         {
             var previous = elements[index - 1];
             var next = elements[index];
             var start = previous.StartOffset + previous.FragmentLength;
             var separator = source.Substring(start, next.StartOffset - start);
-            if (Regex.IsMatch(separator, @"^\s*,\s*$", RegexOptions.CultureInvariant))
+            var separatorComments = comments.Where(item => item.Span.StartOffset >= start
+                    && item.Span.EndOffset <= next.StartOffset).ToArray();
+            if (separatorComments.Length == 0)
             {
+                if (!Regex.IsMatch(separator, @"^\s*,\s*$", RegexOptions.CultureInvariant))
+                    return null;
+                separators[index - 1] = Array.Empty<SqlCommentTrivia>();
                 continue;
             }
 
-            var match = Regex.Match(separator,
-                @"^\s*,[ \t]*(?<comment>--[^\r\n]*)(?:\r\n|\r|\n)\s*$",
-                RegexOptions.CultureInvariant);
-            var kind = SqlCommentKind.Line;
-            if (!match.Success)
-            {
-                match = Regex.Match(separator,
-                    @"^\s*,[ \t]*(?<comment>/\*[\s\S]*?\*/)\s*$",
-                    RegexOptions.CultureInvariant);
-                kind = SqlCommentKind.Block;
-                if (!match.Success) return null;
-            }
-
-            var commentStart = start + match.Groups["comment"].Index;
-            var found = comments.FirstOrDefault(item => item.Span.StartOffset == commentStart);
-            if (found is null
-                || found.Kind != kind
-                || found.Placement != SqlTriviaPlacement.Trailing
-                || found.AnchorTokenIndex is null
-                || context.ParseResult.Tokens[found.AnchorTokenIndex.Value].Text != ","
-                || (kind == SqlCommentKind.Line
-                    ? found.Text.TrimEnd('\r', '\n') : found.Text) != match.Groups["comment"].Value)
-            {
+            var firstComment = separatorComments[0];
+            var commaPrefix = source.Substring(start, firstComment.Span.StartOffset - start);
+            if (!Regex.IsMatch(commaPrefix, @"^\s*,\s*$", RegexOptions.CultureInvariant))
                 return null;
+            var commaOffset = start + commaPrefix.IndexOf(',');
+            if (firstComment.Placement == SqlTriviaPlacement.Leading &&
+                CountLineBreaks(commaPrefix.Substring(commaPrefix.IndexOf(',') + 1)) != 1)
+                return null;
+            var cursor = firstComment.Span.StartOffset;
+            for (var commentIndex = 0; commentIndex < separatorComments.Length; commentIndex++)
+            {
+                var comment = separatorComments[commentIndex];
+                var gap = source.Substring(cursor, comment.Span.StartOffset - cursor);
+                if (!string.IsNullOrWhiteSpace(gap)
+                    || (commentIndex > 0 && CountLineBreaks(gap) > 1)) return null;
+                var anchor = comment.AnchorTokenIndex is null ? null :
+                    context.ParseResult.Tokens[comment.AnchorTokenIndex.Value];
+                var trailingComma = commentIndex == 0
+                    && comment.Placement == SqlTriviaPlacement.Trailing
+                    && anchor?.Text == "," && anchor.Offset == commaOffset;
+                var leadingColumn = comment.Placement == SqlTriviaPlacement.Leading
+                    && anchor?.Offset == next.StartOffset;
+                if (!trailingComma && !leadingColumn) return null;
+                cursor = comment.Span.EndOffset;
             }
 
-            inline[index - 1] = found;
-            hasInline = true;
+            var tail = source.Substring(cursor, next.StartOffset - cursor);
+            if (!string.IsNullOrWhiteSpace(tail) || CountLineBreaks(tail) > 1)
+                return null;
+
+            separators[index - 1] = separatorComments;
+            hasSeparatorComments = true;
         }
 
-        var aligned = !hasInline ? TryAlignAliases(elements, context) : null;
-        var breakEvery = hasInline || aligned is not null
+        var aligned = !hasSeparatorComments ? TryAlignAliases(elements, context) : null;
+        var breakEvery = hasSeparatorComments || aligned is not null
             || _options.Select.ColumnLayout == SelectColumnLayout.OnePerLine;
         var parts = new List<Doc> { breakEvery ? HardLineDoc.Instance : SoftLineDoc.Instance };
         for (var index = 0; index < elements.Count; index++)
@@ -74,12 +83,16 @@ internal sealed class SelectColumnDocBuilder
             if (index > 0)
             {
                 parts.Add(new TextDoc(","));
-                var comment = inline[index - 1];
-                if (comment is not null)
+                var separatorComments = separators[index - 1];
+                if (separatorComments.Length > 0)
                 {
-                    parts.Add(new TextDoc(" "));
-                    parts.Add(new TextDoc(comment.Text.TrimEnd('\r', '\n')));
-                    parts.Add(HardLineDoc.Instance);
+                    parts.Add(separatorComments[0].Placement == SqlTriviaPlacement.Trailing
+                        ? new TextDoc(" ") : HardLineDoc.Instance);
+                    foreach (var comment in separatorComments)
+                    {
+                        parts.Add(new TextDoc(comment.Text.TrimEnd('\r', '\n')));
+                        parts.Add(HardLineDoc.Instance);
+                    }
                 }
                 else
                 {
@@ -96,6 +109,9 @@ internal sealed class SelectColumnDocBuilder
         var body = new IndentDoc(1, new ConcatDoc(parts));
         return breakEvery ? body : new GroupDoc(body);
     }
+
+    private static int CountLineBreaks(string text) =>
+        Regex.Matches(text, @"\r\n|\r|\n", RegexOptions.CultureInvariant).Count;
 
     private string[]? TryAlignAliases(IList<SelectElement> elements, SqlDocBuilderContext context)
     {

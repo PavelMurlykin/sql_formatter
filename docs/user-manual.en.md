@@ -26,11 +26,11 @@ To use the parser in your C# project, add a reference to `src/TSqlFormatter.Core
 
 ## Local dotnet tool and CI examples
 
-The CLI packs as `TSqlFormatter.Tool` version `0.1.0-preview.3` with the `tsqlformat` command. Building needs a .NET 10 SDK and running needs a .NET 10 Runtime; a .NET 8 Runtime alone is insufficient. From the repository root, build and install into a Git-ignored directory (PowerShell):
+The CLI packs as `TSqlFormatter.Tool` version `0.1.0-preview.4` with the `tsqlformat` command. Building needs a .NET 10 SDK and running needs a .NET 10 Runtime; a .NET 8 Runtime alone is insufficient. From the repository root, build and install into a Git-ignored directory (PowerShell):
 
 ```powershell
 dotnet pack src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj -c Release -o artifacts/tool
-dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source artifacts/tool --version 0.1.0-preview.3
+dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source artifacts/tool --version 0.1.0-preview.4
 .\artifacts\tool-bin\tsqlformat.exe query.sql --check
 ```
 
@@ -231,7 +231,7 @@ To check comment preservation separately, run the golden suite:
 dotnet test tests/TSqlFormatter.GoldenTests/TSqlFormatter.GoldenTests.csproj --no-restore
 ```
 
-The suite contains 50 fixed expected-SQL cases with leading, inline, block, and standalone comments. It checks that each comment appears once and that formatting again does not change the result. These checks are also included in `dotnet test TSqlFormatter.sln`.
+The suite contains 60 fixed expected-SQL cases with leading, inline, block, and standalone comments. It checks that each comment appears once and that formatting again does not change the result. These checks are also included in `dotnet test TSqlFormatter.sln`.
 
 ## Parsing T-SQL
 
@@ -306,7 +306,7 @@ foreach (var comment in comments)
 }
 ```
 
-Each `SqlCommentTrivia` carries an exact `Span`, original `Text`, `Kind` (`Line`/`Block`), `TokenIndex`, and `Placement`: `Trailing` follows a SQL token on the same line; `Leading` is adjacent to the next token (including a contiguous chain of comments); `Standalone` has no such attachment, for example when separated by a blank line. `AnchorTokenIndex` refers to the attached SQL token in `parsed.Tokens`; it is `null` for `Standalone`. The scanner also works with available tokens after a parse error. The formatter uses this classification for line and block comments after commas in `SELECT` and before supported clauses; other placements do not yet have dedicated formatting rules.
+Each `SqlCommentTrivia` carries an exact `Span`, original `Text`, `Kind` (`Line`/`Block`), `TokenIndex`, and `Placement`: `Trailing` follows a SQL token on the same line; `Leading` is adjacent to the next token (including a contiguous chain of comments); `Standalone` has no such attachment, for example when separated by a blank line. `AnchorTokenIndex` refers to the attached SQL token in `parsed.Tokens`; it is `null` for `Standalone`. The scanner also works with available tokens after a parse error. The formatter uses this classification for line and block comments after commas and before the next column in `SELECT`, and before supported clauses; other placements do not yet have dedicated formatting rules.
 
 ## Positions in the original source
 
@@ -590,7 +590,17 @@ SELECT
 FROM T
 ```
 
-Multiple such comments in one list are supported. Spacing before `--` is normalized to one space and line endings follow `GeneralOptions.LineEnding`; the comment text itself is unchanged. Comments before a column do not yet have a dedicated placement rule.
+Multiple such comments in one list are supported. Spacing before `--` is normalized to one space and line endings follow `GeneralOptions.LineEnding`; the comment text itself is unchanged. Adjacent comments after a comma and immediately before the next column also stay with that column:
+
+```sql
+SELECT
+    Id, -- separator
+    -- export field
+    Name
+FROM T
+```
+
+If a blank line separates the comments or the comma from a leading comment, or several block comments on one line make attachment ambiguous, the list retains its original layout; recognized keyword casing may still change. This rule does not apply to comments inside column expressions.
 
 ### Leading comments before clauses
 

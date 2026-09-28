@@ -43,7 +43,7 @@ To build and install the preview tool from this repository:
 
 ```powershell
 dotnet pack src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj -c Release -o artifacts/tool
-dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source artifacts/tool --version 0.1.0-preview.3
+dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source artifacts/tool --version 0.1.0-preview.4
 .\artifacts\tool-bin\tsqlformat.exe query.sql --check
 ```
 

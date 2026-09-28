@@ -17,6 +17,10 @@ public sealed class CommentGoldenTests
             "-- __COMMENT__\nSELECT Id\nFROM T"),
         ("column line", "select Id, -- __COMMENT__\nName from T",
             "SELECT\n    Id, -- __COMMENT__\n    Name\nFROM T"),
+        ("column leading", "select Id,\n-- __COMMENT__\nName from T",
+            "SELECT\n    Id,\n    -- __COMMENT__\n    Name\nFROM T"),
+        ("column chain", "select Id, -- separator\n-- __COMMENT__\nName from T",
+            "SELECT\n    Id, -- separator\n    -- __COMMENT__\n    Name\nFROM T"),
         ("before from line", "select Id\n-- __COMMENT__\nfrom T",
             "SELECT Id\n-- __COMMENT__\nFROM T"),
         ("before where line", "select Id from T\n-- __COMMENT__\nwhere Id=1",
@@ -65,10 +69,10 @@ public sealed class CommentGoldenTests
     }
 
     [Fact]
-    public void Has_at_least_fifty_distinct_golden_cases()
+    public void Has_at_least_sixty_distinct_golden_cases()
     {
         var cases = Cases.ToArray();
-        Assert.True(cases.Length >= 50);
+        Assert.True(cases.Length >= 60);
         Assert.Equal(cases.Length, cases.Select(item => item[1]).Distinct().Count());
     }
 
