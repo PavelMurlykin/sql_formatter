@@ -356,6 +356,8 @@ Console.Write(rendered); // SELECT\n    Id\n
 
 By default, `DocRenderOptions` uses a width of 100 UTF-16 code units, 4 spaces per indentation level, LF, and no final newline. You can set `maxLineWidth`, `indentWidth`, `lineEnding` (`Lf`, `CrLf`, `Cr`), `finalNewline`, and `useTabs`. The selected EOL applies to document breaks; line endings inside `TextDoc` are preserved. The renderer removes generated trailing spaces but does not change literal `TextDoc` content. An empty document stays empty even with `finalNewline: true`.
 
+For developers, `SqlLayoutPolicy.Resolve` now merges fields in global → statement → clause → local order, while `SqlLayoutPrimitives` composes breaks, comma-separated lists, parentheses, and safely aligned pairs. Automatic layout requires a `GroupDoc`; unsafe alignment (for example, comments, tabs, or excessive width) returns `null`. These internal primitives do not yet add user-facing switches or change existing output.
+
 ## Measuring renderer performance
 
 From the repository root, after `dotnet restore TSqlFormatter.sln`, run BenchmarkDotNet in Release:

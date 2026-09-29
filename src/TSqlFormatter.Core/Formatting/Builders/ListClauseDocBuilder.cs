@@ -43,9 +43,6 @@ internal sealed class ListClauseDocBuilder
                     return null;
                 }
 
-                items.Add(new TextDoc(","));
-                items.Add(layout == ClauseItemLayout.OnePerLine
-                    ? HardLineDoc.Instance : SoftLineDoc.Instance);
             }
 
             items.Add(new TextDoc(context.GetOriginalText(element).Trim()));
@@ -64,7 +61,8 @@ internal sealed class ListClauseDocBuilder
         {
             layout == ClauseItemLayout.OnePerLine ? HardLineDoc.Instance : SoftLineDoc.Instance
         };
-        content.AddRange(items);
+        content.Add(SqlLayoutPrimitives.CommaSeparated(items,
+            layout == ClauseItemLayout.OnePerLine ? LayoutList.OnePerLine : LayoutList.Auto));
         var list = new IndentDoc(1, new ConcatDoc(content));
         return new ConcatDoc(new Doc[]
         {
