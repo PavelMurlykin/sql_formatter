@@ -14,7 +14,8 @@ public sealed class FormattingOptions
         QueryClauseOptions? clauses = null,
         JoinOptions? joins = null,
         WhereOptions? where = null,
-        AlignmentOptions? alignment = null)
+        AlignmentOptions? alignment = null,
+        RuleOptions? rules = null)
     {
         General = general ?? new GeneralOptions();
         Indent = indent ?? new IndentOptions();
@@ -24,6 +25,7 @@ public sealed class FormattingOptions
         Joins = joins ?? new JoinOptions();
         Where = where ?? new WhereOptions();
         Alignment = alignment ?? new AlignmentOptions();
+        Rules = rules ?? new RuleOptions(RuleCatalog.Default);
     }
 
     public GeneralOptions General { get; }
@@ -42,6 +44,8 @@ public sealed class FormattingOptions
 
     public AlignmentOptions Alignment { get; }
 
+    public RuleOptions Rules { get; }
+
     /// <summary>Creates a new option set, replacing only the supplied sections.</summary>
     public FormattingOptions With(
         GeneralOptions? general = null,
@@ -51,7 +55,8 @@ public sealed class FormattingOptions
         QueryClauseOptions? clauses = null,
         JoinOptions? joins = null,
         WhereOptions? where = null,
-        AlignmentOptions? alignment = null)
+        AlignmentOptions? alignment = null,
+        RuleOptions? rules = null)
     {
         return new FormattingOptions(
             general ?? General,
@@ -61,6 +66,7 @@ public sealed class FormattingOptions
             clauses ?? Clauses,
             joins ?? Joins,
             where ?? Where,
-            alignment ?? Alignment);
+            alignment ?? Alignment,
+            rules ?? Rules);
     }
 }

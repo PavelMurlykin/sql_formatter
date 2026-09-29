@@ -7,18 +7,30 @@ using TSqlFormatter.Core.Layout;
 
 namespace TSqlFormatter.Configuration;
 
-/// <summary>Reads and writes version 1 .tsqlformatter.json settings.</summary>
+/// <summary>Reads version 1 and 2 .tsqlformatter.json settings without changing version-1 output.</summary>
 public sealed class SqlFormatterConfigurationSerializer
 {
     public const string FileName = ".tsqlformatter.json";
 
-    public string Serialize(FormattingOptions options)
+    private readonly RuleCatalog ruleCatalog;
+
+    public SqlFormatterConfigurationSerializer(RuleCatalog? ruleCatalog = null)
+    {
+        this.ruleCatalog = ruleCatalog ?? RuleCatalog.Default;
+    }
+
+    public string Serialize(FormattingOptions options) => SerializeCore(options,
+        options?.Rules.Overrides.Count > 0);
+
+    public string SerializeV2(FormattingOptions options) => SerializeCore(options, true);
+
+    private static string SerializeCore(FormattingOptions options, bool version2)
     {
         if (options is null) throw new ArgumentNullException(nameof(options));
 
         var root = new JObject
         {
-            ["version"] = 1,
+            ["version"] = version2 ? 2 : 1,
             ["general"] = new JObject
             {
                 ["maxLineLength"] = options.General.MaxLineWidth,
@@ -60,6 +72,8 @@ public sealed class SqlFormatterConfigurationSerializer
                 ["declareTypes"] = options.Alignment.DeclareTypes
             }
         };
+
+        if (version2) root["rules"] = RuleConfigurationV2.Write(options.Rules);
 
         var builder = new StringBuilder();
         using (var textWriter = new StringWriter(builder, CultureInfo.InvariantCulture) { NewLine = "\n" })
@@ -104,6 +118,13 @@ public sealed class SqlFormatterConfigurationSerializer
         {
             return Failed($"Invalid configuration JSON: {exception.Message}");
         }
+
+        if (root["version"]?.Type == JTokenType.Integer &&
+            int.TryParse(root["version"]!.ToString(Formatting.None), NumberStyles.Integer,
+                CultureInfo.InvariantCulture, out var formatVersion) && formatVersion == 2)
+            return RuleConfigurationV2.Parse(root, baseline ?? FormattingOptions.Default,
+                ruleCatalog.Definitions.Count == 0 && baseline is not null
+                    ? baseline.Rules.Catalog : ruleCatalog);
 
         var diagnostics = new List<FormatterDiagnostic>();
         ValidateRoot(root, diagnostics);
@@ -151,7 +172,8 @@ public sealed class SqlFormatterConfigurationSerializer
             alignment: new AlignmentOptions(
                 GetBoolean(alignment, "selectAliases", baseline.Alignment.SelectAliases),
                 GetBoolean(alignment, "setAssignments", baseline.Alignment.SetAssignments),
-                GetBoolean(alignment, "declareTypes", baseline.Alignment.DeclareTypes)));
+                GetBoolean(alignment, "declareTypes", baseline.Alignment.DeclareTypes)),
+            rules: baseline.Rules);
     }
 
     private static ConfigurationParseResult Failed(string message) => new(

@@ -85,6 +85,7 @@ public sealed class FormattingOptionsOverrides
             new AlignmentOptions(
                 AlignSelectAliases ?? baseline.Alignment.SelectAliases,
                 AlignSetAssignments ?? baseline.Alignment.SetAssignments,
-                AlignDeclareTypes ?? baseline.Alignment.DeclareTypes));
+                AlignDeclareTypes ?? baseline.Alignment.DeclareTypes),
+            baseline.Rules);
     }
 }

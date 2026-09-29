@@ -84,7 +84,7 @@ public sealed class ConfigurationSerializerTests
 
     [Theory]
     [InlineData("{}")]
-    [InlineData("{\"version\":2}")]
+    [InlineData("{\"version\":3}")]
     [InlineData("{\"version\":1,\"keywords\":{\"case\":\"mixed\"}}")]
     public void Rejects_invalid_version_or_value(string json)
     {
@@ -108,7 +108,7 @@ public sealed class ConfigurationSerializerTests
     [InlineData("{", "Invalid configuration JSON")]
     [InlineData("{\"version\":1,\"version\":1}", "Invalid configuration JSON")]
     [InlineData("{}", "version")]
-    [InlineData("{\"version\":2}", "version")]
+    [InlineData("{\"version\":3}", "version")]
     [InlineData("{\"version\":999999999999999999999999}", "version")]
     [InlineData("{\"version\":1,\"future\":{}}", "future")]
     [InlineData("{\"version\":1,\"general\":null}", "general")]

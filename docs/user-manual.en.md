@@ -169,6 +169,8 @@ To read and write settings, reference `src/TSqlFormatter.Configuration/TSqlForma
 
 `lineEnding` accepts `lf`, `crlf`, or `cr`; `indent.style` accepts `spaces` or `tabs`; `keywords.case` accepts `upper`, `lower`, or `preserve`; layouts accept `auto` or `onePerLine`. The four JOIN/WHERE line-break fields are booleans. `general.maxLineLength` must be an integer of at least 1, and `indent.size` an integer of at least 0. Missing sections and properties use built-in defaults (or IDE defaults in the VSIX). Serialization writes all supported properties and a final LF.
 
+Configuration version `2` is now prepared: it retains the existing sections and adds a `"rules"` object. The built-in user-rule catalog is still empty, so only an empty `"rules": {}` object is accepted for now; new switches will arrive in later stages. Unknown keys in this object produce `TSF2000`. Version-1 configurations keep their previous behavior, and ordinary serialization without new rules still writes version 1. Call `SqlFormatterConfigurationSerializer.SerializeV2(options)` for an explicit migration.
+
 ```csharp
 using System.IO;
 using TSqlFormatter.Configuration;
