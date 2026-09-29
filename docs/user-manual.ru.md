@@ -183,6 +183,10 @@ CLI читает SQL и JSON-конфигурацию с ограничение�
 
 `misc.packageDelimiterBlankLine` (`false` по умолчанию) включает пустые строки у отдельной строки `GO`; `misc.packageDelimiterBlankLineMode` выбирает `after` (по умолчанию), `before` или `both`. Например, `{"version":2,"rules":{"misc.packageDelimiterBlankLine":true,"misc.packageDelimiterBlankLineMode":"both"}}` добавляет по одной пустой строке с обеих сторон `GO`, если её ещё нет. Строки и комментарии, содержащие слово `GO`, не считаются разделителем. Изменения выполняются только для SQL, успешно разобранного ScriptDom, и повторно проверяются; счётчик повторов `GO 2` в этом режиме не поддерживается парсером.
 
+Для простого верхнеуровневого `SELECT` версия 2 позволяет компактную одну строку по `select.singleLine.maxWords` и `select.singleLine.maxCharacters` (объекты `{"enabled":true,"value":10}`), а также по булеву `select.singleLine.whenFitsMargin`. Достаточно выполнения любого включённого условия, но итоговая строка всегда должна помещаться в `general.maxLineLength`; запрос с комментарием не сворачивается. Для списка выражений есть `select.list.breakBeforeFirstColumn` (`inherit`/`always`/`never`), `select.list.stackColumns` (`inherit`/`on`/`off`) и `select.list.stackMode` (`onePerLine`/`auto`, действует при `on`). Например, `{"version":2,"rules":{"select.list.stackColumns":"on","select.list.stackMode":"onePerLine","select.list.breakBeforeFirstColumn":"always"}}`. Пороговая компактность имеет приоритет над вертикальным списком, когда запрос удовлетворяет условию.
+
+`select.list.indent` принимает объект `{"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false}`. `relative` прибавляет `offset` к прежнему уровню отступа, `absolute` задаёт уровень непосредственно; `transparent:true` убирает отступ списка. При `onNewLineOnly:false` дополнительный отступ действует и перед первой колонкой, оставленной на строке `SELECT`. Значения по умолчанию наследуют прежнее поведение JSON v1.
+
 ```csharp
 using System.IO;
 using TSqlFormatter.Configuration;

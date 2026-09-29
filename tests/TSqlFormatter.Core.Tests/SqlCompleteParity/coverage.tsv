@@ -615,17 +615,17 @@ Select_OrderBy_LineBreakAfterBy	SC-09	pending_semantics	-	-	-
 Select_OrderBy_LineBreakBeforeOrder	SC-09	pending_semantics	-	-	-
 Select_OrderBy_StackColumnsList	SC-09	pending_semantics	-	-	-
 Select_OrderBy_StackColumnsListMode	SC-09	pending_semantics	-	-	-
-Select_SelectList_IndentColumnList.Indent	SC-07	pending_semantics	-	-	-
-Select_SelectList_IndentColumnList.OnNewLineOnly	SC-07	pending_semantics	-	-	-
-Select_SelectList_IndentColumnList.Size	SC-07	pending_semantics	-	-	-
-Select_SelectList_LineBreakBeforeFirstColumn	SC-07	pending_semantics	-	-	-
-Select_SelectList_StackColumns	SC-07	pending_semantics	-	-	-
-Select_SelectList_StackColumnsMode	SC-07	pending_semantics	-	-	-
-Select_SingleLine_WhenQueryContainsLessThanXWords.Checked	SC-07	pending_semantics	-	-	-
-Select_SingleLine_WhenQueryContainsLessThanXWords.Value	SC-07	pending_semantics	-	-	-
-Select_SingleLine_WhenQueryIsShorterThanXCharacters.Checked	SC-07	pending_semantics	-	-	-
-Select_SingleLine_WhenQueryIsShorterThanXCharacters.Value	SC-07	pending_semantics	-	-	-
-Select_SingleLine_WhenRightMarginIsNotExceeded	SC-07	pending_semantics	-	-	-
+Select_SelectList_IndentColumnList.Indent	SC-07	covered	select.list.indent.enabled:boolean:false	SelectListParityTests.List_indent_offset_and_inline_indent_are_observable	Enabled native local indent overrides inherited one-level list indent
+Select_SelectList_IndentColumnList.OnNewLineOnly	SC-07	covered	select.list.indent.onNewLineOnly:boolean:true	SelectListParityTests.List_indent_offset_and_inline_indent_are_observable	False also adds inline padding when first column stays on SELECT line
+Select_SelectList_IndentColumnList.Size	SC-07	covered	select.list.indent.offset:integer:0	SelectListParityTests.List_indent_offset_and_inline_indent_are_observable	Native signed level offset or absolute level per style; XML numeric size not copied
+Select_SelectList_LineBreakBeforeFirstColumn	SC-07	covered	select.list.breakBeforeFirstColumn:choice:inherit	SelectListParityTests.First_column_break_can_be_forced_or_suppressed	Native always/never/inherit controls first-column line break
+Select_SelectList_StackColumns	SC-07	covered	select.list.stackColumns:choice:inherit	SelectListParityTests.Stack_switch_and_mode_change_column_layout	Native on/off/inherit controls vertical list policy without changing v1 default
+Select_SelectList_StackColumnsMode	SC-07	covered	select.list.stackMode:choice:onePerLine	SelectListParityTests.Stack_switch_and_mode_change_column_layout	Native onePerLine/auto when stacking is on; XML integer modes replaced by named policies
+Select_SingleLine_WhenQueryContainsLessThanXWords.Checked	SC-07	covered	select.singleLine.maxWords.enabled:boolean:false	SelectListParityTests.Word_threshold_and_right_margin_have_independent_effect	Enable word-count compactness for simple top-level SELECT
+Select_SingleLine_WhenQueryContainsLessThanXWords.Value	SC-07	covered	select.singleLine.maxWords.value:integer:10	SelectListParityTests.Word_threshold_and_right_margin_have_independent_effect	Maximum lexical word count for one-line candidate
+Select_SingleLine_WhenQueryIsShorterThanXCharacters.Checked	SC-07	covered	select.singleLine.maxCharacters.enabled:boolean:false	SelectListParityTests.Character_threshold_compacts_only_short_queries	Enable character-count compactness for simple top-level SELECT
+Select_SingleLine_WhenQueryIsShorterThanXCharacters.Value	SC-07	covered	select.singleLine.maxCharacters.value:integer:50	SelectListParityTests.Character_threshold_compacts_only_short_queries	Maximum candidate character count for one line
+Select_SingleLine_WhenRightMarginIsNotExceeded	SC-07	covered	select.singleLine.whenFitsMargin:boolean:false	SelectListParityTests.Compactness_never_exceeds_configured_margin	Compact when candidate fits configured max line width; all compactness routes obey margin
 Select_Where_IndentWhereCondition.Indent	SC-09	pending_semantics	-	-	-
 Select_Where_IndentWhereCondition.OnNewLineOnly	SC-09	pending_semantics	-	-	-
 Select_Where_IndentWhereCondition.Size	SC-09	pending_semantics	-	-	-

@@ -75,9 +75,22 @@ internal sealed class SelectColumnDocBuilder
         }
 
         var aligned = !hasSeparatorComments ? TryAlignAliases(elements, context) : null;
+        var stack = NativeRules.Get(_options, "select.list.stackColumns").Choice;
+        var stackMode = NativeRules.Get(_options, "select.list.stackMode").Choice;
         var breakEvery = hasSeparatorComments || aligned is not null
-            || _options.Select.ColumnLayout == SelectColumnLayout.OnePerLine;
-        var parts = new List<Doc> { breakEvery ? HardLineDoc.Instance : SoftLineDoc.Instance };
+            || (stack == "on" ? stackMode == "onePerLine"
+                : stack == "inherit" && _options.Select.ColumnLayout == SelectColumnLayout.OnePerLine);
+        var compact = stack == "off" && !hasSeparatorComments && aligned is null;
+        var firstBreak = NativeRules.Get(_options, "select.list.breakBeforeFirstColumn").Choice;
+        var indent = NativeRules.Get(_options, "select.list.indent").Indent;
+        var indentLevel = indent.Enabled ? indent.Transparent ? 0 : indent.Style == "absolute"
+            ? Math.Max(0, indent.Offset) : Math.Max(0, 1 + indent.Offset) : 1;
+        Doc firstSeparator = firstBreak == "always" ? HardLineDoc.Instance
+            : firstBreak == "never" || compact ? new TextDoc(" ")
+            : breakEvery ? HardLineDoc.Instance : SoftLineDoc.Instance;
+        if (indent.Enabled && !indent.OnNewLineOnly && firstSeparator is TextDoc)
+            firstSeparator = new TextDoc(new string(' ', 1 + indentLevel * _options.Indent.Size));
+        var parts = new List<Doc> { firstSeparator };
         for (var index = 0; index < elements.Count; index++)
         {
             if (index > 0)
@@ -96,7 +109,8 @@ internal sealed class SelectColumnDocBuilder
                 }
                 else
                 {
-                    parts.Add(breakEvery ? HardLineDoc.Instance : SoftLineDoc.Instance);
+                    parts.Add(breakEvery ? HardLineDoc.Instance
+                        : compact ? new TextDoc(" ") : SoftLineDoc.Instance);
                 }
             }
 
@@ -106,7 +120,12 @@ internal sealed class SelectColumnDocBuilder
             parts.Add(column);
         }
 
-        var body = new IndentDoc(1, new ConcatDoc(parts));
+        if (firstBreak == "always" && !breakEvery)
+            return new IndentDoc(indentLevel, new ConcatDoc(new Doc[]
+            {
+                firstSeparator, new GroupDoc(new ConcatDoc(parts.Skip(1).ToArray()))
+            }));
+        var body = new IndentDoc(indentLevel, new ConcatDoc(parts));
         return breakEvery ? body : new GroupDoc(body);
     }
 

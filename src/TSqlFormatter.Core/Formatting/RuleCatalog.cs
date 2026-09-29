@@ -107,7 +107,22 @@ public sealed class RuleCatalog
             RuleValue.FromBoolean(false)),
         new RuleDescriptor("misc.packageDelimiterBlankLineMode", "batch delimiter",
             RuleValue.FromChoice("after"), choices: new[] { "after", "before", "both" },
-            dependsOn: "misc.packageDelimiterBlankLine")
+            dependsOn: "misc.packageDelimiterBlankLine"),
+        new RuleDescriptor("select.singleLine.maxWords", "SELECT statement",
+            RuleValue.FromThreshold(new ThresholdRule(false, 10)), 0, 10000),
+        new RuleDescriptor("select.singleLine.maxCharacters", "SELECT statement",
+            RuleValue.FromThreshold(new ThresholdRule(false, 50)), 0, 1000000),
+        new RuleDescriptor("select.singleLine.whenFitsMargin", "SELECT statement",
+            RuleValue.FromBoolean(false)),
+        new RuleDescriptor("select.list.breakBeforeFirstColumn", "SELECT list",
+            RuleValue.FromChoice("inherit"), choices: new[] { "inherit", "always", "never" }),
+        new RuleDescriptor("select.list.indent", "SELECT list",
+            RuleValue.FromIndent(new IndentRule(false, 0, true)), -32, 32),
+        new RuleDescriptor("select.list.stackColumns", "SELECT list",
+            RuleValue.FromChoice("inherit"), choices: new[] { "inherit", "on", "off" }),
+        new RuleDescriptor("select.list.stackMode", "SELECT list",
+            RuleValue.FromChoice("onePerLine"), choices: new[] { "onePerLine", "auto" },
+            dependsOn: "select.list.stackColumns")
     });
 
     private static RuleDescriptor CaseRule(string key, string defaultValue) => new(key, "token",

@@ -183,6 +183,10 @@ Vertical lists support `stackedList.commaPlacement` (`inherit`, `leading`, `trai
 
 `misc.packageDelimiterBlankLine` (default `false`) enables empty lines around a standalone `GO` line; `misc.packageDelimiterBlankLineMode` selects `after` (default), `before`, or `both`. For example, `{"version":2,"rules":{"misc.packageDelimiterBlankLine":true,"misc.packageDelimiterBlankLineMode":"both"}}` inserts one empty line on each side of `GO` if not already present. Strings and comments containing `GO` are not delimiters. Changes require ScriptDom to parse the SQL successfully and are revalidated; the `GO 2` repeat count is not supported by the parser in this mode.
 
+For a simple top-level `SELECT`, version 2 can compact the statement onto one line using `select.singleLine.maxWords` and `select.singleLine.maxCharacters` (objects such as `{"enabled":true,"value":10}`), or the Boolean `select.singleLine.whenFitsMargin`. Any enabled condition may qualify, but the result must always fit `general.maxLineLength`; a query with comments is not collapsed. The expression list has `select.list.breakBeforeFirstColumn` (`inherit`/`always`/`never`), `select.list.stackColumns` (`inherit`/`on`/`off`), and `select.list.stackMode` (`onePerLine`/`auto`, effective with `on`). For example, `{"version":2,"rules":{"select.list.stackColumns":"on","select.list.stackMode":"onePerLine","select.list.breakBeforeFirstColumn":"always"}}`. Threshold-based compactness takes precedence over the vertical list when the statement qualifies.
+
+`select.list.indent` accepts `{"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false}`. `relative` adds `offset` to the former indentation level; `absolute` sets the level directly; `transparent:true` removes list indentation. With `onNewLineOnly:false`, extra indentation also applies before the first column kept on the `SELECT` line. Defaults retain the previous JSON v1 behavior.
+
 ```csharp
 using System.IO;
 using TSqlFormatter.Configuration;
