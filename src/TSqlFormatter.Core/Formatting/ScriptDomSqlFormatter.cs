@@ -92,6 +92,8 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
                 KeywordCasing.GetEdits(reparsed, options, cancellationToken),
                 cancellationToken);
             rendered = SqlSpacing.ApplySafe(rendered, options, _parser, request.Dialect, cancellationToken);
+            rendered = SqlStackedListsAndBatches.ApplySafe(rendered, options, _parser,
+                request.Dialect, cancellationToken);
             if (string.Equals(rendered, source, StringComparison.Ordinal))
             {
                 return Unchanged(source, true);
@@ -104,6 +106,8 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         var edits = KeywordCasing.GetEdits(parsed, options, cancellationToken);
         var cased = KeywordCasing.Apply(source, edits, cancellationToken);
         var output = SqlSpacing.ApplySafe(cased, options, _parser, request.Dialect, cancellationToken);
+        output = SqlStackedListsAndBatches.ApplySafe(output, options, _parser,
+            request.Dialect, cancellationToken);
         if (string.Equals(output, source, StringComparison.Ordinal))
         {
             return Unchanged(source, true);

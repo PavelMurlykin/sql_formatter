@@ -98,7 +98,16 @@ public sealed class RuleCatalog
         SpacingRule("spacing.afterScopeResolution"),
         SpacingRule("spacing.beforeFunctionArguments"),
         SpacingRule("spacing.withinEmptyFunctionArguments"),
-        SpacingRule("spacing.withinFunctionArguments")
+        SpacingRule("spacing.withinFunctionArguments"),
+        new RuleDescriptor("stackedList.commaPlacement", "vertical list",
+            RuleValue.FromChoice("inherit"), choices: new[] { "inherit", "leading", "trailing" }),
+        new RuleDescriptor("stackedList.spaceAfterLeadingComma", "vertical list",
+            RuleValue.FromChoice("inherit"), choices: new[] { "inherit", "insert", "remove" }),
+        new RuleDescriptor("misc.packageDelimiterBlankLine", "batch delimiter",
+            RuleValue.FromBoolean(false)),
+        new RuleDescriptor("misc.packageDelimiterBlankLineMode", "batch delimiter",
+            RuleValue.FromChoice("after"), choices: new[] { "after", "before", "both" },
+            dependsOn: "misc.packageDelimiterBlankLine")
     });
 
     private static RuleDescriptor CaseRule(string key, string defaultValue) => new(key, "token",

@@ -179,6 +179,10 @@ For keywords, `inherit` uses the older `keywords.case`; for functions and data t
 
 Ten spacing rules are also available in `rules`: `spacing.beforeComma`, `spacing.afterComma`, `spacing.beforeDot`, `spacing.afterDot`, `spacing.beforeScopeResolution`, `spacing.afterScopeResolution`, `spacing.arithmeticOperators`, `spacing.beforeFunctionArguments`, `spacing.withinEmptyFunctionArguments`, and `spacing.withinFunctionArguments`. Each accepts `inherit` (default: retain prior layout), `insert` (exactly one space), or `remove` (no space). For example, `{"version":2,"rules":{"spacing.afterComma":"remove","spacing.beforeFunctionArguments":"insert"}}`. `::` is the scope-resolution operator; the arithmetic rule applies only to binary operators recognized in the syntax tree. These rules do not move tokens across lines or change literals or comments, and are skipped if the result fails reparsing or changes the token sequence.
 
+Vertical lists support `stackedList.commaPlacement` (`inherit`, `leading`, `trailing`) and `stackedList.spaceAfterLeadingComma` (`inherit`, `insert`, `remove`). They only change commas between items already separated by a line break. To see the effect on a `SELECT` list, set `"select":{"columns":"onePerLine"}` alongside `leading`. With the standard space, `leading` produces `a\n    , b`; `remove` produces `a\n    ,b`. General `spacing.*` rules run first, and vertical-list settings take precedence for this comma. Both defaults are `inherit`, leaving prior output unchanged.
+
+`misc.packageDelimiterBlankLine` (default `false`) enables empty lines around a standalone `GO` line; `misc.packageDelimiterBlankLineMode` selects `after` (default), `before`, or `both`. For example, `{"version":2,"rules":{"misc.packageDelimiterBlankLine":true,"misc.packageDelimiterBlankLineMode":"both"}}` inserts one empty line on each side of `GO` if not already present. Strings and comments containing `GO` are not delimiters. Changes require ScriptDom to parse the SQL successfully and are revalidated; the `GO 2` repeat count is not supported by the parser in this mode.
+
 ```csharp
 using System.IO;
 using TSqlFormatter.Configuration;

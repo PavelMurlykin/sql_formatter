@@ -453,8 +453,8 @@ Merge_When_LineBreakBeforeWhen	SC-17	pending_semantics	-	-	-
 Merge_When_WrapAfterOperatorMode	SC-17	pending_semantics	-	-	-
 Merge_When_WrapBeforeOperatorMode	SC-17	pending_semantics	-	-	-
 Merge_When_WrapConditionMode	SC-17	pending_semantics	-	-	-
-Misc_AddEmptyLineAfterPackageDelimiter	SC-06	pending_semantics	-	-	-
-Misc_AddEmptyLineAfterPackageDelimiterMode	SC-06	pending_semantics	-	-	-
+Misc_AddEmptyLineAfterPackageDelimiter	SC-06	covered	misc.packageDelimiterBlankLine:boolean:false	StackedListAndBatchFormattingTests.Go_blank_line_mode_is_configurable	Enable blank lines around standalone GO; default off preserves existing layout
+Misc_AddEmptyLineAfterPackageDelimiterMode	SC-06	covered	misc.packageDelimiterBlankLineMode:choice:after	StackedListAndBatchFormattingTests.Go_blank_line_mode_is_configurable	Native after/before/both mode when enabled; XML numeric mode not imported
 ProcedureFunction_Body_IndentAsKeyword.Indent	SC-21	pending_semantics	-	-	-
 ProcedureFunction_Body_IndentAsKeyword.OnNewLineOnly	SC-21	pending_semantics	-	-	-
 ProcedureFunction_Body_IndentAsKeyword.Size	SC-21	pending_semantics	-	-	-
@@ -650,8 +650,8 @@ Spacing_Delimiters_InsertSpaceBeforeScopeResolutionOperator	SC-05	covered	spacin
 Spacing_FunctionCalls_InsertSpaceBeforeArgumentsList	SC-05	covered	spacing.beforeFunctionArguments:choice:inherit	SpacingFormattingTests.Insert_rule_changes_only_requested_boundary	FunctionCall AST opening parenthesis only
 Spacing_FunctionCalls_InsertSpaceWithinEmptyArgumentsListBraces	SC-05	covered	spacing.withinEmptyFunctionArguments:choice:inherit	SpacingFormattingTests.Insert_rule_changes_only_requested_boundary	Empty FunctionCall AST parentheses only
 Spacing_FunctionCalls_InsertSpacesWithinArgumentsListBraces	SC-05	covered	spacing.withinFunctionArguments:choice:inherit	SpacingFormattingTests.Insert_rule_changes_only_requested_boundary	Nonempty FunctionCall AST outer parentheses only
-StackedList_NoSpaceBetweenCommaAndListItemInStack	SC-06	pending_semantics	-	-	-
-StackedList_PlaceCommaBeforeItemInStackedList	SC-06	pending_semantics	-	-	-
+StackedList_NoSpaceBetweenCommaAndListItemInStack	SC-06	covered	stackedList.spaceAfterLeadingComma:choice:inherit	StackedListAndBatchFormattingTests.Vertical_select_list_can_use_leading_comma_with_or_without_space	Native inherit/insert/remove after leading comma in vertical lists
+StackedList_PlaceCommaBeforeItemInStackedList	SC-06	covered	stackedList.commaPlacement:choice:inherit	StackedListAndBatchFormattingTests.Vertical_select_list_can_use_leading_comma_with_or_without_space	Native inherit/leading/trailing placement in vertical lists
 Subquery_Cte_ColumnList_IndentColumnList.Indent	SC-12	pending_semantics	-	-	-
 Subquery_Cte_ColumnList_IndentColumnList.OnNewLineOnly	SC-12	pending_semantics	-	-	-
 Subquery_Cte_ColumnList_IndentColumnList.Size	SC-12	pending_semantics	-	-	-

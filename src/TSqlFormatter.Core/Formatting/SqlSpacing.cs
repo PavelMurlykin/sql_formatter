@@ -130,7 +130,7 @@ internal static class SqlSpacing
     private static string Get(FormattingOptions options, string key) =>
         options.Rules.Catalog.TryGet(key, out _) ? options.Rules.Get(key).Choice : "inherit";
 
-    private static bool SameTokens(SqlParseResult before, SqlParseResult after)
+    internal static bool SameTokens(SqlParseResult before, SqlParseResult after)
     {
         var a = before.Tokens.Where(Meaningful).ToArray();
         var b = after.Tokens.Where(Meaningful).ToArray();
