@@ -9,24 +9,6 @@
       </Group>
     </Groups>
     <Buttons>
-      <Button guid="guidCommandSet" id="cmdEditorProbe" priority="0x0100" type="Button">
-        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
-        <Strings>
-          <ButtonText>T-SQL Formatter: Editor Probe</ButtonText>
-        </Strings>
-      </Button>
-      <Button guid="guidCommandSet" id="cmdReplaceSelectionProbe" priority="0x0110" type="Button">
-        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
-        <Strings>
-          <ButtonText>T-SQL Formatter: Replace Selection Probe</ButtonText>
-        </Strings>
-      </Button>
-      <Button guid="guidCommandSet" id="cmdBackgroundProbe" priority="0x0120" type="Button">
-        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
-        <Strings>
-          <ButtonText>T-SQL Formatter: Background Probe</ButtonText>
-        </Strings>
-      </Button>
       <Button guid="guidCommandSet" id="cmdFormatDocument" priority="0x0200" type="Button">
         <Parent guid="guidCommandSet" id="grpSqlFormatter" />
         <Strings>
@@ -69,9 +51,6 @@
     <GuidSymbol name="guidPackage" value="{C8BAF105-2C0F-484C-93DB-DC653596796B}" />
     <GuidSymbol name="guidCommandSet" value="{164528C8-0EC5-4EEC-8380-7C17745D9701}">
       <IDSymbol name="grpSqlFormatter" value="0x1020" />
-      <IDSymbol name="cmdEditorProbe" value="0x0100" />
-      <IDSymbol name="cmdReplaceSelectionProbe" value="0x0101" />
-      <IDSymbol name="cmdBackgroundProbe" value="0x0102" />
       <IDSymbol name="cmdFormatDocument" value="0x0200" />
       <IDSymbol name="cmdFormatSelection" value="0x0201" />
       <IDSymbol name="cmdFormatStatement" value="0x0202" />

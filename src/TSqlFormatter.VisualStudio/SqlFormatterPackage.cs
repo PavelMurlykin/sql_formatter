@@ -58,9 +58,6 @@ public sealed class SqlFormatterPackage : AsyncPackage
             CreateIdeOptions;
         if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService commands)
         {
-            commands.AddCommand(new MenuCommand(ExecuteProbe, new CommandID(CommandSet, 0x0100)));
-            commands.AddCommand(new MenuCommand(ExecuteReplaceProbe, new CommandID(CommandSet, 0x0101)));
-            commands.AddCommand(new MenuCommand(ExecuteBackgroundProbe, new CommandID(CommandSet, 0x0102)));
             commands.AddCommand(new MenuCommand(ExecuteFormatDocument, new CommandID(CommandSet, 0x0200)));
             commands.AddCommand(new MenuCommand(ExecuteFormatSelection, new CommandID(CommandSet, 0x0201)));
             commands.AddCommand(new MenuCommand(ExecuteFormatStatement, new CommandID(CommandSet, 0x0202)));
@@ -154,54 +151,6 @@ public sealed class SqlFormatterPackage : AsyncPackage
         }
 
         return VSConstants.S_OK;
-    }
-
-    private void ExecuteProbe(object sender, EventArgs e)
-    {
-        ThreadHelper.ThrowIfNotOnUIThread();
-        string message = ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor)
-            ? $"Active SQL buffer: {System.IO.Path.GetFileName(editor.Path)} ({editor.Text.Length} characters)."
-            : "Open a .sql file in the text editor to inspect its buffer.";
-        VsShellUtilities.ShowMessageBox(
-            this,
-            message,
-            "T-SQL Formatter spike",
-            OLEMSGICON.OLEMSGICON_INFO,
-            OLEMSGBUTTON.OLEMSGBUTTON_OK,
-            OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-    }
-
-    private void ExecuteReplaceProbe(object sender, EventArgs e)
-    {
-        ThreadHelper.ThrowIfNotOnUIThread();
-        string message;
-        if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor))
-        {
-            message = "Open a .sql file in the text editor first.";
-        }
-        else if (ErrorHandler.Failed(editor.View.GetSelectedText(out string selected)) || string.IsNullOrEmpty(selected))
-        {
-            message = "Select SQL text to run the replacement probe.";
-        }
-        else if (editorAdapters == null || undoRegistry == null)
-        {
-            message = "Visual Studio editor services are unavailable.";
-        }
-        else
-        {
-            message = editor.TryReplaceSelection(selected + " /* VSIX probe */", editorAdapters, undoRegistry)
-                ? "Selection replaced with the original text plus a probe marker. Use Undo to revert."
-                : "Selection could not be replaced.";
-        }
-
-        VsShellUtilities.ShowMessageBox(this, message, "T-SQL Formatter spike",
-            OLEMSGICON.OLEMSGICON_INFO, OLEMSGBUTTON.OLEMSGBUTTON_OK,
-            OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-    }
-
-    private void ExecuteBackgroundProbe(object sender, EventArgs e)
-    {
-        JoinableTaskFactory.RunAsync(BackgroundProbeAsync).FileAndForget("TSqlFormatter/BackgroundProbe");
     }
 
     private void ExecuteFormatDocument(object sender, EventArgs e)
@@ -628,60 +577,6 @@ public sealed class SqlFormatterPackage : AsyncPackage
         }
     }
 
-    private async Task BackgroundProbeAsync()
-    {
-        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
-        if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor))
-        {
-            ShowProbeMessage("Open a .sql file in the text editor first.");
-            return;
-        }
-
-        string snapshot = editor.Text;
-        try
-        {
-            int nonWhitespace = await Task.Run(() => CountNonWhitespace(snapshot, DisposalToken), DisposalToken);
-            await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
-            if (ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor current) &&
-                ReferenceEquals(current.Buffer, editor.Buffer) && current.Text == snapshot)
-            {
-                ShowProbeMessage($"Background scan completed: {nonWhitespace} non-whitespace characters.");
-            }
-            else
-            {
-                ShowProbeMessage("The SQL buffer changed during the background scan; the result was discarded.");
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            // Package shutdown cancels the probe without touching the editor.
-        }
-        catch (Exception ex)
-        {
-            await JoinableTaskFactory.SwitchToMainThreadAsync();
-            ShowProbeMessage($"Background scan failed: {ex.Message}");
-        }
-    }
-
-    private static int CountNonWhitespace(string text, CancellationToken cancellationToken)
-    {
-        int count = 0;
-        for (int i = 0; i < text.Length; i++)
-        {
-            if ((i & 0x3fff) == 0)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-            }
-
-            if (!char.IsWhiteSpace(text[i]))
-            {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
     private static (FormatResult? Result, FormatterDiagnostic? Error) FormatConfigured(
         string filePath, string source, FormatRequest request, FormattingOptions defaults,
         CancellationToken cancellationToken)
@@ -718,14 +613,6 @@ public sealed class SqlFormatterPackage : AsyncPackage
             clauses: new QueryClauseOptions(select.GroupByItems, select.OrderByItems),
             joins: new JoinOptions(joins.ClauseNewLine, joins.ConditionNewLine),
             where: new WhereOptions(where.ConditionNewLine, where.BooleanOperatorNewLine));
-    }
-
-    private void ShowProbeMessage(string message)
-    {
-        ThreadHelper.ThrowIfNotOnUIThread();
-        VsShellUtilities.ShowMessageBox(this, message, "T-SQL Formatter spike",
-            OLEMSGICON.OLEMSGICON_INFO, OLEMSGBUTTON.OLEMSGBUTTON_OK,
-            OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
     }
 
     private void NotifyFormat(string message, bool isError = false)
