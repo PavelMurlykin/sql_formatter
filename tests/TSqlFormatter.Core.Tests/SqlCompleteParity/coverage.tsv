@@ -565,30 +565,30 @@ Select_From_LineBreakAfterFrom	SC-08	covered	select.from.breakAfter:choice:inher
 Select_From_LineBreakBeforeFrom	SC-08	covered	select.from.breakBefore:choice:inherit	SelectFromParityTests.From_keyword_and_list_boundaries_are_independent	Break before FROM keyword
 Select_From_StackFromList	SC-08	covered	select.from.stackList:choice:inherit	SelectFromParityTests.From_list_can_be_stacked_or_compact	Native on/off/inherit for multiple FROM references
 Select_From_StackFromListMode	SC-08	covered	select.from.stackMode:choice:onePerLine	SelectFromParityTests.From_stack_mode_auto_keeps_a_short_list_inline	Native onePerLine/auto instead of XML integer mode
-Select_GroupBy_IndentColumnList.Indent	SC-09	pending_semantics	-	-	-
-Select_GroupBy_IndentColumnList.OnNewLineOnly	SC-09	pending_semantics	-	-	-
-Select_GroupBy_IndentColumnList.Size	SC-09	pending_semantics	-	-	-
-Select_GroupBy_IndentGroupByPhrase.Indent	SC-09	pending_semantics	-	-	-
-Select_GroupBy_IndentGroupByPhrase.OnNewLineOnly	SC-09	pending_semantics	-	-	-
-Select_GroupBy_IndentGroupByPhrase.Size	SC-09	pending_semantics	-	-	-
-Select_GroupBy_LineBreakBeforeGroup	SC-09	pending_semantics	-	-	-
-Select_GroupBy_LineBreakBeforeGroupByExpression	SC-09	pending_semantics	-	-	-
-Select_GroupBy_StackColumnsList	SC-09	pending_semantics	-	-	-
-Select_GroupBy_StackColumnsListMode	SC-09	pending_semantics	-	-	-
-Select_Having_IndentHavingCondition.Indent	SC-09	pending_semantics	-	-	-
-Select_Having_IndentHavingCondition.OnNewLineOnly	SC-09	pending_semantics	-	-	-
-Select_Having_IndentHavingCondition.Size	SC-09	pending_semantics	-	-	-
-Select_Having_IndentHavingKeyword.Indent	SC-09	pending_semantics	-	-	-
-Select_Having_IndentHavingKeyword.OnNewLineOnly	SC-09	pending_semantics	-	-	-
-Select_Having_IndentHavingKeyword.Size	SC-09	pending_semantics	-	-	-
-Select_Having_IndentWrapConditionNestedOperations.Indent	SC-09	pending_semantics	-	-	-
-Select_Having_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-09	pending_semantics	-	-	-
-Select_Having_IndentWrapConditionNestedOperations.Size	SC-09	pending_semantics	-	-	-
-Select_Having_LineBreakAfterHaving	SC-09	pending_semantics	-	-	-
-Select_Having_LineBreakBeforeHaving	SC-09	pending_semantics	-	-	-
-Select_Having_WrapAfterOperatorMode	SC-09	pending_semantics	-	-	-
-Select_Having_WrapBeforeOperatorMode	SC-09	pending_semantics	-	-	-
-Select_Having_WrapConditionMode	SC-09	pending_semantics	-	-	-
+Select_GroupBy_IndentColumnList.Indent	SC-09	covered	select.groupBy.listIndent.enabled:boolean:false	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	Native local indent before GROUP BY items
+Select_GroupBy_IndentColumnList.OnNewLineOnly	SC-09	covered	select.groupBy.listIndent.onNewLineOnly:boolean:true	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	False also pads inline GROUP BY items
+Select_GroupBy_IndentColumnList.Size	SC-09	covered	select.groupBy.listIndent.offset:integer:0	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	Signed native indentation level offset
+Select_GroupBy_IndentGroupByPhrase.Indent	SC-09	covered	select.groupBy.keywordIndent.enabled:boolean:false	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	Native local indent before GROUP BY phrase
+Select_GroupBy_IndentGroupByPhrase.OnNewLineOnly	SC-09	covered	select.groupBy.keywordIndent.onNewLineOnly:boolean:true	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	False also pads inline GROUP BY phrase
+Select_GroupBy_IndentGroupByPhrase.Size	SC-09	covered	select.groupBy.keywordIndent.offset:integer:0	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	Signed native indentation level offset
+Select_GroupBy_LineBreakBeforeGroup	SC-09	covered	select.groupBy.breakBefore:choice:inherit	SelectClauseParityTests.List_clause_has_independent_before_after_and_stack_rules	Break before GROUP BY phrase
+Select_GroupBy_LineBreakBeforeGroupByExpression	SC-09	covered	select.groupBy.breakAfter:choice:inherit	SelectClauseParityTests.List_clause_has_independent_before_after_and_stack_rules	Break before first GROUP BY expression
+Select_GroupBy_StackColumnsList	SC-09	covered	select.groupBy.stackList:choice:inherit	SelectClauseParityTests.List_clause_has_independent_before_after_and_stack_rules	Native on/off/inherit for GROUP BY items
+Select_GroupBy_StackColumnsListMode	SC-09	covered	select.groupBy.stackMode:choice:onePerLine	SelectClauseParityTests.Auto_stack_mode_keeps_a_short_clause_inline	Native onePerLine/auto rather than XML numeric mode
+Select_Having_IndentHavingCondition.Indent	SC-09	covered	select.having.conditionIndent.enabled:boolean:false	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	Native local indent before HAVING condition
+Select_Having_IndentHavingCondition.OnNewLineOnly	SC-09	covered	select.having.conditionIndent.onNewLineOnly:boolean:true	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	False also pads inline HAVING condition
+Select_Having_IndentHavingCondition.Size	SC-09	covered	select.having.conditionIndent.offset:integer:0	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	Signed native indentation level offset
+Select_Having_IndentHavingKeyword.Indent	SC-09	covered	select.having.keywordIndent.enabled:boolean:false	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	Native local indent before HAVING keyword
+Select_Having_IndentHavingKeyword.OnNewLineOnly	SC-09	covered	select.having.keywordIndent.onNewLineOnly:boolean:true	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	False also pads inline HAVING keyword
+Select_Having_IndentHavingKeyword.Size	SC-09	covered	select.having.keywordIndent.offset:integer:0	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	Signed native indentation level offset
+Select_Having_IndentWrapConditionNestedOperations.Indent	SC-09	covered	select.having.nestedConditionIndent.enabled:boolean:false	SelectClauseParityTests.Nested_condition_indent_and_operator_side_rules_are_observable	Native local indent inside nested HAVING operations
+Select_Having_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-09	covered	select.having.nestedConditionIndent.onNewLineOnly:boolean:true	SelectClauseParityTests.Nested_condition_on_new_line_only_changes_inline_operand	False also pads inline HAVING operand
+Select_Having_IndentWrapConditionNestedOperations.Size	SC-09	covered	select.having.nestedConditionIndent.offset:integer:0	SelectClauseParityTests.Nested_condition_indent_and_operator_side_rules_are_observable	Signed native indentation level offset
+Select_Having_LineBreakAfterHaving	SC-09	covered	select.having.breakAfter:choice:inherit	SelectClauseParityTests.Condition_clause_has_independent_before_and_after_breaks	Break before HAVING condition
+Select_Having_LineBreakBeforeHaving	SC-09	covered	select.having.breakBefore:choice:inherit	SelectClauseParityTests.Condition_clause_has_independent_before_and_after_breaks	Break before HAVING keyword
+Select_Having_WrapAfterOperatorMode	SC-09	covered	select.having.wrapAfterOperator:choice:inherit	SelectClauseParityTests.Nested_condition_indent_and_operator_side_rules_are_observable	Native break after HAVING AND/OR
+Select_Having_WrapBeforeOperatorMode	SC-09	covered	select.having.wrapBeforeOperator:choice:inherit	SelectClauseParityTests.Nested_condition_indent_and_operator_side_rules_are_observable	Native break before HAVING AND/OR
+Select_Having_WrapConditionMode	SC-09	covered	select.having.wrapCondition:choice:inherit	SelectClauseParityTests.Where_and_having_wrapping_do_not_leak_between_clauses	Native none/and/or/both policy independent of WHERE
 Select_Into_IndentIntoKeyword.Indent	SC-08	covered	select.into.keywordIndent.enabled:boolean:false	SelectFromParityTests.Local_indent_changes_its_own_boundary	Native local indent before SELECT INTO keyword
 Select_Into_IndentIntoKeyword.OnNewLineOnly	SC-08	covered	select.into.keywordIndent.onNewLineOnly:boolean:true	SelectFromParityTests.On_new_line_only_controls_inline_padding	False adds inline padding before INTO
 Select_Into_IndentIntoKeyword.Size	SC-08	covered	select.into.keywordIndent.offset:integer:0	SelectFromParityTests.Local_indent_changes_its_own_boundary	Signed native indentation level offset
@@ -605,16 +605,16 @@ Select_OptionHints_IndentOptionKeyword.OnNewLineOnly	SC-10	pending_semantics	-	-
 Select_OptionHints_IndentOptionKeyword.Size	SC-10	pending_semantics	-	-	-
 Select_OptionHints_LineBreakAfterOption	SC-10	pending_semantics	-	-	-
 Select_OptionHints_LineBreakBeforeOption	SC-10	pending_semantics	-	-	-
-Select_OrderBy_IndentColumnList.Indent	SC-09	pending_semantics	-	-	-
-Select_OrderBy_IndentColumnList.OnNewLineOnly	SC-09	pending_semantics	-	-	-
-Select_OrderBy_IndentColumnList.Size	SC-09	pending_semantics	-	-	-
-Select_OrderBy_IndentOrderByPhrase.Indent	SC-09	pending_semantics	-	-	-
-Select_OrderBy_IndentOrderByPhrase.OnNewLineOnly	SC-09	pending_semantics	-	-	-
-Select_OrderBy_IndentOrderByPhrase.Size	SC-09	pending_semantics	-	-	-
-Select_OrderBy_LineBreakAfterBy	SC-09	pending_semantics	-	-	-
-Select_OrderBy_LineBreakBeforeOrder	SC-09	pending_semantics	-	-	-
-Select_OrderBy_StackColumnsList	SC-09	pending_semantics	-	-	-
-Select_OrderBy_StackColumnsListMode	SC-09	pending_semantics	-	-	-
+Select_OrderBy_IndentColumnList.Indent	SC-09	covered	select.orderBy.listIndent.enabled:boolean:false	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	Native local indent before ORDER BY items
+Select_OrderBy_IndentColumnList.OnNewLineOnly	SC-09	covered	select.orderBy.listIndent.onNewLineOnly:boolean:true	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	False also pads inline ORDER BY items
+Select_OrderBy_IndentColumnList.Size	SC-09	covered	select.orderBy.listIndent.offset:integer:0	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	Signed native indentation level offset
+Select_OrderBy_IndentOrderByPhrase.Indent	SC-09	covered	select.orderBy.keywordIndent.enabled:boolean:false	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	Native local indent before ORDER BY phrase
+Select_OrderBy_IndentOrderByPhrase.OnNewLineOnly	SC-09	covered	select.orderBy.keywordIndent.onNewLineOnly:boolean:true	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	False also pads inline ORDER BY phrase
+Select_OrderBy_IndentOrderByPhrase.Size	SC-09	covered	select.orderBy.keywordIndent.offset:integer:0	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	Signed native indentation level offset
+Select_OrderBy_LineBreakAfterBy	SC-09	covered	select.orderBy.breakAfter:choice:inherit	SelectClauseParityTests.List_clause_has_independent_before_after_and_stack_rules	Break before first ORDER BY expression
+Select_OrderBy_LineBreakBeforeOrder	SC-09	covered	select.orderBy.breakBefore:choice:inherit	SelectClauseParityTests.List_clause_has_independent_before_after_and_stack_rules	Break before ORDER BY phrase
+Select_OrderBy_StackColumnsList	SC-09	covered	select.orderBy.stackList:choice:inherit	SelectClauseParityTests.List_clause_has_independent_before_after_and_stack_rules	Native on/off/inherit for ORDER BY items
+Select_OrderBy_StackColumnsListMode	SC-09	covered	select.orderBy.stackMode:choice:onePerLine	SelectClauseParityTests.Auto_stack_mode_keeps_a_short_clause_inline	Native onePerLine/auto rather than XML numeric mode
 Select_SelectList_IndentColumnList.Indent	SC-07	covered	select.list.indent.enabled:boolean:false	SelectListParityTests.List_indent_offset_and_inline_indent_are_observable	Enabled native local indent overrides inherited one-level list indent
 Select_SelectList_IndentColumnList.OnNewLineOnly	SC-07	covered	select.list.indent.onNewLineOnly:boolean:true	SelectListParityTests.List_indent_offset_and_inline_indent_are_observable	False also adds inline padding when first column stays on SELECT line
 Select_SelectList_IndentColumnList.Size	SC-07	covered	select.list.indent.offset:integer:0	SelectListParityTests.List_indent_offset_and_inline_indent_are_observable	Native signed level offset or absolute level per style; XML numeric size not copied
@@ -626,20 +626,20 @@ Select_SingleLine_WhenQueryContainsLessThanXWords.Value	SC-07	covered	select.sin
 Select_SingleLine_WhenQueryIsShorterThanXCharacters.Checked	SC-07	covered	select.singleLine.maxCharacters.enabled:boolean:false	SelectListParityTests.Character_threshold_compacts_only_short_queries	Enable character-count compactness for simple top-level SELECT
 Select_SingleLine_WhenQueryIsShorterThanXCharacters.Value	SC-07	covered	select.singleLine.maxCharacters.value:integer:50	SelectListParityTests.Character_threshold_compacts_only_short_queries	Maximum candidate character count for one line
 Select_SingleLine_WhenRightMarginIsNotExceeded	SC-07	covered	select.singleLine.whenFitsMargin:boolean:false	SelectListParityTests.Compactness_never_exceeds_configured_margin	Compact when candidate fits configured max line width; all compactness routes obey margin
-Select_Where_IndentWhereCondition.Indent	SC-09	pending_semantics	-	-	-
-Select_Where_IndentWhereCondition.OnNewLineOnly	SC-09	pending_semantics	-	-	-
-Select_Where_IndentWhereCondition.Size	SC-09	pending_semantics	-	-	-
-Select_Where_IndentWhereKeyword.Indent	SC-09	pending_semantics	-	-	-
-Select_Where_IndentWhereKeyword.OnNewLineOnly	SC-09	pending_semantics	-	-	-
-Select_Where_IndentWhereKeyword.Size	SC-09	pending_semantics	-	-	-
-Select_Where_IndentWrapConditionNestedOperations.Indent	SC-09	pending_semantics	-	-	-
-Select_Where_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-09	pending_semantics	-	-	-
-Select_Where_IndentWrapConditionNestedOperations.Size	SC-09	pending_semantics	-	-	-
-Select_Where_LineBreakAfterWhere	SC-09	pending_semantics	-	-	-
-Select_Where_LineBreakBeforeWhere	SC-09	pending_semantics	-	-	-
-Select_Where_WrapAfterOperatorMode	SC-09	pending_semantics	-	-	-
-Select_Where_WrapBeforeOperatorMode	SC-09	pending_semantics	-	-	-
-Select_Where_WrapConditionMode	SC-09	pending_semantics	-	-	-
+Select_Where_IndentWhereCondition.Indent	SC-09	covered	select.where.conditionIndent.enabled:boolean:false	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	Native local indent before WHERE condition
+Select_Where_IndentWhereCondition.OnNewLineOnly	SC-09	covered	select.where.conditionIndent.onNewLineOnly:boolean:true	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	False also pads inline WHERE condition
+Select_Where_IndentWhereCondition.Size	SC-09	covered	select.where.conditionIndent.offset:integer:0	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	Signed native indentation level offset
+Select_Where_IndentWhereKeyword.Indent	SC-09	covered	select.where.keywordIndent.enabled:boolean:false	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	Native local indent before WHERE keyword
+Select_Where_IndentWhereKeyword.OnNewLineOnly	SC-09	covered	select.where.keywordIndent.onNewLineOnly:boolean:true	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	False also pads inline WHERE keyword
+Select_Where_IndentWhereKeyword.Size	SC-09	covered	select.where.keywordIndent.offset:integer:0	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	Signed native indentation level offset
+Select_Where_IndentWrapConditionNestedOperations.Indent	SC-09	covered	select.where.nestedConditionIndent.enabled:boolean:false	SelectClauseParityTests.Nested_condition_indent_and_operator_side_rules_are_observable	Native local indent inside nested WHERE operations
+Select_Where_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-09	covered	select.where.nestedConditionIndent.onNewLineOnly:boolean:true	SelectClauseParityTests.Nested_condition_on_new_line_only_changes_inline_operand	False also pads inline WHERE operand
+Select_Where_IndentWrapConditionNestedOperations.Size	SC-09	covered	select.where.nestedConditionIndent.offset:integer:0	SelectClauseParityTests.Nested_condition_indent_and_operator_side_rules_are_observable	Signed native indentation level offset
+Select_Where_LineBreakAfterWhere	SC-09	covered	select.where.breakAfter:choice:inherit	SelectClauseParityTests.Condition_clause_has_independent_before_and_after_breaks	Break before WHERE condition
+Select_Where_LineBreakBeforeWhere	SC-09	covered	select.where.breakBefore:choice:inherit	SelectClauseParityTests.Condition_clause_has_independent_before_and_after_breaks	Break before WHERE keyword
+Select_Where_WrapAfterOperatorMode	SC-09	covered	select.where.wrapAfterOperator:choice:inherit	SelectClauseParityTests.Nested_condition_indent_and_operator_side_rules_are_observable	Native break after WHERE AND/OR
+Select_Where_WrapBeforeOperatorMode	SC-09	covered	select.where.wrapBeforeOperator:choice:inherit	SelectClauseParityTests.Nested_condition_indent_and_operator_side_rules_are_observable	Native break before WHERE AND/OR
+Select_Where_WrapConditionMode	SC-09	covered	select.where.wrapCondition:choice:inherit	SelectClauseParityTests.Where_and_having_wrapping_do_not_leak_between_clauses	Native none/and/or/both policy independent of HAVING
 Spacing_ArithmeticalOperators_SpacesAroundBinaryOperators	SC-05	covered	spacing.arithmeticOperators:choice:inherit	SpacingFormattingTests.Insert_rule_changes_only_requested_boundary	Binary AST arithmetic operator gaps only; native inherit/insert/remove instead of XML numeric mode
 Spacing_Delimiters_InsertSpaceAfterComma	SC-05	covered	spacing.afterComma:choice:inherit	SpacingFormattingTests.Insert_rule_changes_only_requested_boundary	Same-line gap after comma; insert or remove; token sequence validated
 Spacing_Delimiters_InsertSpaceAfterDot	SC-05	covered	spacing.afterDot:choice:inherit	SpacingFormattingTests.Insert_rule_changes_only_requested_boundary	Same-line gap after dot outside literals

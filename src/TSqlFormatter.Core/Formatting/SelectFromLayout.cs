@@ -101,37 +101,7 @@ internal static class SelectFromLayout
             editor.Before(on.Offset, Break("select.join.onBreakBefore"), Indent("select.join.onKeywordIndent"));
             editor.Before(condition.StartOffset, Break("select.join.onBreakAfter"),
                 Indent("select.join.onConditionIndent"));
-            ProcessBoolean(condition);
-        }
-
-        void ProcessBoolean(BooleanExpression expression)
-        {
-            if (expression is BooleanParenthesisExpression { Expression: { } inner })
-            {
-                var open = editor.Find(expression.StartOffset, inner.StartOffset, token => token.Text == "(");
-                if (open is not null)
-                    editor.Before(inner.StartOffset, "inherit", Indent("select.join.nestedConditionIndent"));
-                ProcessBoolean(inner);
-            }
-            else if (expression is BooleanBinaryExpression { FirstExpression: { } first,
-                         SecondExpression: { } second })
-            {
-                ProcessBoolean(first);
-                ProcessBoolean(second);
-                var op = editor.Find(first.StartOffset + first.FragmentLength, second.StartOffset,
-                    token => token.Text.Equals("AND", StringComparison.OrdinalIgnoreCase)
-                        || token.Text.Equals("OR", StringComparison.OrdinalIgnoreCase));
-                if (op is null) return;
-                var mode = NativeRules.Get(options, "select.join.wrapCondition").Choice;
-                var match = mode == "both" || mode == "and" && op.Text.Equals("AND", StringComparison.OrdinalIgnoreCase)
-                    || mode == "or" && op.Text.Equals("OR", StringComparison.OrdinalIgnoreCase);
-                var before = Break("select.join.wrapBeforeOperator");
-                var after = Break("select.join.wrapAfterOperator");
-                if (before == "inherit" && mode != "inherit") before = match ? "always" : "never";
-                if (after == "inherit" && mode != "inherit") after = "never";
-                editor.Before(op.Offset, before);
-                editor.Before(second.StartOffset, after, Indent("select.join.nestedConditionIndent"));
-            }
+            SqlBooleanPolicy.Apply(condition, editor, options, "select.join");
         }
 
         string Break(string key) => NativeRules.Get(options, key).Choice;

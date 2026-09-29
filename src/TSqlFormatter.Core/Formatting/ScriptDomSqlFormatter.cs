@@ -96,6 +96,8 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
                 request.Dialect, cancellationToken);
             rendered = SelectFromLayout.ApplySafe(rendered, options, _parser,
                 request.Dialect, cancellationToken);
+            rendered = SelectClauseLayout.ApplySafe(rendered, options, _parser,
+                request.Dialect, cancellationToken);
             rendered = SelectCompactness.ApplySafe(rendered, options, _parser,
                 request.Dialect, cancellationToken);
             if (string.Equals(rendered, source, StringComparison.Ordinal))
@@ -113,6 +115,8 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         output = SqlStackedListsAndBatches.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);
         output = SelectFromLayout.ApplySafe(output, options, _parser,
+            request.Dialect, cancellationToken);
+        output = SelectClauseLayout.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);
         output = SelectCompactness.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);
