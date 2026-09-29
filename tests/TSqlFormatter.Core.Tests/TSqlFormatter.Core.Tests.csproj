@@ -25,6 +25,7 @@
   <ItemGroup>
     <None Include="CrashCorpus\*.sql" CopyToOutputDirectory="PreserveNewest" />
     <None Include="ValidCorpus\*.sql" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="SqlCompleteParity\*.tsv" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

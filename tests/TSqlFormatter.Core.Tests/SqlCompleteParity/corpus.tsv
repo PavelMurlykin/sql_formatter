@@ -1,0 +1,21 @@
+Category	Sql
+Select	SELECT Id, Name FROM dbo.T WHERE Id = 1 ORDER BY Name;
+Subquery	SELECT d.Id FROM (SELECT Id FROM dbo.T) AS d;
+UnionExceptIntersect	SELECT Id FROM dbo.A UNION ALL SELECT Id FROM dbo.B;
+Case	SELECT CASE WHEN Id > 0 THEN 1 ELSE 0 END AS Flag FROM dbo.T;
+Insert	INSERT INTO dbo.T (Id, Name) VALUES (1, N'a'), (2, N'b');
+Update	UPDATE dbo.T SET Name = N'x' WHERE Id = 1;
+Delete	DELETE FROM dbo.T WHERE Id = 1;
+Merge	MERGE dbo.T AS t USING dbo.S AS s ON t.Id = s.Id WHEN MATCHED THEN UPDATE SET t.Name = s.Name WHEN NOT MATCHED THEN INSERT (Id, Name) VALUES (s.Id, s.Name);
+Declare	DECLARE @x int = 1, @y int = 2;
+Code	IF @x = 1 BEGIN SET @x = 2; END ELSE BEGIN SET @x = 3; END;
+ProcedureFunction	CREATE PROCEDURE dbo.p @x int AS BEGIN SELECT @x; END;
+View	CREATE VIEW dbo.v AS SELECT Id FROM dbo.T;
+CreateTable	CREATE TABLE dbo.T (Id int NOT NULL, Name nvarchar(50));
+Trigger	CREATE TRIGGER dbo.trg ON dbo.T AFTER INSERT AS BEGIN SELECT 1; END;
+Execute	EXEC dbo.p @x = 1, @y = 2;
+Labels	Retry: SELECT 1;
+Spacing	SELECT ABS(-1), dbo.fn(1, 2) FROM dbo.T;
+TextCase	sElEcT [Id], ABS(1) AS Alias FROM dbo.T;
+StackedList	SELECT Id, Name, CreatedAt FROM dbo.T;
+Misc	SELECT 1;\nGO\nSELECT 2;
