@@ -8,12 +8,15 @@ multiple files with `--write`/`--check`, configuration discovery, and local prev
 `dotnet tool` packaging. Broader SQL coverage is planned in
 [`CODEX_DEVELOPMENT_PLAN.md`](CODEX_DEVELOPMENT_PLAN.md).
 An experimental Visual Studio VSIX provides Document, Selection, and Statement
-commands for `.sql` files and discovers the nearest `.tsqlformatter.json`. Host
-behavior still requires manual validation before a user-ready release.
+commands for `.sql` files and discovers the nearest `.tsqlformatter.json`. These
+primary commands passed a limited installed-IDE smoke test in Visual Studio 2026;
+other workflows still need manual validation before a supported release.
 The Release VSIX can be checked with `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Verify-Vsix.ps1`.
 
 Current usage: [English manual](docs/user-manual.en.md) ·
 [Русское руководство](docs/user-manual.ru.md).
+Local packaging and support boundaries: [release-candidate guide](docs/release-candidate.md) ·
+[changelog](CHANGELOG.md).
 
 ## Prerequisites
 
