@@ -1,5 +1,8 @@
 # SSMS 22 integration spike
 
+This is a historical 0.2–0.5 VSIX record. See the current
+[0.6.0 compatibility matrix](ssms22-compatibility.md) for phase 29 results.
+
 Target: SSMS 22.10.1 (build 22.10.12210.168), x64, installed as instance `411fbe8f`.
 
 ## P15-001 — package loading
