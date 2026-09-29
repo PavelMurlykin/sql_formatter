@@ -91,6 +91,7 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
             rendered = KeywordCasing.Apply(rendered,
                 KeywordCasing.GetEdits(reparsed, options, cancellationToken),
                 cancellationToken);
+            rendered = SqlSpacing.ApplySafe(rendered, options, _parser, request.Dialect, cancellationToken);
             if (string.Equals(rendered, source, StringComparison.Ordinal))
             {
                 return Unchanged(source, true);
@@ -101,13 +102,14 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         }
 
         var edits = KeywordCasing.GetEdits(parsed, options, cancellationToken);
-        if (edits.Count == 0)
+        var cased = KeywordCasing.Apply(source, edits, cancellationToken);
+        var output = SqlSpacing.ApplySafe(cased, options, _parser, request.Dialect, cancellationToken);
+        if (string.Equals(output, source, StringComparison.Ordinal))
         {
             return Unchanged(source, true);
         }
-
-        var output = KeywordCasing.Apply(source, edits, cancellationToken);
-        return new FormatResult(output, true, true, edits);
+        return new FormatResult(output, true, true,
+            new[] { new TextEdit(new SqlTextSpan(0, source.Length), output) });
     }
 
     private FormatResult FormatSelection(string source, FormattingOptions options,

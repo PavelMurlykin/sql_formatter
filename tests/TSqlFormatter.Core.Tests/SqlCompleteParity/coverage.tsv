@@ -640,16 +640,16 @@ Select_Where_LineBreakBeforeWhere	SC-09	pending_semantics	-	-	-
 Select_Where_WrapAfterOperatorMode	SC-09	pending_semantics	-	-	-
 Select_Where_WrapBeforeOperatorMode	SC-09	pending_semantics	-	-	-
 Select_Where_WrapConditionMode	SC-09	pending_semantics	-	-	-
-Spacing_ArithmeticalOperators_SpacesAroundBinaryOperators	SC-05	pending_semantics	-	-	-
-Spacing_Delimiters_InsertSpaceAfterComma	SC-05	pending_semantics	-	-	-
-Spacing_Delimiters_InsertSpaceAfterDot	SC-05	pending_semantics	-	-	-
-Spacing_Delimiters_InsertSpaceAfterScopeResolutionOperator	SC-05	pending_semantics	-	-	-
-Spacing_Delimiters_InsertSpaceBeforeComma	SC-05	pending_semantics	-	-	-
-Spacing_Delimiters_InsertSpaceBeforeDot	SC-05	pending_semantics	-	-	-
-Spacing_Delimiters_InsertSpaceBeforeScopeResolutionOperator	SC-05	pending_semantics	-	-	-
-Spacing_FunctionCalls_InsertSpaceBeforeArgumentsList	SC-05	pending_semantics	-	-	-
-Spacing_FunctionCalls_InsertSpaceWithinEmptyArgumentsListBraces	SC-05	pending_semantics	-	-	-
-Spacing_FunctionCalls_InsertSpacesWithinArgumentsListBraces	SC-05	pending_semantics	-	-	-
+Spacing_ArithmeticalOperators_SpacesAroundBinaryOperators	SC-05	covered	spacing.arithmeticOperators:choice:inherit	SpacingFormattingTests.Insert_rule_changes_only_requested_boundary	Binary AST arithmetic operator gaps only; native inherit/insert/remove instead of XML numeric mode
+Spacing_Delimiters_InsertSpaceAfterComma	SC-05	covered	spacing.afterComma:choice:inherit	SpacingFormattingTests.Insert_rule_changes_only_requested_boundary	Same-line gap after comma; insert or remove; token sequence validated
+Spacing_Delimiters_InsertSpaceAfterDot	SC-05	covered	spacing.afterDot:choice:inherit	SpacingFormattingTests.Insert_rule_changes_only_requested_boundary	Same-line gap after dot outside literals
+Spacing_Delimiters_InsertSpaceAfterScopeResolutionOperator	SC-05	covered	spacing.afterScopeResolution:choice:inherit	SpacingFormattingTests.Insert_rule_changes_only_requested_boundary	Same-line gap after scope-resolution token
+Spacing_Delimiters_InsertSpaceBeforeComma	SC-05	covered	spacing.beforeComma:choice:inherit	SpacingFormattingTests.Insert_rule_changes_only_requested_boundary	Same-line gap before comma
+Spacing_Delimiters_InsertSpaceBeforeDot	SC-05	covered	spacing.beforeDot:choice:inherit	SpacingFormattingTests.Insert_rule_changes_only_requested_boundary	Same-line gap before dot outside literals
+Spacing_Delimiters_InsertSpaceBeforeScopeResolutionOperator	SC-05	covered	spacing.beforeScopeResolution:choice:inherit	SpacingFormattingTests.Insert_rule_changes_only_requested_boundary	Same-line gap before scope-resolution token
+Spacing_FunctionCalls_InsertSpaceBeforeArgumentsList	SC-05	covered	spacing.beforeFunctionArguments:choice:inherit	SpacingFormattingTests.Insert_rule_changes_only_requested_boundary	FunctionCall AST opening parenthesis only
+Spacing_FunctionCalls_InsertSpaceWithinEmptyArgumentsListBraces	SC-05	covered	spacing.withinEmptyFunctionArguments:choice:inherit	SpacingFormattingTests.Insert_rule_changes_only_requested_boundary	Empty FunctionCall AST parentheses only
+Spacing_FunctionCalls_InsertSpacesWithinArgumentsListBraces	SC-05	covered	spacing.withinFunctionArguments:choice:inherit	SpacingFormattingTests.Insert_rule_changes_only_requested_boundary	Nonempty FunctionCall AST outer parentheses only
 StackedList_NoSpaceBetweenCommaAndListItemInStack	SC-06	pending_semantics	-	-	-
 StackedList_PlaceCommaBeforeItemInStackedList	SC-06	pending_semantics	-	-	-
 Subquery_Cte_ColumnList_IndentColumnList.Indent	SC-12	pending_semantics	-	-	-

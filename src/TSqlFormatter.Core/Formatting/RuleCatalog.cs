@@ -88,11 +88,23 @@ public sealed class RuleCatalog
         CaseRule("textCase.variable", "preserve"),
         CaseRule("textCase.alias", "preserve"),
         new RuleDescriptor("textCase.formatQuotedIdentifier", "quoted identifier",
-            RuleValue.FromBoolean(false))
+            RuleValue.FromBoolean(false)),
+        SpacingRule("spacing.arithmeticOperators"),
+        SpacingRule("spacing.beforeComma"),
+        SpacingRule("spacing.afterComma"),
+        SpacingRule("spacing.beforeDot"),
+        SpacingRule("spacing.afterDot"),
+        SpacingRule("spacing.beforeScopeResolution"),
+        SpacingRule("spacing.afterScopeResolution"),
+        SpacingRule("spacing.beforeFunctionArguments"),
+        SpacingRule("spacing.withinEmptyFunctionArguments"),
+        SpacingRule("spacing.withinFunctionArguments")
     });
 
     private static RuleDescriptor CaseRule(string key, string defaultValue) => new(key, "token",
         RuleValue.FromChoice(defaultValue), choices: new[] { "inherit", "preserve", "upper", "lower" });
+    private static RuleDescriptor SpacingRule(string key) => new(key, "token gap",
+        RuleValue.FromChoice("inherit"), choices: new[] { "inherit", "insert", "remove" });
     public IReadOnlyDictionary<string, RuleDescriptor> Definitions => definitions;
     public bool TryGet(string key, out RuleDescriptor? descriptor) => definitions.TryGetValue(key, out descriptor);
 }
