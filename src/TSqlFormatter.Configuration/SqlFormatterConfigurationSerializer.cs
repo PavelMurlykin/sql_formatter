@@ -123,7 +123,7 @@ public sealed class SqlFormatterConfigurationSerializer
             int.TryParse(root["version"]!.ToString(Formatting.None), NumberStyles.Integer,
                 CultureInfo.InvariantCulture, out var formatVersion) && formatVersion == 2)
             return RuleConfigurationV2.Parse(root, baseline ?? FormattingOptions.Default,
-                ruleCatalog.Definitions.Count == 0 && baseline is not null
+                ReferenceEquals(ruleCatalog, RuleCatalog.Default) && baseline is not null
                     ? baseline.Rules.Catalog : ruleCatalog);
 
         var diagnostics = new List<FormatterDiagnostic>();

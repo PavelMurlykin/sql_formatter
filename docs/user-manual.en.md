@@ -169,7 +169,13 @@ To read and write settings, reference `src/TSqlFormatter.Configuration/TSqlForma
 
 `lineEnding` accepts `lf`, `crlf`, or `cr`; `indent.style` accepts `spaces` or `tabs`; `keywords.case` accepts `upper`, `lower`, or `preserve`; layouts accept `auto` or `onePerLine`. The four JOIN/WHERE line-break fields are booleans. `general.maxLineLength` must be an integer of at least 1, and `indent.size` an integer of at least 0. Missing sections and properties use built-in defaults (or IDE defaults in the VSIX). Serialization writes all supported properties and a final LF.
 
-Configuration version `2` is now prepared: it retains the existing sections and adds a `"rules"` object. The built-in user-rule catalog is still empty, so only an empty `"rules": {}` object is accepted for now; new switches will arrive in later stages. Unknown keys in this object produce `TSF2000`. Version-1 configurations keep their previous behavior, and ordinary serialization without new rules still writes version 1. Call `SqlFormatterConfigurationSerializer.SerializeV2(options)` for an explicit migration.
+Configuration version `2` retains the existing sections and adds a `"rules"` object. Seven casing rules are available: `textCase.keyword`, `textCase.builtin`, `textCase.dataType`, `textCase.identifier`, `textCase.variable`, and `textCase.alias` accept `inherit`, `preserve`, `upper`, or `lower`; `textCase.formatQuotedIdentifier` accepts `true` or `false`. For example:
+
+```json
+{"version":2,"rules":{"textCase.keyword":"lower","textCase.builtin":"upper","textCase.identifier":"preserve","textCase.formatQuotedIdentifier":false}}
+```
+
+For keywords, `inherit` uses the older `keywords.case`; for functions and data types, it preserves the former token behavior (including keyword casing where applicable). Identifiers, variables, and aliases retain their spelling by default, and identifiers in `[]` or `""` stay unchanged even when `textCase.identifier` is set. Enable `textCase.formatQuotedIdentifier` explicitly to change those; name casing can matter under a case-sensitive SQL Server collation. Built-in casing applies to recognized calls from the supported list, not schema-qualified user functions. String literals and comments stay unchanged. Unknown rule keys produce `TSF2000`. Version-1 configurations keep their previous output, and ordinary serialization without new rules still writes version 1. Call `SqlFormatterConfigurationSerializer.SerializeV2(options)` for an explicit migration.
 
 ```csharp
 using System.IO;

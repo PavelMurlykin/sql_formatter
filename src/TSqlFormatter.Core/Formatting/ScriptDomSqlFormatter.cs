@@ -89,7 +89,7 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
             }
 
             rendered = KeywordCasing.Apply(rendered,
-                KeywordCasing.GetEdits(reparsed, options.Keywords.Case, cancellationToken),
+                KeywordCasing.GetEdits(reparsed, options, cancellationToken),
                 cancellationToken);
             if (string.Equals(rendered, source, StringComparison.Ordinal))
             {
@@ -100,7 +100,7 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
                 new[] { new TextEdit(new SqlTextSpan(0, source.Length), rendered) });
         }
 
-        var edits = KeywordCasing.GetEdits(parsed, options.Keywords.Case, cancellationToken);
+        var edits = KeywordCasing.GetEdits(parsed, options, cancellationToken);
         if (edits.Count == 0)
         {
             return Unchanged(source, true);
@@ -289,26 +289,59 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
 
 internal static class KeywordCasing
 {
-    public static IReadOnlyList<TextEdit> GetEdits(
-        SqlParseResult parsed, KeywordCase keywordCase, CancellationToken cancellationToken)
+    private enum TokenCategory { Builtin, DataType, Alias }
+
+    private static readonly HashSet<string> Builtins = new(StringComparer.OrdinalIgnoreCase)
     {
-        if (keywordCase == KeywordCase.Preserve)
+        "ABS", "AVG", "CAST", "CEILING", "COALESCE", "CONCAT", "CONVERT", "COUNT",
+        "CURRENT_TIMESTAMP", "DATEADD", "DATEDIFF", "DATENAME", "DATEPART", "DAY",
+        "DENSE_RANK", "FLOOR", "GETDATE", "GETUTCDATE", "IIF", "ISNULL", "JSON_VALUE",
+        "LAG", "LEAD", "LEFT", "LEN", "LOWER", "LTRIM", "MAX", "MIN", "MONTH",
+        "NEWID", "NULLIF", "OBJECT_ID", "POWER", "RANK", "REPLACE", "RIGHT",
+        "ROUND", "ROW_NUMBER", "RTRIM", "STRING_AGG", "SUBSTRING", "SUM", "TRIM",
+        "TRY_CAST", "TRY_CONVERT", "UPPER", "YEAR"
+    };
+
+    public static IReadOnlyList<TextEdit> GetEdits(
+        SqlParseResult parsed, FormattingOptions options, CancellationToken cancellationToken)
+    {
+        var keyword = Read(options, "textCase.keyword").Choice;
+        if (keyword == "inherit") keyword = options.Keywords.Case switch
         {
+            KeywordCase.Upper => "upper", KeywordCase.Lower => "lower", _ => "preserve"
+        };
+        var builtin = Read(options, "textCase.builtin").Choice;
+        var dataType = Read(options, "textCase.dataType").Choice;
+        var identifier = Read(options, "textCase.identifier").Choice;
+        var variable = Read(options, "textCase.variable").Choice;
+        var alias = Read(options, "textCase.alias").Choice;
+        var formatQuoted = Read(options, "textCase.formatQuotedIdentifier").Boolean;
+        if (keyword == "preserve" && (builtin is "preserve" or "inherit")
+            && (dataType is "preserve" or "inherit")
+            && identifier == "preserve" && variable == "preserve" && alias == "preserve")
             return Array.Empty<TextEdit>();
-        }
+
+        var categories = builtin != "inherit" || dataType != "inherit" || alias != "preserve"
+            ? Classify(parsed, cancellationToken) : new Dictionary<int, TokenCategory>();
 
         var edits = new List<TextEdit>();
         foreach (var token in parsed.Tokens)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (!token.IsKeyword() || token.TokenType == TSqlTokenType.Identifier)
+            var isQuoted = token.TokenType == TSqlTokenType.QuotedIdentifier;
+            var style = categories.TryGetValue(token.Offset, out var category) ? category switch
             {
-                continue;
-            }
-
-            var replacement = keywordCase == KeywordCase.Upper
-                ? token.Text.ToUpperInvariant()
-                : token.Text.ToLowerInvariant();
+                TokenCategory.Builtin => builtin,
+                TokenCategory.DataType => dataType,
+                TokenCategory.Alias => alias,
+                _ => "preserve"
+            } : token.TokenType == TSqlTokenType.Variable ? variable
+                : token.TokenType == TSqlTokenType.Identifier || isQuoted ? identifier
+                : token.IsKeyword() ? keyword : "preserve";
+            if (style == "inherit") style = token.IsKeyword() && token.TokenType != TSqlTokenType.Identifier
+                ? keyword : "preserve";
+            if (style == "preserve" || (isQuoted && !formatQuoted)) continue;
+            var replacement = isQuoted ? CaseQuoted(token.Text, style) : Case(token.Text, style);
             if (!string.Equals(token.Text, replacement, StringComparison.Ordinal))
             {
                 edits.Add(new TextEdit(new SqlTextSpan(token.Offset, token.Text.Length), replacement));
@@ -316,6 +349,53 @@ internal static class KeywordCasing
         }
 
         return edits;
+    }
+
+    private static RuleValue Read(FormattingOptions options, string key) =>
+        options.Rules.Catalog.TryGet(key, out _) ? options.Rules.Get(key)
+            : RuleCatalog.Default.Definitions[key].DefaultValue;
+
+    private static Dictionary<int, TokenCategory> Classify(SqlParseResult parsed,
+        CancellationToken cancellationToken)
+    {
+        var result = new Dictionary<int, TokenCategory>();
+        if (parsed.Root is null) return result;
+        foreach (var fragment in new SqlFragmentWalker().Walk(parsed.Root, cancellationToken))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            switch (fragment)
+            {
+                case FunctionCall call when call.CallTarget is null && call.FunctionName is not null
+                    && Builtins.Contains(call.FunctionName.Value):
+                    result[call.FunctionName.StartOffset] = TokenCategory.Builtin;
+                    break;
+                case DataTypeReference dataType:
+                    var token = parsed.Tokens.FirstOrDefault(candidate => candidate.Offset >= dataType.StartOffset
+                        && candidate.Offset < dataType.StartOffset + dataType.FragmentLength
+                        && candidate.TokenType is not TSqlTokenType.WhiteSpace);
+                    if (token is not null) result[token.Offset] = TokenCategory.DataType;
+                    break;
+                case SelectScalarExpression scalar when scalar.ColumnName?.Identifier is { } columnAlias:
+                    result[columnAlias.StartOffset] = TokenCategory.Alias;
+                    break;
+                case TableReferenceWithAlias table when table.Alias is not null:
+                    result[table.Alias.StartOffset] = TokenCategory.Alias;
+                    break;
+            }
+        }
+        return result;
+    }
+
+    private static string Case(string text, string style) => style == "upper"
+        ? text.ToUpperInvariant() : text.ToLowerInvariant();
+
+    private static string CaseQuoted(string text, string style)
+    {
+        if (text.Length < 2) return text;
+        var open = text[0];
+        var close = text[text.Length - 1];
+        if (!((open == '[' && close == ']') || (open == '"' && close == '"'))) return text;
+        return open + Case(text.Substring(1, text.Length - 2), style) + close;
     }
 
     public static string Apply(string source, IReadOnlyList<TextEdit> edits,

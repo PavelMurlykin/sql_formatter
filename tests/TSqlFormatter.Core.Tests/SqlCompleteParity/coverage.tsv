@@ -814,13 +814,13 @@ Subquery_Where_LineBreakBeforeWhere	SC-12	pending_semantics	-	-	-
 Subquery_Where_WrapAfterOperatorMode	SC-12	pending_semantics	-	-	-
 Subquery_Where_WrapBeforeOperatorMode	SC-12	pending_semantics	-	-	-
 Subquery_Where_WrapConditionMode	SC-12	pending_semantics	-	-	-
-TextCase_Alias	SC-04	pending_semantics	-	-	-
-TextCase_Builtin	SC-04	pending_semantics	-	-	-
-TextCase_DataType	SC-04	pending_semantics	-	-	-
-TextCase_FormatQuotedIdentifier	SC-04	pending_semantics	-	-	-
-TextCase_Identifier	SC-04	pending_semantics	-	-	-
-TextCase_Keyword	SC-04	pending_semantics	-	-	-
-TextCase_Variable	SC-04	pending_semantics	-	-	-
+TextCase_Alias	SC-04	covered	textCase.alias:choice:preserve	TextCaseFormattingTests.Alias_case_only_changes_explicit_aliases	ScriptDom SELECT and table aliases; explicit case policy; XML integer modes replaced by named native policies
+TextCase_Builtin	SC-04	covered	textCase.builtin:choice:inherit	TextCaseFormattingTests.Builtin_function_case_does_not_change_schema_qualified_user_function	Recognized built-in function calls only; schema-qualified user calls excluded; inherit retains legacy token case
+TextCase_DataType	SC-04	covered	textCase.dataType:choice:inherit	TextCaseFormattingTests.Data_type_case_is_independent_of_keyword_case	ScriptDom data-type first token; inherit retains legacy token case
+TextCase_FormatQuotedIdentifier	SC-04	covered	textCase.formatQuotedIdentifier:boolean:false	TextCaseFormattingTests.Quoted_identifier_switch_controls_casing_without_touching_literals_or_comments	Explicit opt-in permits identifier policy inside brackets or double quotes; delimiters and literals stay intact
+TextCase_Identifier	SC-04	covered	textCase.identifier:choice:preserve	TextCaseFormattingTests.Identifier_and_variable_case_are_independent	Unquoted identifiers; preserve default avoids altering case-sensitive names unless explicitly requested
+TextCase_Keyword	SC-04	covered	textCase.keyword:choice:inherit	TextCaseFormattingTests.Keyword_case_can_override_version_one_keyword_setting	Keyword tokens; inherit follows v1 keywords.case
+TextCase_Variable	SC-04	covered	textCase.variable:choice:preserve	TextCaseFormattingTests.Identifier_and_variable_case_are_independent	Variable tokens independent of identifiers and keywords
 Trigger_Body_IndentAsKeyword.Indent	SC-23	pending_semantics	-	-	-
 Trigger_Body_IndentAsKeyword.OnNewLineOnly	SC-23	pending_semantics	-	-	-
 Trigger_Body_IndentAsKeyword.Size	SC-23	pending_semantics	-	-	-

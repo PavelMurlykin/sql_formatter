@@ -79,7 +79,20 @@ public sealed class RuleCatalog
         definitions = new ReadOnlyDictionary<string, RuleDescriptor>(map);
     }
 
-    public static RuleCatalog Default { get; } = new(Array.Empty<RuleDescriptor>());
+    public static RuleCatalog Default { get; } = new(new[]
+    {
+        CaseRule("textCase.keyword", "inherit"),
+        CaseRule("textCase.builtin", "inherit"),
+        CaseRule("textCase.dataType", "inherit"),
+        CaseRule("textCase.identifier", "preserve"),
+        CaseRule("textCase.variable", "preserve"),
+        CaseRule("textCase.alias", "preserve"),
+        new RuleDescriptor("textCase.formatQuotedIdentifier", "quoted identifier",
+            RuleValue.FromBoolean(false))
+    });
+
+    private static RuleDescriptor CaseRule(string key, string defaultValue) => new(key, "token",
+        RuleValue.FromChoice(defaultValue), choices: new[] { "inherit", "preserve", "upper", "lower" });
     public IReadOnlyDictionary<string, RuleDescriptor> Definitions => definitions;
     public bool TryGet(string key, out RuleDescriptor? descriptor) => definitions.TryGetValue(key, out descriptor);
 }
