@@ -531,40 +531,40 @@ Select_ForClause_IndentForXmlSpecification.OnNewLineOnly	SC-10	pending_semantics
 Select_ForClause_IndentForXmlSpecification.Size	SC-10	pending_semantics	-	-	-
 Select_ForClause_LineBreakAfterForXml	SC-10	pending_semantics	-	-	-
 Select_ForClause_LineBreakBeforeFor	SC-10	pending_semantics	-	-	-
-Select_From_IndentFromKeyword.Indent	SC-08	pending_semantics	-	-	-
-Select_From_IndentFromKeyword.OnNewLineOnly	SC-08	pending_semantics	-	-	-
-Select_From_IndentFromKeyword.Size	SC-08	pending_semantics	-	-	-
-Select_From_IndentFromList.Indent	SC-08	pending_semantics	-	-	-
-Select_From_IndentFromList.OnNewLineOnly	SC-08	pending_semantics	-	-	-
-Select_From_IndentFromList.Size	SC-08	pending_semantics	-	-	-
-Select_From_Join_IndentJoinKeyword.Indent	SC-08	pending_semantics	-	-	-
-Select_From_Join_IndentJoinKeyword.OnNewLineOnly	SC-08	pending_semantics	-	-	-
-Select_From_Join_IndentJoinKeyword.Size	SC-08	pending_semantics	-	-	-
-Select_From_Join_IndentJoinKeyword.Style	SC-08	pending_semantics	-	-	-
-Select_From_Join_IndentJoinKeyword.Transparent	SC-08	pending_semantics	-	-	-
-Select_From_Join_IndentOnCondition.Indent	SC-08	pending_semantics	-	-	-
-Select_From_Join_IndentOnCondition.OnNewLineOnly	SC-08	pending_semantics	-	-	-
-Select_From_Join_IndentOnCondition.Size	SC-08	pending_semantics	-	-	-
-Select_From_Join_IndentOnKeyword.Indent	SC-08	pending_semantics	-	-	-
-Select_From_Join_IndentOnKeyword.OnNewLineOnly	SC-08	pending_semantics	-	-	-
-Select_From_Join_IndentOnKeyword.Size	SC-08	pending_semantics	-	-	-
-Select_From_Join_IndentTableAfterJoin.Indent	SC-08	pending_semantics	-	-	-
-Select_From_Join_IndentTableAfterJoin.OnNewLineOnly	SC-08	pending_semantics	-	-	-
-Select_From_Join_IndentTableAfterJoin.Size	SC-08	pending_semantics	-	-	-
-Select_From_Join_IndentWrapConditionNestedOperations.Indent	SC-08	pending_semantics	-	-	-
-Select_From_Join_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-08	pending_semantics	-	-	-
-Select_From_Join_IndentWrapConditionNestedOperations.Size	SC-08	pending_semantics	-	-	-
-Select_From_Join_LineBreakAfterJoin	SC-08	pending_semantics	-	-	-
-Select_From_Join_LineBreakAfterOn	SC-08	pending_semantics	-	-	-
-Select_From_Join_LineBreakBeforeJoin	SC-08	pending_semantics	-	-	-
-Select_From_Join_LineBreakBeforeOn	SC-08	pending_semantics	-	-	-
-Select_From_Join_WrapAfterOperatorMode	SC-08	pending_semantics	-	-	-
-Select_From_Join_WrapBeforeOperatorMode	SC-08	pending_semantics	-	-	-
-Select_From_Join_WrapConditionMode	SC-08	pending_semantics	-	-	-
-Select_From_LineBreakAfterFrom	SC-08	pending_semantics	-	-	-
-Select_From_LineBreakBeforeFrom	SC-08	pending_semantics	-	-	-
-Select_From_StackFromList	SC-08	pending_semantics	-	-	-
-Select_From_StackFromListMode	SC-08	pending_semantics	-	-	-
+Select_From_IndentFromKeyword.Indent	SC-08	covered	select.from.keywordIndent.enabled:boolean:false	SelectFromParityTests.Local_indent_changes_its_own_boundary	Native local indent before FROM keyword
+Select_From_IndentFromKeyword.OnNewLineOnly	SC-08	covered	select.from.keywordIndent.onNewLineOnly:boolean:true	SelectFromParityTests.On_new_line_only_controls_inline_padding	False adds inline padding before FROM
+Select_From_IndentFromKeyword.Size	SC-08	covered	select.from.keywordIndent.offset:integer:0	SelectFromParityTests.Local_indent_changes_its_own_boundary	Signed native indentation level offset
+Select_From_IndentFromList.Indent	SC-08	covered	select.from.listIndent.enabled:boolean:false	SelectFromParityTests.Local_indent_changes_its_own_boundary	Native local indent for first and stacked FROM table
+Select_From_IndentFromList.OnNewLineOnly	SC-08	covered	select.from.listIndent.onNewLineOnly:boolean:true	SelectFromParityTests.On_new_line_only_controls_inline_padding	False adds inline padding before FROM table
+Select_From_IndentFromList.Size	SC-08	covered	select.from.listIndent.offset:integer:0	SelectFromParityTests.Local_indent_changes_its_own_boundary	Signed native indentation level offset
+Select_From_Join_IndentJoinKeyword.Indent	SC-08	covered	select.join.keywordIndent.enabled:boolean:false	SelectFromParityTests.Local_indent_changes_its_own_boundary	Native local indent before JOIN or APPLY phrase
+Select_From_Join_IndentJoinKeyword.OnNewLineOnly	SC-08	covered	select.join.keywordIndent.onNewLineOnly:boolean:true	SelectFromParityTests.On_new_line_only_controls_inline_padding	False adds inline padding before JOIN
+Select_From_Join_IndentJoinKeyword.Size	SC-08	covered	select.join.keywordIndent.offset:integer:0	SelectFromParityTests.Local_indent_changes_its_own_boundary	Signed native indentation level offset
+Select_From_Join_IndentJoinKeyword.Style	SC-08	covered	select.join.keywordIndent.style:choice:relative	SelectFromParityTests.Join_keyword_indent_supports_style_transparency_and_inline_mode	Native relative/absolute/anchor style rather than XML numeric code
+Select_From_Join_IndentJoinKeyword.Transparent	SC-08	covered	select.join.keywordIndent.transparent:boolean:false	SelectFromParityTests.Join_keyword_indent_supports_style_transparency_and_inline_mode	Transparent removes indentation before JOIN
+Select_From_Join_IndentOnCondition.Indent	SC-08	covered	select.join.onConditionIndent.enabled:boolean:false	SelectFromParityTests.Local_indent_changes_its_own_boundary	Native local indent for ON condition
+Select_From_Join_IndentOnCondition.OnNewLineOnly	SC-08	covered	select.join.onConditionIndent.onNewLineOnly:boolean:true	SelectFromParityTests.On_new_line_only_controls_inline_padding	False adds inline padding before ON condition
+Select_From_Join_IndentOnCondition.Size	SC-08	covered	select.join.onConditionIndent.offset:integer:0	SelectFromParityTests.Local_indent_changes_its_own_boundary	Signed native indentation level offset
+Select_From_Join_IndentOnKeyword.Indent	SC-08	covered	select.join.onKeywordIndent.enabled:boolean:false	SelectFromParityTests.Local_indent_changes_its_own_boundary	Native local indent before ON keyword
+Select_From_Join_IndentOnKeyword.OnNewLineOnly	SC-08	covered	select.join.onKeywordIndent.onNewLineOnly:boolean:true	SelectFromParityTests.On_new_line_only_controls_inline_padding	False adds inline padding before ON
+Select_From_Join_IndentOnKeyword.Size	SC-08	covered	select.join.onKeywordIndent.offset:integer:0	SelectFromParityTests.Local_indent_changes_its_own_boundary	Signed native indentation level offset
+Select_From_Join_IndentTableAfterJoin.Indent	SC-08	covered	select.join.tableIndent.enabled:boolean:false	SelectFromParityTests.Local_indent_changes_its_own_boundary	Native local indent before table after JOIN or APPLY
+Select_From_Join_IndentTableAfterJoin.OnNewLineOnly	SC-08	covered	select.join.tableIndent.onNewLineOnly:boolean:true	SelectFromParityTests.On_new_line_only_controls_inline_padding	False adds inline padding before joined table
+Select_From_Join_IndentTableAfterJoin.Size	SC-08	covered	select.join.tableIndent.offset:integer:0	SelectFromParityTests.Local_indent_changes_its_own_boundary	Signed native indentation level offset
+Select_From_Join_IndentWrapConditionNestedOperations.Indent	SC-08	covered	select.join.nestedConditionIndent.enabled:boolean:false	SelectFromParityTests.Nested_condition_indent_changes_wrapped_operator_operand	Native local indent inside nested ON operations
+Select_From_Join_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-08	covered	select.join.nestedConditionIndent.onNewLineOnly:boolean:true	SelectFromParityTests.On_new_line_only_controls_inline_padding	False adds inline padding to nested ON operand
+Select_From_Join_IndentWrapConditionNestedOperations.Size	SC-08	covered	select.join.nestedConditionIndent.offset:integer:0	SelectFromParityTests.Nested_condition_indent_changes_wrapped_operator_operand	Signed native indentation level offset
+Select_From_Join_LineBreakAfterJoin	SC-08	covered	select.join.breakAfter:choice:inherit	SelectFromParityTests.Join_and_on_boundaries_are_independent	Break before table after JOIN or APPLY
+Select_From_Join_LineBreakAfterOn	SC-08	covered	select.join.onBreakAfter:choice:inherit	SelectFromParityTests.Join_and_on_boundaries_are_independent	Break before ON condition
+Select_From_Join_LineBreakBeforeJoin	SC-08	covered	select.join.breakBefore:choice:inherit	SelectFromParityTests.Join_and_on_boundaries_are_independent	Break before JOIN or APPLY phrase
+Select_From_Join_LineBreakBeforeOn	SC-08	covered	select.join.onBreakBefore:choice:inherit	SelectFromParityTests.Join_and_on_boundaries_are_independent	Break before ON keyword
+Select_From_Join_WrapAfterOperatorMode	SC-08	covered	select.join.wrapAfterOperator:choice:inherit	SelectFromParityTests.Join_boolean_wrap_modes_and_operator_sides_are_distinct	Native inherit/always/never after AND or OR
+Select_From_Join_WrapBeforeOperatorMode	SC-08	covered	select.join.wrapBeforeOperator:choice:inherit	SelectFromParityTests.Join_boolean_wrap_modes_and_operator_sides_are_distinct	Native inherit/always/never before AND or OR
+Select_From_Join_WrapConditionMode	SC-08	covered	select.join.wrapCondition:choice:inherit	SelectFromParityTests.Join_wrap_condition_can_target_or_without_changing_and	Native none/and/or/both policy for ON Boolean operations
+Select_From_LineBreakAfterFrom	SC-08	covered	select.from.breakAfter:choice:inherit	SelectFromParityTests.From_keyword_and_list_boundaries_are_independent	Break before first table after FROM
+Select_From_LineBreakBeforeFrom	SC-08	covered	select.from.breakBefore:choice:inherit	SelectFromParityTests.From_keyword_and_list_boundaries_are_independent	Break before FROM keyword
+Select_From_StackFromList	SC-08	covered	select.from.stackList:choice:inherit	SelectFromParityTests.From_list_can_be_stacked_or_compact	Native on/off/inherit for multiple FROM references
+Select_From_StackFromListMode	SC-08	covered	select.from.stackMode:choice:onePerLine	SelectFromParityTests.From_stack_mode_auto_keeps_a_short_list_inline	Native onePerLine/auto instead of XML integer mode
 Select_GroupBy_IndentColumnList.Indent	SC-09	pending_semantics	-	-	-
 Select_GroupBy_IndentColumnList.OnNewLineOnly	SC-09	pending_semantics	-	-	-
 Select_GroupBy_IndentColumnList.Size	SC-09	pending_semantics	-	-	-
@@ -589,14 +589,14 @@ Select_Having_LineBreakBeforeHaving	SC-09	pending_semantics	-	-	-
 Select_Having_WrapAfterOperatorMode	SC-09	pending_semantics	-	-	-
 Select_Having_WrapBeforeOperatorMode	SC-09	pending_semantics	-	-	-
 Select_Having_WrapConditionMode	SC-09	pending_semantics	-	-	-
-Select_Into_IndentIntoKeyword.Indent	SC-08	pending_semantics	-	-	-
-Select_Into_IndentIntoKeyword.OnNewLineOnly	SC-08	pending_semantics	-	-	-
-Select_Into_IndentIntoKeyword.Size	SC-08	pending_semantics	-	-	-
-Select_Into_IndentTable.Indent	SC-08	pending_semantics	-	-	-
-Select_Into_IndentTable.OnNewLineOnly	SC-08	pending_semantics	-	-	-
-Select_Into_IndentTable.Size	SC-08	pending_semantics	-	-	-
-Select_Into_LineBreakAfterInto	SC-08	pending_semantics	-	-	-
-Select_Into_LineBreakBeforeInto	SC-08	pending_semantics	-	-	-
+Select_Into_IndentIntoKeyword.Indent	SC-08	covered	select.into.keywordIndent.enabled:boolean:false	SelectFromParityTests.Local_indent_changes_its_own_boundary	Native local indent before SELECT INTO keyword
+Select_Into_IndentIntoKeyword.OnNewLineOnly	SC-08	covered	select.into.keywordIndent.onNewLineOnly:boolean:true	SelectFromParityTests.On_new_line_only_controls_inline_padding	False adds inline padding before INTO
+Select_Into_IndentIntoKeyword.Size	SC-08	covered	select.into.keywordIndent.offset:integer:0	SelectFromParityTests.Local_indent_changes_its_own_boundary	Signed native indentation level offset
+Select_Into_IndentTable.Indent	SC-08	covered	select.into.tableIndent.enabled:boolean:false	SelectFromParityTests.Local_indent_changes_its_own_boundary	Native local indent before SELECT INTO target
+Select_Into_IndentTable.OnNewLineOnly	SC-08	covered	select.into.tableIndent.onNewLineOnly:boolean:true	SelectFromParityTests.On_new_line_only_controls_inline_padding	False adds inline padding before target
+Select_Into_IndentTable.Size	SC-08	covered	select.into.tableIndent.offset:integer:0	SelectFromParityTests.Local_indent_changes_its_own_boundary	Signed native indentation level offset
+Select_Into_LineBreakAfterInto	SC-08	covered	select.into.breakAfter:choice:inherit	SelectFromParityTests.Into_keyword_and_table_boundaries_are_independent	Break before SELECT INTO target
+Select_Into_LineBreakBeforeInto	SC-08	covered	select.into.breakBefore:choice:inherit	SelectFromParityTests.Into_keyword_and_table_boundaries_are_independent	Break before SELECT INTO keyword
 Select_OptionHints_IndentOptionHints.Indent	SC-10	pending_semantics	-	-	-
 Select_OptionHints_IndentOptionHints.OnNewLineOnly	SC-10	pending_semantics	-	-	-
 Select_OptionHints_IndentOptionHints.Size	SC-10	pending_semantics	-	-	-

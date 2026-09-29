@@ -122,13 +122,44 @@ public sealed class RuleCatalog
             RuleValue.FromChoice("inherit"), choices: new[] { "inherit", "on", "off" }),
         new RuleDescriptor("select.list.stackMode", "SELECT list",
             RuleValue.FromChoice("onePerLine"), choices: new[] { "onePerLine", "auto" },
-            dependsOn: "select.list.stackColumns")
+            dependsOn: "select.list.stackColumns"),
+        IndentDescriptor("select.from.keywordIndent", "FROM keyword"),
+        IndentDescriptor("select.from.listIndent", "FROM list"),
+        BreakRule("select.from.breakBefore", "FROM keyword"),
+        BreakRule("select.from.breakAfter", "FROM keyword"),
+        StackRule("select.from.stackList", "FROM list"),
+        new RuleDescriptor("select.from.stackMode", "FROM list", RuleValue.FromChoice("onePerLine"),
+            choices: new[] { "onePerLine", "auto" }, dependsOn: "select.from.stackList"),
+        IndentDescriptor("select.into.keywordIndent", "INTO keyword"),
+        IndentDescriptor("select.into.tableIndent", "INTO table"),
+        BreakRule("select.into.breakBefore", "INTO keyword"),
+        BreakRule("select.into.breakAfter", "INTO keyword"),
+        IndentDescriptor("select.join.keywordIndent", "JOIN keyword"),
+        IndentDescriptor("select.join.tableIndent", "JOIN table"),
+        IndentDescriptor("select.join.onKeywordIndent", "ON keyword"),
+        IndentDescriptor("select.join.onConditionIndent", "ON condition"),
+        IndentDescriptor("select.join.nestedConditionIndent", "ON nested condition"),
+        BreakRule("select.join.breakBefore", "JOIN keyword"),
+        BreakRule("select.join.breakAfter", "JOIN keyword"),
+        BreakRule("select.join.onBreakBefore", "ON keyword"),
+        BreakRule("select.join.onBreakAfter", "ON keyword"),
+        WrapRule("select.join.wrapCondition", "ON condition"),
+        BreakRule("select.join.wrapBeforeOperator", "ON condition"),
+        BreakRule("select.join.wrapAfterOperator", "ON condition")
     });
 
     private static RuleDescriptor CaseRule(string key, string defaultValue) => new(key, "token",
         RuleValue.FromChoice(defaultValue), choices: new[] { "inherit", "preserve", "upper", "lower" });
     private static RuleDescriptor SpacingRule(string key) => new(key, "token gap",
         RuleValue.FromChoice("inherit"), choices: new[] { "inherit", "insert", "remove" });
+    private static RuleDescriptor IndentDescriptor(string key, string scope) => new(key, scope,
+        RuleValue.FromIndent(new IndentRule(false, 0, true)), -32, 32);
+    private static RuleDescriptor BreakRule(string key, string scope) => new(key, scope,
+        RuleValue.FromChoice("inherit"), choices: new[] { "inherit", "always", "never" });
+    private static RuleDescriptor StackRule(string key, string scope) => new(key, scope,
+        RuleValue.FromChoice("inherit"), choices: new[] { "inherit", "on", "off" });
+    private static RuleDescriptor WrapRule(string key, string scope) => new(key, scope,
+        RuleValue.FromChoice("inherit"), choices: new[] { "inherit", "none", "and", "or", "both" });
     public IReadOnlyDictionary<string, RuleDescriptor> Definitions => definitions;
     public bool TryGet(string key, out RuleDescriptor? descriptor) => definitions.TryGetValue(key, out descriptor);
 }
