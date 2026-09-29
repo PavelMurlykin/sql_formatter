@@ -6,3 +6,4 @@ BenchmarkDotNet.Artifacts/
 artifacts/
 *.suo
 *.user
+.codex-remote-attachments/
