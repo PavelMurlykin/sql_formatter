@@ -495,42 +495,42 @@ ProcedureFunction_With_LineBreakAfterWith	SC-21	pending_semantics	-	-	-
 ProcedureFunction_With_LineBreakBeforeWith	SC-21	pending_semantics	-	-	-
 ProcedureFunction_With_StackWithOptions	SC-21	pending_semantics	-	-	-
 ProcedureFunction_With_StackWithOptionsMode	SC-21	pending_semantics	-	-	-
-Select_Compute_IndentComputeExpression.Indent	SC-10	pending_semantics	-	-	-
-Select_Compute_IndentComputeExpression.OnNewLineOnly	SC-10	pending_semantics	-	-	-
-Select_Compute_IndentComputeExpression.Size	SC-10	pending_semantics	-	-	-
-Select_Compute_IndentComputeKeyword.Indent	SC-10	pending_semantics	-	-	-
-Select_Compute_IndentComputeKeyword.OnNewLineOnly	SC-10	pending_semantics	-	-	-
-Select_Compute_IndentComputeKeyword.Size	SC-10	pending_semantics	-	-	-
-Select_Compute_LineBreakAfterCompute	SC-10	pending_semantics	-	-	-
-Select_Compute_LineBreakBeforeCompute	SC-10	pending_semantics	-	-	-
-Select_Cte_ColumnList_IndentColumnList.Indent	SC-10	pending_semantics	-	-	-
-Select_Cte_ColumnList_IndentColumnList.OnNewLineOnly	SC-10	pending_semantics	-	-	-
-Select_Cte_ColumnList_IndentColumnList.Size	SC-10	pending_semantics	-	-	-
-Select_Cte_ColumnList_IndentColumnListBraces.Indent	SC-10	pending_semantics	-	-	-
-Select_Cte_ColumnList_IndentColumnListBraces.OnNewLineOnly	SC-10	pending_semantics	-	-	-
-Select_Cte_ColumnList_IndentColumnListBraces.Size	SC-10	pending_semantics	-	-	-
-Select_Cte_ColumnList_LineBreakAfterColumnListOpenBrace	SC-10	pending_semantics	-	-	-
-Select_Cte_ColumnList_LineBreakBeforeColumnListClosingBrace	SC-10	pending_semantics	-	-	-
-Select_Cte_ColumnList_LineBreakBeforeColumnListOpenBrace	SC-10	pending_semantics	-	-	-
-Select_Cte_ColumnList_StackColumnList	SC-10	pending_semantics	-	-	-
-Select_Cte_ColumnList_StackColumnListMode	SC-10	pending_semantics	-	-	-
-Select_Cte_IndentCommonTableExpression.Indent	SC-10	pending_semantics	-	-	-
-Select_Cte_IndentCommonTableExpression.OnNewLineOnly	SC-10	pending_semantics	-	-	-
-Select_Cte_IndentCommonTableExpression.Size	SC-10	pending_semantics	-	-	-
-Select_Cte_IndentSubqueryBraces.Indent	SC-10	pending_semantics	-	-	-
-Select_Cte_IndentSubqueryBraces.OnNewLineOnly	SC-10	pending_semantics	-	-	-
-Select_Cte_IndentSubqueryBraces.Size	SC-10	pending_semantics	-	-	-
-Select_Cte_LineBreakAfterAs	SC-10	pending_semantics	-	-	-
-Select_Cte_LineBreakAfterWith	SC-10	pending_semantics	-	-	-
-Select_Cte_LineBreakBeforeAs	SC-10	pending_semantics	-	-	-
-Select_ForClause_IndentForKeyword.Indent	SC-10	pending_semantics	-	-	-
-Select_ForClause_IndentForKeyword.OnNewLineOnly	SC-10	pending_semantics	-	-	-
-Select_ForClause_IndentForKeyword.Size	SC-10	pending_semantics	-	-	-
-Select_ForClause_IndentForXmlSpecification.Indent	SC-10	pending_semantics	-	-	-
-Select_ForClause_IndentForXmlSpecification.OnNewLineOnly	SC-10	pending_semantics	-	-	-
-Select_ForClause_IndentForXmlSpecification.Size	SC-10	pending_semantics	-	-	-
-Select_ForClause_LineBreakAfterForXml	SC-10	pending_semantics	-	-	-
-Select_ForClause_LineBreakBeforeFor	SC-10	pending_semantics	-	-	-
+Select_Compute_IndentComputeExpression.Indent	SC-10	covered	select.compute.expressionIndent.enabled:boolean:false	SelectTailParityTests.Scoped_indent_changes_its_boundary	Sql2008 and Auto legacy fallback only; indent after COMPUTE
+Select_Compute_IndentComputeExpression.OnNewLineOnly	SC-10	covered	select.compute.expressionIndent.onNewLineOnly:boolean:true	SelectTailParityTests.Scoped_indent_on_new_line_only_controls_inline_padding	False pads inline COMPUTE expression
+Select_Compute_IndentComputeExpression.Size	SC-10	covered	select.compute.expressionIndent.offset:integer:0	SelectTailParityTests.Scoped_indent_changes_its_boundary	Signed native indentation level offset
+Select_Compute_IndentComputeKeyword.Indent	SC-10	covered	select.compute.keywordIndent.enabled:boolean:false	SelectTailParityTests.Scoped_indent_changes_its_boundary	Sql2008 and Auto legacy fallback only; indent before COMPUTE
+Select_Compute_IndentComputeKeyword.OnNewLineOnly	SC-10	covered	select.compute.keywordIndent.onNewLineOnly:boolean:true	SelectTailParityTests.Scoped_indent_on_new_line_only_controls_inline_padding	False pads inline COMPUTE keyword
+Select_Compute_IndentComputeKeyword.Size	SC-10	covered	select.compute.keywordIndent.offset:integer:0	SelectTailParityTests.Scoped_indent_changes_its_boundary	Signed native indentation level offset
+Select_Compute_LineBreakAfterCompute	SC-10	covered	select.compute.breakAfter:choice:inherit	SelectTailParityTests.Compute_uses_sql2008_parser_in_auto_and_rejects_modern_dialect_explicitly	Break after COMPUTE in Sql2008; modern dialect reports TSF3005
+Select_Compute_LineBreakBeforeCompute	SC-10	covered	select.compute.breakBefore:choice:inherit	SelectTailParityTests.Compute_uses_sql2008_parser_in_auto_and_rejects_modern_dialect_explicitly	Break before COMPUTE in Sql2008; modern dialect reports TSF3005
+Select_Cte_ColumnList_IndentColumnList.Indent	SC-10	covered	select.cte.columnListIndent.enabled:boolean:false	SelectTailParityTests.Scoped_indent_changes_its_boundary	Native indent for CTE column list
+Select_Cte_ColumnList_IndentColumnList.OnNewLineOnly	SC-10	covered	select.cte.columnListIndent.onNewLineOnly:boolean:true	SelectTailParityTests.Scoped_indent_on_new_line_only_controls_inline_padding	False pads inline CTE column
+Select_Cte_ColumnList_IndentColumnList.Size	SC-10	covered	select.cte.columnListIndent.offset:integer:0	SelectTailParityTests.Scoped_indent_changes_its_boundary	Signed native indentation level offset
+Select_Cte_ColumnList_IndentColumnListBraces.Indent	SC-10	covered	select.cte.columnBraceIndent.enabled:boolean:false	SelectTailParityTests.Scoped_indent_changes_its_boundary	Native indent for CTE column parentheses
+Select_Cte_ColumnList_IndentColumnListBraces.OnNewLineOnly	SC-10	covered	select.cte.columnBraceIndent.onNewLineOnly:boolean:true	SelectTailParityTests.Scoped_indent_on_new_line_only_controls_inline_padding	False pads inline opening brace
+Select_Cte_ColumnList_IndentColumnListBraces.Size	SC-10	covered	select.cte.columnBraceIndent.offset:integer:0	SelectTailParityTests.Scoped_indent_changes_its_boundary	Signed native indentation level offset
+Select_Cte_ColumnList_LineBreakAfterColumnListOpenBrace	SC-10	covered	select.cte.breakAfterColumnOpen:choice:inherit	SelectTailParityTests.Cte_column_braces_list_and_as_have_independent_breaks	Break after CTE column opening parenthesis
+Select_Cte_ColumnList_LineBreakBeforeColumnListClosingBrace	SC-10	covered	select.cte.breakBeforeColumnClose:choice:inherit	SelectTailParityTests.Cte_column_braces_list_and_as_have_independent_breaks	Break before CTE column closing parenthesis
+Select_Cte_ColumnList_LineBreakBeforeColumnListOpenBrace	SC-10	covered	select.cte.breakBeforeColumnOpen:choice:inherit	SelectTailParityTests.Cte_column_braces_list_and_as_have_independent_breaks	Break before CTE column opening parenthesis
+Select_Cte_ColumnList_StackColumnList	SC-10	covered	select.cte.stackColumns:choice:inherit	SelectTailParityTests.Cte_with_and_column_stack_modes_are_configurable	Native on/off/inherit for CTE column list
+Select_Cte_ColumnList_StackColumnListMode	SC-10	covered	select.cte.stackMode:choice:onePerLine	SelectTailParityTests.Cte_with_and_column_stack_modes_are_configurable	Native onePerLine/auto instead of XML numeric mode
+Select_Cte_IndentCommonTableExpression.Indent	SC-10	covered	select.cte.expressionIndent.enabled:boolean:false	SelectTailParityTests.Scoped_indent_changes_its_boundary	Native indent before CTE expression name
+Select_Cte_IndentCommonTableExpression.OnNewLineOnly	SC-10	covered	select.cte.expressionIndent.onNewLineOnly:boolean:true	SelectTailParityTests.Scoped_indent_on_new_line_only_controls_inline_padding	False pads inline CTE name
+Select_Cte_IndentCommonTableExpression.Size	SC-10	covered	select.cte.expressionIndent.offset:integer:0	SelectTailParityTests.Scoped_indent_changes_its_boundary	Signed native indentation level offset
+Select_Cte_IndentSubqueryBraces.Indent	SC-10	covered	select.cte.subqueryBraceIndent.enabled:boolean:false	SelectTailParityTests.Scoped_indent_changes_its_boundary	Native indent for CTE subquery parentheses
+Select_Cte_IndentSubqueryBraces.OnNewLineOnly	SC-10	covered	select.cte.subqueryBraceIndent.onNewLineOnly:boolean:true	SelectTailParityTests.Scoped_indent_on_new_line_only_controls_inline_padding	False pads inline CTE subquery brace
+Select_Cte_IndentSubqueryBraces.Size	SC-10	covered	select.cte.subqueryBraceIndent.offset:integer:0	SelectTailParityTests.Scoped_indent_changes_its_boundary	Signed native indentation level offset
+Select_Cte_LineBreakAfterAs	SC-10	covered	select.cte.breakAfterAs:choice:inherit	SelectTailParityTests.Cte_column_braces_list_and_as_have_independent_breaks	Break between CTE AS and subquery parenthesis
+Select_Cte_LineBreakAfterWith	SC-10	covered	select.cte.breakAfterWith:choice:inherit	SelectTailParityTests.Cte_with_and_column_stack_modes_are_configurable	Break between WITH and first CTE
+Select_Cte_LineBreakBeforeAs	SC-10	covered	select.cte.breakBeforeAs:choice:inherit	SelectTailParityTests.Cte_column_braces_list_and_as_have_independent_breaks	Break before CTE AS
+Select_ForClause_IndentForKeyword.Indent	SC-10	covered	select.for.keywordIndent.enabled:boolean:false	SelectTailParityTests.Scoped_indent_changes_its_boundary	Native indent before FOR keyword
+Select_ForClause_IndentForKeyword.OnNewLineOnly	SC-10	covered	select.for.keywordIndent.onNewLineOnly:boolean:true	SelectTailParityTests.Scoped_indent_on_new_line_only_controls_inline_padding	False pads inline FOR keyword
+Select_ForClause_IndentForKeyword.Size	SC-10	covered	select.for.keywordIndent.offset:integer:0	SelectTailParityTests.Scoped_indent_changes_its_boundary	Signed native indentation level offset
+Select_ForClause_IndentForXmlSpecification.Indent	SC-10	covered	select.for.specIndent.enabled:boolean:false	SelectTailParityTests.Scoped_indent_changes_its_boundary	Native indent before FOR XML specification
+Select_ForClause_IndentForXmlSpecification.OnNewLineOnly	SC-10	covered	select.for.specIndent.onNewLineOnly:boolean:true	SelectTailParityTests.Scoped_indent_on_new_line_only_controls_inline_padding	False pads inline XML specification
+Select_ForClause_IndentForXmlSpecification.Size	SC-10	covered	select.for.specIndent.offset:integer:0	SelectTailParityTests.Scoped_indent_changes_its_boundary	Signed native indentation level offset
+Select_ForClause_LineBreakAfterForXml	SC-10	covered	select.for.breakAfterXml:choice:inherit	SelectTailParityTests.For_xml_and_option_boundaries_are_configurable	Break between XML and XML specification
+Select_ForClause_LineBreakBeforeFor	SC-10	covered	select.for.breakBefore:choice:inherit	SelectTailParityTests.For_xml_and_option_boundaries_are_configurable	Break before FOR keyword
 Select_From_IndentFromKeyword.Indent	SC-08	covered	select.from.keywordIndent.enabled:boolean:false	SelectFromParityTests.Local_indent_changes_its_own_boundary	Native local indent before FROM keyword
 Select_From_IndentFromKeyword.OnNewLineOnly	SC-08	covered	select.from.keywordIndent.onNewLineOnly:boolean:true	SelectFromParityTests.On_new_line_only_controls_inline_padding	False adds inline padding before FROM
 Select_From_IndentFromKeyword.Size	SC-08	covered	select.from.keywordIndent.offset:integer:0	SelectFromParityTests.Local_indent_changes_its_own_boundary	Signed native indentation level offset
@@ -597,14 +597,14 @@ Select_Into_IndentTable.OnNewLineOnly	SC-08	covered	select.into.tableIndent.onNe
 Select_Into_IndentTable.Size	SC-08	covered	select.into.tableIndent.offset:integer:0	SelectFromParityTests.Local_indent_changes_its_own_boundary	Signed native indentation level offset
 Select_Into_LineBreakAfterInto	SC-08	covered	select.into.breakAfter:choice:inherit	SelectFromParityTests.Into_keyword_and_table_boundaries_are_independent	Break before SELECT INTO target
 Select_Into_LineBreakBeforeInto	SC-08	covered	select.into.breakBefore:choice:inherit	SelectFromParityTests.Into_keyword_and_table_boundaries_are_independent	Break before SELECT INTO keyword
-Select_OptionHints_IndentOptionHints.Indent	SC-10	pending_semantics	-	-	-
-Select_OptionHints_IndentOptionHints.OnNewLineOnly	SC-10	pending_semantics	-	-	-
-Select_OptionHints_IndentOptionHints.Size	SC-10	pending_semantics	-	-	-
-Select_OptionHints_IndentOptionKeyword.Indent	SC-10	pending_semantics	-	-	-
-Select_OptionHints_IndentOptionKeyword.OnNewLineOnly	SC-10	pending_semantics	-	-	-
-Select_OptionHints_IndentOptionKeyword.Size	SC-10	pending_semantics	-	-	-
-Select_OptionHints_LineBreakAfterOption	SC-10	pending_semantics	-	-	-
-Select_OptionHints_LineBreakBeforeOption	SC-10	pending_semantics	-	-	-
+Select_OptionHints_IndentOptionHints.Indent	SC-10	covered	select.option.hintsIndent.enabled:boolean:false	SelectTailParityTests.Option_hint_indent_changes_a_multiline_hint	Native local indent before OPTION hint
+Select_OptionHints_IndentOptionHints.OnNewLineOnly	SC-10	covered	select.option.hintsIndent.onNewLineOnly:boolean:true	SelectTailParityTests.Option_hint_inline_padding_is_opt_in	False pads inline OPTION hint
+Select_OptionHints_IndentOptionHints.Size	SC-10	covered	select.option.hintsIndent.offset:integer:0	SelectTailParityTests.Option_hint_indent_changes_a_multiline_hint	Signed native indentation level offset
+Select_OptionHints_IndentOptionKeyword.Indent	SC-10	covered	select.option.keywordIndent.enabled:boolean:false	SelectTailParityTests.Scoped_indent_changes_its_boundary	Native indent before OPTION keyword
+Select_OptionHints_IndentOptionKeyword.OnNewLineOnly	SC-10	covered	select.option.keywordIndent.onNewLineOnly:boolean:true	SelectTailParityTests.Scoped_indent_on_new_line_only_controls_inline_padding	False pads inline OPTION keyword
+Select_OptionHints_IndentOptionKeyword.Size	SC-10	covered	select.option.keywordIndent.offset:integer:0	SelectTailParityTests.Scoped_indent_changes_its_boundary	Signed native indentation level offset
+Select_OptionHints_LineBreakAfterOption	SC-10	covered	select.option.breakAfter:choice:inherit	SelectTailParityTests.For_xml_and_option_boundaries_are_configurable	Break between OPTION keyword and opening parenthesis
+Select_OptionHints_LineBreakBeforeOption	SC-10	covered	select.option.breakBefore:choice:inherit	SelectTailParityTests.For_xml_and_option_boundaries_are_configurable	Break before OPTION keyword
 Select_OrderBy_IndentColumnList.Indent	SC-09	covered	select.orderBy.listIndent.enabled:boolean:false	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	Native local indent before ORDER BY items
 Select_OrderBy_IndentColumnList.OnNewLineOnly	SC-09	covered	select.orderBy.listIndent.onNewLineOnly:boolean:true	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	False also pads inline ORDER BY items
 Select_OrderBy_IndentColumnList.Size	SC-09	covered	select.orderBy.listIndent.offset:integer:0	SelectClauseParityTests.Local_indent_and_inline_policy_are_observable	Signed native indentation level offset

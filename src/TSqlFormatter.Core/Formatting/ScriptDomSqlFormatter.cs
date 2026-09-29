@@ -50,6 +50,11 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
                 : parsed.Diagnostics.Select(error => new FormatterDiagnostic(
                     "TSF1000", error.Message, FormatterDiagnosticSeverity.Error,
                     new SqlTextSpan(error.Offset, 0))).ToArray();
+            if (parsed.Tokens.Any(token => string.Equals(token.Text, "COMPUTE", StringComparison.OrdinalIgnoreCase))
+                && request.Dialect is not (SqlDialectVersion.Sql2008 or SqlDialectVersion.Auto))
+                diagnostics = diagnostics.Concat(new[] { new FormatterDiagnostic("TSF3005",
+                    "COMPUTE requires the SQL Server 2008 dialect; choose Sql2008 or Auto for legacy fallback.",
+                    FormatterDiagnosticSeverity.Error) }).ToArray();
             return request.ParseFailureBehavior == ParseFailureBehavior.Safe
                 ? FormatSafeFragments(source, options, request, parsed, diagnostics, cancellationToken)
                 : new FormatResult(source, false, false, diagnostics: diagnostics);
@@ -98,6 +103,8 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
                 request.Dialect, cancellationToken);
             rendered = SelectClauseLayout.ApplySafe(rendered, options, _parser,
                 request.Dialect, cancellationToken);
+            rendered = SelectTailLayout.ApplySafe(rendered, options, _parser,
+                request.Dialect, cancellationToken);
             rendered = SelectCompactness.ApplySafe(rendered, options, _parser,
                 request.Dialect, cancellationToken);
             if (string.Equals(rendered, source, StringComparison.Ordinal))
@@ -117,6 +124,8 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         output = SelectFromLayout.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);
         output = SelectClauseLayout.ApplySafe(output, options, _parser,
+            request.Dialect, cancellationToken);
+        output = SelectTailLayout.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);
         output = SelectCompactness.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);

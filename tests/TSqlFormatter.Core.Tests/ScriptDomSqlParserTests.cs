@@ -89,6 +89,7 @@ public sealed class ScriptDomSqlParserTests
 
     [Theory]
     [InlineData(SqlDialectVersion.Auto, SqlVersion.Sql180)]
+    [InlineData(SqlDialectVersion.Sql2008, SqlVersion.Sql100)]
     [InlineData(SqlDialectVersion.Sql2016, SqlVersion.Sql130)]
     [InlineData(SqlDialectVersion.Sql2017, SqlVersion.Sql140)]
     [InlineData(SqlDialectVersion.Sql2019, SqlVersion.Sql150)]

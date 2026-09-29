@@ -195,6 +195,10 @@ Top-level `SELECT` now has separate `select.where.*`, `select.having.*`, `select
 
 `WHERE` and `HAVING` conditions independently offer `wrapCondition` (`inherit`/`none`/`and`/`or`/`both`), `wrapBeforeOperator`, `wrapAfterOperator` (`inherit`/`always`/`never`), and `nestedConditionIndent`. An explicit `AND`/`OR` side rule takes precedence over the general wrap mode. `select.where.*` does not change `HAVING`, or vice versa; the older shared JSON v1 switches still establish the initial layout under `inherit`. As in SC-08, only safe gaps between tokens are changed; comments are retained and output is revalidated. SC-07 one-line compactness runs last.
 
+The remaining top-level `SELECT` version-2 settings are in `select.cte.*`, `select.for.*`, `select.option.*`, and `select.compute.*`. CTEs offer independent breaks after `WITH`, before/after `AS`, and around column-list parentheses; `stackColumns` (`inherit`/`on`/`off`) with `stackMode` (`onePerLine`/`auto`); and local `expressionIndent`, `columnListIndent`, `columnBraceIndent`, and `subqueryBraceIndent`. For example, `{"version":2,"rules":{"select.cte.breakAfterWith":"always","select.cte.stackColumns":"on","select.cte.stackMode":"onePerLine"}}`. `FOR XML` offers `select.for.breakBefore`, `select.for.breakAfterXml`, `keywordIndent`, and `specIndent`; `OPTION` hints offer `select.option.breakBefore`, `breakAfter`, `keywordIndent`, and `hintsIndent`. Breaks accept `inherit`/`always`/`never`, and indents use the object described above. Only recognized gaps are changed, after which SQL is reparsed and checked for the same token sequence.
+
+Legacy `COMPUTE` is supported only by the SQL Server 2008 (`Sql2008`) dialect. For a script containing `COMPUTE`, `Auto` tries the `Sql100` parser if the modern parser rejects it and the entire script is valid under `Sql100`; other `Auto` scripts continue to use `Sql180`. `select.compute.breakBefore`, `breakAfter`, `keywordIndent`, and `expressionIndent` act only through this compatibility path. An explicitly selected modern dialect leaves the source unchanged and reports `TSF3005`. This does not imply that `Auto` supports other legacy constructs.
+
 ```csharp
 using System.IO;
 using TSqlFormatter.Configuration;
@@ -287,7 +291,7 @@ else
 
 `result.Source` retains the input text. `result.Diagnostics` provides the ScriptDom error number, message, offset, line, and column. On failure, `result.Root` may be partial, so use it only after checking `ParseSucceeded`.
 
-`SqlDialectVersion` accepts `Auto`, `Sql2016`, `Sql2017`, `Sql2019`, `Sql2022`, and `Latest`. Currently, `Auto` and `Latest` use ScriptDom parser `Sql180`; `Auto` does not detect a server version. `ScriptDomSqlParser` enables quoted identifiers by default; pass `initialQuotedIdentifiers: false` to change the initial setting.
+`SqlDialectVersion` accepts `Auto`, `Sql2008`, `Sql2016`, `Sql2017`, `Sql2019`, `Sql2022`, and `Latest`. `Sql2008` uses ScriptDom `Sql100`, and `Latest` uses `Sql180`. `Auto` normally uses `Sql180` but can safely fall back to `Sql100` for a parseable `COMPUTE`; it does not detect the server version. `ScriptDomSqlParser` enables quoted identifiers by default; pass `initialQuotedIdentifiers: false` to change the initial setting.
 
 ## Navigating tokens and fragments
 

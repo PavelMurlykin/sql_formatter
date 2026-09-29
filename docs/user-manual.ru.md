@@ -195,6 +195,10 @@ CLI читает SQL и JSON-конфигурацию с ограничение�
 
 Для условий `WHERE` и `HAVING` доступны независимые `wrapCondition` (`inherit`/`none`/`and`/`or`/`both`), `wrapBeforeOperator`, `wrapAfterOperator` (`inherit`/`always`/`never`) и `nestedConditionIndent`. Явная настройка стороны `AND`/`OR` имеет приоритет над общим режимом. Опции `select.where.*` не меняют `HAVING` и наоборот; старые общие переключатели JSON v1 продолжают задавать исходную раскладку при `inherit`. Как и у SC-08, меняются только безопасные промежутки между токенами; комментарии не удаляются, а результат повторно проверяется. Однострочная компактность SC-07 применяется последней.
 
+Оставшиеся настройки верхнеуровневого `SELECT` версии 2 находятся в группах `select.cte.*`, `select.for.*`, `select.option.*` и `select.compute.*`. Для CTE доступны независимые переносы после `WITH`, до/после `AS`, у открывающей и закрывающей скобок списка колонок, режим `stackColumns` (`inherit`/`on`/`off`) с `stackMode` (`onePerLine`/`auto`), а также локальные `expressionIndent`, `columnListIndent`, `columnBraceIndent` и `subqueryBraceIndent`. Например, `{"version":2,"rules":{"select.cte.breakAfterWith":"always","select.cte.stackColumns":"on","select.cte.stackMode":"onePerLine"}}`. У `FOR XML` есть `select.for.breakBefore`, `select.for.breakAfterXml`, `keywordIndent` и `specIndent`; у подсказок `OPTION` — `select.option.breakBefore`, `breakAfter`, `keywordIndent` и `hintsIndent`. Переносы принимают `inherit`/`always`/`never`, отступы — ранее описанный объект. Меняются только распознанные промежутки, после чего SQL повторно разбирается и сверяется по токенам.
+
+Устаревший `COMPUTE` поддерживается только диалектом SQL Server 2008 (`Sql2008`). Для скрипта с `COMPUTE` режим `Auto` автоматически пробует парсер `Sql100`, если современный парсер отклонил скрипт и весь скрипт корректен в `Sql100`; остальные запросы `Auto` продолжают использовать `Sql180`. Правила `select.compute.breakBefore`, `breakAfter`, `keywordIndent` и `expressionIndent` действуют только на этом совместимом пути. При явном современном диалекте источник остаётся неизменным и выводится диагностика `TSF3005`. Это не означает поддержку прочих устаревших конструкций в `Auto`.
+
 ```csharp
 using System.IO;
 using TSqlFormatter.Configuration;
@@ -287,7 +291,7 @@ else
 
 `result.Source` сохраняет исходный текст. `result.Diagnostics` содержит номер ошибки ScriptDom, сообщение, смещение, строку и столбец. При ошибке `result.Root` может быть частичным, поэтому используйте его только после проверки `ParseSucceeded`.
 
-`SqlDialectVersion` принимает `Auto`, `Sql2016`, `Sql2017`, `Sql2019`, `Sql2022` и `Latest`. Сейчас `Auto` и `Latest` используют парсер ScriptDom `Sql180`; `Auto` не определяет версию сервера. Конструктор `ScriptDomSqlParser` по умолчанию включает режим quoted identifiers; для другого начального режима передайте `initialQuotedIdentifiers: false`.
+`SqlDialectVersion` принимает `Auto`, `Sql2008`, `Sql2016`, `Sql2017`, `Sql2019`, `Sql2022` и `Latest`. `Sql2008` использует ScriptDom `Sql100`, `Latest` — `Sql180`. `Auto` обычно использует `Sql180`, но может безопасно перейти на `Sql100` для разбираемого `COMPUTE`; версию сервера он не определяет. Конструктор `ScriptDomSqlParser` по умолчанию включает режим quoted identifiers; для другого начального режима передайте `initialQuotedIdentifiers: false`.
 
 ## Навигация по токенам и фрагментам
 
