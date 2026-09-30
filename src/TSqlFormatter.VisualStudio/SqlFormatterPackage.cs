@@ -21,6 +21,7 @@ namespace TSqlFormatter.VisualStudio;
 [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
 [ProvideMenuResource("Menus.ctmenu", 1)]
 [ProvideOptionPage(typeof(GeneralOptionsPage), "T-SQL Formatter", "General", 0, 0, true)]
+[ProvideOptionPage(typeof(FullSettingsOptionsPage), "T-SQL Formatter", "All settings", 0, 0, true)]
 [ProvideOptionPage(typeof(PreviewOptionsPage), "T-SQL Formatter", "SQL Preview", 0, 0, true)]
 [ProvideOptionPage(typeof(SelectOptionsPage), "T-SQL Formatter", "SELECT", 0, 0, true)]
 [ProvideOptionPage(typeof(JoinOptionsPage), "T-SQL Formatter", "JOIN", 0, 0, true)]
@@ -56,6 +57,9 @@ public sealed class SqlFormatterPackage : AsyncPackage
         undoRegistry = components?.GetService<ITextUndoHistoryRegistry>();
         ((PreviewOptionsPage)GetDialogPage(typeof(PreviewOptionsPage))).OptionsProvider =
             CreateIdeOptions;
+        var fullSettings = (FullSettingsOptionsPage)GetDialogPage(typeof(FullSettingsOptionsPage));
+        fullSettings.LegacyOptionsProvider = CreateLegacyOptions;
+        fullSettings.SqlPathProvider = () => ActiveSqlEditor.TryRead(textManager, out var editor) ? editor.Path : null;
         if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService commands)
         {
             commands.AddCommand(new MenuCommand(ExecuteFormatDocument, new CommandID(CommandSet, 0x0200)));
@@ -374,6 +378,9 @@ public sealed class SqlFormatterPackage : AsyncPackage
         joins.SaveSettingsToStorage();
         where.SaveSettingsToStorage();
         profile.SaveSettingsToStorage();
+        var fullSettings = (FullSettingsOptionsPage)GetDialogPage(typeof(FullSettingsOptionsPage));
+        fullSettings.ImportOptions(options);
+        fullSettings.SaveSettingsToStorage();
     }
 
     private async Task FormatStatementAsync()
@@ -593,6 +600,13 @@ public sealed class SqlFormatterPackage : AsyncPackage
     }
 
     private FormattingOptions CreateIdeOptions()
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        var fullSettings = (FullSettingsOptionsPage)GetDialogPage(typeof(FullSettingsOptionsPage));
+        return fullSettings.ResolveOptions(CreateLegacyOptions());
+    }
+
+    private FormattingOptions CreateLegacyOptions()
     {
         ThreadHelper.ThrowIfNotOnUIThread();
         var profilePage = (ProfileOptionsPage)GetDialogPage(typeof(ProfileOptionsPage));

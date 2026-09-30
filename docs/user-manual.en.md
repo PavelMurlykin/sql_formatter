@@ -4,7 +4,7 @@
 
 This is an early prototype. T-SQL parsing, token navigation, comment classification, offset-to-line mapping, layout document construction and rendering, keyword casing, and formatting for supported `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms are available through `TSqlFormatter.Core`, including CTEs, subqueries, `CASE`, window functions, `FROM`, `JOIN`, `APPLY`, and simple control-flow and stored-code forms. JSON settings, named profiles, and a limited `.editorconfig` subset are available through `TSqlFormatter.Configuration`. The CLI formats SQL from stdin or one file to stdout; multiple files and directories support `--write` and `--check` with configuration discovery for each file. The CLI can be built and installed as a local preview `dotnet tool`; no stable package has been published. An experimental VSIX formats the entire open `.sql` document, a statement containing a selection, or the statement nearest the caret and loads file configuration. A separate SSMS 22 VSIX can format the active `.sql` document experimentally.
 
-The repository now includes a verifiable requirements inventory for two user-supplied SQL Complete profiles and T-SQL examples for 20 categories. This is a development baseline only: the current version does not support every listed option and cannot import SQL Complete XML profiles. The available user settings are listed below under “JSON configuration.”
+The repository now includes a verifiable requirements inventory for two user-supplied SQL Complete profiles and T-SQL examples for 20 categories. All 969 applicable ledger paths have native settings; 8 OptionHints paths were declared not applicable. This is capability coverage with documented safe-layout limitations, not byte-for-byte SQL Complete output. XML profiles are not imported. The available user settings are listed below under “JSON configuration.”
 
 ### Control flow and stored code
 
@@ -12,7 +12,7 @@ The CLI and editor commands use the same engine. For simple statements it lays o
 
 ### Column alignment
 
-JSON configuration can enable `alignment.selectAliases`, `alignment.setAssignments`, and `alignment.declareTypes` (all `false` by default). The first aligns explicit `AS` keywords and aliases in a simple `SELECT` list; the second aligns `=` signs in simple `UPDATE ... SET` assignments; the third aligns data types in a multi-variable `DECLARE`. For example, with `"selectAliases": true`, `Id AS CustomerId, LongName AS Name` is placed on separate lines with the `AS` keywords in one column. Alignment falls back to the previous layout for a particular list when it contains comments or complex forms, uses tabs, or would exceed `general.maxLineLength`. It does not align a standalone `SET @x = ...` or implicit aliases. The VS/SSMS option pages do not yet expose these switches; use `.tsqlformatter.json` with the editors. Importing a profile in VS does not transfer these switches to its option pages.
+JSON configuration can enable `alignment.selectAliases`, `alignment.setAssignments`, and `alignment.declareTypes` (all `false` by default). The first aligns explicit `AS` keywords and aliases in a simple `SELECT` list; the second aligns `=` signs in simple `UPDATE ... SET` assignments; the third aligns data types in a multi-variable `DECLARE`. For example, with `"selectAliases": true`, `Id AS CustomerId, LongName AS Name` is placed on separate lines with the `AS` keywords in one column. Alignment falls back to the previous layout for a particular list when it contains comments or complex forms, uses tabs, or would exceed `general.maxLineLength`. It does not align a standalone `SET @x = ...` or implicit aliases. These settings are available in VS/SSMS All settings and `.tsqlformatter.json`; native profile import retains alignment.
 
 ## Setup
 
@@ -68,11 +68,11 @@ The VSIX adds `Tools → Options → T-SQL Formatter → General` with maximum l
 
 `Tools → Options → T-SQL Formatter → SQL Preview` provides an editable SQL sample (up to 4096 characters) and a formatted result. After a 300 ms pause in typing it runs the same Core formatter as the commands; returning to the page refreshes the preview with the current IDE settings. The preview uses IDE options only, not a project config, and never edits the open SQL document. Invalid sample SQL displays a diagnostic instead of formatted output. Runtime behavior in an installed Visual Studio instance remains to be checked manually.
 
-The `SELECT`, `JOIN`, and `WHERE` pages under `Tools → Options → T-SQL Formatter` configure supported layouts. SELECT offers `Auto` or `OnePerLine` for columns and for GROUP BY/ORDER BY items. JOIN can place supported JOIN/APPLY clauses and ON conditions on a new line (both on by default). WHERE can place supported WHERE/HAVING conditions and AND/OR operators on a new line (both on by default). With the `Default` IDE profile, these page values are used by formatting commands and SQL Preview; matching fields in a project config override them for commands. Unsupported SQL constructs retain their original layout. Page behavior in a running IDE still needs manual verification.
+The `SELECT`, `JOIN`, and `WHERE` pages under `Tools → Options → T-SQL Formatter` configure supported layouts. SELECT offers `Auto` or `OnePerLine` for columns and for GROUP BY/ORDER BY items. JOIN can place supported JOIN/APPLY clauses and ON conditions on a new line (both on by default). WHERE can place supported WHERE/HAVING conditions and AND/OR operators on a new line (both on by default). With Use full settings disabled and the `Default` IDE profile, these page values are used by formatting commands and SQL Preview; matching fields in a project config override them for commands. Unsupported SQL constructs retain their original layout. Page behavior in a running IDE still needs manual verification.
 
-`Tools → Options → T-SQL Formatter → Profile` selects `Default`, `Compact`, or `Expanded`. `Default` uses the General/SELECT/JOIN/WHERE page values; `Compact` uses its built-in 120-character width, while `Expanded` uses width 80 and one item per line for SELECT, GROUP BY, and ORDER BY. With `Compact` or `Expanded`, the other IDE pages are ignored until you switch back to `Default`; matching project-config fields still override the selected profile for formatting commands. SQL Preview uses the selected profile but not project configuration. Profile selection in the installed IDE needs manual verification.
+`Tools → Options → T-SQL Formatter → Profile` selects `Default`, `Compact`, or `Expanded`. With Use full settings disabled, `Default` uses the General/SELECT/JOIN/WHERE page values; `Compact` uses its built-in 120-character width, while `Expanded` uses width 80 and one item per line for SELECT, GROUP BY, and ORDER BY. With `Compact` or `Expanded`, the other IDE pages are ignored until you switch back to `Default`; matching project-config fields still override the selected profile for formatting commands. SQL Preview uses the selected profile but not project configuration. Profile selection in the installed IDE needs manual verification.
 
-`Tools → T-SQL Formatter: Export Profile...` writes the currently effective IDE options to a version-1 JSON file after a save dialog. `Tools → T-SQL Formatter: Import Profile...` accepts a version-1 JSON file (at most 1 MiB, strict UTF-8), applies its values to the IDE option pages, persists them, and selects `Default`. It does not edit the open SQL document or a project config. Invalid input or a value above the IDE limits (line length 4096, indent size 32) leaves the current IDE settings unchanged and reports an error. Exported JSON is a full options snapshot that can also be copied to `.tsqlformatter.json`; it is not a named custom profile. These commands need manual verification in an installed Visual Studio instance.
+`Tools → T-SQL Formatter: Export Profile...` saves effective IDE options as native v1/v2 JSON (v2 when rules are overridden). `Import Profile...` accepts native v1/v2 JSON up to 1 MiB, strict UTF-8; persists all rules and alignment in All settings, enables Use full settings, also updates legacy pages and selects Default. Neither the SQL document nor project configuration changes. Invalid files or values above this command's legacy limits (line width 4096, indent size 32) are rejected. For the full range use Import JSON in All settings. Both imports retain native types without interpreting XML; exported snapshots are portable as `.tsqlformatter.json`.
 
 `Tools → Options → T-SQL Formatter → General → Format on save` defaults to `Off`. `CurrentDocument` formats the active `.sql` document immediately before Visual Studio writes it; `OnlyWhenProjectConfigExists` does so only when a `.tsqlformatter.json` is found by the normal upward search. Formatting uses the same project configuration, selected IDE profile, strict parsing, snapshot guard, and one Undo edit as the manual Document command. Automatic save formatting has a stricter 8 Ki-character buffer cap and a two-second cooperative cancellation token; manual Document retains its 16 Mi-character cap. A syntax/configuration error or cancellation does not block saving: the unformatted buffer is saved and an error is reported. The prototype processes only the active editor document; inactive files in Save All are not formatted. This save hook has compile and unit-test coverage, but still requires manual validation in a running Visual Studio instance before enabling it for valuable files.
 
@@ -83,6 +83,20 @@ The `SELECT`, `JOIN`, and `WHERE` pages under `Tools → Options → T-SQL Forma
 The automation limits follow a [synthetic local measurement](performance/editor-workflow-validation.md). Cancellation is cooperative; ScriptDom's synchronous parse can exceed the nominal two-second timeout before the token is observed. No UI responsiveness claim has been verified in an installed IDE.
 
 Formatting status and errors appear in the Visual Studio status bar and the **T-SQL Formatter** Output pane; errors activate that pane. The messages include diagnostic codes when available. A successful status-bar message was confirmed in the installed IDE; error-pane behavior remains untested there.
+
+## Full VS/SSMS settings editor (SC-25)
+
+Open `Tools → Options → T-SQL Formatter → All settings` in Visual Studio or `Tools → Options → T-SQL Formatter (SSMS) → All settings` in the supported experimental SSMS. Both adapters share this page; its complete catalog comes from Core metadata, including all five indent members and both threshold members. Rule field names start with `rules.`, for example `rules.execute.parameters.stackList`; JSON uses the same key without that prefix inside `rules`.
+
+Choose a category, search by part of a key/scope, and select a field. Set its boolean, numeric or choice value and click Set value. This enables Use full settings. For vertical EXEC parameters set `rules.execute.parameters.stackList = on`; for indentation set `rules.execute.parameters.listIndent.enabled = true` and `.offset = 1`. Reset field restores only the selected member; Reset all restores the draft without deleting named profiles. The explanation shows scope, explicit/inherited value, dependencies and dialect constraints. Disabled/dependent values are retained; for example stackMode applies when stackList=on, and local subquery rules require useSelectFormatting=false.
+
+Use full settings is initially off: legacy pages and built-in profiles keep their existing behavior. When enabled, commands use the complete snapshot instead of legacy pages; Format on save/Save exclusions automation stays on General. OK/Apply persists the draft and named profiles in the IDE's per-user settings; Cancel discards unsaved changes. The SQL document is not modified.
+
+Enter a name (1–100 characters) and Save as… to save a snapshot; replacing an existing name requires confirmation. Select a Built-in/User profile and click Load profile. Import JSON…/Export JSON… exchange native v1/v2 snapshots including rules/alignment; import is capped at 1 MiB and export confirms overwriting. File export is a separate action and is not undone by cancelling the options dialog. User names are stored in the IDE; they do not become CLI IDs for `--profile`.
+
+Preview formats an editable sample up to 8192 characters in the background after a 300 ms pause; cancellation is cooperative with a 2-second limit. By default it shows only the draft, even if Use full settings is off. Include active SQL file's project configuration shows the `.editorconfig` and nearest `.tsqlformatter.json` overlay for the active saved `.sql`; the source line lists them in precedence order. A project override can prevent a local draft edit from changing the effective value. Project preview is unavailable without an active file. Configuration/SQL errors are shown without editing a document, and stale results are suppressed.
+
+For CLI use, save the export as `.tsqlformatter.json` next to SQL and run `dotnet run --project src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj --no-restore -- query.sql`. Every rule is available through this shared format; there is no separate flag per field. With identical effective settings, preview/Core/CLI/IDE commands use the same engine. Build and automated tests verify the new page's implementation; installed-IDE manual verification remains part of SC-27 and is not established by earlier smoke-test records.
 
 ## CLI: stdin, files, and directories
 
@@ -812,7 +826,7 @@ WHERE
     a = 1;
 ```
 
-Rules apply to parsed UPDATE/DELETE statements, including stored code, TOP, variable table targets, JOIN/APPLY, and nested joins. `delete.target.*` controls the `DELETE [FROM] target` header, while `delete.from.*` controls the separate source FROM. `where.*` can change the boundary before `CURRENT OF` but does not rewrite the cursor. `output.*` controls the OUTPUT projection, including OUTPUT INTO and both OUTPUT clauses of one statement; INTO target columns are not part of that projection. OPTION retains hints and their order. Comments and literals are not rewritten; gaps adjacent to comments are skipped, while other safe boundaries may change. Edits are checked by reparsing and comparing tokens. Multiline literals/quoted identifiers block rewriting of the entire script. Invalid SQL stays unchanged. XML numeric modes are not imported; without new overrides, JSON v1 and earlier output are retained. VS/SSMS options pages do not expose these new switches — use a configuration file.
+Rules apply to parsed UPDATE/DELETE statements, including stored code, TOP, variable table targets, JOIN/APPLY, and nested joins. `delete.target.*` controls the `DELETE [FROM] target` header, while `delete.from.*` controls the separate source FROM. `where.*` can change the boundary before `CURRENT OF` but does not rewrite the cursor. `output.*` controls the OUTPUT projection, including OUTPUT INTO and both OUTPUT clauses of one statement; INTO target columns are not part of that projection. OPTION retains hints and their order. Comments and literals are not rewritten; gaps adjacent to comments are skipped, while other safe boundaries may change. Edits are checked by reparsing and comparing tokens. Multiline literals/quoted identifiers block rewriting of the entire script. Invalid SQL stays unchanged. XML numeric modes are not imported; without new overrides, JSON v1 and earlier output are retained. Use VS/SSMS All settings or a configuration file.
 
 ## OUTPUT
 
@@ -900,7 +914,7 @@ ON
     t.id = s.id WHEN MATCHED THEN DELETE;
 ```
 
-In this example, the branch stays on the condition's line: header settings do not control WHEN/THEN or actions — use the separate branch rules below. Use the SC-18 rules below for OUTPUT/OPTION/TOP. Header/source settings also work with CTEs, TOP, additional branch conditions, and stored code, without changing expressions or action order. Comments and literals are not rewritten; gaps adjacent to comments are skipped, while other safe boundaries may change. Edits are checked by reparsing and comparing tokens. Multiline literals/quoted identifiers block rewriting of the entire script; invalid SQL stays unchanged. XML numeric modes are not imported; JSON v1 and earlier output without new overrides are retained. VS/SSMS options pages do not expose these new switches — use a configuration file.
+In this example, the branch stays on the condition's line: header settings do not control WHEN/THEN or actions — use the separate branch rules below. Use the SC-18 rules below for OUTPUT/OPTION/TOP. Header/source settings also work with CTEs, TOP, additional branch conditions, and stored code, without changing expressions or action order. Comments and literals are not rewritten; gaps adjacent to comments are skipped, while other safe boundaries may change. Edits are checked by reparsing and comparing tokens. Multiline literals/quoted identifiers block rewriting of the entire script; invalid SQL stays unchanged. XML numeric modes are not imported; JSON v1 and earlier output without new overrides are retained. Use VS/SSMS All settings or a configuration file.
 
 ## MERGE branches (SC-17)
 
@@ -930,7 +944,7 @@ Example `.tsqlformatter.json` used by CLI and adapters:
 }}
 ```
 
-UPDATE/INSERT/DELETE branch order, tokens, comments and literal contents are preserved. DELETE uses the shared THEN action indent. Without new overrides, including JSON v1, previous output is unchanged. Invalid SQL and scripts containing multiline literals are not rewritten; gaps adjacent to comments are skipped. OUTPUT/OPTION/TOP settings are described in the SC-18 section below. VS/SSMS option pages do not expose the new switches yet: use a configuration file.
+UPDATE/INSERT/DELETE branch order, tokens, comments and literal contents are preserved. DELETE uses the shared THEN action indent. Without new overrides, including JSON v1, previous output is unchanged. Invalid SQL and scripts containing multiline literals are not rewritten; gaps adjacent to comments are skipped. OUTPUT/OPTION/TOP settings are described in the SC-18 section below. Use VS/SSMS All settings or a configuration file.
 
 ## TOP, OUTPUT and OPTION in MERGE (SC-18)
 
@@ -951,7 +965,7 @@ Example configuration:
 "merge.output.breakBefore":"always","merge.output.stackList":"on","merge.option.breakBefore":"always"}}
 ```
 
-All 109 groups/181 scalar paths in the MERGE section have native counterparts. This is capability coverage, not a promise of byte-for-byte SQL Complete output; XML numeric modes still are not imported. Defaults and v1 output remain unchanged. Comment/literal safety, reparsing and token checks apply as described above. New IDE settings still require JSON.
+All 109 groups/181 scalar paths in the MERGE section have native counterparts. This is capability coverage, not a promise of byte-for-byte SQL Complete output; XML numeric modes still are not imported. Defaults and v1 output remain unchanged. Comment/literal safety, reparsing and token checks apply as described above. New settings are available through IDE All settings and JSON.
 
 ## DECLARE: variables and cursors (SC-19)
 
@@ -977,7 +991,7 @@ Verified `.tsqlformatter.json` example:
 "declare.cursor.breakBeforeFor":"always","declare.cursor.breakBeforeQuery":"always"}}
 ```
 
-Rules also apply inside stored code; variable order, values, cursor options and comments are preserved. Defaults/v1 retain previous behavior; invalid SQL and multiline literals are not rewritten. XML numeric Style is not interpreted. New VS/SSMS keys still require JSON.
+Rules also apply inside stored code; variable order, values, cursor options and comments are preserved. Defaults/v1 retain previous behavior; invalid SQL and multiline literals are not rewritten. XML numeric Style is not interpreted. New keys are available through VS/SSMS All settings or JSON.
 
 ## Code, blocks and transactions (SC-20)
 
@@ -1036,7 +1050,7 @@ Verified example:
 "view.columns.stackList":"off","view.query.singleLine.any":true}}
 ```
 
-Works in Core/CLI and adapters through configuration files, including current-statement scope. Defaults/v1 retain previous output; invalid SQL, multiline literals and gaps adjacent to comments are not rewritten. XML numeric modes are not imported. New switches are not yet exposed on IDE option pages.
+Works in Core/CLI and adapters through configuration files, including current-statement scope. Defaults/v1 retain previous output; invalid SQL, multiline literals and gaps adjacent to comments are not rewritten. XML numeric modes are not imported. New switches are available through IDE All settings.
 
 ## CREATE TABLE (SC-22)
 
@@ -1061,7 +1075,7 @@ Verified configuration:
 "createTable.storage.breakBefore":"always","createTable.storage.stackList":"on"}}
 ```
 
-Regular/computed columns, constraints, indexes, PERIOD, graph tables with definitions and nested CREATE TABLE statements are supported. CTAS/CLONE and definition-free forms (such as FILETABLE) are not rewritten by this policy. Unknown syntax is safely declined; tokens, order, comments and literals are preserved with parser validation. Defaults/v1 retain previous output; access is through Core/CLI and IDE JSON, without XML numeric enum import.
+Regular/computed columns, constraints, indexes, PERIOD, graph tables with definitions and nested CREATE TABLE statements are supported. CTAS/CLONE and definition-free forms (such as FILETABLE) are not rewritten by this policy. Unknown syntax is safely declined; tokens, order, comments and literals are preserved with parser validation. Defaults/v1 retain previous output; access is through Core/CLI and IDE All settings/JSON, without XML numeric enum import.
 
 ## Triggers (SC-23)
 
@@ -1087,7 +1101,7 @@ Verified example:
 "trigger.body.codeIndent":{"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false}}}
 ```
 
-Core/CLI/IDE share the same configuration (currently through JSON in IDEs). New rules are opt-in; v1/default retain previous behavior. Tokens/comments are validated, gaps adjacent to comments are skipped, and multiline literals are not rewritten. XML numeric modes are not guessed.
+Core/CLI/IDE share the same configuration (through All settings or JSON in IDEs). New rules are opt-in; v1/default retain previous behavior. Tokens/comments are validated, gaps adjacent to comments are skipped, and multiline literals are not rewritten. XML numeric modes are not guessed.
 
 ## EXECUTE and labels (SC-24)
 

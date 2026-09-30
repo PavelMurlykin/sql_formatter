@@ -13,24 +13,8 @@ internal sealed class SqlEditorConfigResolver
     {
         try
         {
-            var directory = new DirectoryInfo(Path.GetDirectoryName(Path.GetFullPath(filePath))!);
-            var files = new List<string>();
-            while (directory is not null)
-            {
-                var path = Path.Combine(directory.FullName, ".editorconfig");
-                if (File.Exists(path))
-                {
-                    files.Add(path);
-                    if (new FileInfo(path).Length > MaxBytes)
-                        return Failure("TSF9001", $"{path}: .editorconfig exceeds {MaxBytes} bytes.");
-                    if (HasRootMarker(File.ReadAllText(path, new UTF8Encoding(false, true)))) break;
-                }
-                directory = directory.Parent;
-            }
-
             var settings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            files.Reverse();
-            foreach (var path in files)
+            foreach (var path in FindConfigurationPaths(filePath))
                 ReadApplicableProperties(File.ReadAllText(path, new UTF8Encoding(false, true)), settings);
 
             var general = baseline.General;
@@ -64,11 +48,37 @@ internal sealed class SqlEditorConfigResolver
                 general: new GeneralOptions(width, ending, finalNewline),
                 indent: new IndentOptions(indentSize, useTabs)), Array.Empty<FormatterDiagnostic>());
         }
+        catch (ConfigurationSizeException exception) { return Failure("TSF9001", exception.Message); }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException
             or DecoderFallbackException or ArgumentException)
         {
             return Failure("TSF9000", $"Cannot load .editorconfig: {exception.Message}");
         }
+    }
+
+    internal static IReadOnlyList<string> FindConfigurationPaths(string filePath)
+    {
+        var directory = new DirectoryInfo(Path.GetDirectoryName(Path.GetFullPath(filePath))!);
+        var files = new List<string>();
+        while (directory is not null)
+        {
+            var path = Path.Combine(directory.FullName, ".editorconfig");
+            if (File.Exists(path))
+            {
+                files.Add(path);
+                if (new FileInfo(path).Length > MaxBytes)
+                    throw new ConfigurationSizeException($"{path}: .editorconfig exceeds {MaxBytes} bytes.");
+                if (HasRootMarker(File.ReadAllText(path, new UTF8Encoding(false, true)))) break;
+            }
+            directory = directory.Parent;
+        }
+        files.Reverse();
+        return files.AsReadOnly();
+    }
+
+    private sealed class ConfigurationSizeException : IOException
+    {
+        public ConfigurationSizeException(string message) : base(message) { }
     }
 
     private static bool HasRootMarker(string content)

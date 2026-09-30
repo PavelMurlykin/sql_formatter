@@ -3,7 +3,7 @@ using TSqlFormatter.Core.Formatting;
 
 namespace TSqlFormatter.Configuration;
 
-/// <summary>Imports and exports a portable version-1 formatter options file.</summary>
+/// <summary>Imports and exports portable native v1/v2 options, including every rule override.</summary>
 public sealed class SqlFormatterProfileExchange
 {
     public const long MaxProfileBytes = 1024 * 1024;

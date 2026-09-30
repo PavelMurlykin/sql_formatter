@@ -21,6 +21,7 @@ namespace TSqlFormatter.Ssms;
 [ProvideAutoLoad(UIContextGuids80.SolutionExists, PackageAutoLoadFlags.BackgroundLoad)]
 [ProvideMenuResource("Menus.ctmenu", 1)]
 [ProvideOptionPage(typeof(SsmsOptionsPage), "T-SQL Formatter (SSMS)", "General", 0, 0, true)]
+[ProvideOptionPage(typeof(FullSettingsOptionsPage), "T-SQL Formatter (SSMS)", "All settings", 0, 0, true)]
 [Guid(PackageGuid)]
 public sealed class SsmsPackage : AsyncPackage
 {
@@ -37,6 +38,9 @@ public sealed class SsmsPackage : AsyncPackage
         var components = await GetServiceAsync(typeof(SComponentModel)) as IComponentModel;
         editorAdapters = components?.GetService<IVsEditorAdaptersFactoryService>();
         undoRegistry = components?.GetService<ITextUndoHistoryRegistry>();
+        var fullSettings = (FullSettingsOptionsPage)GetDialogPage(typeof(FullSettingsOptionsPage));
+        fullSettings.LegacyOptionsProvider = () => ((SsmsOptionsPage)GetDialogPage(typeof(SsmsOptionsPage))).CreateOptions();
+        fullSettings.SqlPathProvider = () => ActiveQueryEditor.TryRead(textManager, out var editor) ? editor.Path : null;
         ActivityLog.LogInformation("T-SQL Formatter SSMS", "SSMS spike package initialized.");
         if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService commands)
         {
@@ -103,6 +107,7 @@ public sealed class SsmsPackage : AsyncPackage
         {
             string source = snapshot.GetText();
             FormattingOptions defaults = ((SsmsOptionsPage)GetDialogPage(typeof(SsmsOptionsPage))).CreateOptions();
+            defaults = ((FullSettingsOptionsPage)GetDialogPage(typeof(FullSettingsOptionsPage))).ResolveOptions(defaults);
             var configured = await Task.Run(() =>
             {
                 var config = new SqlFormatterConfigurationResolver().ResolveForSqlFile(editor.Path, defaults);
