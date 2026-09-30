@@ -455,46 +455,46 @@ Merge_When_WrapBeforeOperatorMode	SC-17	covered	merge.when.wrapBeforeOperator	Me
 Merge_When_WrapConditionMode	SC-17	covered	merge.when.wrapCondition	MergeBranchParityTests.Conditions_inheritance_and_combined_nested_anchors_are_stable	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
 Misc_AddEmptyLineAfterPackageDelimiter	SC-06	covered	misc.packageDelimiterBlankLine:boolean:false	StackedListAndBatchFormattingTests.Go_blank_line_mode_is_configurable	Enable blank lines around standalone GO; default off preserves existing layout
 Misc_AddEmptyLineAfterPackageDelimiterMode	SC-06	covered	misc.packageDelimiterBlankLineMode:choice:after	StackedListAndBatchFormattingTests.Go_blank_line_mode_is_configurable	Native after/before/both mode when enabled; XML numeric mode not imported
-ProcedureFunction_Body_IndentAsKeyword.Indent	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Body_IndentAsKeyword.OnNewLineOnly	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Body_IndentAsKeyword.Size	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Body_IndentBeginEndKeywords.Indent	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Body_IndentBeginEndKeywords.OnNewLineOnly	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Body_IndentBeginEndKeywords.Size	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Body_IndentCode.Indent	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Body_IndentCode.OnNewLineOnly	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Body_IndentCode.Size	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Body_LineBreakBeforeAs	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Body_LineBreakBeforeRoutineBody	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Parameters_IndentParameters.Indent	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Parameters_IndentParameters.OnNewLineOnly	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Parameters_IndentParameters.Size	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Parameters_IndentParametersListBraces.Indent	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Parameters_IndentParametersListBraces.OnNewLineOnly	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Parameters_IndentParametersListBraces.Size	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Parameters_InsertSpaceBeforeOpenBrace	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Parameters_InsertSpaceWithinEmptyParametersListBraces	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Parameters_InsertSpacesWithinParametersListBraces	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Parameters_LineBreakBeforeClosingBrace	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Parameters_LineBreakBeforeFirstParameter	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Parameters_LineBreakBeforeOpenBrace	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Parameters_StackParametersList	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Parameters_StackParametersListStyle	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Returns_IndentTableDefinition.Indent	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Returns_IndentTableDefinition.OnNewLineOnly	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Returns_IndentTableDefinition.Size	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Returns_LineBreakBeforeReturns	SC-21	pending_semantics	-	-	-
-ProcedureFunction_Returns_LineBreakBeforeTableDefinition	SC-21	pending_semantics	-	-	-
-ProcedureFunction_With_IndentWith.Indent	SC-21	pending_semantics	-	-	-
-ProcedureFunction_With_IndentWith.OnNewLineOnly	SC-21	pending_semantics	-	-	-
-ProcedureFunction_With_IndentWith.Size	SC-21	pending_semantics	-	-	-
-ProcedureFunction_With_IndentWithOptions.Indent	SC-21	pending_semantics	-	-	-
-ProcedureFunction_With_IndentWithOptions.OnNewLineOnly	SC-21	pending_semantics	-	-	-
-ProcedureFunction_With_IndentWithOptions.Size	SC-21	pending_semantics	-	-	-
-ProcedureFunction_With_LineBreakAfterWith	SC-21	pending_semantics	-	-	-
-ProcedureFunction_With_LineBreakBeforeWith	SC-21	pending_semantics	-	-	-
-ProcedureFunction_With_StackWithOptions	SC-21	pending_semantics	-	-	-
-ProcedureFunction_With_StackWithOptionsMode	SC-21	pending_semantics	-	-	-
+ProcedureFunction_Body_IndentAsKeyword.Indent	SC-21	covered	routine.body.asIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Body_IndentAsKeyword.OnNewLineOnly	SC-21	covered	routine.body.asIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Body_IndentAsKeyword.Size	SC-21	covered	routine.body.asIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Body_IndentBeginEndKeywords.Indent	SC-21	covered	routine.body.keywordIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Body_IndentBeginEndKeywords.OnNewLineOnly	SC-21	covered	routine.body.keywordIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Body_IndentBeginEndKeywords.Size	SC-21	covered	routine.body.keywordIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Body_IndentCode.Indent	SC-21	covered	routine.body.codeIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Body_IndentCode.OnNewLineOnly	SC-21	covered	routine.body.codeIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Body_IndentCode.Size	SC-21	covered	routine.body.codeIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Body_LineBreakBeforeAs	SC-21	covered	routine.body.breakBeforeAs	ModuleParityTests.Create_and_alter_boundaries_support_all_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Body_LineBreakBeforeRoutineBody	SC-21	covered	routine.body.breakBefore	ModuleParityTests.Create_and_alter_boundaries_support_all_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Parameters_IndentParameters.Indent	SC-21	covered	routine.parameters.listIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Parameters_IndentParameters.OnNewLineOnly	SC-21	covered	routine.parameters.listIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Parameters_IndentParameters.Size	SC-21	covered	routine.parameters.listIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Parameters_IndentParametersListBraces.Indent	SC-21	covered	routine.parameters.braceIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Parameters_IndentParametersListBraces.OnNewLineOnly	SC-21	covered	routine.parameters.braceIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Parameters_IndentParametersListBraces.Size	SC-21	covered	routine.parameters.braceIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Parameters_InsertSpaceBeforeOpenBrace	SC-21	covered	routine.parameters.spaceBeforeOpen	ModuleParityTests.Every_brace_space_rule_has_distinct_insert_remove_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Parameters_InsertSpaceWithinEmptyParametersListBraces	SC-21	covered	routine.parameters.spaceWithinEmpty	ModuleParityTests.Every_brace_space_rule_has_distinct_insert_remove_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Parameters_InsertSpacesWithinParametersListBraces	SC-21	covered	routine.parameters.spaceWithin	ModuleParityTests.Every_brace_space_rule_has_distinct_insert_remove_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Parameters_LineBreakBeforeClosingBrace	SC-21	covered	routine.parameters.breakBeforeClose	ModuleParityTests.Create_and_alter_boundaries_support_all_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Parameters_LineBreakBeforeFirstParameter	SC-21	covered	routine.parameters.breakAfterOpen	ModuleParityTests.Create_and_alter_boundaries_support_all_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Parameters_LineBreakBeforeOpenBrace	SC-21	covered	routine.parameters.breakBeforeOpen	ModuleParityTests.Create_and_alter_boundaries_support_all_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Parameters_StackParametersList	SC-21	covered	routine.parameters.stackList	ModuleParityTests.Every_list_has_on_off_auto_and_leading_comma_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Parameters_StackParametersListStyle	SC-21	covered	routine.parameters.stackMode	ModuleParityTests.Every_list_has_on_off_auto_and_leading_comma_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Returns_IndentTableDefinition.Indent	SC-21	covered	routine.returns.tableIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Returns_IndentTableDefinition.OnNewLineOnly	SC-21	covered	routine.returns.tableIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Returns_IndentTableDefinition.Size	SC-21	covered	routine.returns.tableIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Returns_LineBreakBeforeReturns	SC-21	covered	routine.returns.breakBefore	ModuleParityTests.Create_and_alter_boundaries_support_all_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_Returns_LineBreakBeforeTableDefinition	SC-21	covered	routine.returns.breakBeforeTable	ModuleParityTests.Create_and_alter_boundaries_support_all_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_With_IndentWith.Indent	SC-21	covered	routine.with.keywordIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_With_IndentWith.OnNewLineOnly	SC-21	covered	routine.with.keywordIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_With_IndentWith.Size	SC-21	covered	routine.with.keywordIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_With_IndentWithOptions.Indent	SC-21	covered	routine.with.listIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_With_IndentWithOptions.OnNewLineOnly	SC-21	covered	routine.with.listIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_With_IndentWithOptions.Size	SC-21	covered	routine.with.listIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_With_LineBreakAfterWith	SC-21	covered	routine.with.breakAfter	ModuleParityTests.Create_and_alter_boundaries_support_all_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_With_LineBreakBeforeWith	SC-21	covered	routine.with.breakBefore	ModuleParityTests.Create_and_alter_boundaries_support_all_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_With_StackWithOptions	SC-21	covered	routine.with.stackList	ModuleParityTests.Every_list_has_on_off_auto_and_leading_comma_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+ProcedureFunction_With_StackWithOptionsMode	SC-21	covered	routine.with.stackMode	ModuleParityTests.Every_list_has_on_off_auto_and_leading_comma_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
 Select_Compute_IndentComputeExpression.Indent	SC-10	covered	select.compute.expressionIndent.enabled:boolean:false	SelectTailParityTests.Scoped_indent_changes_its_boundary	Sql2008 and Auto legacy fallback only; indent after COMPUTE
 Select_Compute_IndentComputeExpression.OnNewLineOnly	SC-10	covered	select.compute.expressionIndent.onNewLineOnly:boolean:true	SelectTailParityTests.Scoped_indent_on_new_line_only_controls_inline_padding	False pads inline COMPUTE expression
 Select_Compute_IndentComputeExpression.Size	SC-10	covered	select.compute.expressionIndent.offset:integer:0	SelectTailParityTests.Scoped_indent_changes_its_boundary	Signed native indentation level offset
@@ -949,30 +949,30 @@ Update_Where_LineBreakBeforeWhere	SC-15	covered	update.where.breakBefore	UpdateD
 Update_Where_WrapAfterOperatorMode	SC-15	covered	update.where.wrapAfterOperator	UpdateDeleteParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never operator sides; XML numeric modes not assumed
 Update_Where_WrapBeforeOperatorMode	SC-15	covered	update.where.wrapBeforeOperator	UpdateDeleteParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never operator sides; XML numeric modes not assumed
 Update_Where_WrapConditionMode	SC-15	covered	update.where.wrapCondition	UpdateDeleteParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never operator sides; XML numeric modes not assumed
-View_ColumnList_IndentColumnList.Indent	SC-21	pending_semantics	-	-	-
-View_ColumnList_IndentColumnList.OnNewLineOnly	SC-21	pending_semantics	-	-	-
-View_ColumnList_IndentColumnList.Size	SC-21	pending_semantics	-	-	-
-View_ColumnList_IndentColumnListBraces.Indent	SC-21	pending_semantics	-	-	-
-View_ColumnList_IndentColumnListBraces.OnNewLineOnly	SC-21	pending_semantics	-	-	-
-View_ColumnList_IndentColumnListBraces.Size	SC-21	pending_semantics	-	-	-
-View_ColumnList_InsertSpaceBeforeColumnsList	SC-21	pending_semantics	-	-	-
-View_ColumnList_InsertSpacesWithinColumnsListBraces	SC-21	pending_semantics	-	-	-
-View_ColumnList_LineBreakAfterOpenBrace	SC-21	pending_semantics	-	-	-
-View_ColumnList_LineBreakBeforeClosingBrace	SC-21	pending_semantics	-	-	-
-View_ColumnList_LineBreakBeforeOpenBrace	SC-21	pending_semantics	-	-	-
-View_ColumnList_StackColumnsList	SC-21	pending_semantics	-	-	-
-View_ColumnList_StackColumnsListStyle	SC-21	pending_semantics	-	-	-
-View_Subquery_IndentAsKeyword.Indent	SC-21	pending_semantics	-	-	-
-View_Subquery_IndentAsKeyword.OnNewLineOnly	SC-21	pending_semantics	-	-	-
-View_Subquery_IndentAsKeyword.Size	SC-21	pending_semantics	-	-	-
-View_Subquery_IndentSubquery.Indent	SC-21	pending_semantics	-	-	-
-View_Subquery_IndentSubquery.OnNewLineOnly	SC-21	pending_semantics	-	-	-
-View_Subquery_IndentSubquery.Size	SC-21	pending_semantics	-	-	-
-View_Subquery_LineBreakAfterAs	SC-21	pending_semantics	-	-	-
-View_Subquery_LineBreakBeforeAs	SC-21	pending_semantics	-	-	-
-View_Subquery_SingleLine_AnyQuery	SC-21	pending_semantics	-	-	-
-View_Subquery_SingleLine_WhenQueryContainsLessThanXWords.Checked	SC-21	pending_semantics	-	-	-
-View_Subquery_SingleLine_WhenQueryContainsLessThanXWords.Value	SC-21	pending_semantics	-	-	-
-View_Subquery_SingleLine_WhenQueryIsShorterThanXCharacters.Checked	SC-21	pending_semantics	-	-	-
-View_Subquery_SingleLine_WhenQueryIsShorterThanXCharacters.Value	SC-21	pending_semantics	-	-	-
-View_Subquery_SingleLine_WhenRightMarginIsNotExceeded	SC-21	pending_semantics	-	-	-
+View_ColumnList_IndentColumnList.Indent	SC-21	covered	view.columns.listIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_ColumnList_IndentColumnList.OnNewLineOnly	SC-21	covered	view.columns.listIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_ColumnList_IndentColumnList.Size	SC-21	covered	view.columns.listIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_ColumnList_IndentColumnListBraces.Indent	SC-21	covered	view.columns.braceIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_ColumnList_IndentColumnListBraces.OnNewLineOnly	SC-21	covered	view.columns.braceIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_ColumnList_IndentColumnListBraces.Size	SC-21	covered	view.columns.braceIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_ColumnList_InsertSpaceBeforeColumnsList	SC-21	covered	view.columns.spaceBeforeOpen	ModuleParityTests.Every_brace_space_rule_has_distinct_insert_remove_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_ColumnList_InsertSpacesWithinColumnsListBraces	SC-21	covered	view.columns.spaceWithin	ModuleParityTests.Every_brace_space_rule_has_distinct_insert_remove_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_ColumnList_LineBreakAfterOpenBrace	SC-21	covered	view.columns.breakAfterOpen	ModuleParityTests.Create_and_alter_boundaries_support_all_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_ColumnList_LineBreakBeforeClosingBrace	SC-21	covered	view.columns.breakBeforeClose	ModuleParityTests.Create_and_alter_boundaries_support_all_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_ColumnList_LineBreakBeforeOpenBrace	SC-21	covered	view.columns.breakBeforeOpen	ModuleParityTests.Create_and_alter_boundaries_support_all_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_ColumnList_StackColumnsList	SC-21	covered	view.columns.stackList	ModuleParityTests.Every_list_has_on_off_auto_and_leading_comma_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_ColumnList_StackColumnsListStyle	SC-21	covered	view.columns.stackMode	ModuleParityTests.Every_list_has_on_off_auto_and_leading_comma_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_Subquery_IndentAsKeyword.Indent	SC-21	covered	view.query.asIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_Subquery_IndentAsKeyword.OnNewLineOnly	SC-21	covered	view.query.asIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_Subquery_IndentAsKeyword.Size	SC-21	covered	view.query.asIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_Subquery_IndentSubquery.Indent	SC-21	covered	view.query.queryIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_Subquery_IndentSubquery.OnNewLineOnly	SC-21	covered	view.query.queryIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_Subquery_IndentSubquery.Size	SC-21	covered	view.query.queryIndent	ModuleParityTests.Every_indent_has_enabled_offset_newline_style_and_transparency	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_Subquery_LineBreakAfterAs	SC-21	covered	view.query.breakAfterAs	ModuleParityTests.Create_and_alter_boundaries_support_all_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_Subquery_LineBreakBeforeAs	SC-21	covered	view.query.breakBeforeAs	ModuleParityTests.Create_and_alter_boundaries_support_all_modes	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_Subquery_SingleLine_AnyQuery	SC-21	covered	view.query.singleLine.any	ModuleParityTests.View_query_compactness_thresholds_and_whole_query_indent_work	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_Subquery_SingleLine_WhenQueryContainsLessThanXWords.Checked	SC-21	covered	view.query.singleLine.maxWords	ModuleParityTests.View_query_compactness_thresholds_and_whole_query_indent_work	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_Subquery_SingleLine_WhenQueryContainsLessThanXWords.Value	SC-21	covered	view.query.singleLine.maxWords	ModuleParityTests.View_query_compactness_thresholds_and_whole_query_indent_work	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_Subquery_SingleLine_WhenQueryIsShorterThanXCharacters.Checked	SC-21	covered	view.query.singleLine.maxCharacters	ModuleParityTests.View_query_compactness_thresholds_and_whole_query_indent_work	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_Subquery_SingleLine_WhenQueryIsShorterThanXCharacters.Value	SC-21	covered	view.query.singleLine.maxCharacters	ModuleParityTests.View_query_compactness_thresholds_and_whole_query_indent_work	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference
+View_Subquery_SingleLine_WhenRightMarginIsNotExceeded	SC-21	covered	view.query.singleLine.whenFitsMargin	ModuleParityTests.View_query_compactness_thresholds_and_whole_query_indent_work	Native CREATE/ALTER module boundary, indentation, list, spacing or compactness; no XML numeric enum inference

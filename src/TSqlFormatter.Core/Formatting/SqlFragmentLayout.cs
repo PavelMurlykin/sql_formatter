@@ -7,11 +7,12 @@ namespace TSqlFormatter.Core.Formatting;
 
 internal sealed class FragmentIndent
 {
-    public FragmentIndent(TSqlFragment fragment, int anchor, IndentRule rule, int? endOffset = null)
-    { Fragment = fragment; Anchor = anchor; Rule = rule; EndOffset = endOffset; }
+    public FragmentIndent(TSqlFragment fragment, int anchor, IndentRule rule, int? endOffset = null, int? startOffset = null)
+    { Fragment = fragment; Anchor = anchor; Rule = rule; EndOffset = endOffset; ExplicitStart = startOffset; }
     private int? EndOffset { get; }
+    private int? ExplicitStart { get; }
     public TSqlFragment Fragment { get; }
-    public int StartOffset => Fragment is StatementList { Statements.Count: > 0 } list ? list.Statements[0].StartOffset : Fragment.StartOffset;
+    public int StartOffset => ExplicitStart ?? (Fragment is StatementList { Statements.Count: > 0 } list ? list.Statements[0].StartOffset : Fragment.StartOffset);
     public int FragmentLength => EndOffset is { } end ? end - StartOffset : Fragment is StatementList { Statements.Count: > 0 } list
         ? list.Statements[list.Statements.Count - 1].StartOffset + list.Statements[list.Statements.Count - 1].FragmentLength - StartOffset
         : Fragment.FragmentLength;

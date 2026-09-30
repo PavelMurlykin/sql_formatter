@@ -91,7 +91,7 @@ internal sealed class SqlTokenGapEditor
         var start = left.Offset + left.Text.Length;
         var length = right.Offset - start;
         if (length < 0) return;
-        var current = parsed.Source.Substring(start, length);
+        var current = edits.TryGetValue(start, out var pending) ? pending.NewText : parsed.Source.Substring(start, length);
         if (current.Any(ch => !char.IsWhiteSpace(ch))) return;
         var existingBreak = Regex.Match(current, @"\r\n|\r|\n");
         var newline = options.General.LineEnding switch

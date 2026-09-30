@@ -255,7 +255,7 @@ public sealed class RuleCatalog
                 descriptor.DependsOn?.Replace("select.", "subquery."), descriptor.Dialect));
         return new RuleCatalog(descriptors.Concat(subquery).Concat(UpdateDeleteRules(descriptors))
             .Concat(MergeHeaderRules(descriptors)).Concat(MergeBranchRules(descriptors)).Concat(MergeTailRules())
-            .Concat(DeclareRules()).Concat(CodeRules()));
+            .Concat(DeclareRules()).Concat(CodeRules()).Concat(ModuleRules()));
     }
 
     private static RuleDescriptor CaseRule(string key, string defaultValue) => new(key, "token",
@@ -444,6 +444,30 @@ public sealed class RuleCatalog
         }
         yield return BreakRule("code.if.breakBeforeElse", scope);
         yield return BreakRule("code.if.breakAfterElse", scope);
+    }
+
+    private static IEnumerable<RuleDescriptor> ModuleRules()
+    {
+        const string scope = "procedure/function/view";
+        foreach (var key in new[] { "body.asIndent", "body.keywordIndent", "body.codeIndent", "parameters.listIndent",
+                     "parameters.braceIndent", "returns.tableIndent", "with.keywordIndent", "with.listIndent" })
+            yield return IndentDescriptor("routine." + key, scope);
+        foreach (var key in new[] { "body.breakBeforeAs", "body.breakBefore", "parameters.breakBeforeOpen", "parameters.breakAfterOpen",
+                     "parameters.breakBeforeClose", "returns.breakBefore", "returns.breakBeforeTable", "with.breakBefore", "with.breakAfter" })
+            yield return BreakRule("routine." + key, scope);
+        foreach (var key in new[] { "parameters.spaceBeforeOpen", "parameters.spaceWithin", "parameters.spaceWithinEmpty" })
+            yield return SpacingRule("routine." + key);
+        foreach (var prefix in new[] { "routine.parameters", "routine.with" })
+            foreach (var rule in ListRules(prefix, scope)) yield return rule;
+        foreach (var descriptor in InsertRules().Where(d => d.Key.StartsWith("insert.columns.", StringComparison.Ordinal)))
+            yield return new RuleDescriptor(descriptor.Key.Replace("insert.columns.", "view.columns."), scope,
+                descriptor.DefaultValue, descriptor.Minimum, descriptor.Maximum, descriptor.Choices,
+                descriptor.DependsOn?.Replace("insert.columns.", "view.columns."));
+        foreach (var key in new[] { "asIndent", "queryIndent" }) yield return IndentDescriptor("view.query." + key, scope);
+        foreach (var key in new[] { "breakBeforeAs", "breakAfterAs" }) yield return BreakRule("view.query." + key, scope);
+        foreach (var rule in SingleLineRules("view"))
+            yield return new RuleDescriptor(rule.Key.Replace("subquery.singleLine.view", "view.query.singleLine"), scope,
+                rule.DefaultValue, rule.Minimum, rule.Maximum, rule.Choices);
     }
 
     public IReadOnlyDictionary<string, RuleDescriptor> Definitions => definitions;

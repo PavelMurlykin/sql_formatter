@@ -1007,6 +1007,37 @@ JSON v2 предоставляет независимые настройки:
 
 Работает в Core/CLI и через файл конфигурации IDE; поддерживает форматирование выделения без изменения соседнего текста. Новые правила опциональны, v1/default сохраняют прежний вывод. При включённых правилах Code завершающая точка с запятой TRY/CATCH сохраняется (старый структурный режим без этих правил мог её опускать). Токены проверяются повторным разбором; ошибочный SQL/многострочные литералы сохраняются. Числовые XML-режимы не угадываются.
 
+## Процедуры, функции и представления (SC-21)
+
+Настройки JSON v2 действуют на CREATE, ALTER и CREATE OR ALTER:
+
+| Группа | Суффиксы ключей |
+| --- | --- |
+| `routine.parameters` | `listIndent, braceIndent, breakBeforeOpen, breakAfterOpen, breakBeforeClose, spaceBeforeOpen, spaceWithin, spaceWithinEmpty, stackList, stackMode` |
+| `routine.with` | `keywordIndent, listIndent, breakBefore, breakAfter, stackList, stackMode` |
+| `routine.returns` | `tableIndent, breakBefore, breakBeforeTable` |
+| `routine.body` | `asIndent, keywordIndent, codeIndent, breakBeforeAs, breakBefore` |
+| `view.columns` | `listIndent, braceIndent, breakBeforeOpen, breakAfterOpen, breakBeforeClose, spaceBeforeOpen, spaceWithin, stackList, stackMode` |
+| `view.query` | `asIndent, queryIndent, breakBeforeAs, breakAfterAs` |
+| `view.query.singleLine` | `any, whenFitsMargin, maxWords, maxCharacters` |
+
+Переносы: inherit/always/never; пробелы: inherit/insert/remove; списки: inherit/on/off с onePerLine/auto. Режим auto измеряет компактный список и не уплотняет списки с комментариями. Для процедур без скобок `parameters.breakAfterOpen` означает перенос перед первым параметром. Для функций пустые скобки имеют отдельное `spaceWithinEmpty`; параметры не меняют запятые внутри decimal(p,s) или значений. WITH относится только к опциям модуля, не к CTE/подсказкам в теле.
+
+Все отступы имеют общий тип enabled/offset/onNewLineOnly/style/transparent. AS, скобки и WITH считаются от начала модуля; параметры/опции — от скобки/WITH. BEGIN/END — от AS, внутренний код — от BEGIN, а тело без BEGIN — от AS. `returns.tableIndent` смещает TABLE и определение результата функции от начала модуля, не скалярный тип RETURNS. Для inline-функции `body.breakBefore` относится к RETURN, с сохранением необязательности AS. CLR EXTERNAL NAME не трактуется как SQL-тело.
+
+В VIEW отдельны скобки/колонки, AS и весь SELECT (от AS). Компактность использует те же независимые boolean/threshold-поля, что у курсоров: строгие пороги, проверка ширины с префиксом/хвостом, запрет при комментариях. Порядок и значения параметров, опций, колонок и выражений сохраняются.
+
+Проверенный пример:
+
+```json
+{"version":2,"rules":{"routine.parameters.stackList":"on","routine.with.breakBefore":"always",
+"routine.body.breakBeforeAs":"always","routine.body.breakBefore":"always",
+"routine.body.codeIndent":{"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false},
+"view.columns.stackList":"off","view.query.singleLine.any":true}}
+```
+
+Работает в Core/CLI и адаптерах через файл конфигурации, включая область текущего оператора. По умолчанию/v1 вывод прежний; ошибочный SQL, многострочные литералы и промежутки рядом с комментариями не переписываются. Числовые XML-режимы не импортируются. Новые переключатели пока отсутствуют на страницах IDE.
+
 ## Построение `Doc` из AST
 
 `SqlDocBuilder` создаёт layout-документ из результата парсинга. Без дополнительных обработчиков он сохраняет весь исходный текст, включая комментарии и разделители `GO`:

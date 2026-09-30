@@ -1007,6 +1007,37 @@ Verified configuration:
 
 Works in Core/CLI and via IDE configuration files; selection formatting preserves neighboring text. New rules are opt-in, with previous v1/default output retained. With Code rules enabled, a trailing TRY/CATCH semicolon is preserved (the legacy structural mode without these rules could omit it). Reparsing checks tokens; invalid SQL/multiline literals remain unchanged. XML numeric modes are not guessed.
 
+## Procedures, functions and views (SC-21)
+
+JSON v2 settings apply to CREATE, ALTER and CREATE OR ALTER:
+
+| Group | Key suffixes |
+| --- | --- |
+| `routine.parameters` | `listIndent, braceIndent, breakBeforeOpen, breakAfterOpen, breakBeforeClose, spaceBeforeOpen, spaceWithin, spaceWithinEmpty, stackList, stackMode` |
+| `routine.with` | `keywordIndent, listIndent, breakBefore, breakAfter, stackList, stackMode` |
+| `routine.returns` | `tableIndent, breakBefore, breakBeforeTable` |
+| `routine.body` | `asIndent, keywordIndent, codeIndent, breakBeforeAs, breakBefore` |
+| `view.columns` | `listIndent, braceIndent, breakBeforeOpen, breakAfterOpen, breakBeforeClose, spaceBeforeOpen, spaceWithin, stackList, stackMode` |
+| `view.query` | `asIndent, queryIndent, breakBeforeAs, breakAfterAs` |
+| `view.query.singleLine` | `any, whenFitsMargin, maxWords, maxCharacters` |
+
+Breaks: inherit/always/never; spaces: inherit/insert/remove; lists: inherit/on/off with onePerLine/auto. Auto measures a compact list and does not compact lists containing comments. For unbraced procedure parameters, `parameters.breakAfterOpen` means a break before the first parameter. Empty function parentheses have independent `spaceWithinEmpty`; parameter rules do not alter commas inside decimal(p,s) or values. WITH applies only to module options, not CTEs/hints in the body.
+
+All indents use the common enabled/offset/onNewLineOnly/style/transparent type. AS, parentheses and WITH anchor to the module start; parameters/options to the opening parenthesis/WITH. BEGIN/END anchor to AS, inner code to BEGIN, and bodies without BEGIN to AS. `returns.tableIndent` shifts TABLE and the function result definition from the module start, not scalar RETURNS types. For inline functions, `body.breakBefore` controls RETURN, preserving optional AS. CLR EXTERNAL NAME is not treated as a SQL body.
+
+VIEW has independent parentheses/columns, AS, and whole SELECT indentation (from AS). Compaction uses the same independent boolean/threshold fields as cursors: strict thresholds, margin checks including prefix/suffix, and no compaction with comments. Parameter, option, column and expression order/values are preserved.
+
+Verified example:
+
+```json
+{"version":2,"rules":{"routine.parameters.stackList":"on","routine.with.breakBefore":"always",
+"routine.body.breakBeforeAs":"always","routine.body.breakBefore":"always",
+"routine.body.codeIndent":{"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false},
+"view.columns.stackList":"off","view.query.singleLine.any":true}}
+```
+
+Works in Core/CLI and adapters through configuration files, including current-statement scope. Defaults/v1 retain previous output; invalid SQL, multiline literals and gaps adjacent to comments are not rewritten. XML numeric modes are not imported. New switches are not yet exposed on IDE option pages.
+
 ## Building a `Doc` from the AST
 
 `SqlDocBuilder` creates a layout document from a parse result. With no additional builders, it preserves the entire source, including comments and `GO` separators:
