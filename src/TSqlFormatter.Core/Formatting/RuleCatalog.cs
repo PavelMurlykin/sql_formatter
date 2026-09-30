@@ -221,7 +221,27 @@ public sealed class RuleCatalog
         StackRule("subquery.list.stackColumns", "subquery SELECT list"),
         new RuleDescriptor("subquery.list.stackMode", "subquery SELECT list",
             RuleValue.FromChoice("onePerLine"), choices: new[] { "onePerLine", "auto" },
-            dependsOn: "subquery.list.stackColumns")
+            dependsOn: "subquery.list.stackColumns"),
+        IndentDescriptor("case.caseIndent", "CASE keyword"),
+        IndentDescriptor("case.codeIndent", "CASE THEN/ELSE result"),
+        IndentDescriptor("case.inputIndent", "simple CASE input"),
+        IndentDescriptor("case.thenKeywordIndent", "CASE THEN keyword"),
+        IndentDescriptor("case.whenExpressionIndent", "CASE WHEN condition"),
+        IndentDescriptor("case.whenKeywordIndent", "CASE WHEN/ELSE keyword"),
+        IndentDescriptor("case.nestedConditionIndent", "CASE nested Boolean condition"),
+        BreakRule("case.breakAfterThenElse", "CASE THEN/ELSE result"),
+        BreakRule("case.breakBeforeCase", "CASE keyword"),
+        BreakRule("case.breakBeforeEnd", "CASE END keyword"),
+        BreakRule("case.breakBeforeInput", "simple CASE input"),
+        BreakRule("case.breakBeforeThen", "CASE THEN keyword"),
+        BreakRule("case.breakBeforeWhenElse", "CASE WHEN/ELSE keyword"),
+        WrapRule("case.wrapCondition", "searched CASE condition"),
+        BreakRule("case.wrapBeforeOperator", "searched CASE AND/OR operator"),
+        BreakRule("case.wrapAfterOperator", "searched CASE AND/OR operand"),
+        IndentDescriptor("setOperator.keywordIndent", "UNION/EXCEPT/INTERSECT keyword"),
+        IndentDescriptor("setOperator.branchIndent", "UNION/EXCEPT/INTERSECT right branch"),
+        BreakRule("setOperator.breakBefore", "UNION/EXCEPT/INTERSECT keyword"),
+        BreakRule("setOperator.breakAfter", "UNION/EXCEPT/INTERSECT right branch")
         }.Concat(new[] { "allAnySomeExists", "cteQueries", "fromList", "inOperator", "other" }
             .SelectMany(SingleLineRules)).ToArray();
         var scopes = new[] { "from.", "join.", "where.", "groupBy.", "having.",

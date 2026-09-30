@@ -436,7 +436,7 @@ var options = FormattingOptions.Default.With(
     keywords: new KeywordOptions(KeywordCase.Lower));
 ```
 
-The public sections currently include only options backed by implemented behavior. Planned `CASE`, comment, and other settings are not part of the API yet.
+The public sections currently include only options backed by implemented behavior. `CASE` and set-operator rules are available through JSON v2; comment layout and other future rules are not yet part of the API.
 
 ## Basic SELECT
 
@@ -550,7 +550,13 @@ SELECT
 FROM T
 ```
 
-Condition and result expression text within each branch is retained. If comments or another unsupported construct appear between CASE parts, the query's original layout is retained; keyword casing may still change.
+In JSON v2, `case.*` controls boundaries through `breakBeforeCase`, `breakBeforeEnd`, `breakBeforeInput` (simple `CASE` only), `breakBeforeThen`, `breakBeforeWhenElse`, and `breakAfterThenElse`. Values are `inherit` (default), `always`, and `never`. Seven independent indents — `caseIndent`, `codeIndent` (the `THEN`/`ELSE` result), `inputIndent`, `thenKeywordIndent`, `whenExpressionIndent`, `whenKeywordIndent`, and `nestedConditionIndent` — use the `enabled`/`offset`/`onNewLineOnly`/`style`/`transparent` object described for `select.list.indent`. Searched `CASE` conditions support `wrapCondition` (`inherit`/`none`/`and`/`or`/`both`), `wrapBeforeOperator`, and `wrapAfterOperator` (`inherit`/`always`/`never`); an explicit operator-side rule takes precedence. For example:
+
+```json
+{"version":2,"rules":{"case.breakAfterThenElse":"always","case.wrapCondition":"and","case.codeIndent":{"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false}}}
+```
+
+Condition and result text, as well as comments, is preserved. A comment between `CASE` parts can prevent structural layout; the new rules only change safe whitespace gaps at recognized tokens and never cross a comment. Output is reparsed and compared by token sequence. Numeric modes from the source XML are neither imported nor treated as JSON values.
 
 ### Set operators
 
@@ -565,7 +571,7 @@ FROM B
 ORDER BY Id;
 ```
 
-If a comment appears between a query and the operator, the entire expression keeps its original layout; only keyword casing may change. Combining such an expression with a CTE or `OFFSET/FETCH` does not yet receive structural formatting.
+The JSON v2 `setOperator.*` group independently controls `breakBefore` (before `UNION`/`EXCEPT`/`INTERSECT`) and `breakAfter` (before the right branch, after `ALL` for `UNION ALL`), with `inherit`/`always`/`never` values. `keywordIndent` and `branchIndent` use the same indent object as `select.list.indent`. The rules work for chains and nested queries. For example, `{"version":2,"rules":{"setOperator.breakAfter":"never","setOperator.keywordIndent":{"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false}}}`. A comment between a query and the operator is preserved; the adjacent gap is not rewritten, though other safe boundaries may change. Combining such an expression with a CTE or `OFFSET/FETCH` does not yet receive structural formatting.
 
 ### Window functions
 

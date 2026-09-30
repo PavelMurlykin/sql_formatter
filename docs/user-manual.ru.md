@@ -436,7 +436,7 @@ var options = FormattingOptions.Default.With(
     keywords: new KeywordOptions(KeywordCase.Lower));
 ```
 
-Публичный набор секций сейчас ограничен реально поддержанными параметрами. Настройки `CASE`, комментариев и других правил из плана пока не входят в API.
+Публичный набор секций сейчас ограничен реально поддержанными параметрами. Правила `CASE` и операторов объединения запросов доступны через JSON v2; настройки раскладки комментариев и другие будущие правила пока не входят в API.
 
 ## Базовый SELECT
 
@@ -550,7 +550,13 @@ SELECT
 FROM T
 ```
 
-Текст условий и результатов ветвей сохраняется. Если между частями `CASE` есть комментарий или другая неподдержанная конструкция, исходная раскладка этого запроса сохраняется; регистр ключевых слов может измениться.
+В JSON v2 группа `case.*` задаёт границы `breakBeforeCase`, `breakBeforeEnd`, `breakBeforeInput` (только простой `CASE`), `breakBeforeThen`, `breakBeforeWhenElse` и `breakAfterThenElse`. Значения — `inherit` (по умолчанию), `always`, `never`. Семь независимых правил отступа — `caseIndent`, `codeIndent` (результат `THEN`/`ELSE`), `inputIndent`, `thenKeywordIndent`, `whenExpressionIndent`, `whenKeywordIndent` и `nestedConditionIndent` — используют объект `enabled`/`offset`/`onNewLineOnly`/`style`/`transparent`, как `select.list.indent`. Для условий поискового `CASE` доступны `wrapCondition` (`inherit`/`none`/`and`/`or`/`both`), `wrapBeforeOperator` и `wrapAfterOperator` (`inherit`/`always`/`never`); явное правило стороны оператора имеет приоритет. Например:
+
+```json
+{"version":2,"rules":{"case.breakAfterThenElse":"always","case.wrapCondition":"and","case.codeIndent":{"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false}}}
+```
+
+Текст условий, результатов и комментарии сохраняются. Комментарий между частями `CASE` может исключить структурную раскладку; новые правила меняют только безопасные пробельные промежутки у распознанных токенов, не пересекающие комментарий. Результат повторно разбирается и сверяется по токенам. Числовые режимы исходных XML не импортируются и не интерпретируются как значения JSON.
 
 ### Операторы объединения запросов
 
@@ -565,7 +571,7 @@ FROM B
 ORDER BY Id;
 ```
 
-Если между запросами и оператором находится комментарий, расположение всего выражения сохраняется; измениться может только регистр ключевых слов. Сочетание такого выражения с CTE и `OFFSET/FETCH` пока структурно не форматируется.
+Группа JSON v2 `setOperator.*` позволяет независимо настроить `breakBefore` (перед `UNION`/`EXCEPT`/`INTERSECT`) и `breakAfter` (перед правой ветвью, после `ALL` у `UNION ALL`) со значениями `inherit`/`always`/`never`. `keywordIndent` и `branchIndent` используют тот же объект отступа, что и `select.list.indent`. Правила действуют и в цепочках, и во вложенных запросах. Например, `{"version":2,"rules":{"setOperator.breakAfter":"never","setOperator.keywordIndent":{"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false}}}`. Комментарий между запросом и оператором сохраняется; соседний с ним промежуток не переписывается, но другие безопасные границы могут измениться. Сочетание такого выражения с CTE и `OFFSET/FETCH` пока структурно не форматируется.
 
 ### Оконные функции
 

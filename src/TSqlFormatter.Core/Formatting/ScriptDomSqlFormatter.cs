@@ -117,6 +117,8 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
                 request.Dialect, cancellationToken);
             rendered = SubqueryCteLayout.ApplySafe(rendered, options, _parser,
                 request.Dialect, cancellationToken);
+            rendered = CaseAndSetLayout.ApplySafe(rendered, options, _parser,
+                request.Dialect, cancellationToken);
             rendered = SelectCompactness.ApplySafe(rendered, options, _parser,
                 request.Dialect, cancellationToken);
             if (string.Equals(rendered, source, StringComparison.Ordinal))
@@ -142,6 +144,8 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         output = SubqueryLayout.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);
         output = SubqueryCteLayout.ApplySafe(output, options, _parser,
+            request.Dialect, cancellationToken);
+        output = CaseAndSetLayout.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);
         output = SelectCompactness.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);

@@ -1,35 +1,35 @@
 Path	Stage	Status	NativeSetting	Evidence	Semantics
-Case_IndentCaseOperation.Indent	SC-13	pending_semantics	-	-	-
-Case_IndentCaseOperation.OnNewLineOnly	SC-13	pending_semantics	-	-	-
-Case_IndentCaseOperation.Size	SC-13	pending_semantics	-	-	-
-Case_IndentCaseOperation.Style	SC-13	pending_semantics	-	-	-
-Case_IndentCode.Indent	SC-13	pending_semantics	-	-	-
-Case_IndentCode.OnNewLineOnly	SC-13	pending_semantics	-	-	-
-Case_IndentCode.Size	SC-13	pending_semantics	-	-	-
-Case_IndentInputExpression.Indent	SC-13	pending_semantics	-	-	-
-Case_IndentInputExpression.OnNewLineOnly	SC-13	pending_semantics	-	-	-
-Case_IndentInputExpression.Size	SC-13	pending_semantics	-	-	-
-Case_IndentThenKeyword.Indent	SC-13	pending_semantics	-	-	-
-Case_IndentThenKeyword.OnNewLineOnly	SC-13	pending_semantics	-	-	-
-Case_IndentThenKeyword.Size	SC-13	pending_semantics	-	-	-
-Case_IndentWhenExpression.Indent	SC-13	pending_semantics	-	-	-
-Case_IndentWhenExpression.OnNewLineOnly	SC-13	pending_semantics	-	-	-
-Case_IndentWhenExpression.Size	SC-13	pending_semantics	-	-	-
-Case_IndentWhenKeyword.Indent	SC-13	pending_semantics	-	-	-
-Case_IndentWhenKeyword.OnNewLineOnly	SC-13	pending_semantics	-	-	-
-Case_IndentWhenKeyword.Size	SC-13	pending_semantics	-	-	-
-Case_IndentWrapConditionNestedOperations.Indent	SC-13	pending_semantics	-	-	-
-Case_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-13	pending_semantics	-	-	-
-Case_IndentWrapConditionNestedOperations.Size	SC-13	pending_semantics	-	-	-
-Case_LineBreakAfterThenElse	SC-13	pending_semantics	-	-	-
-Case_LineBreakBeforeCase	SC-13	pending_semantics	-	-	-
-Case_LineBreakBeforeEnd	SC-13	pending_semantics	-	-	-
-Case_LineBreakBeforeInputExpression	SC-13	pending_semantics	-	-	-
-Case_LineBreakBeforeThen	SC-13	pending_semantics	-	-	-
-Case_LineBreakBeforeWhenElse	SC-13	pending_semantics	-	-	-
-Case_WrapAfterOperatorMode	SC-13	pending_semantics	-	-	-
-Case_WrapBeforeOperatorMode	SC-13	pending_semantics	-	-	-
-Case_WrapConditionMode	SC-13	pending_semantics	-	-	-
+Case_IndentCaseOperation.Indent	SC-13	covered	case.caseIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_IndentCaseOperation.OnNewLineOnly	SC-13	covered	case.caseIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_IndentCaseOperation.Size	SC-13	covered	case.caseIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_IndentCaseOperation.Style	SC-13	covered	case.caseIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_IndentCode.Indent	SC-13	covered	case.codeIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_IndentCode.OnNewLineOnly	SC-13	covered	case.codeIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_IndentCode.Size	SC-13	covered	case.codeIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_IndentInputExpression.Indent	SC-13	covered	case.inputIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_IndentInputExpression.OnNewLineOnly	SC-13	covered	case.inputIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_IndentInputExpression.Size	SC-13	covered	case.inputIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_IndentThenKeyword.Indent	SC-13	covered	case.thenKeywordIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_IndentThenKeyword.OnNewLineOnly	SC-13	covered	case.thenKeywordIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_IndentThenKeyword.Size	SC-13	covered	case.thenKeywordIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_IndentWhenExpression.Indent	SC-13	covered	case.whenExpressionIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_IndentWhenExpression.OnNewLineOnly	SC-13	covered	case.whenExpressionIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_IndentWhenExpression.Size	SC-13	covered	case.whenExpressionIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_IndentWhenKeyword.Indent	SC-13	covered	case.whenKeywordIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_IndentWhenKeyword.OnNewLineOnly	SC-13	covered	case.whenKeywordIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_IndentWhenKeyword.Size	SC-13	covered	case.whenKeywordIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_IndentWrapConditionNestedOperations.Indent	SC-13	covered	case.nestedConditionIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-13	covered	case.nestedConditionIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_IndentWrapConditionNestedOperations.Size	SC-13	covered	case.nestedConditionIndent	CaseAndSetParityTests.Every_case_indent_targets_a_real_boundary	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+Case_LineBreakAfterThenElse	SC-13	covered	case.breakAfterThenElse	CaseAndSetParityTests.Case_boundaries_are_independent	Native inherit/always/never at parsed syntax boundary; XML Boolean maps to optional policy
+Case_LineBreakBeforeCase	SC-13	covered	case.breakBeforeCase	CaseAndSetParityTests.Case_boundaries_are_independent	Native inherit/always/never at parsed syntax boundary; XML Boolean maps to optional policy
+Case_LineBreakBeforeEnd	SC-13	covered	case.breakBeforeEnd	CaseAndSetParityTests.Case_boundaries_are_independent	Native inherit/always/never at parsed syntax boundary; XML Boolean maps to optional policy
+Case_LineBreakBeforeInputExpression	SC-13	covered	case.breakBeforeInput	CaseAndSetParityTests.Simple_case_input_has_a_separate_boundary	Native inherit/always/never at parsed syntax boundary; XML Boolean maps to optional policy
+Case_LineBreakBeforeThen	SC-13	covered	case.breakBeforeThen	CaseAndSetParityTests.Case_boundaries_are_independent	Native inherit/always/never at parsed syntax boundary; XML Boolean maps to optional policy
+Case_LineBreakBeforeWhenElse	SC-13	covered	case.breakBeforeWhenElse	CaseAndSetParityTests.Case_boundaries_are_independent	Native inherit/always/never at parsed syntax boundary; XML Boolean maps to optional policy
+Case_WrapAfterOperatorMode	SC-13	covered	case.wrapAfterOperator	CaseAndSetParityTests.Searched_case_boolean_rules_change_only_condition_layout	Native inherit/always/never around parsed CASE AND/OR; XML numeric mode not assumed
+Case_WrapBeforeOperatorMode	SC-13	covered	case.wrapBeforeOperator	CaseAndSetParityTests.Searched_case_boolean_rules_change_only_condition_layout	Native inherit/always/never around parsed CASE AND/OR; XML numeric mode not assumed
+Case_WrapConditionMode	SC-13	covered	case.wrapCondition	CaseAndSetParityTests.Searched_case_boolean_rules_change_only_condition_layout	Native inherit/none/and/or/both on parsed CASE Boolean conditions; XML numeric mode not assumed
 Code_AnonymousBlocks_AddEmptyLinesAround	SC-20	pending_semantics	-	-	-
 Code_AnonymousBlocks_IndentCode.Indent	SC-20	pending_semantics	-	-	-
 Code_AnonymousBlocks_IndentCode.OnNewLineOnly	SC-20	pending_semantics	-	-	-
@@ -860,14 +860,14 @@ Trigger_With_LineBreakAfterWith	SC-23	pending_semantics	-	-	-
 Trigger_With_LineBreakBeforeWith	SC-23	pending_semantics	-	-	-
 Trigger_With_StackWithOptions	SC-23	pending_semantics	-	-	-
 Trigger_With_StackWithOptionsMode	SC-23	pending_semantics	-	-	-
-UnionExceptIntersect_IndentKeyword.Indent	SC-13	pending_semantics	-	-	-
-UnionExceptIntersect_IndentKeyword.OnNewLineOnly	SC-13	pending_semantics	-	-	-
-UnionExceptIntersect_IndentKeyword.Size	SC-13	pending_semantics	-	-	-
-UnionExceptIntersect_IndentSubquery.Indent	SC-13	pending_semantics	-	-	-
-UnionExceptIntersect_IndentSubquery.OnNewLineOnly	SC-13	pending_semantics	-	-	-
-UnionExceptIntersect_IndentSubquery.Size	SC-13	pending_semantics	-	-	-
-UnionExceptIntersect_LineBreakAfterUnion	SC-13	pending_semantics	-	-	-
-UnionExceptIntersect_LineBreakBeforeUnion	SC-13	pending_semantics	-	-	-
+UnionExceptIntersect_IndentKeyword.Indent	SC-13	covered	setOperator.keywordIndent	CaseAndSetParityTests.Set_operator_indents_affect_nested_branches	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+UnionExceptIntersect_IndentKeyword.OnNewLineOnly	SC-13	covered	setOperator.keywordIndent	CaseAndSetParityTests.Set_operator_indents_affect_nested_branches	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+UnionExceptIntersect_IndentKeyword.Size	SC-13	covered	setOperator.keywordIndent	CaseAndSetParityTests.Set_operator_indents_affect_nested_branches	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+UnionExceptIntersect_IndentSubquery.Indent	SC-13	covered	setOperator.branchIndent	CaseAndSetParityTests.Set_operator_indents_affect_nested_branches	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+UnionExceptIntersect_IndentSubquery.OnNewLineOnly	SC-13	covered	setOperator.branchIndent	CaseAndSetParityTests.Set_operator_indents_affect_nested_branches	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+UnionExceptIntersect_IndentSubquery.Size	SC-13	covered	setOperator.branchIndent	CaseAndSetParityTests.Set_operator_indents_affect_nested_branches	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
+UnionExceptIntersect_LineBreakAfterUnion	SC-13	covered	setOperator.breakAfter	CaseAndSetParityTests.Set_operator_boundaries_cover_chained_queries	Native inherit/always/never at parsed syntax boundary; XML Boolean maps to optional policy
+UnionExceptIntersect_LineBreakBeforeUnion	SC-13	covered	setOperator.breakBefore	CaseAndSetParityTests.Set_operator_boundaries_cover_chained_queries	Native inherit/always/never at parsed syntax boundary; XML Boolean maps to optional policy
 Update_From_IndentFromKeyword.Indent	SC-15	pending_semantics	-	-	-
 Update_From_IndentFromKeyword.OnNewLineOnly	SC-15	pending_semantics	-	-	-
 Update_From_IndentFromKeyword.Size	SC-15	pending_semantics	-	-	-
