@@ -900,7 +900,37 @@ ON
     t.id = s.id WHEN MATCHED THEN DELETE;
 ```
 
-In this example, the branch stays on the condition's line: the new settings do not yet control WHEN/THEN, actions, OUTPUT, or OPTION. Header/source settings also work with CTEs, TOP, additional branch conditions, and stored code, without changing expressions or action order. Comments and literals are not rewritten; gaps adjacent to comments are skipped, while other safe boundaries may change. Edits are checked by reparsing and comparing tokens. Multiline literals/quoted identifiers block rewriting of the entire script; invalid SQL stays unchanged. XML numeric modes are not imported; JSON v1 and earlier output without new overrides are retained. VS/SSMS options pages do not expose these new switches — use a configuration file.
+In this example, the branch stays on the condition's line: header settings do not control WHEN/THEN or actions — use the separate branch rules below. OUTPUT and OPTION retain their previous layout for now. Header/source settings also work with CTEs, TOP, additional branch conditions, and stored code, without changing expressions or action order. Comments and literals are not rewritten; gaps adjacent to comments are skipped, while other safe boundaries may change. Edits are checked by reparsing and comparing tokens. Multiline literals/quoted identifiers block rewriting of the entire script; invalid SQL stays unchanged. XML numeric modes are not imported; JSON v1 and earlier output without new overrides are retained. VS/SSMS options pages do not expose these new switches — use a configuration file.
+
+## MERGE branches (SC-17)
+
+JSON v2 exposes 40 independent branch rules. Header rules `merge.into/using/on/join/values` remain separate: `merge.values` affects only the USING source, whereas `merge.insert.values` affects the INSERT action.
+
+| Rule group | Key suffixes |
+| --- | --- |
+| `merge.when` | `keywordIndent, conditionIndent, nestedConditionIndent, breakBefore, breakAfter, wrapCondition, wrapBeforeOperator, wrapAfterOperator` |
+| `merge.then` | `keywordIndent, actionIndent, breakBefore, breakAfter` |
+| `merge.update.set` | `keywordIndent, listIndent, breakBefore, breakAfter, stackList, stackMode` |
+| `merge.insert.columns` | `listIndent, braceIndent, breakBeforeOpen, breakAfterOpen, breakBeforeClose, spaceBeforeOpen, spaceWithin, stackList, stackMode` |
+| `merge.insert.values` | `keywordIndent, listIndent, braceIndent, breakBeforeKeyword, breakAfterKeyword, breakAfterOpen, breakBeforeClose, spaceAfterKeyword, spaceWithin, stackList, stackMode` |
+
+Breaks: `inherit/always/never`; spaces: `inherit/insert/remove`; lists: `inherit/on/off`, mode `onePerLine/auto`. `auto` compares the normalized compact token width of the list with MaxLineWidth, including anchor indentation and comma spacing; comments within a list disable automatic compaction. Global leading-comma settings apply. Conditions: `inherit/none/and/or/both`; the AND joining MATCHED to its extra condition is not controlled here, only logical operations inside that condition. `conditionIndent` indents MATCHED/NOT MATCHED following WHEN.
+
+Indents use the common `enabled/offset/onNewLineOnly/style/transparent` object. Relative anchors are MERGE (WHEN), WHEN (THEN), THEN (action), the action (SET/INSERT), or the opening brace (items). Absolute indentation ignores the anchor; transparent indentation is zero.
+
+`merge.update.useStatementFormatting` and `merge.insert.useStatementFormatting` (boolean, false by default) select `update.set.*` and `insert.columns/values.*` instead of local rules. INSERT inherits the single VALUES list rules, not standalone INSERT row layout.
+
+Example `.tsqlformatter.json` used by CLI and adapters:
+
+```json
+{"version":2,"rules":{
+  "merge.when.breakBefore":"always","merge.then.breakBefore":"always","merge.then.breakAfter":"always",
+  "merge.then.actionIndent":{"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false},
+  "merge.update.set.stackList":"on","merge.insert.columns.stackList":"off","merge.insert.values.stackList":"off"
+}}
+```
+
+UPDATE/INSERT/DELETE branch order, tokens, comments and literal contents are preserved. DELETE uses the shared THEN action indent. Without new overrides, including JSON v1, previous output is unchanged. Invalid SQL and scripts containing multiline literals are not rewritten; gaps adjacent to comments are skipped. OUTPUT/OPTION/TOP settings are not included in this set yet. VS/SSMS option pages do not expose the new switches yet: use a configuration file.
 
 ## Building a `Doc` from the AST
 

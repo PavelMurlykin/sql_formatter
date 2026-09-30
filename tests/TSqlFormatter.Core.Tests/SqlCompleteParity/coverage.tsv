@@ -327,56 +327,56 @@ Merge_Output_LineBreakAfterOutput	SC-18	pending_semantics	-	-	-
 Merge_Output_LineBreakBeforeOutput	SC-18	pending_semantics	-	-	-
 Merge_Output_StackColumns	SC-18	pending_semantics	-	-	-
 Merge_Output_StackColumnsMode	SC-18	pending_semantics	-	-	-
-Merge_Then_IndentThen.Indent	SC-17	pending_semantics	-	-	-
-Merge_Then_IndentThen.OnNewLineOnly	SC-17	pending_semantics	-	-	-
-Merge_Then_IndentThen.Size	SC-17	pending_semantics	-	-	-
-Merge_Then_IndentThenActions.Indent	SC-17	pending_semantics	-	-	-
-Merge_Then_IndentThenActions.OnNewLineOnly	SC-17	pending_semantics	-	-	-
-Merge_Then_IndentThenActions.Size	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_ColumnList_IndentColumnList.Indent	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_ColumnList_IndentColumnList.OnNewLineOnly	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_ColumnList_IndentColumnList.Size	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_ColumnList_IndentColumnListBraces.Indent	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_ColumnList_IndentColumnListBraces.OnNewLineOnly	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_ColumnList_IndentColumnListBraces.Size	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_ColumnList_InsertSpaceBeforeColumnsList	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_ColumnList_InsertSpacesWithinColumnsListBraces	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_ColumnList_LineBreakAfterOpenBrace	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_ColumnList_LineBreakBeforeClosingBrace	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_ColumnList_LineBreakBeforeOpenBrace	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_ColumnList_StackColumnsList	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_ColumnList_StackColumnsListMode	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_UseSameFormattingAsInInsert	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_Values_IndentValuesExpressionsList.Indent	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_Values_IndentValuesExpressionsList.OnNewLineOnly	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_Values_IndentValuesExpressionsList.Size	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_Values_IndentValuesExpressionsListBraces.Indent	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_Values_IndentValuesExpressionsListBraces.OnNewLineOnly	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_Values_IndentValuesExpressionsListBraces.Size	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_Values_IndentValuesKeyword.Indent	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_Values_IndentValuesKeyword.OnNewLineOnly	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_Values_IndentValuesKeyword.Size	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_Values_InsertSpaceAfterValuesKeyword	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_Values_InsertSpacesWithinValuesExpressionsListBraces	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_Values_LineBreakAfterOpenBrace	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_Values_LineBreakAfterValues	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_Values_LineBreakBeforeClosingBrace	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_Values_LineBreakBeforeValues	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_Values_StackValuesExpressionsList	SC-17	pending_semantics	-	-	-
-Merge_Then_Insert_Values_StackValuesExpressionsListMode	SC-17	pending_semantics	-	-	-
-Merge_Then_LineBreakAfterThen	SC-17	pending_semantics	-	-	-
-Merge_Then_LineBreakBeforeThen	SC-17	pending_semantics	-	-	-
-Merge_Then_Update_SetClause_IndentColumnAssignmentsList.Indent	SC-17	pending_semantics	-	-	-
-Merge_Then_Update_SetClause_IndentColumnAssignmentsList.OnNewLineOnly	SC-17	pending_semantics	-	-	-
-Merge_Then_Update_SetClause_IndentColumnAssignmentsList.Size	SC-17	pending_semantics	-	-	-
-Merge_Then_Update_SetClause_IndentSetKeyword.Indent	SC-17	pending_semantics	-	-	-
-Merge_Then_Update_SetClause_IndentSetKeyword.OnNewLineOnly	SC-17	pending_semantics	-	-	-
-Merge_Then_Update_SetClause_IndentSetKeyword.Size	SC-17	pending_semantics	-	-	-
-Merge_Then_Update_SetClause_LineBreakAfterSet	SC-17	pending_semantics	-	-	-
-Merge_Then_Update_SetClause_LineBreakBeforeSet	SC-17	pending_semantics	-	-	-
-Merge_Then_Update_SetClause_StackColumnAssignmentsList	SC-17	pending_semantics	-	-	-
-Merge_Then_Update_SetClause_StackColumnAssignmentsListMode	SC-17	pending_semantics	-	-	-
-Merge_Then_Update_UseSameFormattingAsInUpdate	SC-17	pending_semantics	-	-	-
+Merge_Then_IndentThen.Indent	SC-17	covered	merge.then.keywordIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_IndentThen.OnNewLineOnly	SC-17	covered	merge.then.keywordIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_IndentThen.Size	SC-17	covered	merge.then.keywordIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_IndentThenActions.Indent	SC-17	covered	merge.then.actionIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_IndentThenActions.OnNewLineOnly	SC-17	covered	merge.then.actionIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_IndentThenActions.Size	SC-17	covered	merge.then.actionIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_ColumnList_IndentColumnList.Indent	SC-17	covered	merge.insert.columns.listIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_ColumnList_IndentColumnList.OnNewLineOnly	SC-17	covered	merge.insert.columns.listIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_ColumnList_IndentColumnList.Size	SC-17	covered	merge.insert.columns.listIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_ColumnList_IndentColumnListBraces.Indent	SC-17	covered	merge.insert.columns.braceIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_ColumnList_IndentColumnListBraces.OnNewLineOnly	SC-17	covered	merge.insert.columns.braceIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_ColumnList_IndentColumnListBraces.Size	SC-17	covered	merge.insert.columns.braceIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_ColumnList_InsertSpaceBeforeColumnsList	SC-17	covered	merge.insert.columns.spaceBeforeOpen	MergeBranchParityTests.Every_space_policy_is_local_and_preserves_literal_contents	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_ColumnList_InsertSpacesWithinColumnsListBraces	SC-17	covered	merge.insert.columns.spaceWithin	MergeBranchParityTests.Every_space_policy_is_local_and_preserves_literal_contents	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_ColumnList_LineBreakAfterOpenBrace	SC-17	covered	merge.insert.columns.breakAfterOpen	MergeBranchParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_ColumnList_LineBreakBeforeClosingBrace	SC-17	covered	merge.insert.columns.breakBeforeClose	MergeBranchParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_ColumnList_LineBreakBeforeOpenBrace	SC-17	covered	merge.insert.columns.breakBeforeOpen	MergeBranchParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_ColumnList_StackColumnsList	SC-17	covered	merge.insert.columns.stackList	MergeBranchParityTests.Every_list_supports_on_off_auto_and_leading_commas	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_ColumnList_StackColumnsListMode	SC-17	covered	merge.insert.columns.stackMode	MergeBranchParityTests.Every_list_supports_on_off_auto_and_leading_commas	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_UseSameFormattingAsInInsert	SC-17	covered	merge.insert.useStatementFormatting	MergeBranchParityTests.Conditions_inheritance_and_combined_nested_anchors_are_stable	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_Values_IndentValuesExpressionsList.Indent	SC-17	covered	merge.insert.values.listIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_Values_IndentValuesExpressionsList.OnNewLineOnly	SC-17	covered	merge.insert.values.listIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_Values_IndentValuesExpressionsList.Size	SC-17	covered	merge.insert.values.listIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_Values_IndentValuesExpressionsListBraces.Indent	SC-17	covered	merge.insert.values.braceIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_Values_IndentValuesExpressionsListBraces.OnNewLineOnly	SC-17	covered	merge.insert.values.braceIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_Values_IndentValuesExpressionsListBraces.Size	SC-17	covered	merge.insert.values.braceIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_Values_IndentValuesKeyword.Indent	SC-17	covered	merge.insert.values.keywordIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_Values_IndentValuesKeyword.OnNewLineOnly	SC-17	covered	merge.insert.values.keywordIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_Values_IndentValuesKeyword.Size	SC-17	covered	merge.insert.values.keywordIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_Values_InsertSpaceAfterValuesKeyword	SC-17	covered	merge.insert.values.spaceAfterKeyword	MergeBranchParityTests.Every_space_policy_is_local_and_preserves_literal_contents	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_Values_InsertSpacesWithinValuesExpressionsListBraces	SC-17	covered	merge.insert.values.spaceWithin	MergeBranchParityTests.Every_space_policy_is_local_and_preserves_literal_contents	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_Values_LineBreakAfterOpenBrace	SC-17	covered	merge.insert.values.breakAfterOpen	MergeBranchParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_Values_LineBreakAfterValues	SC-17	covered	merge.insert.values.breakAfterKeyword	MergeBranchParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_Values_LineBreakBeforeClosingBrace	SC-17	covered	merge.insert.values.breakBeforeClose	MergeBranchParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_Values_LineBreakBeforeValues	SC-17	covered	merge.insert.values.breakBeforeKeyword	MergeBranchParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_Values_StackValuesExpressionsList	SC-17	covered	merge.insert.values.stackList	MergeBranchParityTests.Every_list_supports_on_off_auto_and_leading_commas	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Insert_Values_StackValuesExpressionsListMode	SC-17	covered	merge.insert.values.stackMode	MergeBranchParityTests.Every_list_supports_on_off_auto_and_leading_commas	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_LineBreakAfterThen	SC-17	covered	merge.then.breakAfter	MergeBranchParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_LineBreakBeforeThen	SC-17	covered	merge.then.breakBefore	MergeBranchParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Update_SetClause_IndentColumnAssignmentsList.Indent	SC-17	covered	merge.update.set.listIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Update_SetClause_IndentColumnAssignmentsList.OnNewLineOnly	SC-17	covered	merge.update.set.listIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Update_SetClause_IndentColumnAssignmentsList.Size	SC-17	covered	merge.update.set.listIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Update_SetClause_IndentSetKeyword.Indent	SC-17	covered	merge.update.set.keywordIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Update_SetClause_IndentSetKeyword.OnNewLineOnly	SC-17	covered	merge.update.set.keywordIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Update_SetClause_IndentSetKeyword.Size	SC-17	covered	merge.update.set.keywordIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Update_SetClause_LineBreakAfterSet	SC-17	covered	merge.update.set.breakAfter	MergeBranchParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Update_SetClause_LineBreakBeforeSet	SC-17	covered	merge.update.set.breakBefore	MergeBranchParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Update_SetClause_StackColumnAssignmentsList	SC-17	covered	merge.update.set.stackList	MergeBranchParityTests.Every_list_supports_on_off_auto_and_leading_commas	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Update_SetClause_StackColumnAssignmentsListMode	SC-17	covered	merge.update.set.stackMode	MergeBranchParityTests.Every_list_supports_on_off_auto_and_leading_commas	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_Then_Update_UseSameFormattingAsInUpdate	SC-17	covered	merge.update.useStatementFormatting	MergeBranchParityTests.Conditions_inheritance_and_combined_nested_anchors_are_stable	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
 Merge_TopClause_IndentPercentKeyword.Indent	SC-18	pending_semantics	-	-	-
 Merge_TopClause_IndentPercentKeyword.OnNewLineOnly	SC-18	pending_semantics	-	-	-
 Merge_TopClause_IndentPercentKeyword.Size	SC-18	pending_semantics	-	-	-
@@ -439,20 +439,20 @@ Merge_Using_Values_StackValuesExpressionsList	SC-16	covered	merge.values.stackLi
 Merge_Using_Values_StackValuesExpressionsListMode	SC-16	covered	merge.values.stackMode	MergeHeaderParityTests.Values_lists_and_rows_support_stacking_compaction_auto_and_leading_commas	Native inherit/on/off and onePerLine/auto modes for independent USING VALUES expression/row lists; XML numeric mode not assumed
 Merge_Using_Values_StackValuesExpressionsRowsList	SC-16	covered	merge.values.stackRows	MergeHeaderParityTests.Values_lists_and_rows_support_stacking_compaction_auto_and_leading_commas	Native inherit/on/off and onePerLine/auto modes for independent USING VALUES expression/row lists; XML numeric mode not assumed
 Merge_Using_Values_StackValuesExpressionsRowsListMode	SC-16	covered	merge.values.stackRowsMode	MergeHeaderParityTests.Values_lists_and_rows_support_stacking_compaction_auto_and_leading_commas	Native inherit/on/off and onePerLine/auto modes for independent USING VALUES expression/row lists; XML numeric mode not assumed
-Merge_When_IndentWhen.Indent	SC-17	pending_semantics	-	-	-
-Merge_When_IndentWhen.OnNewLineOnly	SC-17	pending_semantics	-	-	-
-Merge_When_IndentWhen.Size	SC-17	pending_semantics	-	-	-
-Merge_When_IndentWhenConditions.Indent	SC-17	pending_semantics	-	-	-
-Merge_When_IndentWhenConditions.OnNewLineOnly	SC-17	pending_semantics	-	-	-
-Merge_When_IndentWhenConditions.Size	SC-17	pending_semantics	-	-	-
-Merge_When_IndentWrapConditionNestedOperations.Indent	SC-17	pending_semantics	-	-	-
-Merge_When_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-17	pending_semantics	-	-	-
-Merge_When_IndentWrapConditionNestedOperations.Size	SC-17	pending_semantics	-	-	-
-Merge_When_LineBreakAfterWhen	SC-17	pending_semantics	-	-	-
-Merge_When_LineBreakBeforeWhen	SC-17	pending_semantics	-	-	-
-Merge_When_WrapAfterOperatorMode	SC-17	pending_semantics	-	-	-
-Merge_When_WrapBeforeOperatorMode	SC-17	pending_semantics	-	-	-
-Merge_When_WrapConditionMode	SC-17	pending_semantics	-	-	-
+Merge_When_IndentWhen.Indent	SC-17	covered	merge.when.keywordIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_When_IndentWhen.OnNewLineOnly	SC-17	covered	merge.when.keywordIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_When_IndentWhen.Size	SC-17	covered	merge.when.keywordIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_When_IndentWhenConditions.Indent	SC-17	covered	merge.when.conditionIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_When_IndentWhenConditions.OnNewLineOnly	SC-17	covered	merge.when.conditionIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_When_IndentWhenConditions.Size	SC-17	covered	merge.when.conditionIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_When_IndentWrapConditionNestedOperations.Indent	SC-17	covered	merge.when.nestedConditionIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_When_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-17	covered	merge.when.nestedConditionIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_When_IndentWrapConditionNestedOperations.Size	SC-17	covered	merge.when.nestedConditionIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_When_LineBreakAfterWhen	SC-17	covered	merge.when.breakAfter	MergeBranchParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_When_LineBreakBeforeWhen	SC-17	covered	merge.when.breakBefore	MergeBranchParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_When_WrapAfterOperatorMode	SC-17	covered	merge.when.wrapAfterOperator	MergeBranchParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_When_WrapBeforeOperatorMode	SC-17	covered	merge.when.wrapBeforeOperator	MergeBranchParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
+Merge_When_WrapConditionMode	SC-17	covered	merge.when.wrapCondition	MergeBranchParityTests.Conditions_inheritance_and_combined_nested_anchors_are_stable	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
 Misc_AddEmptyLineAfterPackageDelimiter	SC-06	covered	misc.packageDelimiterBlankLine:boolean:false	StackedListAndBatchFormattingTests.Go_blank_line_mode_is_configurable	Enable blank lines around standalone GO; default off preserves existing layout
 Misc_AddEmptyLineAfterPackageDelimiterMode	SC-06	covered	misc.packageDelimiterBlankLineMode:choice:after	StackedListAndBatchFormattingTests.Go_blank_line_mode_is_configurable	Native after/before/both mode when enabled; XML numeric mode not imported
 ProcedureFunction_Body_IndentAsKeyword.Indent	SC-21	pending_semantics	-	-	-

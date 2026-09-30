@@ -900,7 +900,37 @@ ON
     t.id = s.id WHEN MATCHED THEN DELETE;
 ```
 
-В этом примере ветвь остаётся на строке условия: новые настройки пока не управляют WHEN/THEN, действиями, OUTPUT или OPTION. Заголовок и источник настраиваются и при CTE, TOP, дополнительных условиях ветвей и внутри хранимого кода, без изменения выражений или порядка действий. Комментарии и литералы не переписываются; промежутки рядом с комментариями пропускаются, остальные безопасные границы могут измениться. После правок выполняются повторный разбор и сверка токенов. Многострочные литералы/заключённые в кавычки идентификаторы блокируют переработку всего скрипта; SQL с ошибками остаётся исходным. Числовые режимы XML не импортируются; JSON v1 и прежний вывод без новых переопределений сохраняются. Новые переключатели отсутствуют на страницах параметров VS/SSMS — используйте файл конфигурации.
+В этом примере ветвь остаётся на строке условия: настройки заголовка не управляют WHEN/THEN и действиями — для них используйте отдельные правила ветвей ниже. OUTPUT и OPTION пока сохраняют прежнее расположение. Заголовок и источник настраиваются и при CTE, TOP, дополнительных условиях ветвей и внутри хранимого кода, без изменения выражений или порядка действий. Комментарии и литералы не переписываются; промежутки рядом с комментариями пропускаются, остальные безопасные границы могут измениться. После правок выполняются повторный разбор и сверка токенов. Многострочные литералы/заключённые в кавычки идентификаторы блокируют переработку всего скрипта; SQL с ошибками остаётся исходным. Числовые режимы XML не импортируются; JSON v1 и прежний вывод без новых переопределений сохраняются. Новые переключатели отсутствуют на страницах параметров VS/SSMS — используйте файл конфигурации.
+
+## Ветви MERGE (SC-17)
+
+В JSON v2 доступны 40 независимых правил ветвей. Настройки заголовка `merge.into/using/on/join/values` остаются отдельными; `merge.values` относится только к источнику USING, а `merge.insert.values` — к действию INSERT.
+
+| Группа правил | Суффиксы ключей |
+| --- | --- |
+| `merge.when` | `keywordIndent, conditionIndent, nestedConditionIndent, breakBefore, breakAfter, wrapCondition, wrapBeforeOperator, wrapAfterOperator` |
+| `merge.then` | `keywordIndent, actionIndent, breakBefore, breakAfter` |
+| `merge.update.set` | `keywordIndent, listIndent, breakBefore, breakAfter, stackList, stackMode` |
+| `merge.insert.columns` | `listIndent, braceIndent, breakBeforeOpen, breakAfterOpen, breakBeforeClose, spaceBeforeOpen, spaceWithin, stackList, stackMode` |
+| `merge.insert.values` | `keywordIndent, listIndent, braceIndent, breakBeforeKeyword, breakAfterKeyword, breakAfterOpen, breakBeforeClose, spaceAfterKeyword, spaceWithin, stackList, stackMode` |
+
+Переносы: `inherit/always/never`; пробелы: `inherit/insert/remove`; списки: `inherit/on/off`, режим `onePerLine/auto`. `auto` сравнивает нормализованную компактную ширину токенов списка с MaxLineWidth, учитывая отступ якоря и пробелы после запятых; комментарий в списке запрещает автоматическое уплотнение. Для списков действуют общие настройки ведущих запятых. Условия: `inherit/none/and/or/both`; AND соединения MATCHED с дополнительным условием не переносится этим правилом — обрабатываются логические операции самого условия. `conditionIndent` задаёт отступ MATCHED/NOT MATCHED после WHEN.
+
+Отступы используют общий объект `enabled/offset/onNewLineOnly/style/transparent`: относительный отступ считается от MERGE (WHEN), WHEN (THEN), THEN (действие), действия (SET/INSERT) либо открывающей скобки (элементы). Абсолютный отступ не зависит от якоря; прозрачный равен нулю.
+
+`merge.update.useStatementFormatting` и `merge.insert.useStatementFormatting` (boolean, по умолчанию false) выбирают вместо локальных правил соответственно `update.set.*` и `insert.columns/values.*`. Для INSERT наследуются только параметры одного списка VALUES, не расположение строк самостоятельного INSERT.
+
+Пример файла `.tsqlformatter.json`, применяемого CLI и адаптерами:
+
+```json
+{"version":2,"rules":{
+  "merge.when.breakBefore":"always","merge.then.breakBefore":"always","merge.then.breakAfter":"always",
+  "merge.then.actionIndent":{"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false},
+  "merge.update.set.stackList":"on","merge.insert.columns.stackList":"off","merge.insert.values.stackList":"off"
+}}
+```
+
+Порядок ветвей UPDATE/INSERT/DELETE, токены, комментарии и содержимое литералов сохраняются. DELETE использует общий отступ действия THEN. Без новых переопределений и для JSON v1 прежний вывод сохраняется. SQL с ошибками и скрипт с многострочным литералом не перерабатываются; соседние с комментариями промежутки пропускаются. Настройки OUTPUT/OPTION/TOP ещё не входят в этот набор. Страницы VS/SSMS пока не содержат новых переключателей: используйте файл конфигурации.
 
 ## Построение `Doc` из AST
 

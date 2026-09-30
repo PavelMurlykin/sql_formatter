@@ -127,6 +127,8 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
                 request.Dialect, cancellationToken);
             rendered = MergeHeaderLayout.ApplySafe(rendered, options, _parser,
                 request.Dialect, cancellationToken);
+            rendered = MergeBranchLayout.ApplySafe(rendered, options, _parser,
+                request.Dialect, cancellationToken);
             if (string.Equals(rendered, source, StringComparison.Ordinal))
             {
                 return Unchanged(source, true);
@@ -160,6 +162,8 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         output = UpdateDeleteLayout.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);
         output = MergeHeaderLayout.ApplySafe(output, options, _parser,
+            request.Dialect, cancellationToken);
+        output = MergeBranchLayout.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);
         if (string.Equals(output, source, StringComparison.Ordinal))
         {

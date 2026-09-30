@@ -254,7 +254,7 @@ public sealed class RuleCatalog
                 descriptor.Minimum, descriptor.Maximum, descriptor.Choices,
                 descriptor.DependsOn?.Replace("select.", "subquery."), descriptor.Dialect));
         return new RuleCatalog(descriptors.Concat(subquery).Concat(UpdateDeleteRules(descriptors))
-            .Concat(MergeHeaderRules(descriptors)));
+            .Concat(MergeHeaderRules(descriptors)).Concat(MergeBranchRules(descriptors)));
     }
 
     private static RuleDescriptor CaseRule(string key, string defaultValue) => new(key, "token",
@@ -373,6 +373,28 @@ public sealed class RuleCatalog
         yield return StackRule("merge.values.stackRows", scope);
         yield return new RuleDescriptor("merge.values.stackRowsMode", scope, RuleValue.FromChoice("onePerLine"),
             choices: new[] { "onePerLine", "auto" }, dependsOn: "merge.values.stackRows");
+    }
+
+    private static IEnumerable<RuleDescriptor> MergeBranchRules(IEnumerable<RuleDescriptor> rules)
+    {
+        const string scope = "MERGE branches";
+        foreach (var key in new[] { "when.keywordIndent", "when.conditionIndent", "when.nestedConditionIndent",
+                     "then.keywordIndent", "then.actionIndent" })
+            yield return IndentDescriptor("merge." + key, scope);
+        foreach (var key in new[] { "when.breakBefore", "when.breakAfter", "when.wrapBeforeOperator",
+                     "when.wrapAfterOperator", "then.breakBefore", "then.breakAfter" })
+            yield return BreakRule("merge." + key, scope);
+        yield return WrapRule("merge.when.wrapCondition", scope);
+        var actions = rules.Where(rule => rule.Key.StartsWith("insert.columns.", StringComparison.Ordinal)
+            || rule.Key.StartsWith("insert.values.", StringComparison.Ordinal))
+            .Where(rule => !rule.Key.Contains("stackRows"))
+            .Concat(UpdateDeleteRules(rules).Where(rule => rule.Key.StartsWith("update.set.", StringComparison.Ordinal)));
+        foreach (var descriptor in actions)
+            yield return new RuleDescriptor("merge." + descriptor.Key, scope, descriptor.DefaultValue,
+                descriptor.Minimum, descriptor.Maximum, descriptor.Choices,
+                descriptor.DependsOn is null ? null : "merge." + descriptor.DependsOn, descriptor.Dialect);
+        foreach (var action in new[] { "update", "insert" })
+            yield return new RuleDescriptor("merge." + action + ".useStatementFormatting", scope, RuleValue.FromBoolean(false));
     }
 
     public IReadOnlyDictionary<string, RuleDescriptor> Definitions => definitions;
