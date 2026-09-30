@@ -900,7 +900,7 @@ ON
     t.id = s.id WHEN MATCHED THEN DELETE;
 ```
 
-In this example, the branch stays on the condition's line: header settings do not control WHEN/THEN or actions — use the separate branch rules below. OUTPUT and OPTION retain their previous layout for now. Header/source settings also work with CTEs, TOP, additional branch conditions, and stored code, without changing expressions or action order. Comments and literals are not rewritten; gaps adjacent to comments are skipped, while other safe boundaries may change. Edits are checked by reparsing and comparing tokens. Multiline literals/quoted identifiers block rewriting of the entire script; invalid SQL stays unchanged. XML numeric modes are not imported; JSON v1 and earlier output without new overrides are retained. VS/SSMS options pages do not expose these new switches — use a configuration file.
+In this example, the branch stays on the condition's line: header settings do not control WHEN/THEN or actions — use the separate branch rules below. Use the SC-18 rules below for OUTPUT/OPTION/TOP. Header/source settings also work with CTEs, TOP, additional branch conditions, and stored code, without changing expressions or action order. Comments and literals are not rewritten; gaps adjacent to comments are skipped, while other safe boundaries may change. Edits are checked by reparsing and comparing tokens. Multiline literals/quoted identifiers block rewriting of the entire script; invalid SQL stays unchanged. XML numeric modes are not imported; JSON v1 and earlier output without new overrides are retained. VS/SSMS options pages do not expose these new switches — use a configuration file.
 
 ## MERGE branches (SC-17)
 
@@ -930,7 +930,28 @@ Example `.tsqlformatter.json` used by CLI and adapters:
 }}
 ```
 
-UPDATE/INSERT/DELETE branch order, tokens, comments and literal contents are preserved. DELETE uses the shared THEN action indent. Without new overrides, including JSON v1, previous output is unchanged. Invalid SQL and scripts containing multiline literals are not rewritten; gaps adjacent to comments are skipped. OUTPUT/OPTION/TOP settings are not included in this set yet. VS/SSMS option pages do not expose the new switches yet: use a configuration file.
+UPDATE/INSERT/DELETE branch order, tokens, comments and literal contents are preserved. DELETE uses the shared THEN action indent. Without new overrides, including JSON v1, previous output is unchanged. Invalid SQL and scripts containing multiline literals are not rewritten; gaps adjacent to comments are skipped. OUTPUT/OPTION/TOP settings are described in the SC-18 section below. VS/SSMS option pages do not expose the new switches yet: use a configuration file.
+
+## TOP, OUTPUT and OPTION in MERGE (SC-18)
+
+JSON v2 completes MERGE settings with these keys:
+
+| Group | Suffixes |
+| --- | --- |
+| `merge.top` | `keywordIndent, percentIndent, breakBefore, breakBeforeOpen, breakAfterOpen, breakBeforeClose, breakBeforePercent, spaceAfterKeyword, spaceWithin` |
+| `merge.output` | `keywordIndent, listIndent, breakBefore, breakAfter, stackList, stackMode` |
+| `merge.option` | `keywordIndent, hintsIndent, breakBefore, breakAfter` |
+
+Types and modes match the branch rules above. TOP and OUTPUT/OPTION indent from MERGE; PERCENT from TOP; OUTPUT items and hints from their keyword. `option.breakAfter` breaks before the opening parenthesis following OPTION; `hintsIndent` also applies to already-wrapped hints. OUTPUT and OUTPUT INTO share settings, but the destination table/columns are outside the output list. TOP edits only the outer expression parentheses, not nested parentheses; PERCENT is independent. Syntax rejected by the parser, such as MERGE TOP WITH TIES, stays unchanged.
+
+Example configuration:
+
+```json
+{"version":2,"rules":{"merge.top.breakBefore":"always","merge.top.spaceWithin":"remove",
+"merge.output.breakBefore":"always","merge.output.stackList":"on","merge.option.breakBefore":"always"}}
+```
+
+All 109 groups/181 scalar paths in the MERGE section have native counterparts. This is capability coverage, not a promise of byte-for-byte SQL Complete output; XML numeric modes still are not imported. Defaults and v1 output remain unchanged. Comment/literal safety, reparsing and token checks apply as described above. New IDE settings still require JSON.
 
 ## Building a `Doc` from the AST
 

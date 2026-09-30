@@ -254,7 +254,7 @@ public sealed class RuleCatalog
                 descriptor.Minimum, descriptor.Maximum, descriptor.Choices,
                 descriptor.DependsOn?.Replace("select.", "subquery."), descriptor.Dialect));
         return new RuleCatalog(descriptors.Concat(subquery).Concat(UpdateDeleteRules(descriptors))
-            .Concat(MergeHeaderRules(descriptors)).Concat(MergeBranchRules(descriptors)));
+            .Concat(MergeHeaderRules(descriptors)).Concat(MergeBranchRules(descriptors)).Concat(MergeTailRules()));
     }
 
     private static RuleDescriptor CaseRule(string key, string defaultValue) => new(key, "token",
@@ -395,6 +395,20 @@ public sealed class RuleCatalog
                 descriptor.DependsOn is null ? null : "merge." + descriptor.DependsOn, descriptor.Dialect);
         foreach (var action in new[] { "update", "insert" })
             yield return new RuleDescriptor("merge." + action + ".useStatementFormatting", scope, RuleValue.FromBoolean(false));
+    }
+
+    private static IEnumerable<RuleDescriptor> MergeTailRules()
+    {
+        const string scope = "MERGE TOP/OUTPUT/OPTION";
+        foreach (var key in new[] { "top.keywordIndent", "top.percentIndent", "output.keywordIndent",
+                     "output.listIndent", "option.keywordIndent", "option.hintsIndent" })
+            yield return IndentDescriptor("merge." + key, scope);
+        foreach (var key in new[] { "top.breakBefore", "top.breakBeforeOpen", "top.breakAfterOpen",
+                     "top.breakBeforeClose", "top.breakBeforePercent", "output.breakBefore", "output.breakAfter",
+                     "option.breakBefore", "option.breakAfter" })
+            yield return BreakRule("merge." + key, scope);
+        foreach (var key in new[] { "top.spaceAfterKeyword", "top.spaceWithin" }) yield return SpacingRule("merge." + key);
+        foreach (var rule in ListRules("merge.output", scope)) yield return rule;
     }
 
     public IReadOnlyDictionary<string, RuleDescriptor> Definitions => definitions;

@@ -309,24 +309,24 @@ Merge_On_LineBreakBeforeOn	SC-16	covered	merge.on.breakBefore	MergeHeaderParityT
 Merge_On_WrapAfterOperatorMode	SC-16	covered	merge.on.wrapAfterOperator	MergeHeaderParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never sides at outer ON or source JOIN ON; XML numeric modes not assumed
 Merge_On_WrapBeforeOperatorMode	SC-16	covered	merge.on.wrapBeforeOperator	MergeHeaderParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never sides at outer ON or source JOIN ON; XML numeric modes not assumed
 Merge_On_WrapConditionMode	SC-16	covered	merge.on.wrapCondition	MergeHeaderParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never sides at outer ON or source JOIN ON; XML numeric modes not assumed
-Merge_OptionHints_IndentOptionHints.Indent	SC-18	pending_semantics	-	-	-
-Merge_OptionHints_IndentOptionHints.OnNewLineOnly	SC-18	pending_semantics	-	-	-
-Merge_OptionHints_IndentOptionHints.Size	SC-18	pending_semantics	-	-	-
-Merge_OptionHints_IndentOptionKeyword.Indent	SC-18	pending_semantics	-	-	-
-Merge_OptionHints_IndentOptionKeyword.OnNewLineOnly	SC-18	pending_semantics	-	-	-
-Merge_OptionHints_IndentOptionKeyword.Size	SC-18	pending_semantics	-	-	-
-Merge_OptionHints_LineBreakAfterOption	SC-18	pending_semantics	-	-	-
-Merge_OptionHints_LineBreakBeforeOption	SC-18	pending_semantics	-	-	-
-Merge_Output_IndentOutputKeyword.Indent	SC-18	pending_semantics	-	-	-
-Merge_Output_IndentOutputKeyword.OnNewLineOnly	SC-18	pending_semantics	-	-	-
-Merge_Output_IndentOutputKeyword.Size	SC-18	pending_semantics	-	-	-
-Merge_Output_IndentOutputParameters.Indent	SC-18	pending_semantics	-	-	-
-Merge_Output_IndentOutputParameters.OnNewLineOnly	SC-18	pending_semantics	-	-	-
-Merge_Output_IndentOutputParameters.Size	SC-18	pending_semantics	-	-	-
-Merge_Output_LineBreakAfterOutput	SC-18	pending_semantics	-	-	-
-Merge_Output_LineBreakBeforeOutput	SC-18	pending_semantics	-	-	-
-Merge_Output_StackColumns	SC-18	pending_semantics	-	-	-
-Merge_Output_StackColumnsMode	SC-18	pending_semantics	-	-	-
+Merge_OptionHints_IndentOptionHints.Indent	SC-18	covered	merge.option.hintsIndent	MergeTailParityTests.Every_indent_honors_all_native_fields	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_OptionHints_IndentOptionHints.OnNewLineOnly	SC-18	covered	merge.option.hintsIndent	MergeTailParityTests.Every_indent_honors_all_native_fields	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_OptionHints_IndentOptionHints.Size	SC-18	covered	merge.option.hintsIndent	MergeTailParityTests.Every_indent_honors_all_native_fields	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_OptionHints_IndentOptionKeyword.Indent	SC-18	covered	merge.option.keywordIndent	MergeTailParityTests.Every_indent_honors_all_native_fields	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_OptionHints_IndentOptionKeyword.OnNewLineOnly	SC-18	covered	merge.option.keywordIndent	MergeTailParityTests.Every_indent_honors_all_native_fields	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_OptionHints_IndentOptionKeyword.Size	SC-18	covered	merge.option.keywordIndent	MergeTailParityTests.Every_indent_honors_all_native_fields	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_OptionHints_LineBreakAfterOption	SC-18	covered	merge.option.breakAfter	MergeTailParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_OptionHints_LineBreakBeforeOption	SC-18	covered	merge.option.breakBefore	MergeTailParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_Output_IndentOutputKeyword.Indent	SC-18	covered	merge.output.keywordIndent	MergeTailParityTests.Every_indent_honors_all_native_fields	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_Output_IndentOutputKeyword.OnNewLineOnly	SC-18	covered	merge.output.keywordIndent	MergeTailParityTests.Every_indent_honors_all_native_fields	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_Output_IndentOutputKeyword.Size	SC-18	covered	merge.output.keywordIndent	MergeTailParityTests.Every_indent_honors_all_native_fields	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_Output_IndentOutputParameters.Indent	SC-18	covered	merge.output.listIndent	MergeTailParityTests.Every_indent_honors_all_native_fields	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_Output_IndentOutputParameters.OnNewLineOnly	SC-18	covered	merge.output.listIndent	MergeTailParityTests.Every_indent_honors_all_native_fields	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_Output_IndentOutputParameters.Size	SC-18	covered	merge.output.listIndent	MergeTailParityTests.Every_indent_honors_all_native_fields	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_Output_LineBreakAfterOutput	SC-18	covered	merge.output.breakAfter	MergeTailParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_Output_LineBreakBeforeOutput	SC-18	covered	merge.output.breakBefore	MergeTailParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_Output_StackColumns	SC-18	covered	merge.output.stackList	MergeTailParityTests.Output_lists_support_both_clauses_auto_and_leading_commas	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_Output_StackColumnsMode	SC-18	covered	merge.output.stackMode	MergeTailParityTests.Output_lists_support_both_clauses_auto_and_leading_commas	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
 Merge_Then_IndentThen.Indent	SC-17	covered	merge.then.keywordIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
 Merge_Then_IndentThen.OnNewLineOnly	SC-17	covered	merge.then.keywordIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
 Merge_Then_IndentThen.Size	SC-17	covered	merge.then.keywordIndent	MergeBranchParityTests.Every_indent_honors_enabled_offset_newline_style_and_transparency	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
@@ -377,19 +377,19 @@ Merge_Then_Update_SetClause_LineBreakBeforeSet	SC-17	covered	merge.update.set.br
 Merge_Then_Update_SetClause_StackColumnAssignmentsList	SC-17	covered	merge.update.set.stackList	MergeBranchParityTests.Every_list_supports_on_off_auto_and_leading_commas	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
 Merge_Then_Update_SetClause_StackColumnAssignmentsListMode	SC-17	covered	merge.update.set.stackMode	MergeBranchParityTests.Every_list_supports_on_off_auto_and_leading_commas	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
 Merge_Then_Update_UseSameFormattingAsInUpdate	SC-17	covered	merge.update.useStatementFormatting	MergeBranchParityTests.Conditions_inheritance_and_combined_nested_anchors_are_stable	Native AST-scoped branch layout; enabled/offset/newline/style or named modes, XML numeric enums not inferred
-Merge_TopClause_IndentPercentKeyword.Indent	SC-18	pending_semantics	-	-	-
-Merge_TopClause_IndentPercentKeyword.OnNewLineOnly	SC-18	pending_semantics	-	-	-
-Merge_TopClause_IndentPercentKeyword.Size	SC-18	pending_semantics	-	-	-
-Merge_TopClause_IndentTopKeyword.Indent	SC-18	pending_semantics	-	-	-
-Merge_TopClause_IndentTopKeyword.OnNewLineOnly	SC-18	pending_semantics	-	-	-
-Merge_TopClause_IndentTopKeyword.Size	SC-18	pending_semantics	-	-	-
-Merge_TopClause_InsertSpaceAfterTop	SC-18	pending_semantics	-	-	-
-Merge_TopClause_InsertSpacesWithinExpressionBraces	SC-18	pending_semantics	-	-	-
-Merge_TopClause_LineBreakAfterOpeningBrace	SC-18	pending_semantics	-	-	-
-Merge_TopClause_LineBreakBeforeClosingBrace	SC-18	pending_semantics	-	-	-
-Merge_TopClause_LineBreakBeforeOpeningBrace	SC-18	pending_semantics	-	-	-
-Merge_TopClause_LineBreakBeforePercent	SC-18	pending_semantics	-	-	-
-Merge_TopClause_LineBreakBeforeTop	SC-18	pending_semantics	-	-	-
+Merge_TopClause_IndentPercentKeyword.Indent	SC-18	covered	merge.top.percentIndent	MergeTailParityTests.Every_indent_honors_all_native_fields	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_TopClause_IndentPercentKeyword.OnNewLineOnly	SC-18	covered	merge.top.percentIndent	MergeTailParityTests.Every_indent_honors_all_native_fields	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_TopClause_IndentPercentKeyword.Size	SC-18	covered	merge.top.percentIndent	MergeTailParityTests.Every_indent_honors_all_native_fields	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_TopClause_IndentTopKeyword.Indent	SC-18	covered	merge.top.keywordIndent	MergeTailParityTests.Every_indent_honors_all_native_fields	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_TopClause_IndentTopKeyword.OnNewLineOnly	SC-18	covered	merge.top.keywordIndent	MergeTailParityTests.Every_indent_honors_all_native_fields	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_TopClause_IndentTopKeyword.Size	SC-18	covered	merge.top.keywordIndent	MergeTailParityTests.Every_indent_honors_all_native_fields	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_TopClause_InsertSpaceAfterTop	SC-18	covered	merge.top.spaceAfterKeyword	MergeTailParityTests.Top_spaces_and_breaks_are_local	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_TopClause_InsertSpacesWithinExpressionBraces	SC-18	covered	merge.top.spaceWithin	MergeTailParityTests.Top_spaces_and_breaks_are_local	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_TopClause_LineBreakAfterOpeningBrace	SC-18	covered	merge.top.breakAfterOpen	MergeTailParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_TopClause_LineBreakBeforeClosingBrace	SC-18	covered	merge.top.breakBeforeClose	MergeTailParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_TopClause_LineBreakBeforeOpeningBrace	SC-18	covered	merge.top.breakBeforeOpen	MergeTailParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_TopClause_LineBreakBeforePercent	SC-18	covered	merge.top.breakBeforePercent	MergeTailParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
+Merge_TopClause_LineBreakBeforeTop	SC-18	covered	merge.top.breakBefore	MergeTailParityTests.Every_boundary_has_distinct_always_never_and_inherit_modes	Native MERGE TOP/OUTPUT/OPTION whitespace policy; explicit named modes, no XML enum interpretation
 Merge_Using_IndentUsingKeyword.Indent	SC-16	covered	merge.using.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
 Merge_Using_IndentUsingKeyword.OnNewLineOnly	SC-16	covered	merge.using.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
 Merge_Using_IndentUsingKeyword.Size	SC-16	covered	merge.using.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units

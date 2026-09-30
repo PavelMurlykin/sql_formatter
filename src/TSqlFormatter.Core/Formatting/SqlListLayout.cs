@@ -23,7 +23,7 @@ internal sealed class SqlListLayout
         var indent = NativeRules.Get(options, prefix + ".listIndent").Indent;
         if (stack == "inherit" && !indent.Enabled) return false;
         var compact = stack == "off" || stack == "on" && Choice(prefix + ".stackMode") == "auto"
-            && Fits(start ?? items[0].StartOffset, end ?? End(items[items.Length - 1]), anchor, indent);
+            && Fits(start ?? items[0].StartOffset, end ?? End(items[items.Length - 1]), anchor, indent, prefix);
         var mode = compact ? "never" : "always";
         var leading = !compact && Choice("stackedList.commaPlacement") == "leading";
         for (var index = 1; index < items.Length; index++)
@@ -47,7 +47,7 @@ internal sealed class SqlListLayout
         return compact;
     }
 
-    private bool Fits(int start, int end, int anchor, IndentRule indent)
+    private bool Fits(int start, int end, int anchor, IndentRule indent, string prefix)
     {
         var width = editor.GetLineIndent(anchor);
         TSqlParserToken? previous = null;
@@ -59,7 +59,13 @@ internal sealed class SqlListLayout
             {
                 var gap = parsed.Source.Substring(previous.Offset + previous.Text.Length,
                     token.Offset - previous.Offset - previous.Text.Length);
-                width += token.Text == "," ? Choice("spacing.beforeComma") == "insert" ? 1 : 0
+                var brace = previous.Offset == start && previous.Text == "(" ? "breakAfterOpen"
+                    : token.Offset + token.Text.Length == end && token.Text == ")" ? "breakBeforeClose" : null;
+                width += brace is not null && options.Rules.Catalog.TryGet(prefix + "." + brace, out _)
+                    ? Choice(prefix + "." + brace) == "always" ? 1
+                        : Choice(prefix + ".spaceWithin") == "insert" ? 1
+                        : Choice(prefix + ".spaceWithin") == "remove" ? 0 : gap.Length > 0 ? 1 : 0
+                    : token.Text == "," ? Choice("spacing.beforeComma") == "insert" ? 1 : 0
                     : previous.Text == "," ? 1 + (indent is { Enabled: true, OnNewLineOnly: false, Transparent: false }
                         ? Math.Max(0, indent.Offset * options.Indent.Size) : 0)
                     : gap.Length > 0 ? 1 : 0;
