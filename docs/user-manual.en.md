@@ -953,6 +953,32 @@ Example configuration:
 
 All 109 groups/181 scalar paths in the MERGE section have native counterparts. This is capability coverage, not a promise of byte-for-byte SQL Complete output; XML numeric modes still are not imported. Defaults and v1 output remain unchanged. Comment/literal safety, reparsing and token checks apply as described above. New IDE settings still require JSON.
 
+## DECLARE: variables and cursors (SC-19)
+
+JSON v2 exposes:
+
+| Group | Key suffixes |
+| --- | --- |
+| `declare.variables` | `listIndent, tableIndent, breakAfter, breakBeforeTable, stackList, stackMode` |
+| `declare.cursor` | `keywordIndent, forIndent, queryIndent, breakBefore, breakBeforeFor, breakBeforeQuery` |
+| `declare.cursor.singleLine` | `any, whenFitsMargin, maxWords, maxCharacters` |
+
+`breakAfter` breaks before the first variable following DECLARE (including table variables); `breakBeforeTable` controls TABLE. `stackList/stackMode` control variable lists: inherit/on/off and onePerLine/auto, including global leading commas. Vertical type alignment is preserved; compact lists remove extra alignment padding.
+
+Indents use the common enabled/offset/onNewLineOnly/style/transparent object, anchored at DECLARE. `queryIndent` shifts every cursor SELECT line while preserving relative internal indentation. Inline OnNewLineOnly=true adds nothing; false adds local spaces.
+
+Other breaks use inherit/always/never. Cursor compaction is enabled by any independent condition: `any` (boolean), `whenFitsMargin` (boolean), or `maxWords/maxCharacters` thresholds such as `{"enabled":true,"value":100}`. Thresholds are strict (less than the value); margin checks include the current line prefix and suffix. Comments prevent query compaction. Table-variable column structure is currently preserved.
+
+Verified `.tsqlformatter.json` example:
+
+```json
+{"version":2,"rules":{"declare.variables.breakAfter":"always","declare.variables.stackList":"on",
+"declare.variables.listIndent":{"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false},
+"declare.cursor.breakBeforeFor":"always","declare.cursor.breakBeforeQuery":"always"}}
+```
+
+Rules also apply inside stored code; variable order, values, cursor options and comments are preserved. Defaults/v1 retain previous behavior; invalid SQL and multiline literals are not rewritten. XML numeric Style is not interpreted. New VS/SSMS keys still require JSON.
+
 ## Building a `Doc` from the AST
 
 `SqlDocBuilder` creates a layout document from a parse result. With no additional builders, it preserves the entire source, including comments and `GO` separators:

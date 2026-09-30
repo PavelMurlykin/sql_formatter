@@ -44,6 +44,19 @@ internal sealed class SqlTokenGapEditor
             Set(index, index + 1, breakMode, indent, spaceMode, anchorOffset);
     }
 
+    /// <summary>Retain an already-indented first line before shifting a whole fragment.</summary>
+    public void BeforeFragment(int offset, string breakMode, int anchorOffset)
+    {
+        if (breakMode == "always" && indices.TryGetValue(offset, out var index) && index > 0)
+        {
+            var previous = tokens[index - 1];
+            var start = previous.Offset + previous.Text.Length;
+            if (parsed.Source.Substring(start, offset - start).IndexOfAny(new[] { '\r', '\n' }) >= 0)
+                breakMode = "inherit";
+        }
+        Before(offset, breakMode, anchorOffset: anchorOffset);
+    }
+
     public string Apply(CancellationToken cancellationToken)
     {
         return edits.Count == 0 ? parsed.Source : KeywordCasing.Apply(parsed.Source,

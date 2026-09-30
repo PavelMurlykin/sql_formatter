@@ -97,34 +97,34 @@ CreateTable_StackColumnsList	SC-22	pending_semantics	-	-	-
 CreateTable_StackColumnsListStyle	SC-22	pending_semantics	-	-	-
 CreateTable_StackStorageOptions	SC-22	pending_semantics	-	-	-
 CreateTable_StackStorageOptionsMode	SC-22	pending_semantics	-	-	-
-Declare_Cursors_IndentCursorKeyword.Indent	SC-19	pending_semantics	-	-	-
-Declare_Cursors_IndentCursorKeyword.OnNewLineOnly	SC-19	pending_semantics	-	-	-
-Declare_Cursors_IndentCursorKeyword.Size	SC-19	pending_semantics	-	-	-
-Declare_Cursors_IndentForKeyword.Indent	SC-19	pending_semantics	-	-	-
-Declare_Cursors_IndentForKeyword.OnNewLineOnly	SC-19	pending_semantics	-	-	-
-Declare_Cursors_IndentForKeyword.Size	SC-19	pending_semantics	-	-	-
-Declare_Cursors_IndentSubquery.Indent	SC-19	pending_semantics	-	-	-
-Declare_Cursors_IndentSubquery.OnNewLineOnly	SC-19	pending_semantics	-	-	-
-Declare_Cursors_IndentSubquery.Size	SC-19	pending_semantics	-	-	-
-Declare_Cursors_LineBreakBeforeCursor	SC-19	pending_semantics	-	-	-
-Declare_Cursors_LineBreakBeforeFor	SC-19	pending_semantics	-	-	-
-Declare_Cursors_LineBreakBeforeSubquery	SC-19	pending_semantics	-	-	-
-Declare_Cursors_SingleLine_AnyQuery	SC-19	pending_semantics	-	-	-
-Declare_Cursors_SingleLine_WhenQueryContainsLessThanXWords.Checked	SC-19	pending_semantics	-	-	-
-Declare_Cursors_SingleLine_WhenQueryContainsLessThanXWords.Value	SC-19	pending_semantics	-	-	-
-Declare_Cursors_SingleLine_WhenQueryIsShorterThanXCharacters.Checked	SC-19	pending_semantics	-	-	-
-Declare_Cursors_SingleLine_WhenQueryIsShorterThanXCharacters.Value	SC-19	pending_semantics	-	-	-
-Declare_Cursors_SingleLine_WhenRightMarginIsNotExceeded	SC-19	pending_semantics	-	-	-
-Declare_Variables_IndentDeclarations.Indent	SC-19	pending_semantics	-	-	-
-Declare_Variables_IndentDeclarations.OnNewLineOnly	SC-19	pending_semantics	-	-	-
-Declare_Variables_IndentDeclarations.Size	SC-19	pending_semantics	-	-	-
-Declare_Variables_IndentTableKeyword.Indent	SC-19	pending_semantics	-	-	-
-Declare_Variables_IndentTableKeyword.OnNewLineOnly	SC-19	pending_semantics	-	-	-
-Declare_Variables_IndentTableKeyword.Size	SC-19	pending_semantics	-	-	-
-Declare_Variables_LineBreakAfterDeclare	SC-19	pending_semantics	-	-	-
-Declare_Variables_LineBreakBeforeTableKeyword	SC-19	pending_semantics	-	-	-
-Declare_Variables_StackVariablesList	SC-19	pending_semantics	-	-	-
-Declare_Variables_StackVariablesListStyle	SC-19	pending_semantics	-	-	-
+Declare_Cursors_IndentCursorKeyword.Indent	SC-19	covered	declare.cursor.keywordIndent	DeclareParityTests.Every_indent_supports_enabled_offset_newline_style_and_transparency	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Cursors_IndentCursorKeyword.OnNewLineOnly	SC-19	covered	declare.cursor.keywordIndent	DeclareParityTests.Every_indent_supports_enabled_offset_newline_style_and_transparency	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Cursors_IndentCursorKeyword.Size	SC-19	covered	declare.cursor.keywordIndent	DeclareParityTests.Every_indent_supports_enabled_offset_newline_style_and_transparency	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Cursors_IndentForKeyword.Indent	SC-19	covered	declare.cursor.forIndent	DeclareParityTests.Every_indent_supports_enabled_offset_newline_style_and_transparency	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Cursors_IndentForKeyword.OnNewLineOnly	SC-19	covered	declare.cursor.forIndent	DeclareParityTests.Every_indent_supports_enabled_offset_newline_style_and_transparency	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Cursors_IndentForKeyword.Size	SC-19	covered	declare.cursor.forIndent	DeclareParityTests.Every_indent_supports_enabled_offset_newline_style_and_transparency	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Cursors_IndentSubquery.Indent	SC-19	covered	declare.cursor.queryIndent	DeclareParityTests.Every_indent_supports_enabled_offset_newline_style_and_transparency	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Cursors_IndentSubquery.OnNewLineOnly	SC-19	covered	declare.cursor.queryIndent	DeclareParityTests.Every_indent_supports_enabled_offset_newline_style_and_transparency	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Cursors_IndentSubquery.Size	SC-19	covered	declare.cursor.queryIndent	DeclareParityTests.Every_indent_supports_enabled_offset_newline_style_and_transparency	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Cursors_LineBreakBeforeCursor	SC-19	covered	declare.cursor.breakBefore	DeclareParityTests.Every_boundary_supports_all_modes	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Cursors_LineBreakBeforeFor	SC-19	covered	declare.cursor.breakBeforeFor	DeclareParityTests.Every_boundary_supports_all_modes	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Cursors_LineBreakBeforeSubquery	SC-19	covered	declare.cursor.breakBeforeQuery	DeclareParityTests.Every_boundary_supports_all_modes	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Cursors_SingleLine_AnyQuery	SC-19	covered	declare.cursor.singleLine.any	DeclareParityTests.Query_indent_shifts_all_lines_and_compaction_has_independent_thresholds	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Cursors_SingleLine_WhenQueryContainsLessThanXWords.Checked	SC-19	covered	declare.cursor.singleLine.maxWords	DeclareParityTests.Query_indent_shifts_all_lines_and_compaction_has_independent_thresholds	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Cursors_SingleLine_WhenQueryContainsLessThanXWords.Value	SC-19	covered	declare.cursor.singleLine.maxWords	DeclareParityTests.Query_indent_shifts_all_lines_and_compaction_has_independent_thresholds	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Cursors_SingleLine_WhenQueryIsShorterThanXCharacters.Checked	SC-19	covered	declare.cursor.singleLine.maxCharacters	DeclareParityTests.Query_indent_shifts_all_lines_and_compaction_has_independent_thresholds	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Cursors_SingleLine_WhenQueryIsShorterThanXCharacters.Value	SC-19	covered	declare.cursor.singleLine.maxCharacters	DeclareParityTests.Query_indent_shifts_all_lines_and_compaction_has_independent_thresholds	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Cursors_SingleLine_WhenRightMarginIsNotExceeded	SC-19	covered	declare.cursor.singleLine.whenFitsMargin	DeclareParityTests.Query_indent_shifts_all_lines_and_compaction_has_independent_thresholds	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Variables_IndentDeclarations.Indent	SC-19	covered	declare.variables.listIndent	DeclareParityTests.Every_indent_supports_enabled_offset_newline_style_and_transparency	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Variables_IndentDeclarations.OnNewLineOnly	SC-19	covered	declare.variables.listIndent	DeclareParityTests.Every_indent_supports_enabled_offset_newline_style_and_transparency	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Variables_IndentDeclarations.Size	SC-19	covered	declare.variables.listIndent	DeclareParityTests.Every_indent_supports_enabled_offset_newline_style_and_transparency	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Variables_IndentTableKeyword.Indent	SC-19	covered	declare.variables.tableIndent	DeclareParityTests.Every_indent_supports_enabled_offset_newline_style_and_transparency	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Variables_IndentTableKeyword.OnNewLineOnly	SC-19	covered	declare.variables.tableIndent	DeclareParityTests.Every_indent_supports_enabled_offset_newline_style_and_transparency	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Variables_IndentTableKeyword.Size	SC-19	covered	declare.variables.tableIndent	DeclareParityTests.Every_indent_supports_enabled_offset_newline_style_and_transparency	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Variables_LineBreakAfterDeclare	SC-19	covered	declare.variables.breakAfter	DeclareParityTests.Every_boundary_supports_all_modes	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Variables_LineBreakBeforeTableKeyword	SC-19	covered	declare.variables.breakBeforeTable	DeclareParityTests.Every_boundary_supports_all_modes	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Variables_StackVariablesList	SC-19	covered	declare.variables.stackList	DeclareParityTests.Variable_lists_preserve_alignment_when_vertical_and_compact_when_requested	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
+Declare_Variables_StackVariablesListStyle	SC-19	covered	declare.variables.stackMode	DeclareParityTests.Variable_lists_preserve_alignment_when_vertical_and_compact_when_requested	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
 Delete_From_IndentFromKeyword.Indent	SC-15	covered	delete.from.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
 Delete_From_IndentFromKeyword.OnNewLineOnly	SC-15	covered	delete.from.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
 Delete_From_IndentFromKeyword.Size	SC-15	covered	delete.from.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units

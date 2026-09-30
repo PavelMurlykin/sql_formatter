@@ -254,7 +254,8 @@ public sealed class RuleCatalog
                 descriptor.Minimum, descriptor.Maximum, descriptor.Choices,
                 descriptor.DependsOn?.Replace("select.", "subquery."), descriptor.Dialect));
         return new RuleCatalog(descriptors.Concat(subquery).Concat(UpdateDeleteRules(descriptors))
-            .Concat(MergeHeaderRules(descriptors)).Concat(MergeBranchRules(descriptors)).Concat(MergeTailRules()));
+            .Concat(MergeHeaderRules(descriptors)).Concat(MergeBranchRules(descriptors)).Concat(MergeTailRules())
+            .Concat(DeclareRules()));
     }
 
     private static RuleDescriptor CaseRule(string key, string defaultValue) => new(key, "token",
@@ -409,6 +410,19 @@ public sealed class RuleCatalog
             yield return BreakRule("merge." + key, scope);
         foreach (var key in new[] { "top.spaceAfterKeyword", "top.spaceWithin" }) yield return SpacingRule("merge." + key);
         foreach (var rule in ListRules("merge.output", scope)) yield return rule;
+    }
+
+    private static IEnumerable<RuleDescriptor> DeclareRules()
+    {
+        const string scope = "DECLARE";
+        foreach (var key in new[] { "variables.listIndent", "variables.tableIndent", "cursor.keywordIndent",
+                     "cursor.forIndent", "cursor.queryIndent" }) yield return IndentDescriptor("declare." + key, scope);
+        foreach (var key in new[] { "variables.breakAfter", "variables.breakBeforeTable", "cursor.breakBefore",
+                     "cursor.breakBeforeFor", "cursor.breakBeforeQuery" }) yield return BreakRule("declare." + key, scope);
+        foreach (var rule in ListRules("declare.variables", scope)) yield return rule;
+        foreach (var rule in SingleLineRules("cursor"))
+            yield return new RuleDescriptor(rule.Key.Replace("subquery.singleLine.cursor", "declare.cursor.singleLine"),
+                scope, rule.DefaultValue, rule.Minimum, rule.Maximum, rule.Choices);
     }
 
     public IReadOnlyDictionary<string, RuleDescriptor> Definitions => definitions;

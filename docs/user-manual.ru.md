@@ -953,6 +953,32 @@ JSON v2 завершает настройки MERGE следующими клю�
 
 Все 109 групп/181 скалярный путь раздела MERGE имеют нативное соответствие. Это покрытие возможностей, не обещание побайтового совпадения с SQL Complete; числовые XML-режимы по-прежнему не импортируются. По умолчанию и в v1 вывод не меняется. Безопасность комментариев/литералов, повторный разбор и проверка токенов действуют, как описано выше. Для новых ключей в IDE пока используется JSON.
 
+## DECLARE: переменные и курсоры (SC-19)
+
+В JSON v2 доступны:
+
+| Группа | Суффиксы ключей |
+| --- | --- |
+| `declare.variables` | `listIndent, tableIndent, breakAfter, breakBeforeTable, stackList, stackMode` |
+| `declare.cursor` | `keywordIndent, forIndent, queryIndent, breakBefore, breakBeforeFor, breakBeforeQuery` |
+| `declare.cursor.singleLine` | `any, whenFitsMargin, maxWords, maxCharacters` |
+
+`breakAfter` переносит первую переменную после DECLARE (также табличную), `breakBeforeTable` — TABLE. `stackList` и `stackMode` управляют переменными: inherit/on/off и onePerLine/auto, с общими ведущими запятыми. Вертикальное выравнивание типов сохраняется; компактный список убирает его добавочные пробелы.
+
+Отступы используют общий объект enabled/offset/onNewLineOnly/style/transparent. Якорь — DECLARE; `queryIndent` смещает все строки SELECT курсора, сохраняя их относительные отступы. На одной строке OnNewLineOnly=true ничего не добавляет, false добавляет локальные пробелы.
+
+Остальные переносы имеют режимы inherit/always/never. Компактность курсора включается любым из независимых условий: `any` (boolean), `whenFitsMargin` (boolean), либо порогами `maxWords/maxCharacters` вида `{"enabled":true,"value":100}`. Порог строгий: меньше указанного значения; ширина учитывает префикс и хвост текущей строки. Комментарии запрещают уплотнение запроса. Колонки табличной переменной пока сохраняют исходную структуру.
+
+Проверенный пример файла `.tsqlformatter.json`:
+
+```json
+{"version":2,"rules":{"declare.variables.breakAfter":"always","declare.variables.stackList":"on",
+"declare.variables.listIndent":{"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false},
+"declare.cursor.breakBeforeFor":"always","declare.cursor.breakBeforeQuery":"always"}}
+```
+
+Правила работают и во вложенном коде; порядок переменных, значения, параметры курсора и комментарии сохраняются. Без переопределений/v1 поведение прежнее; ошибочный SQL и многострочные литералы не переписываются. XML numeric Style не интерпретируется. Новые ключи в VS/SSMS пока задаются через JSON.
+
 ## Построение `Doc` из AST
 
 `SqlDocBuilder` создаёт layout-документ из результата парсинга. Без дополнительных обработчиков он сохраняет весь исходный текст, включая комментарии и разделители `GO`:
