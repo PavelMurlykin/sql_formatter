@@ -1,0 +1,87 @@
+{
+  "version": 2,
+  "general": {
+    "maxLineLength": 100,
+    "lineEnding": "lf",
+    "finalNewLine": false
+  },
+  "indent": {
+    "style": "spaces",
+    "size": 4
+  },
+  "keywords": {
+    "case": "upper"
+  },
+  "select": {
+    "columns": "onePerLine"
+  },
+  "joins": {
+    "clauseNewLine": true,
+    "conditionNewLine": true
+  },
+  "where": {
+    "conditionNewLine": true,
+    "booleanOperatorNewLine": true
+  },
+  "clauses": {
+    "groupByLayout": "onePerLine",
+    "orderByLayout": "onePerLine"
+  },
+  "alignment": {
+    "selectAliases": true,
+    "setAssignments": true,
+    "declareTypes": true
+  },
+  "rules": {
+    "createTable.columns.breakAfterOpen": "always",
+    "createTable.columns.stackList": "on",
+    "createTable.storage.stackList": "on",
+    "declare.variables.breakAfter": "always",
+    "declare.variables.stackList": "on",
+    "delete.from.stackList": "on",
+    "delete.output.stackList": "on",
+    "execute.parameters.breakBefore": "always",
+    "execute.parameters.stackList": "on",
+    "insert.columns.stackList": "on",
+    "insert.output.stackList": "on",
+    "insert.values.stackList": "on",
+    "insert.values.stackRows": "on",
+    "labels.breakAfter": "always",
+    "merge.insert.columns.stackList": "on",
+    "merge.insert.values.stackList": "on",
+    "merge.output.stackList": "on",
+    "merge.update.set.stackList": "on",
+    "merge.values.stackList": "on",
+    "merge.values.stackRows": "on",
+    "routine.body.breakBefore": "always",
+    "routine.body.breakBeforeAs": "always",
+    "routine.parameters.breakAfterOpen": "always",
+    "routine.parameters.stackList": "on",
+    "routine.with.stackList": "on",
+    "select.cte.stackColumns": "on",
+    "select.from.breakBefore": "always",
+    "select.from.stackList": "on",
+    "select.groupBy.breakBefore": "always",
+    "select.groupBy.stackList": "on",
+    "select.list.breakBeforeFirstColumn": "always",
+    "select.list.stackColumns": "on",
+    "select.orderBy.breakBefore": "always",
+    "select.orderBy.stackList": "on",
+    "select.where.breakBefore": "always",
+    "subquery.cte.stackColumns": "on",
+    "subquery.from.stackList": "on",
+    "subquery.groupBy.stackList": "on",
+    "subquery.list.stackColumns": "on",
+    "subquery.orderBy.stackList": "on",
+    "subquery.useSelectFormatting": false,
+    "trigger.body.breakAfterAs": "always",
+    "trigger.events.stackList": "on",
+    "trigger.with.stackList": "on",
+    "update.from.stackList": "on",
+    "update.output.stackList": "on",
+    "update.set.stackList": "on",
+    "view.columns.breakAfterOpen": "always",
+    "view.columns.stackList": "on",
+    "view.query.breakAfterAs": "always"
+  }
+}

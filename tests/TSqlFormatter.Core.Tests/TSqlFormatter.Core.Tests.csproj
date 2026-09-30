@@ -26,6 +26,8 @@
     <None Include="CrashCorpus\*.sql" CopyToOutputDirectory="PreserveNewest" />
     <None Include="ValidCorpus\*.sql" CopyToOutputDirectory="PreserveNewest" />
     <None Include="SqlCompleteParity\*.tsv" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\examples\profiles\*.json" Link="NativeProfiles\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\examples\profiles\*.tsv" Link="NativeProfiles\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

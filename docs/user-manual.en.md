@@ -98,6 +98,14 @@ Preview formats an editable sample up to 8192 characters in the background after
 
 For CLI use, save the export as `.tsqlformatter.json` next to SQL and run `dotnet run --project src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj --no-restore -- query.sql`. Every rule is available through this shared format; there is no separate flag per field. With identical effective settings, preview/Core/CLI/IDE commands use the same engine. Build and automated tests verify the new page's implementation; installed-IDE manual verification remains part of SC-27 and is not established by earlier smoke-test records.
 
+## Native alternatives to SQL Complete profiles (SC-26)
+
+`examples/profiles/` provides two original ready-to-use v2 JSON styles: `ReadableVertical.json` (width 100, vertical lists, supported alignment and module boundaries) and `CompactQueries.json` (width 120, compact lists and margin-fitting queries). The latter does not flatten all procedural code. Import a file through All settings → Import JSON… and save a named profile; for CLI use it as `.tsqlformatter.json` next to SQL after backing up any existing configuration. These are settings files, not new `--profile` IDs.
+
+They are **not AV/EPM conversions** or promises of identical output. Numeric XML modes/Style lack verified control output: the plan's native-alternative fallback is used instead of guessing. `sql-complete-correspondence.tsv` includes all 977 paths/577 groups, exact original values of both profiles, native counterparts, both alternatives' effective values, decision, test and semantics. All 969 applicable fields remain available for manual selection in the editor; only the 8 previously agreed OptionHints paths are excluded. An indent object in the report does not decode numeric XML Style. Original XML is not published.
+
+To verify reproducibility from the repository root, run `pwsh -NoProfile -File scripts/Export-NativeProfileAlternatives.ps1` (PowerShell 7, restored dependencies). Without switches it changes no files; `-Write` regenerates only the three alternative artifacts. It leaves the snapshot/ledger untouched, does not read XML or execute SQL. Both presets are tested over 20 categories with reparsing, token and idempotence checks; final golden/performance/IDE verification remains SC-27.
+
 ## CLI: stdin, files, and directories
 
 After building, pass SQL through stdin from the repository root:
