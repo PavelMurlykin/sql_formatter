@@ -30,16 +30,18 @@ internal sealed class SqlTokenGapEditor
     public TSqlParserToken? FindLast(int start, int end, Func<TSqlParserToken, bool> match) =>
         tokens.LastOrDefault(token => token.Offset >= start && token.Offset < end && match(token));
 
-    public void Before(int offset, string breakMode, IndentRule? indent = null)
+    public void Before(int offset, string breakMode, IndentRule? indent = null,
+        string spaceMode = "inherit", int? anchorOffset = null)
     {
         if (indices.TryGetValue(offset, out var index) && index > 0)
-            Set(index - 1, index, breakMode, indent);
+            Set(index - 1, index, breakMode, indent, spaceMode, anchorOffset);
     }
 
-    public void After(int offset, string breakMode, IndentRule? indent = null)
+    public void After(int offset, string breakMode, IndentRule? indent = null,
+        string spaceMode = "inherit", int? anchorOffset = null)
     {
         if (indices.TryGetValue(offset, out var index) && index + 1 < tokens.Length)
-            Set(index, index + 1, breakMode, indent);
+            Set(index, index + 1, breakMode, indent, spaceMode, anchorOffset);
     }
 
     public string Apply(CancellationToken cancellationToken)
@@ -48,9 +50,10 @@ internal sealed class SqlTokenGapEditor
             edits.Values.OrderBy(edit => edit.Span.StartOffset).ToArray(), cancellationToken);
     }
 
-    private void Set(int leftIndex, int rightIndex, string breakMode, IndentRule? indent)
+    private void Set(int leftIndex, int rightIndex, string breakMode, IndentRule? indent,
+        string spaceMode, int? anchorOffset)
     {
-        if (breakMode == "inherit" && indent?.Enabled != true) return;
+        if (breakMode == "inherit" && indent?.Enabled != true && spaceMode == "inherit") return;
         var left = tokens[leftIndex];
         var right = tokens[rightIndex];
         if (IsComment(left) || IsComment(right)) return;
@@ -67,23 +70,26 @@ internal sealed class SqlTokenGapEditor
         string replacement;
         if (breakMode == "always")
         {
-            var baseIndent = LineIndent(left.Offset);
+            var baseIndent = LineIndent(anchorOffset ?? left.Offset);
             replacement = newline + new string(' ', IndentWidth(baseIndent, indent));
         }
         else if (breakMode == "never")
         {
-            replacement = " " + (indent is { Enabled: true, OnNewLineOnly: false }
-                ? new string(' ', Math.Max(0, indent.Offset * options.Indent.Size)) : "");
+            replacement = (spaceMode == "remove" ? "" : " ") + (indent is { Enabled: true, OnNewLineOnly: false }
+                ? new string(' ', indent.Transparent ? 0 : Math.Max(0, indent.Offset * options.Indent.Size)) : "");
         }
         else if (existingBreak.Success)
         {
+            if (indent?.Enabled != true) return;
             replacement = current.Substring(0, existingBreak.Index + existingBreak.Length)
-                + new string(' ', IndentWidth(LineIndent(left.Offset), indent));
+                + new string(' ', IndentWidth(LineIndent(anchorOffset ?? left.Offset), indent));
         }
         else if (indent is { Enabled: true, OnNewLineOnly: false })
         {
-            replacement = " " + new string(' ', Math.Max(0, indent.Offset * options.Indent.Size));
+            replacement = (spaceMode == "remove" ? "" : " ")
+                + new string(' ', indent.Transparent ? 0 : Math.Max(0, indent.Offset * options.Indent.Size));
         }
+        else if (spaceMode != "inherit") replacement = spaceMode == "insert" ? " " : "";
         else return;
         if (current != replacement) edits[start] = new TextEdit(new SqlTextSpan(start, length), replacement);
     }
@@ -110,8 +116,13 @@ internal sealed class SqlTokenGapEditor
         var start = Math.Max(parsed.Source.LastIndexOf('\n', Math.Max(0, offset - 1)),
             parsed.Source.LastIndexOf('\r', Math.Max(0, offset - 1))) + 1;
         var end = start;
-        while (end < parsed.Source.Length && parsed.Source[end] is ' ' or '\t') end++;
-        return end - start;
+        var width = 0;
+        while (end < parsed.Source.Length && parsed.Source[end] is ' ' or '\t')
+        {
+            width += parsed.Source[end] == '\t' ? options.Indent.Size : 1;
+            end++;
+        }
+        return width;
     }
 
     private static bool IsComment(TSqlParserToken token) => token.TokenType is

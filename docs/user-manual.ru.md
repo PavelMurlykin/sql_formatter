@@ -683,7 +683,7 @@ FROM T
 
 ## INSERT
 
-Поддержаны `INSERT [INTO] таблица [(колонки)] VALUES` с одной или несколькими строками значений и `INSERT [INTO] таблица [(колонки)] SELECT`. Целевые колонки нормализуются через запятую и пробел, каждая строка `VALUES` выводится отдельно:
+Поддержаны `INSERT [INTO] таблица [(колонки)] VALUES` с одной или несколькими строками значений и `INSERT [INTO] таблица [(колонки)] SELECT`. По умолчанию целевые колонки нормализуются через запятую и пробел, каждая строка `VALUES` выводится отдельно:
 
 ```sql
 INSERT INTO dbo.T (Id, Name)
@@ -692,7 +692,43 @@ VALUES
     (2, 'b');
 ```
 
-В `INSERT ... SELECT` вложенный запрос использует те же поддержанные правила форматирования `SELECT`. Порядок колонок и значений сохраняется. Поддержанный CTE перед `INSERT` форматируется над оператором. `INSERT ... EXEC`, `DEFAULT VALUES` и комментарии между строками значений пока сохраняют исходную раскладку; распознанные ключевые слова всё ещё могут менять регистр.
+В `INSERT ... SELECT` вложенный запрос использует поддержанные правила форматирования `SELECT` и выбор наследования `subquery.useSelectFormatting`. Порядок колонок и значений сохраняется. Поддержанный CTE перед `INSERT` форматируется над оператором.
+
+JSON v2 предоставляет 38 правил `insert.*`. Для границ используются `inherit` (по умолчанию), `always`, `never`; локальные отступы имеют объект `enabled`/`offset`/`onNewLineOnly`/`style`/`transparent`, как `select.list.indent`.
+
+| Группа | Границы переноса | Отступы |
+|---|---|---|
+| `insert.into.*` | `breakBefore`, `breakBeforeTable` | `keywordIndent`, `tableIndent` |
+| `insert.columns.*` | `breakBeforeOpen`, `breakAfterOpen`, `breakBeforeClose` | `listIndent`, `braceIndent` |
+| `insert.values.*` | `breakBeforeKeyword`, `breakAfterKeyword`, `breakAfterOpen`, `breakBeforeClose` | `keywordIndent`, `listIndent`, `braceIndent` |
+| `insert.output.*` | `breakBefore`, `breakAfter` | `keywordIndent`, `listIndent` |
+| `insert.source.*` | `breakBefore` | `indent` |
+
+`insert.columns.spaceBeforeOpen`, `insert.columns.spaceWithin`, `insert.values.spaceAfterKeyword` и `insert.values.spaceWithin` принимают `inherit`/`insert`/`remove`. Они меняют только однострочные промежутки; заданный перевод строки имеет приоритет. У групп `columns`, `values`, `output` есть независимые `stackList` (`inherit`/`on`/`off`) и `stackMode` (`onePerLine`/`auto`). `onePerLine` разделяет элементы переносами; `auto` оставляет список компактным, если его нормализованный текст с опорным отступом помещается в правое поле. Отдельные `insert.values.stackRows` и `stackRowsMode` с теми же значениями управляют разделителями между строками `VALUES`, независимо от выражений внутри строки. Эти списки учитывают общую настройку ведущей запятой `stackedList.commaPlacement`. Настройки `output` действуют на проекцию `OUTPUT`, в том числе перед `OUTPUT INTO`; колонки цели `OUTPUT INTO` не относятся к списку целевых колонок `INSERT`.
+
+Отступы ключевых слов и скобок отсчитываются от строки `INSERT`, отступы элементов — от строки открывающей скобки или `OUTPUT`; `absolute` задаёт уровень непосредственно. При `onNewLineOnly:false` отступ может добавлять пробелы и внутри строки. `insert.source.indent` сдвигает всё тело запроса, если `SELECT` начинается с новой строки, сохраняя внутреннюю раскладку; для `SELECT` на строке заголовка при `onNewLineOnly:false` добавляются пробелы перед ним. Локальные отступы выводятся пробелами.
+
+Для источника `SELECT` есть четыре условия одной строки: `insert.source.singleLine.any`, `whenFitsMargin` (булевы), `maxWords` и `maxCharacters` (пороговые объекты, например `{"enabled":true,"value":10}`). Достаточно одного выполненного условия. `any` сворачивает независимо от ширины; `whenFitsMargin` учитывает отступ, заголовок на той же строке и суффикс. Пороги требуют числа слов/символов строго меньше заданного значения. Компактность источника применяется после его остальных правил; запрос с комментариями не сворачивается.
+
+Сохраните, например, такую `.tsqlformatter.json` рядом с SQL-файлом и форматируйте его обычной командой CLI:
+
+```json
+{
+  "version": 2,
+  "rules": {
+    "insert.columns.breakAfterOpen": "always",
+    "insert.columns.breakBeforeClose": "always",
+    "insert.columns.stackList": "on",
+    "insert.columns.listIndent": {"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false},
+    "insert.values.breakAfterKeyword": "always",
+    "insert.values.braceIndent": {"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false},
+    "insert.values.stackList": "off",
+    "insert.values.stackRows": "on"
+  }
+}
+```
+
+Правила `insert.*` применяются к разобранному `INSERT` с обычной или переменной табличной целью и источником `VALUES`/`SELECT`, включая операторы внутри хранимого кода. `INSERT ... EXEC` и `DEFAULT VALUES` сохраняют исходную раскладку. Комментарии и литералы не переписываются; промежутки рядом с комментариями пропускаются, остальные безопасные границы могут измениться. После правок выполняются повторный разбор и сверка токенов. Числовые режимы профилей SQL Complete не импортируются. При отсутствии явных переопределений JSON v1 и прежний вывод сохраняются.
 
 ## UPDATE
 
@@ -727,7 +763,7 @@ WHERE
 
 ## OUTPUT
 
-В поддержанных `INSERT`, `UPDATE` и `DELETE` предложение `OUTPUT` выводится на отдельной строке. Список выражений разделяется запятой и пробелом; также поддержан `OUTPUT ... INTO таблица [(колонки)]`:
+По умолчанию в поддержанных `INSERT`, `UPDATE` и `DELETE` предложение `OUTPUT` выводится на отдельной строке. Список выражений разделяется запятой и пробелом; также поддержан `OUTPUT ... INTO таблица [(колонки)]`. Для `INSERT` эту раскладку можно переопределить правилами `insert.output.*`, описанными выше:
 
 ```sql
 DELETE FROM T

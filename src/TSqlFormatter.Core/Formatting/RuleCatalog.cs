@@ -243,7 +243,7 @@ public sealed class RuleCatalog
         BreakRule("setOperator.breakBefore", "UNION/EXCEPT/INTERSECT keyword"),
         BreakRule("setOperator.breakAfter", "UNION/EXCEPT/INTERSECT right branch")
         }.Concat(new[] { "allAnySomeExists", "cteQueries", "fromList", "inOperator", "other" }
-            .SelectMany(SingleLineRules)).ToArray();
+            .SelectMany(SingleLineRules)).Concat(InsertRules()).ToArray();
         var scopes = new[] { "from.", "join.", "where.", "groupBy.", "having.",
             "orderBy.", "cte.", "for." };
         var subquery = descriptors.Where(descriptor => scopes.Any(scope =>
@@ -280,6 +280,39 @@ public sealed class RuleCatalog
             new RuleDescriptor(prefix + ".maxCharacters", category,
                 RuleValue.FromThreshold(new ThresholdRule(false, 50)), 0, 1000000)
         };
+    }
+    private static IEnumerable<RuleDescriptor> InsertRules()
+    {
+        const string scope = "INSERT";
+        foreach (var key in new[] { "into.keywordIndent", "into.tableIndent", "columns.listIndent",
+                     "columns.braceIndent", "output.keywordIndent", "output.listIndent", "source.indent",
+                     "values.listIndent", "values.braceIndent", "values.keywordIndent" })
+            yield return IndentDescriptor("insert." + key, scope);
+        foreach (var key in new[] { "into.breakBefore", "into.breakBeforeTable", "columns.breakAfterOpen",
+                     "columns.breakBeforeClose", "columns.breakBeforeOpen", "output.breakAfter",
+                     "output.breakBefore", "source.breakBefore", "values.breakAfterOpen",
+                     "values.breakAfterKeyword", "values.breakBeforeClose", "values.breakBeforeKeyword" })
+            yield return BreakRule("insert." + key, scope);
+        foreach (var key in new[] { "columns.spaceBeforeOpen", "columns.spaceWithin",
+                     "values.spaceAfterKeyword", "values.spaceWithin" })
+            yield return SpacingRule("insert." + key);
+        foreach (var group in new[] { "columns", "output", "values" })
+        {
+            yield return StackRule("insert." + group + ".stackList", scope);
+            yield return new RuleDescriptor("insert." + group + ".stackMode", scope,
+                RuleValue.FromChoice("onePerLine"), choices: new[] { "onePerLine", "auto" },
+                dependsOn: "insert." + group + ".stackList");
+        }
+        yield return StackRule("insert.values.stackRows", scope);
+        yield return new RuleDescriptor("insert.values.stackRowsMode", scope,
+            RuleValue.FromChoice("onePerLine"), choices: new[] { "onePerLine", "auto" },
+            dependsOn: "insert.values.stackRows");
+        yield return new RuleDescriptor("insert.source.singleLine.any", scope, RuleValue.FromBoolean(false));
+        yield return new RuleDescriptor("insert.source.singleLine.whenFitsMargin", scope, RuleValue.FromBoolean(false));
+        yield return new RuleDescriptor("insert.source.singleLine.maxWords", scope,
+            RuleValue.FromThreshold(new ThresholdRule(false, 10)), 0, 10000);
+        yield return new RuleDescriptor("insert.source.singleLine.maxCharacters", scope,
+            RuleValue.FromThreshold(new ThresholdRule(false, 50)), 0, 1000000);
     }
     public IReadOnlyDictionary<string, RuleDescriptor> Definitions => definitions;
     public bool TryGet(string key, out RuleDescriptor? descriptor) => definitions.TryGetValue(key, out descriptor);

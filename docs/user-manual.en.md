@@ -683,7 +683,7 @@ A block comment before a clause, such as `/* filter */` before `WHERE`, is also 
 
 ## INSERT
 
-`INSERT [INTO] table [(columns)] VALUES` with one or more rows and `INSERT [INTO] table [(columns)] SELECT` are supported. Target columns are normalized with comma-space separators, and each `VALUES` row gets its own line:
+`INSERT [INTO] table [(columns)] VALUES` with one or more rows and `INSERT [INTO] table [(columns)] SELECT` are supported. By default, target columns are normalized with comma-space separators, and each `VALUES` row gets its own line:
 
 ```sql
 INSERT INTO dbo.T (Id, Name)
@@ -692,7 +692,43 @@ VALUES
     (2, 'b');
 ```
 
-In `INSERT ... SELECT`, the nested query follows the supported `SELECT` formatting rules. Column and value order is retained. A supported CTE before `INSERT` is formatted above the statement. `INSERT ... EXEC`, `DEFAULT VALUES`, and comments between value rows retain their original layout for now; recognized keywords may still change case.
+In `INSERT ... SELECT`, the nested query uses the supported `SELECT` rules and the inheritance choice `subquery.useSelectFormatting`. Column and value order is retained. A supported CTE before `INSERT` is formatted above the statement.
+
+JSON v2 provides 38 `insert.*` rules. Boundaries accept `inherit` (default), `always`, and `never`; local indents use the `enabled`/`offset`/`onNewLineOnly`/`style`/`transparent` object described for `select.list.indent`.
+
+| Group | Line boundaries | Indents |
+|---|---|---|
+| `insert.into.*` | `breakBefore`, `breakBeforeTable` | `keywordIndent`, `tableIndent` |
+| `insert.columns.*` | `breakBeforeOpen`, `breakAfterOpen`, `breakBeforeClose` | `listIndent`, `braceIndent` |
+| `insert.values.*` | `breakBeforeKeyword`, `breakAfterKeyword`, `breakAfterOpen`, `breakBeforeClose` | `keywordIndent`, `listIndent`, `braceIndent` |
+| `insert.output.*` | `breakBefore`, `breakAfter` | `keywordIndent`, `listIndent` |
+| `insert.source.*` | `breakBefore` | `indent` |
+
+`insert.columns.spaceBeforeOpen`, `insert.columns.spaceWithin`, `insert.values.spaceAfterKeyword`, and `insert.values.spaceWithin` accept `inherit`/`insert`/`remove`. They only affect inline gaps; a specified newline takes precedence. The `columns`, `values`, and `output` groups each have independent `stackList` (`inherit`/`on`/`off`) and `stackMode` (`onePerLine`/`auto`). `onePerLine` separates items with newlines; `auto` keeps the list compact when its normalized text plus anchor indentation fits the right margin. Separate `insert.values.stackRows` and `stackRowsMode`, with the same values, control separators between `VALUES` rows independently of expressions within each row. These lists respect the shared `stackedList.commaPlacement` leading-comma setting. `output` rules affect the `OUTPUT` projection, including before `OUTPUT INTO`; destination columns in `OUTPUT INTO` are not part of the `INSERT` target-column list.
+
+Keyword and brace indents are relative to the `INSERT` line, while item indents are relative to the opening-brace or `OUTPUT` line; `absolute` sets the level directly. With `onNewLineOnly:false`, indentation can also add spaces within a line. `insert.source.indent` shifts the complete query body when `SELECT` starts on a new line, retaining its internal layout; for `SELECT` on the header line with `onNewLineOnly:false`, spaces are added before it. Local indents are emitted as spaces.
+
+The `SELECT` source has four one-line conditions: `insert.source.singleLine.any`, `whenFitsMargin` (Booleans), and `maxWords` and `maxCharacters` (threshold objects such as `{"enabled":true,"value":10}`). Any satisfied condition qualifies. `any` compacts regardless of width; `whenFitsMargin` includes indentation, a header on the same line, and the suffix. Thresholds require the word/character count to be strictly less than the configured value. Source compactness runs after its other rules; a query containing comments is not flattened.
+
+For example, save this `.tsqlformatter.json` next to the SQL file and format it with the usual CLI command:
+
+```json
+{
+  "version": 2,
+  "rules": {
+    "insert.columns.breakAfterOpen": "always",
+    "insert.columns.breakBeforeClose": "always",
+    "insert.columns.stackList": "on",
+    "insert.columns.listIndent": {"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false},
+    "insert.values.breakAfterKeyword": "always",
+    "insert.values.braceIndent": {"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false},
+    "insert.values.stackList": "off",
+    "insert.values.stackRows": "on"
+  }
+}
+```
+
+The `insert.*` rules apply to a parsed `INSERT` with a named or variable table target and a `VALUES`/`SELECT` source, including statements in stored code. `INSERT ... EXEC` and `DEFAULT VALUES` retain their original layout. Comments and literals are not rewritten; gaps adjacent to comments are skipped, while other safe boundaries may change. Changes are reparsed and checked for the same tokens. SQL Complete profile numeric modes are not imported. Without explicit overrides, JSON v1 and the earlier output are retained.
 
 ## UPDATE
 
@@ -727,7 +763,7 @@ WHERE
 
 ## OUTPUT
 
-In supported `INSERT`, `UPDATE`, and `DELETE`, the `OUTPUT` clause starts on its own line. Its projection list uses comma-space separators; `OUTPUT ... INTO table [(columns)]` is also supported:
+By default, in supported `INSERT`, `UPDATE`, and `DELETE`, the `OUTPUT` clause starts on its own line. Its projection list uses comma-space separators; `OUTPUT ... INTO table [(columns)]` is also supported. For `INSERT`, the `insert.output.*` rules described above can override that layout:
 
 ```sql
 DELETE FROM T

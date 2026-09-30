@@ -206,66 +206,66 @@ Execute_IndentParameters.Size	SC-24	pending_semantics	-	-	-
 Execute_LineBreakBeforeParametersList	SC-24	pending_semantics	-	-	-
 Execute_StackParametersList	SC-24	pending_semantics	-	-	-
 Execute_StackParametersListMode	SC-24	pending_semantics	-	-	-
-Insert_ColumnList_IndentColumnList.Indent	SC-14	pending_semantics	-	-	-
-Insert_ColumnList_IndentColumnList.OnNewLineOnly	SC-14	pending_semantics	-	-	-
-Insert_ColumnList_IndentColumnList.Size	SC-14	pending_semantics	-	-	-
-Insert_ColumnList_IndentColumnListBraces.Indent	SC-14	pending_semantics	-	-	-
-Insert_ColumnList_IndentColumnListBraces.OnNewLineOnly	SC-14	pending_semantics	-	-	-
-Insert_ColumnList_IndentColumnListBraces.Size	SC-14	pending_semantics	-	-	-
-Insert_ColumnList_InsertSpaceBeforeColumnsList	SC-14	pending_semantics	-	-	-
-Insert_ColumnList_InsertSpacesWithinColumnsListBraces	SC-14	pending_semantics	-	-	-
-Insert_ColumnList_LineBreakAfterOpenBrace	SC-14	pending_semantics	-	-	-
-Insert_ColumnList_LineBreakBeforeClosingBrace	SC-14	pending_semantics	-	-	-
-Insert_ColumnList_LineBreakBeforeOpenBrace	SC-14	pending_semantics	-	-	-
-Insert_ColumnList_StackColumnsList	SC-14	pending_semantics	-	-	-
-Insert_ColumnList_StackColumnsListMode	SC-14	pending_semantics	-	-	-
-Insert_Into_IndentIntoKeyword.Indent	SC-14	pending_semantics	-	-	-
-Insert_Into_IndentIntoKeyword.OnNewLineOnly	SC-14	pending_semantics	-	-	-
-Insert_Into_IndentIntoKeyword.Size	SC-14	pending_semantics	-	-	-
-Insert_Into_IndentTable.Indent	SC-14	pending_semantics	-	-	-
-Insert_Into_IndentTable.OnNewLineOnly	SC-14	pending_semantics	-	-	-
-Insert_Into_IndentTable.Size	SC-14	pending_semantics	-	-	-
-Insert_Into_LineBreakBeforeInto	SC-14	pending_semantics	-	-	-
-Insert_Into_LineBreakBeforeTable	SC-14	pending_semantics	-	-	-
-Insert_OutputClause_IndentOutputKeyword.Indent	SC-14	pending_semantics	-	-	-
-Insert_OutputClause_IndentOutputKeyword.OnNewLineOnly	SC-14	pending_semantics	-	-	-
-Insert_OutputClause_IndentOutputKeyword.Size	SC-14	pending_semantics	-	-	-
-Insert_OutputClause_IndentOutputParameters.Indent	SC-14	pending_semantics	-	-	-
-Insert_OutputClause_IndentOutputParameters.OnNewLineOnly	SC-14	pending_semantics	-	-	-
-Insert_OutputClause_IndentOutputParameters.Size	SC-14	pending_semantics	-	-	-
-Insert_OutputClause_LineBreakAfterOutput	SC-14	pending_semantics	-	-	-
-Insert_OutputClause_LineBreakBeforeOutput	SC-14	pending_semantics	-	-	-
-Insert_OutputClause_StackDmlColumnsList	SC-14	pending_semantics	-	-	-
-Insert_OutputClause_StackDmlColumnsListMode	SC-14	pending_semantics	-	-	-
-Insert_Subquery_IndentSubquery.Indent	SC-14	pending_semantics	-	-	-
-Insert_Subquery_IndentSubquery.OnNewLineOnly	SC-14	pending_semantics	-	-	-
-Insert_Subquery_IndentSubquery.Size	SC-14	pending_semantics	-	-	-
-Insert_Subquery_LineBreakBeforeSubquery	SC-14	pending_semantics	-	-	-
-Insert_Subquery_SingleLine_AnySubquery	SC-14	pending_semantics	-	-	-
-Insert_Subquery_SingleLine_WhenRightMarginIsNotExceeded	SC-14	pending_semantics	-	-	-
-Insert_Subquery_SingleLine_WhenSubqueryContainsLessThanXWords.Checked	SC-14	pending_semantics	-	-	-
-Insert_Subquery_SingleLine_WhenSubqueryContainsLessThanXWords.Value	SC-14	pending_semantics	-	-	-
-Insert_Subquery_SingleLine_WhenSubqueryIsShorterThanXCharacters.Checked	SC-14	pending_semantics	-	-	-
-Insert_Subquery_SingleLine_WhenSubqueryIsShorterThanXCharacters.Value	SC-14	pending_semantics	-	-	-
-Insert_Values_IndentValuesExpressionsList.Indent	SC-14	pending_semantics	-	-	-
-Insert_Values_IndentValuesExpressionsList.OnNewLineOnly	SC-14	pending_semantics	-	-	-
-Insert_Values_IndentValuesExpressionsList.Size	SC-14	pending_semantics	-	-	-
-Insert_Values_IndentValuesExpressionsListBraces.Indent	SC-14	pending_semantics	-	-	-
-Insert_Values_IndentValuesExpressionsListBraces.OnNewLineOnly	SC-14	pending_semantics	-	-	-
-Insert_Values_IndentValuesExpressionsListBraces.Size	SC-14	pending_semantics	-	-	-
-Insert_Values_IndentValuesKeyword.Indent	SC-14	pending_semantics	-	-	-
-Insert_Values_IndentValuesKeyword.OnNewLineOnly	SC-14	pending_semantics	-	-	-
-Insert_Values_IndentValuesKeyword.Size	SC-14	pending_semantics	-	-	-
-Insert_Values_InsertSpaceAfterValuesKeyword	SC-14	pending_semantics	-	-	-
-Insert_Values_InsertSpacesWithinValuesExpressionsListBraces	SC-14	pending_semantics	-	-	-
-Insert_Values_LineBreakAfterOpenBrace	SC-14	pending_semantics	-	-	-
-Insert_Values_LineBreakAfterValues	SC-14	pending_semantics	-	-	-
-Insert_Values_LineBreakBeforeClosingBrace	SC-14	pending_semantics	-	-	-
-Insert_Values_LineBreakBeforeValues	SC-14	pending_semantics	-	-	-
-Insert_Values_StackValuesExpressionsList	SC-14	pending_semantics	-	-	-
-Insert_Values_StackValuesExpressionsListMode	SC-14	pending_semantics	-	-	-
-Insert_Values_StackValuesExpressionsRowsList	SC-14	pending_semantics	-	-	-
-Insert_Values_StackValuesExpressionsRowsListMode	SC-14	pending_semantics	-	-	-
+Insert_ColumnList_IndentColumnList.Indent	SC-14	covered	insert.columns.listIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_ColumnList_IndentColumnList.OnNewLineOnly	SC-14	covered	insert.columns.listIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_ColumnList_IndentColumnList.Size	SC-14	covered	insert.columns.listIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_ColumnList_IndentColumnListBraces.Indent	SC-14	covered	insert.columns.braceIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_ColumnList_IndentColumnListBraces.OnNewLineOnly	SC-14	covered	insert.columns.braceIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_ColumnList_IndentColumnListBraces.Size	SC-14	covered	insert.columns.braceIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_ColumnList_InsertSpaceBeforeColumnsList	SC-14	covered	insert.columns.spaceBeforeOpen	InsertParityTests.Local_spaces_do_not_change_other_parentheses	Native inherit/insert/remove on inline gaps only; explicit newlines take precedence
+Insert_ColumnList_InsertSpacesWithinColumnsListBraces	SC-14	covered	insert.columns.spaceWithin	InsertParityTests.Local_spaces_do_not_change_other_parentheses	Native inherit/insert/remove on inline gaps only; explicit newlines take precedence
+Insert_ColumnList_LineBreakAfterOpenBrace	SC-14	covered	insert.columns.breakAfterOpen	InsertParityTests.Boundaries_offer_distinct_always_and_never_policies	Native inherit/always/never at AST-identified INSERT boundary; comments are not crossed
+Insert_ColumnList_LineBreakBeforeClosingBrace	SC-14	covered	insert.columns.breakBeforeClose	InsertParityTests.Boundaries_offer_distinct_always_and_never_policies	Native inherit/always/never at AST-identified INSERT boundary; comments are not crossed
+Insert_ColumnList_LineBreakBeforeOpenBrace	SC-14	covered	insert.columns.breakBeforeOpen	InsertParityTests.Boundaries_offer_distinct_always_and_never_policies	Native inherit/always/never at AST-identified INSERT boundary; comments are not crossed
+Insert_ColumnList_StackColumnsList	SC-14	covered	insert.columns.stackList	InsertParityTests.Each_list_can_be_stacked_compact_or_automatic	Native inherit/on/off list policy; INSERT-scoped lists and row separators are independent
+Insert_ColumnList_StackColumnsListMode	SC-14	covered	insert.columns.stackMode	InsertParityTests.Each_list_can_be_stacked_compact_or_automatic	Native onePerLine/auto list policy; XML numeric mode not assumed or imported
+Insert_Into_IndentIntoKeyword.Indent	SC-14	covered	insert.into.keywordIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_Into_IndentIntoKeyword.OnNewLineOnly	SC-14	covered	insert.into.keywordIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_Into_IndentIntoKeyword.Size	SC-14	covered	insert.into.keywordIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_Into_IndentTable.Indent	SC-14	covered	insert.into.tableIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_Into_IndentTable.OnNewLineOnly	SC-14	covered	insert.into.tableIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_Into_IndentTable.Size	SC-14	covered	insert.into.tableIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_Into_LineBreakBeforeInto	SC-14	covered	insert.into.breakBefore	InsertParityTests.Boundaries_offer_distinct_always_and_never_policies	Native inherit/always/never at AST-identified INSERT boundary; comments are not crossed
+Insert_Into_LineBreakBeforeTable	SC-14	covered	insert.into.breakBeforeTable	InsertParityTests.Boundaries_offer_distinct_always_and_never_policies	Native inherit/always/never at AST-identified INSERT boundary; comments are not crossed
+Insert_OutputClause_IndentOutputKeyword.Indent	SC-14	covered	insert.output.keywordIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_OutputClause_IndentOutputKeyword.OnNewLineOnly	SC-14	covered	insert.output.keywordIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_OutputClause_IndentOutputKeyword.Size	SC-14	covered	insert.output.keywordIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_OutputClause_IndentOutputParameters.Indent	SC-14	covered	insert.output.listIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_OutputClause_IndentOutputParameters.OnNewLineOnly	SC-14	covered	insert.output.listIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_OutputClause_IndentOutputParameters.Size	SC-14	covered	insert.output.listIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_OutputClause_LineBreakAfterOutput	SC-14	covered	insert.output.breakAfter	InsertParityTests.Boundaries_offer_distinct_always_and_never_policies	Native inherit/always/never at AST-identified INSERT boundary; comments are not crossed
+Insert_OutputClause_LineBreakBeforeOutput	SC-14	covered	insert.output.breakBefore	InsertParityTests.Boundaries_offer_distinct_always_and_never_policies	Native inherit/always/never at AST-identified INSERT boundary; comments are not crossed
+Insert_OutputClause_StackDmlColumnsList	SC-14	covered	insert.output.stackList	InsertParityTests.Each_list_can_be_stacked_compact_or_automatic	Native inherit/on/off list policy; INSERT-scoped lists and row separators are independent
+Insert_OutputClause_StackDmlColumnsListMode	SC-14	covered	insert.output.stackMode	InsertParityTests.Each_list_can_be_stacked_compact_or_automatic	Native onePerLine/auto list policy; XML numeric mode not assumed or imported
+Insert_Subquery_IndentSubquery.Indent	SC-14	covered	insert.source.indent	InsertParityTests.Source_indent_shifts_the_complete_select_body	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_Subquery_IndentSubquery.OnNewLineOnly	SC-14	covered	insert.source.indent	InsertParityTests.Source_indent_shifts_the_complete_select_body	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_Subquery_IndentSubquery.Size	SC-14	covered	insert.source.indent	InsertParityTests.Source_indent_shifts_the_complete_select_body	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_Subquery_LineBreakBeforeSubquery	SC-14	covered	insert.source.breakBefore	InsertParityTests.Boundaries_offer_distinct_always_and_never_policies	Native inherit/always/never at AST-identified INSERT boundary; comments are not crossed
+Insert_Subquery_SingleLine_AnySubquery	SC-14	covered	insert.source.singleLine.any	InsertParityTests.Source_compactness_has_four_independent_conditions	Native OR-combined compactness conditions; strict word/character thresholds; comment-free SELECT source; margin includes prefix and suffix
+Insert_Subquery_SingleLine_WhenRightMarginIsNotExceeded	SC-14	covered	insert.source.singleLine.whenFitsMargin	InsertParityTests.Source_compactness_has_four_independent_conditions	Native OR-combined compactness conditions; strict word/character thresholds; comment-free SELECT source; margin includes prefix and suffix
+Insert_Subquery_SingleLine_WhenSubqueryContainsLessThanXWords.Checked	SC-14	covered	insert.source.singleLine.maxWords	InsertParityTests.Source_compactness_has_four_independent_conditions	Native OR-combined compactness conditions; strict word/character thresholds; comment-free SELECT source; margin includes prefix and suffix
+Insert_Subquery_SingleLine_WhenSubqueryContainsLessThanXWords.Value	SC-14	covered	insert.source.singleLine.maxWords	InsertParityTests.Source_compactness_has_four_independent_conditions	Native OR-combined compactness conditions; strict word/character thresholds; comment-free SELECT source; margin includes prefix and suffix
+Insert_Subquery_SingleLine_WhenSubqueryIsShorterThanXCharacters.Checked	SC-14	covered	insert.source.singleLine.maxCharacters	InsertParityTests.Source_compactness_has_four_independent_conditions	Native OR-combined compactness conditions; strict word/character thresholds; comment-free SELECT source; margin includes prefix and suffix
+Insert_Subquery_SingleLine_WhenSubqueryIsShorterThanXCharacters.Value	SC-14	covered	insert.source.singleLine.maxCharacters	InsertParityTests.Source_compactness_has_four_independent_conditions	Native OR-combined compactness conditions; strict word/character thresholds; comment-free SELECT source; margin includes prefix and suffix
+Insert_Values_IndentValuesExpressionsList.Indent	SC-14	covered	insert.values.listIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_Values_IndentValuesExpressionsList.OnNewLineOnly	SC-14	covered	insert.values.listIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_Values_IndentValuesExpressionsList.Size	SC-14	covered	insert.values.listIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_Values_IndentValuesExpressionsListBraces.Indent	SC-14	covered	insert.values.braceIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_Values_IndentValuesExpressionsListBraces.OnNewLineOnly	SC-14	covered	insert.values.braceIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_Values_IndentValuesExpressionsListBraces.Size	SC-14	covered	insert.values.braceIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_Values_IndentValuesKeyword.Indent	SC-14	covered	insert.values.keywordIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_Values_IndentValuesKeyword.OnNewLineOnly	SC-14	covered	insert.values.keywordIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_Values_IndentValuesKeyword.Size	SC-14	covered	insert.values.keywordIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
+Insert_Values_InsertSpaceAfterValuesKeyword	SC-14	covered	insert.values.spaceAfterKeyword	InsertParityTests.Values_keyword_spacing_respects_the_line_break_policy	Native inherit/insert/remove on inline gaps only; explicit newlines take precedence
+Insert_Values_InsertSpacesWithinValuesExpressionsListBraces	SC-14	covered	insert.values.spaceWithin	InsertParityTests.Local_spaces_do_not_change_other_parentheses	Native inherit/insert/remove on inline gaps only; explicit newlines take precedence
+Insert_Values_LineBreakAfterOpenBrace	SC-14	covered	insert.values.breakAfterOpen	InsertParityTests.Boundaries_offer_distinct_always_and_never_policies	Native inherit/always/never at AST-identified INSERT boundary; comments are not crossed
+Insert_Values_LineBreakAfterValues	SC-14	covered	insert.values.breakAfterKeyword	InsertParityTests.Boundaries_offer_distinct_always_and_never_policies	Native inherit/always/never at AST-identified INSERT boundary; comments are not crossed
+Insert_Values_LineBreakBeforeClosingBrace	SC-14	covered	insert.values.breakBeforeClose	InsertParityTests.Boundaries_offer_distinct_always_and_never_policies	Native inherit/always/never at AST-identified INSERT boundary; comments are not crossed
+Insert_Values_LineBreakBeforeValues	SC-14	covered	insert.values.breakBeforeKeyword	InsertParityTests.Boundaries_offer_distinct_always_and_never_policies	Native inherit/always/never at AST-identified INSERT boundary; comments are not crossed
+Insert_Values_StackValuesExpressionsList	SC-14	covered	insert.values.stackList	InsertParityTests.Each_list_can_be_stacked_compact_or_automatic	Native inherit/on/off list policy; INSERT-scoped lists and row separators are independent
+Insert_Values_StackValuesExpressionsListMode	SC-14	covered	insert.values.stackMode	InsertParityTests.Each_list_can_be_stacked_compact_or_automatic	Native onePerLine/auto list policy; XML numeric mode not assumed or imported
+Insert_Values_StackValuesExpressionsRowsList	SC-14	covered	insert.values.stackRows	InsertParityTests.Row_stacking_is_independent_from_expression_stacking	Native inherit/on/off list policy; INSERT-scoped lists and row separators are independent
+Insert_Values_StackValuesExpressionsRowsListMode	SC-14	covered	insert.values.stackRowsMode	InsertParityTests.Row_stacking_is_independent_from_expression_stacking	Native onePerLine/auto list policy; XML numeric mode not assumed or imported
 Labels_AddEmptyLinesAroundLabeledBlock	SC-24	pending_semantics	-	-	-
 Labels_IndentLabel.Indent	SC-24	pending_semantics	-	-	-
 Labels_IndentLabel.OnNewLineOnly	SC-24	pending_semantics	-	-	-
