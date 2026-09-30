@@ -63,13 +63,13 @@ internal sealed class StoredCodeDocBuilder : ISqlFragmentDocBuilder
             HardLineDoc.Instance, new TextDoc(suffix.Contains(';') ? "END;" : "END"));
     }
 
-    private static Doc? BuildIf(IfStatement statement, SqlDocBuilderContext context)
+    private Doc? BuildIf(IfStatement statement, SqlDocBuilderContext context)
     {
         if (statement.Predicate is null || statement.ThenStatement is null
             || !Matches(Between(context, statement.StartOffset, statement.Predicate.StartOffset), @"^\s*IF\s+$")
             || !White(Between(context, End(statement.Predicate), statement.ThenStatement.StartOffset)))
             return null;
-        var parts = new List<Doc> { new TextDoc("IF " + context.GetOriginalText(statement.Predicate).Trim()),
+        var parts = new List<Doc> { ConditionHeader("IF", "if", statement, statement.Predicate, context),
             Branch(statement.ThenStatement, context) };
         if (statement.ElseStatement is { } alternative)
         {
@@ -83,17 +83,26 @@ internal sealed class StoredCodeDocBuilder : ISqlFragmentDocBuilder
         return Join(parts);
     }
 
-    private static Doc? BuildWhile(WhileStatement statement, SqlDocBuilderContext context)
+    private Doc? BuildWhile(WhileStatement statement, SqlDocBuilderContext context)
     {
         if (statement.Predicate is null || statement.Statement is null
             || !Matches(Between(context, statement.StartOffset, statement.Predicate.StartOffset), @"^\s*WHILE\s+$")
             || !White(Between(context, End(statement.Predicate), statement.Statement.StartOffset))
             || !White(Between(context, End(statement.Statement), End(statement)))) return null;
-        return Join(new TextDoc("WHILE " + context.GetOriginalText(statement.Predicate).Trim()),
+        return Join(ConditionHeader("WHILE", "while", statement, statement.Predicate, context),
             Branch(statement.Statement, context));
     }
 
-    private static Doc? BuildTryCatch(TryCatchStatement statement, SqlDocBuilderContext context)
+    private Doc ConditionHeader(string keyword, string prefix, TSqlStatement statement,
+        BooleanExpression predicate, SqlDocBuilderContext context)
+    {
+        var preserveBreak = NativeRules.Get(options, "code." + prefix + ".conditionIndent").Indent.Enabled
+            && Between(context, statement.StartOffset, predicate.StartOffset).IndexOfAny(new[] { '\r', '\n' }) >= 0;
+        return Join(new TextDoc(keyword), preserveBreak ? HardLineDoc.Instance : new TextDoc(" "),
+            new TextDoc(context.GetOriginalText(predicate).Trim()));
+    }
+
+    private Doc? BuildTryCatch(TryCatchStatement statement, SqlDocBuilderContext context)
     {
         var tries = statement.TryStatements?.Statements;
         var catches = statement.CatchStatements?.Statements;
@@ -109,7 +118,8 @@ internal sealed class StoredCodeDocBuilder : ISqlFragmentDocBuilder
         return Join(new TextDoc("BEGIN TRY"), new IndentDoc(1, Join(HardLineDoc.Instance, tryBody)),
             HardLineDoc.Instance, new TextDoc("END TRY"), HardLineDoc.Instance,
             new TextDoc("BEGIN CATCH"), new IndentDoc(1, Join(HardLineDoc.Instance, catchBody)),
-            HardLineDoc.Instance, new TextDoc("END CATCH"));
+            HardLineDoc.Instance, new TextDoc("END CATCH" + (options.Rules.Overrides.Keys.Any(key => key.StartsWith("code.", StringComparison.Ordinal))
+                && Between(context, End(catches[catches.Count - 1]), End(statement)).Contains(';') ? ";" : "")));
     }
 
     private Doc? BuildDeclare(DeclareVariableStatement statement, SqlDocBuilderContext context)

@@ -133,6 +133,8 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
                 request.Dialect, cancellationToken);
             rendered = DeclareLayout.ApplySafe(rendered, options, _parser,
                 request.Dialect, cancellationToken);
+            rendered = CodeLayout.ApplySafe(rendered, options, _parser,
+                request.Dialect, cancellationToken);
             if (string.Equals(rendered, source, StringComparison.Ordinal))
             {
                 return Unchanged(source, true);
@@ -172,6 +174,8 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         output = MergeTailLayout.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);
         output = DeclareLayout.ApplySafe(output, options, _parser,
+            request.Dialect, cancellationToken);
+        output = CodeLayout.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);
         if (string.Equals(output, source, StringComparison.Ordinal))
         {

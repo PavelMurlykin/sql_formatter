@@ -255,7 +255,7 @@ public sealed class RuleCatalog
                 descriptor.DependsOn?.Replace("select.", "subquery."), descriptor.Dialect));
         return new RuleCatalog(descriptors.Concat(subquery).Concat(UpdateDeleteRules(descriptors))
             .Concat(MergeHeaderRules(descriptors)).Concat(MergeBranchRules(descriptors)).Concat(MergeTailRules())
-            .Concat(DeclareRules()));
+            .Concat(DeclareRules()).Concat(CodeRules()));
     }
 
     private static RuleDescriptor CaseRule(string key, string defaultValue) => new(key, "token",
@@ -423,6 +423,27 @@ public sealed class RuleCatalog
         foreach (var rule in SingleLineRules("cursor"))
             yield return new RuleDescriptor(rule.Key.Replace("subquery.singleLine.cursor", "declare.cursor.singleLine"),
                 scope, rule.DefaultValue, rule.Minimum, rule.Maximum, rule.Choices);
+    }
+
+    private static IEnumerable<RuleDescriptor> CodeRules()
+    {
+        const string scope = "control flow";
+        foreach (var key in new[] { "breakAfterBegin", "breakBeforeEnd", "separateStatements", "block.breakBeforeCatch" })
+            yield return BreakRule("code." + key, scope);
+        yield return IndentDescriptor("code.transaction.bodyIndent", scope);
+        foreach (var prefix in new[] { "block", "if", "while" })
+        {
+            yield return new RuleDescriptor("code." + prefix + ".blankLinesAround", scope, RuleValue.FromBoolean(false));
+            yield return IndentDescriptor("code." + prefix + ".bodyIndent", scope);
+            if (prefix == "block") continue;
+            foreach (var key in new[] { "keywordIndent", "conditionIndent", "nestedConditionIndent" })
+                yield return IndentDescriptor("code." + prefix + "." + key, scope);
+            foreach (var key in new[] { "breakAfterCondition", "wrapBeforeOperator", "wrapAfterOperator" })
+                yield return BreakRule("code." + prefix + "." + key, scope);
+            yield return WrapRule("code." + prefix + ".wrapCondition", scope);
+        }
+        yield return BreakRule("code.if.breakBeforeElse", scope);
+        yield return BreakRule("code.if.breakAfterElse", scope);
     }
 
     public IReadOnlyDictionary<string, RuleDescriptor> Definitions => definitions;

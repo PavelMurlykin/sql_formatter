@@ -979,6 +979,34 @@ JSON v2 завершает настройки MERGE следующими клю�
 
 Правила работают и во вложенном коде; порядок переменных, значения, параметры курсора и комментарии сохраняются. Без переопределений/v1 поведение прежнее; ошибочный SQL и многострочные литералы не переписываются. XML numeric Style не интерпретируется. Новые ключи в VS/SSMS пока задаются через JSON.
 
+## Код, блоки и транзакции (SC-20)
+
+JSON v2 предоставляет независимые настройки:
+
+| Группа | Суффиксы ключей |
+| --- | --- |
+| `code` | `separateStatements, breakAfterBegin, breakBeforeEnd` |
+| `code.block` | `bodyIndent, blankLinesAround, breakBeforeCatch` |
+| `code.transaction` | `bodyIndent` |
+| `code.if` | `keywordIndent, bodyIndent, conditionIndent, nestedConditionIndent, blankLinesAround, breakAfterCondition, breakBeforeElse, breakAfterElse, wrapCondition, wrapBeforeOperator, wrapAfterOperator` |
+| `code.while` | `keywordIndent, bodyIndent, conditionIndent, nestedConditionIndent, blankLinesAround, breakAfterCondition, wrapCondition, wrapBeforeOperator, wrapAfterOperator` |
+
+Переносы используют inherit/always/never. `separateStatements` действует между соседними операторами одного списка, не внутри выражений. `blankLinesAround` — boolean, false сохраняет исходные пустые строки, true добавляет минимум одну до/после конструкции при наличии соседнего оператора (не вокруг ELSE/END/GO); промежутки рядом с комментариями пропускаются.
+
+Отступы имеют общий тип enabled/offset/onNewLineOnly/style/transparent. `keywordIndent` задаёт BEGIN/END от IF/WHILE; `bodyIndent` задаёт всё тело от BEGIN, либо одиночный оператор от IF/WHILE. Условие считается от IF/WHILE; conditionIndent сохраняет существующий перенос после ключевого слова, но сам не создаёт новый. При OnNewLineOnly=false возможно добавление пробелов в строке. Вложенные тела обрабатываются от внешнего к внутреннему и могут иметь разные стили. У безусловного BEGIN/END и TRY/CATCH действует `code.block.bodyIndent`, у блоков IF/WHILE — их собственные настройки. `breakBeforeCatch` управляет BEGIN CATCH после END TRY. Логические режимы условий: inherit/none/and/or/both; BETWEEN и содержимое литералов не меняются.
+
+Транзакционное тело форматируется только для лексически замкнутых пар BEGIN TRANSACTION и COMMIT/ROLLBACK в одном списке операторов. Вложенные пары дают вложенные отступы; незамкнутые пары, транзакции в разных ветвях и SAVE TRANSACTION не интерпретируются как тело. Это правило раскладки, не анализ исполнения/числа активных транзакций.
+
+Проверенная конфигурация:
+
+```json
+{"version":2,"rules":{"code.separateStatements":"always","code.breakAfterBegin":"always","code.breakBeforeEnd":"always",
+"code.if.breakAfterCondition":"always","code.if.bodyIndent":{"enabled":true,"offset":2,"onNewLineOnly":true,"style":"relative","transparent":false},
+"code.while.bodyIndent":{"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false}}}
+```
+
+Работает в Core/CLI и через файл конфигурации IDE; поддерживает форматирование выделения без изменения соседнего текста. Новые правила опциональны, v1/default сохраняют прежний вывод. При включённых правилах Code завершающая точка с запятой TRY/CATCH сохраняется (старый структурный режим без этих правил мог её опускать). Токены проверяются повторным разбором; ошибочный SQL/многострочные литералы сохраняются. Числовые XML-режимы не угадываются.
+
 ## Построение `Doc` из AST
 
 `SqlDocBuilder` создаёт layout-документ из результата парсинга. Без дополнительных обработчиков он сохраняет весь исходный текст, включая комментарии и разделители `GO`:

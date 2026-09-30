@@ -30,53 +30,53 @@ Case_LineBreakBeforeWhenElse	SC-13	covered	case.breakBeforeWhenElse	CaseAndSetPa
 Case_WrapAfterOperatorMode	SC-13	covered	case.wrapAfterOperator	CaseAndSetParityTests.Searched_case_boolean_rules_change_only_condition_layout	Native inherit/always/never around parsed CASE AND/OR; XML numeric mode not assumed
 Case_WrapBeforeOperatorMode	SC-13	covered	case.wrapBeforeOperator	CaseAndSetParityTests.Searched_case_boolean_rules_change_only_condition_layout	Native inherit/always/never around parsed CASE AND/OR; XML numeric mode not assumed
 Case_WrapConditionMode	SC-13	covered	case.wrapCondition	CaseAndSetParityTests.Searched_case_boolean_rules_change_only_condition_layout	Native inherit/none/and/or/both on parsed CASE Boolean conditions; XML numeric mode not assumed
-Code_AnonymousBlocks_AddEmptyLinesAround	SC-20	pending_semantics	-	-	-
-Code_AnonymousBlocks_IndentCode.Indent	SC-20	pending_semantics	-	-	-
-Code_AnonymousBlocks_IndentCode.OnNewLineOnly	SC-20	pending_semantics	-	-	-
-Code_AnonymousBlocks_IndentCode.Size	SC-20	pending_semantics	-	-	-
-Code_AnonymousBlocks_LineBreakBeforeBeginCatch	SC-20	pending_semantics	-	-	-
-Code_If_AddEmptyLinesAroundIfStatement	SC-20	pending_semantics	-	-	-
-Code_If_IndentBeginEndKeywords.Indent	SC-20	pending_semantics	-	-	-
-Code_If_IndentBeginEndKeywords.OnNewLineOnly	SC-20	pending_semantics	-	-	-
-Code_If_IndentBeginEndKeywords.Size	SC-20	pending_semantics	-	-	-
-Code_If_IndentCode.Indent	SC-20	pending_semantics	-	-	-
-Code_If_IndentCode.OnNewLineOnly	SC-20	pending_semantics	-	-	-
-Code_If_IndentCode.Size	SC-20	pending_semantics	-	-	-
-Code_If_IndentCondition.Indent	SC-20	pending_semantics	-	-	-
-Code_If_IndentCondition.OnNewLineOnly	SC-20	pending_semantics	-	-	-
-Code_If_IndentCondition.Size	SC-20	pending_semantics	-	-	-
-Code_If_IndentWrapConditionNestedOperations.Indent	SC-20	pending_semantics	-	-	-
-Code_If_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-20	pending_semantics	-	-	-
-Code_If_IndentWrapConditionNestedOperations.Size	SC-20	pending_semantics	-	-	-
-Code_If_LineBreakAfterCondition	SC-20	pending_semantics	-	-	-
-Code_If_LineBreakAfterElse	SC-20	pending_semantics	-	-	-
-Code_If_LineBreakBeforeElse	SC-20	pending_semantics	-	-	-
-Code_If_WrapAfterOperatorMode	SC-20	pending_semantics	-	-	-
-Code_If_WrapBeforeOperatorMode	SC-20	pending_semantics	-	-	-
-Code_If_WrapConditionMode	SC-20	pending_semantics	-	-	-
-Code_LineBreakAfterBegin	SC-20	pending_semantics	-	-	-
-Code_LineBreakBeforeEnd	SC-20	pending_semantics	-	-	-
-Code_PlaceEachStatementOnASeparateLine	SC-20	pending_semantics	-	-	-
-Code_Transaction_IndentTranBody.Indent	SC-20	pending_semantics	-	-	-
-Code_Transaction_IndentTranBody.OnNewLineOnly	SC-20	pending_semantics	-	-	-
-Code_Transaction_IndentTranBody.Size	SC-20	pending_semantics	-	-	-
-Code_While_AddEmptyLinesAround	SC-20	pending_semantics	-	-	-
-Code_While_IndentBeginEndKeywords.Indent	SC-20	pending_semantics	-	-	-
-Code_While_IndentBeginEndKeywords.OnNewLineOnly	SC-20	pending_semantics	-	-	-
-Code_While_IndentBeginEndKeywords.Size	SC-20	pending_semantics	-	-	-
-Code_While_IndentCode.Indent	SC-20	pending_semantics	-	-	-
-Code_While_IndentCode.OnNewLineOnly	SC-20	pending_semantics	-	-	-
-Code_While_IndentCode.Size	SC-20	pending_semantics	-	-	-
-Code_While_IndentCondition.Indent	SC-20	pending_semantics	-	-	-
-Code_While_IndentCondition.OnNewLineOnly	SC-20	pending_semantics	-	-	-
-Code_While_IndentCondition.Size	SC-20	pending_semantics	-	-	-
-Code_While_IndentWrapConditionNestedOperations.Indent	SC-20	pending_semantics	-	-	-
-Code_While_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-20	pending_semantics	-	-	-
-Code_While_IndentWrapConditionNestedOperations.Size	SC-20	pending_semantics	-	-	-
-Code_While_LineBreakAfterCondition	SC-20	pending_semantics	-	-	-
-Code_While_WrapAfterOperatorMode	SC-20	pending_semantics	-	-	-
-Code_While_WrapBeforeOperatorMode	SC-20	pending_semantics	-	-	-
-Code_While_WrapConditionMode	SC-20	pending_semantics	-	-	-
+Code_AnonymousBlocks_AddEmptyLinesAround	SC-20	covered	code.block.blankLinesAround	CodeParityTests.Blank_lines_surround_only_requested_constructs	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_AnonymousBlocks_IndentCode.Indent	SC-20	covered	code.block.bodyIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_AnonymousBlocks_IndentCode.OnNewLineOnly	SC-20	covered	code.block.bodyIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_AnonymousBlocks_IndentCode.Size	SC-20	covered	code.block.bodyIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_AnonymousBlocks_LineBreakBeforeBeginCatch	SC-20	covered	code.block.breakBeforeCatch	CodeParityTests.Every_boundary_supports_distinct_modes	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_If_AddEmptyLinesAroundIfStatement	SC-20	covered	code.if.blankLinesAround	CodeParityTests.Blank_lines_surround_only_requested_constructs	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_If_IndentBeginEndKeywords.Indent	SC-20	covered	code.if.keywordIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_If_IndentBeginEndKeywords.OnNewLineOnly	SC-20	covered	code.if.keywordIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_If_IndentBeginEndKeywords.Size	SC-20	covered	code.if.keywordIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_If_IndentCode.Indent	SC-20	covered	code.if.bodyIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_If_IndentCode.OnNewLineOnly	SC-20	covered	code.if.bodyIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_If_IndentCode.Size	SC-20	covered	code.if.bodyIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_If_IndentCondition.Indent	SC-20	covered	code.if.conditionIndent	CodeParityTests.Condition_indents_and_boolean_wrapping_are_independent	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_If_IndentCondition.OnNewLineOnly	SC-20	covered	code.if.conditionIndent	CodeParityTests.Condition_indents_and_boolean_wrapping_are_independent	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_If_IndentCondition.Size	SC-20	covered	code.if.conditionIndent	CodeParityTests.Condition_indents_and_boolean_wrapping_are_independent	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_If_IndentWrapConditionNestedOperations.Indent	SC-20	covered	code.if.nestedConditionIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_If_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-20	covered	code.if.nestedConditionIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_If_IndentWrapConditionNestedOperations.Size	SC-20	covered	code.if.nestedConditionIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_If_LineBreakAfterCondition	SC-20	covered	code.if.breakAfterCondition	CodeParityTests.Every_boundary_supports_distinct_modes	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_If_LineBreakAfterElse	SC-20	covered	code.if.breakAfterElse	CodeParityTests.Every_boundary_supports_distinct_modes	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_If_LineBreakBeforeElse	SC-20	covered	code.if.breakBeforeElse	CodeParityTests.Every_boundary_supports_distinct_modes	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_If_WrapAfterOperatorMode	SC-20	covered	code.if.wrapAfterOperator	CodeParityTests.Every_boundary_supports_distinct_modes	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_If_WrapBeforeOperatorMode	SC-20	covered	code.if.wrapBeforeOperator	CodeParityTests.Every_boundary_supports_distinct_modes	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_If_WrapConditionMode	SC-20	covered	code.if.wrapCondition	CodeParityTests.Condition_indents_and_boolean_wrapping_are_independent	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_LineBreakAfterBegin	SC-20	covered	code.breakAfterBegin	CodeParityTests.Every_boundary_supports_distinct_modes	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_LineBreakBeforeEnd	SC-20	covered	code.breakBeforeEnd	CodeParityTests.Every_boundary_supports_distinct_modes	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_PlaceEachStatementOnASeparateLine	SC-20	covered	code.separateStatements	CodeParityTests.Every_boundary_supports_distinct_modes	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_Transaction_IndentTranBody.Indent	SC-20	covered	code.transaction.bodyIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_Transaction_IndentTranBody.OnNewLineOnly	SC-20	covered	code.transaction.bodyIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_Transaction_IndentTranBody.Size	SC-20	covered	code.transaction.bodyIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_While_AddEmptyLinesAround	SC-20	covered	code.while.blankLinesAround	CodeParityTests.Blank_lines_surround_only_requested_constructs	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_While_IndentBeginEndKeywords.Indent	SC-20	covered	code.while.keywordIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_While_IndentBeginEndKeywords.OnNewLineOnly	SC-20	covered	code.while.keywordIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_While_IndentBeginEndKeywords.Size	SC-20	covered	code.while.keywordIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_While_IndentCode.Indent	SC-20	covered	code.while.bodyIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_While_IndentCode.OnNewLineOnly	SC-20	covered	code.while.bodyIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_While_IndentCode.Size	SC-20	covered	code.while.bodyIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_While_IndentCondition.Indent	SC-20	covered	code.while.conditionIndent	CodeParityTests.Condition_indents_and_boolean_wrapping_are_independent	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_While_IndentCondition.OnNewLineOnly	SC-20	covered	code.while.conditionIndent	CodeParityTests.Condition_indents_and_boolean_wrapping_are_independent	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_While_IndentCondition.Size	SC-20	covered	code.while.conditionIndent	CodeParityTests.Condition_indents_and_boolean_wrapping_are_independent	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_While_IndentWrapConditionNestedOperations.Indent	SC-20	covered	code.while.nestedConditionIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_While_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-20	covered	code.while.nestedConditionIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_While_IndentWrapConditionNestedOperations.Size	SC-20	covered	code.while.nestedConditionIndent	CodeParityTests.Every_body_keyword_or_nested_indent_honors_native_fields	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_While_LineBreakAfterCondition	SC-20	covered	code.while.breakAfterCondition	CodeParityTests.Every_boundary_supports_distinct_modes	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_While_WrapAfterOperatorMode	SC-20	covered	code.while.wrapAfterOperator	CodeParityTests.Every_boundary_supports_distinct_modes	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_While_WrapBeforeOperatorMode	SC-20	covered	code.while.wrapBeforeOperator	CodeParityTests.Every_boundary_supports_distinct_modes	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
+Code_While_WrapConditionMode	SC-20	covered	code.while.wrapCondition	CodeParityTests.Condition_indents_and_boolean_wrapping_are_independent	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
 CreateTable_AddEmptyLinesAroundStatement	SC-22	pending_semantics	-	-	-
 CreateTable_IndentColumnList.Indent	SC-22	pending_semantics	-	-	-
 CreateTable_IndentColumnList.OnNewLineOnly	SC-22	pending_semantics	-	-	-

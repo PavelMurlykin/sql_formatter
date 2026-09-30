@@ -7,9 +7,14 @@ namespace TSqlFormatter.Core.Formatting;
 
 internal sealed class FragmentIndent
 {
-    public FragmentIndent(TSqlFragment fragment, int anchor, IndentRule rule)
-    { Fragment = fragment; Anchor = anchor; Rule = rule; }
+    public FragmentIndent(TSqlFragment fragment, int anchor, IndentRule rule, int? endOffset = null)
+    { Fragment = fragment; Anchor = anchor; Rule = rule; EndOffset = endOffset; }
+    private int? EndOffset { get; }
     public TSqlFragment Fragment { get; }
+    public int StartOffset => Fragment is StatementList { Statements.Count: > 0 } list ? list.Statements[0].StartOffset : Fragment.StartOffset;
+    public int FragmentLength => EndOffset is { } end ? end - StartOffset : Fragment is StatementList { Statements.Count: > 0 } list
+        ? list.Statements[list.Statements.Count - 1].StartOffset + list.Statements[list.Statements.Count - 1].FragmentLength - StartOffset
+        : Fragment.FragmentLength;
     public int Anchor { get; }
     public IndentRule Rule { get; }
 }
@@ -17,6 +22,30 @@ internal sealed class FragmentIndent
 /// <summary>Token-preserving whole-fragment indentation and compactness for embedded queries/bodies.</summary>
 internal static class SqlFragmentLayout
 {
+    public static string IndentTreeSafe(string source, FormattingOptions options, ISqlParser parser,
+        SqlDialectVersion dialect, CancellationToken cancellationToken,
+        Func<TSqlFragment, IEnumerable<FragmentIndent>> select)
+    {
+        var parsed = parser.Parse(source, dialect, cancellationToken);
+        if (!parsed.ParseSucceeded || parsed.Root is null) return source;
+        var initial = select(parsed.Root).Where(i => i.Rule.Enabled).ToArray();
+        var levels = initial.Length == 0 ? 0 : initial.Max(i => Depth(i, initial)) + 1;
+        for (var level = 0; level < levels; level++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            source = IndentSafe(source, options, parser, dialect, cancellationToken, root =>
+            {
+                var items = select(root).Where(i => i.Rule.Enabled).ToArray();
+                return items.Where(i => Depth(i, items) == level);
+            });
+        }
+        return source;
+        static int Depth(FragmentIndent item, FragmentIndent[] items) => items.Count(parent =>
+            parent.StartOffset <= item.StartOffset
+            && parent.StartOffset + parent.FragmentLength >= item.StartOffset + item.FragmentLength
+            && parent.FragmentLength > item.FragmentLength);
+    }
+
     public static string IndentSafe(string source, FormattingOptions options, ISqlParser parser,
         SqlDialectVersion dialect, CancellationToken cancellationToken,
         Func<TSqlFragment, IEnumerable<FragmentIndent>> select)
@@ -27,23 +56,22 @@ internal static class SqlFragmentLayout
         var edits = new List<TextEdit>();
         var lastEnd = -1;
         // Parents first; descendants are left for a subsequent caller to avoid overlapping edits.
-        foreach (var item in select(parsed.Root).OrderBy(i => i.Fragment.StartOffset).ThenByDescending(i => i.Fragment.FragmentLength))
+        foreach (var item in select(parsed.Root).OrderBy(i => i.StartOffset).ThenByDescending(i => i.FragmentLength))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var fragment = item.Fragment;
             var rule = item.Rule;
-            if (!rule.Enabled || fragment.StartOffset < lastEnd) continue;
-            var lineStart = LineStart(source, fragment.StartOffset);
-            if (source.Substring(lineStart, fragment.StartOffset - lineStart).Any(ch => ch is not (' ' or '\t')))
+            if (!rule.Enabled || item.StartOffset < 0 || item.StartOffset < lastEnd) continue;
+            var lineStart = LineStart(source, item.StartOffset);
+            if (source.Substring(lineStart, item.StartOffset - lineStart).Any(ch => ch is not (' ' or '\t')))
             {
-                editor.Before(fragment.StartOffset, "inherit", rule, anchorOffset: item.Anchor);
+                editor.Before(item.StartOffset, "inherit", rule, anchorOffset: item.Anchor);
                 continue;
             }
             var target = rule.Transparent ? 0 : Math.Max(0, (rule.Style == "absolute" ? 0 : editor.GetLineIndent(item.Anchor))
                 + rule.Offset * options.Indent.Size);
-            var delta = target - editor.GetLineIndent(fragment.StartOffset);
+            var delta = target - editor.GetLineIndent(item.StartOffset);
             if (delta == 0) continue;
-            lastEnd = fragment.StartOffset + fragment.FragmentLength;
+            lastEnd = item.StartOffset + item.FragmentLength;
             foreach (Match line in Regex.Matches(source, @"(?:\A|(?<=\n)|(?<=\r)(?!\n))[ \t]*"))
             {
                 if (line.Index < lineStart || line.Index >= lastEnd) continue;
@@ -61,9 +89,9 @@ internal static class SqlFragmentLayout
             if (!reparsed.ParseSucceeded || reparsed.Root is null) return source;
             var inline = new SqlTokenGapEditor(reparsed, options);
             foreach (var item in select(reparsed.Root))
-                if (item.Rule.Enabled && shifted.Substring(LineStart(shifted, item.Fragment.StartOffset),
-                        item.Fragment.StartOffset - LineStart(shifted, item.Fragment.StartOffset)).Any(ch => ch is not (' ' or '\t')))
-                    inline.Before(item.Fragment.StartOffset, "inherit", item.Rule, anchorOffset: item.Anchor);
+                if (item.Rule.Enabled && item.StartOffset >= 0 && shifted.Substring(LineStart(shifted, item.StartOffset),
+                        item.StartOffset - LineStart(shifted, item.StartOffset)).Any(ch => ch is not (' ' or '\t')))
+                    inline.Before(item.StartOffset, "inherit", item.Rule, anchorOffset: item.Anchor);
             shifted = inline.Apply(cancellationToken);
         }
         return Valid(shifted, parsed, parser, dialect, cancellationToken) ? shifted : source;

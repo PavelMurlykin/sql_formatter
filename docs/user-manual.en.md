@@ -979,6 +979,34 @@ Verified `.tsqlformatter.json` example:
 
 Rules also apply inside stored code; variable order, values, cursor options and comments are preserved. Defaults/v1 retain previous behavior; invalid SQL and multiline literals are not rewritten. XML numeric Style is not interpreted. New VS/SSMS keys still require JSON.
 
+## Code, blocks and transactions (SC-20)
+
+JSON v2 provides independent settings:
+
+| Group | Key suffixes |
+| --- | --- |
+| `code` | `separateStatements, breakAfterBegin, breakBeforeEnd` |
+| `code.block` | `bodyIndent, blankLinesAround, breakBeforeCatch` |
+| `code.transaction` | `bodyIndent` |
+| `code.if` | `keywordIndent, bodyIndent, conditionIndent, nestedConditionIndent, blankLinesAround, breakAfterCondition, breakBeforeElse, breakAfterElse, wrapCondition, wrapBeforeOperator, wrapAfterOperator` |
+| `code.while` | `keywordIndent, bodyIndent, conditionIndent, nestedConditionIndent, blankLinesAround, breakAfterCondition, wrapCondition, wrapBeforeOperator, wrapAfterOperator` |
+
+Breaks use inherit/always/never. `separateStatements` acts between sibling statements in a list, not inside expressions. `blankLinesAround` is boolean: false preserves existing blank lines; true adds at least one before/after the construct when a neighboring statement exists (not around ELSE/END/GO). Gaps adjacent to comments are skipped.
+
+Indents use the common enabled/offset/onNewLineOnly/style/transparent type. `keywordIndent` positions BEGIN/END relative to IF/WHILE; `bodyIndent` shifts the entire body relative to BEGIN, or a single statement relative to IF/WHILE. Conditions anchor to IF/WHILE; conditionIndent retains an existing break after the keyword, but does not create one. OnNewLineOnly=false allows inline padding. Nested bodies are processed outermost first and may use different styles. Unconditional BEGIN/END and TRY/CATCH use `code.block.bodyIndent`; IF/WHILE blocks use their own settings. `breakBeforeCatch` controls BEGIN CATCH after END TRY. Boolean condition modes are inherit/none/and/or/both; BETWEEN and literal contents are preserved.
+
+Transaction bodies are formatted only for lexically closed BEGIN TRANSACTION and COMMIT/ROLLBACK pairs in the same statement list. Nested pairs receive nested indents; unmatched pairs, transactions across branches and SAVE TRANSACTION are not interpreted as bodies. This is a layout rule, not execution or active-transaction-count analysis.
+
+Verified configuration:
+
+```json
+{"version":2,"rules":{"code.separateStatements":"always","code.breakAfterBegin":"always","code.breakBeforeEnd":"always",
+"code.if.breakAfterCondition":"always","code.if.bodyIndent":{"enabled":true,"offset":2,"onNewLineOnly":true,"style":"relative","transparent":false},
+"code.while.bodyIndent":{"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false}}}
+```
+
+Works in Core/CLI and via IDE configuration files; selection formatting preserves neighboring text. New rules are opt-in, with previous v1/default output retained. With Code rules enabled, a trailing TRY/CATCH semicolon is preserved (the legacy structural mode without these rules could omit it). Reparsing checks tokens; invalid SQL/multiline literals remain unchanged. XML numeric modes are not guessed.
+
 ## Building a `Doc` from the AST
 
 `SqlDocBuilder` creates a layout document from a parse result. With no additional builders, it preserves the entire source, including comments and `GO` separators:

@@ -63,6 +63,22 @@ internal sealed class SqlTokenGapEditor
             edits.Values.OrderBy(edit => edit.Span.StartOffset).ToArray(), cancellationToken);
     }
 
+    public void BlankBefore(int offset)
+    {
+        if (!indices.TryGetValue(offset, out var index) || index == 0) return;
+        var left = tokens[index - 1];
+        var right = tokens[index];
+        if (IsComment(left) || IsComment(right)) return;
+        var start = left.Offset + left.Text.Length;
+        var length = right.Offset - start;
+        var current = edits.TryGetValue(start, out var edit) ? edit.NewText : parsed.Source.Substring(start, length);
+        if (current.Any(ch => !char.IsWhiteSpace(ch))) return;
+        var newline = options.General.LineEnding switch
+        { DocLineEnding.CrLf => "\r\n", DocLineEnding.Cr => "\r", _ => "\n" };
+        if (Regex.Matches(current, @"\r\n|\r|\n").Count >= 2) return;
+        edits[start] = new TextEdit(new SqlTextSpan(start, length), newline + newline + new string(' ', LineIndent(offset)));
+    }
+
     public int GetLineIndent(int offset) => LineIndent(offset);
 
     private void Set(int leftIndex, int rightIndex, string breakMode, IndentRule? indent,
