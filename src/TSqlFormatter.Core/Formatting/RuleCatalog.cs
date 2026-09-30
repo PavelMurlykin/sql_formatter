@@ -79,7 +79,11 @@ public sealed class RuleCatalog
         definitions = new ReadOnlyDictionary<string, RuleDescriptor>(map);
     }
 
-    public static RuleCatalog Default { get; } = new(new[]
+    public static RuleCatalog Default { get; } = CreateDefault();
+
+    private static RuleCatalog CreateDefault()
+    {
+        var descriptors = new[]
     {
         CaseRule("textCase.keyword", "inherit"),
         CaseRule("textCase.builtin", "inherit"),
@@ -218,8 +222,19 @@ public sealed class RuleCatalog
         new RuleDescriptor("subquery.list.stackMode", "subquery SELECT list",
             RuleValue.FromChoice("onePerLine"), choices: new[] { "onePerLine", "auto" },
             dependsOn: "subquery.list.stackColumns")
-    }.Concat(new[] { "allAnySomeExists", "cteQueries", "fromList", "inOperator", "other" }
-        .SelectMany(SingleLineRules)).ToArray());
+        }.Concat(new[] { "allAnySomeExists", "cteQueries", "fromList", "inOperator", "other" }
+            .SelectMany(SingleLineRules)).ToArray();
+        var scopes = new[] { "from.", "join.", "where.", "groupBy.", "having.",
+            "orderBy.", "cte.", "for." };
+        var subquery = descriptors.Where(descriptor => scopes.Any(scope =>
+                descriptor.Key.StartsWith("select." + scope, StringComparison.Ordinal)))
+            .Select(descriptor => new RuleDescriptor(
+                "subquery." + descriptor.Key.Substring("select.".Length),
+                "subquery " + descriptor.Scope, descriptor.DefaultValue,
+                descriptor.Minimum, descriptor.Maximum, descriptor.Choices,
+                descriptor.DependsOn?.Replace("select.", "subquery."), descriptor.Dialect));
+        return new RuleCatalog(descriptors.Concat(subquery));
+    }
 
     private static RuleDescriptor CaseRule(string key, string defaultValue) => new(key, "token",
         RuleValue.FromChoice(defaultValue), choices: new[] { "inherit", "preserve", "upper", "lower" });

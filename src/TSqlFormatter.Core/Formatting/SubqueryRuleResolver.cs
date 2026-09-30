@@ -12,8 +12,8 @@ internal static class SubqueryRuleResolver
             .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal);
         foreach (var pair in options.Rules.Overrides)
         {
-            if (!pair.Key.StartsWith("subquery.list.", StringComparison.Ordinal)) continue;
-            var target = "select.list." + pair.Key.Substring("subquery.list.".Length);
+            if (!pair.Key.StartsWith("subquery.", StringComparison.Ordinal)) continue;
+            var target = "select." + pair.Key.Substring("subquery.".Length);
             if (catalog.TryGet(target, out var descriptor) && descriptor is not null
                 && descriptor.Accepts(pair.Value)) values[target] = pair.Value;
         }

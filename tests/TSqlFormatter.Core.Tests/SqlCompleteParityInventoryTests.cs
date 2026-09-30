@@ -78,11 +78,19 @@ public sealed class SqlCompleteParityInventoryTests
             Assert.Equal(6, row.Length);
             Assert.Equal(paths[index], row[0]);
             Assert.Matches(@"^SC-(0[4-9]|1[0-9]|2[0-4])$", row[1]);
-            Assert.Contains(row[2], new[] { "pending_semantics", "in_progress", "covered", "blocked" });
+            Assert.Contains(row[2], new[] { "pending_semantics", "in_progress", "covered", "blocked",
+                "not_applicable" });
             Assert.All(row.Skip(3), value => Assert.NotEmpty(value));
             if (row[2] == "covered")
             {
                 Assert.All(row.Skip(3), value => Assert.NotEqual("-", value));
+            }
+            if (row[2] == "not_applicable")
+            {
+                Assert.StartsWith("Subquery_OptionHints_", row[0]);
+                Assert.Equal("-", row[3]);
+                Assert.NotEqual("-", row[4]);
+                Assert.NotEqual("-", row[5]);
             }
         }
     }

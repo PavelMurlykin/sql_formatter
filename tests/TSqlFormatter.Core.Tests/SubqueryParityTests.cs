@@ -10,7 +10,10 @@ public sealed class SubqueryParityTests
     public void Catalog_exposes_all_thirty_sc11_rules()
     {
         Assert.Equal(30, RuleCatalog.Default.Definitions.Keys.Count(key =>
-            key.StartsWith("subquery.", StringComparison.Ordinal)));
+            key == "subquery.useSelectFormatting" || key == "subquery.indent"
+            || key.StartsWith("subquery.break", StringComparison.Ordinal)
+            || key.StartsWith("subquery.list.", StringComparison.Ordinal)
+            || key.StartsWith("subquery.singleLine.", StringComparison.Ordinal)));
     }
 
     [Fact]
@@ -183,7 +186,7 @@ public sealed class SubqueryParityTests
         var formatted = Format(sql, Boolean("subquery.useSelectFormatting", false),
             Boolean("subquery.singleLine.inOperator.any", true));
         Assert.Contains("/*keep*/", formatted);
-        Assert.DoesNotContain("(SELECT", formatted);
+        Assert.Equal(Format(sql, Boolean("subquery.useSelectFormatting", false)), formatted);
 
         const string multilineSql = "SELECT (SELECT 'first\n  second' FROM dbo.T) AS x";
         var rules = new RuleOptions(RuleCatalog.Default)

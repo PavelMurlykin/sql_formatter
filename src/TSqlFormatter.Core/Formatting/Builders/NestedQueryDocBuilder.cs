@@ -16,6 +16,10 @@ internal sealed class NestedQueryDocBuilder
 
     public Doc? Build(QueryExpression query, SqlDocBuilderContext context)
     {
+        if (context.ParseResult.Tokens.Any(token => token.Offset >= query.StartOffset
+            && token.Offset < query.StartOffset + query.FragmentLength
+            && token.TokenType is TSqlTokenType.SingleLineComment or TSqlTokenType.MultilineComment))
+            return null;
         if (query is BinaryQueryExpression binary)
         {
             return new BinaryQueryDocBuilder(_options).Build(binary, context);

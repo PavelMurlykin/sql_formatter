@@ -98,6 +98,15 @@ internal sealed class SqlTokenGapEditor
 
     private int LineIndent(int offset)
     {
+        var pendingBreak = edits.Values.Where(edit => edit.Span.EndOffset <= offset
+                && edit.NewText.IndexOfAny(new[] { '\r', '\n' }) >= 0)
+            .OrderByDescending(edit => edit.Span.StartOffset).FirstOrDefault();
+        if (pendingBreak is not null && parsed.Source.Substring(pendingBreak.Span.EndOffset,
+                offset - pendingBreak.Span.EndOffset).IndexOfAny(new[] { '\r', '\n' }) < 0)
+        {
+            var lastBreak = pendingBreak.NewText.LastIndexOfAny(new[] { '\r', '\n' });
+            return pendingBreak.NewText.Length - lastBreak - 1;
+        }
         var start = Math.Max(parsed.Source.LastIndexOf('\n', Math.Max(0, offset - 1)),
             parsed.Source.LastIndexOf('\r', Math.Max(0, offset - 1))) + 1;
         var end = start;
