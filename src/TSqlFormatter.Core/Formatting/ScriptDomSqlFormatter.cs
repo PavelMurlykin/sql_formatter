@@ -60,6 +60,14 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
                 : new FormatResult(source, false, false, diagnostics: diagnostics);
         }
 
+        // Structural docs can reindent embedded newlines inside a literal or quoted identifier.
+        // Preserve the whole source until such tokens have a token-aware rendering path.
+        if (parsed.Tokens.Any(token => token.TokenType is not
+                (TSqlTokenType.WhiteSpace or TSqlTokenType.EndOfFile
+                    or TSqlTokenType.SingleLineComment or TSqlTokenType.MultilineComment)
+                && token.Text.IndexOfAny(new[] { '\r', '\n' }) >= 0))
+            return Unchanged(source, true);
+
         if (request.Scope == FormatScope.Selection)
         {
             return FormatSelection(source, options, request, parsed, cancellationToken);
@@ -105,6 +113,8 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
                 request.Dialect, cancellationToken);
             rendered = SelectTailLayout.ApplySafe(rendered, options, _parser,
                 request.Dialect, cancellationToken);
+            rendered = SubqueryLayout.ApplySafe(rendered, options, _parser,
+                request.Dialect, cancellationToken);
             rendered = SelectCompactness.ApplySafe(rendered, options, _parser,
                 request.Dialect, cancellationToken);
             if (string.Equals(rendered, source, StringComparison.Ordinal))
@@ -126,6 +136,8 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         output = SelectClauseLayout.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);
         output = SelectTailLayout.ApplySafe(output, options, _parser,
+            request.Dialect, cancellationToken);
+        output = SubqueryLayout.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);
         output = SelectCompactness.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);

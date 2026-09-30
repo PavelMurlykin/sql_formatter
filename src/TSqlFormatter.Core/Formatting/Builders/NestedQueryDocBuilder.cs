@@ -11,7 +11,7 @@ internal sealed class NestedQueryDocBuilder
 
     public NestedQueryDocBuilder(FormattingOptions options)
     {
-        _options = options;
+        _options = SubqueryRuleResolver.ForNested(options);
     }
 
     public Doc? Build(QueryExpression query, SqlDocBuilderContext context)

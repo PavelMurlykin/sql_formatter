@@ -204,8 +204,22 @@ public sealed class RuleCatalog
         IndentDescriptor("select.option.keywordIndent", "OPTION keyword"),
         IndentDescriptor("select.option.hintsIndent", "OPTION hints"),
         BreakRule("select.option.breakBefore", "OPTION keyword"),
-        BreakRule("select.option.breakAfter", "OPTION hints")
-    });
+        BreakRule("select.option.breakAfter", "OPTION hints"),
+        new RuleDescriptor("subquery.useSelectFormatting", "subquery",
+            RuleValue.FromBoolean(true)),
+        IndentDescriptor("subquery.indent", "subquery body"),
+        BreakRule("subquery.breakBeforeOpen", "subquery braces"),
+        BreakRule("subquery.breakAfterOpen", "subquery braces"),
+        BreakRule("subquery.breakBeforeClose", "subquery braces"),
+        BreakRule("subquery.breakAfterClose", "subquery braces"),
+        IndentDescriptor("subquery.list.indent", "subquery SELECT list"),
+        BreakRule("subquery.list.breakBeforeFirstColumn", "subquery SELECT list"),
+        StackRule("subquery.list.stackColumns", "subquery SELECT list"),
+        new RuleDescriptor("subquery.list.stackMode", "subquery SELECT list",
+            RuleValue.FromChoice("onePerLine"), choices: new[] { "onePerLine", "auto" },
+            dependsOn: "subquery.list.stackColumns")
+    }.Concat(new[] { "allAnySomeExists", "cteQueries", "fromList", "inOperator", "other" }
+        .SelectMany(SingleLineRules)).ToArray());
 
     private static RuleDescriptor CaseRule(string key, string defaultValue) => new(key, "token",
         RuleValue.FromChoice(defaultValue), choices: new[] { "inherit", "preserve", "upper", "lower" });
@@ -219,6 +233,19 @@ public sealed class RuleCatalog
         RuleValue.FromChoice("inherit"), choices: new[] { "inherit", "on", "off" });
     private static RuleDescriptor WrapRule(string key, string scope) => new(key, scope,
         RuleValue.FromChoice("inherit"), choices: new[] { "inherit", "none", "and", "or", "both" });
+    private static RuleDescriptor[] SingleLineRules(string category)
+    {
+        var prefix = "subquery.singleLine." + category;
+        return new[]
+        {
+            new RuleDescriptor(prefix + ".any", category, RuleValue.FromBoolean(false)),
+            new RuleDescriptor(prefix + ".whenFitsMargin", category, RuleValue.FromBoolean(false)),
+            new RuleDescriptor(prefix + ".maxWords", category,
+                RuleValue.FromThreshold(new ThresholdRule(false, 10)), 0, 10000),
+            new RuleDescriptor(prefix + ".maxCharacters", category,
+                RuleValue.FromThreshold(new ThresholdRule(false, 50)), 0, 1000000)
+        };
+    }
     public IReadOnlyDictionary<string, RuleDescriptor> Definitions => definitions;
     public bool TryGet(string key, out RuleDescriptor? descriptor) => definitions.TryGetValue(key, out descriptor);
 }

@@ -738,13 +738,13 @@ Subquery_Having_LineBreakBeforeHaving	SC-12	pending_semantics	-	-	-
 Subquery_Having_WrapAfterOperatorMode	SC-12	pending_semantics	-	-	-
 Subquery_Having_WrapBeforeOperatorMode	SC-12	pending_semantics	-	-	-
 Subquery_Having_WrapConditionMode	SC-12	pending_semantics	-	-	-
-Subquery_IndentSubquery.Indent	SC-11	pending_semantics	-	-	-
-Subquery_IndentSubquery.OnNewLineOnly	SC-11	pending_semantics	-	-	-
-Subquery_IndentSubquery.Size	SC-11	pending_semantics	-	-	-
-Subquery_LineBreakAfterClosingBrace	SC-11	pending_semantics	-	-	-
-Subquery_LineBreakAfterOpenBrace	SC-11	pending_semantics	-	-	-
-Subquery_LineBreakBeforeClosingBrace	SC-11	pending_semantics	-	-	-
-Subquery_LineBreakBeforeOpenBrace	SC-11	pending_semantics	-	-	-
+Subquery_IndentSubquery.Indent	SC-11	covered	subquery.indent.enabled:boolean:false	SubqueryParityTests.Independent_brace_breaks_and_indent_are_applied	Independent body indent; preserves relative line indentation
+Subquery_IndentSubquery.OnNewLineOnly	SC-11	covered	subquery.indent.onNewLineOnly:boolean:true	SubqueryParityTests.Independent_brace_breaks_and_indent_are_applied	Independent body indent; preserves relative line indentation
+Subquery_IndentSubquery.Size	SC-11	covered	subquery.indent.offset:integer:0	SubqueryParityTests.Independent_brace_breaks_and_indent_are_applied	Independent body indent; preserves relative line indentation
+Subquery_LineBreakAfterClosingBrace	SC-11	covered	subquery.breakAfterClose:choice:inherit	SubqueryParityTests.Independent_brace_breaks_and_indent_are_applied	Independent parenthesis boundary; inherit/always/never
+Subquery_LineBreakAfterOpenBrace	SC-11	covered	subquery.breakAfterOpen:choice:inherit	SubqueryParityTests.Independent_brace_breaks_and_indent_are_applied	Independent parenthesis boundary; inherit/always/never
+Subquery_LineBreakBeforeClosingBrace	SC-11	covered	subquery.breakBeforeClose:choice:inherit	SubqueryParityTests.Independent_brace_breaks_and_indent_are_applied	Independent parenthesis boundary; inherit/always/never
+Subquery_LineBreakBeforeOpenBrace	SC-11	covered	subquery.breakBeforeOpen:choice:inherit	SubqueryParityTests.Independent_brace_breaks_and_indent_are_applied	Independent parenthesis boundary; inherit/always/never
 Subquery_OptionHints_IndentOptionHints.Indent	SC-12	pending_semantics	-	-	-
 Subquery_OptionHints_IndentOptionHints.OnNewLineOnly	SC-12	pending_semantics	-	-	-
 Subquery_OptionHints_IndentOptionHints.Size	SC-12	pending_semantics	-	-	-
@@ -763,43 +763,43 @@ Subquery_OrderBy_LineBreakAfterBy	SC-12	pending_semantics	-	-	-
 Subquery_OrderBy_LineBreakBeforeOrder	SC-12	pending_semantics	-	-	-
 Subquery_OrderBy_StackColumnsList	SC-12	pending_semantics	-	-	-
 Subquery_OrderBy_StackColumnsListMode	SC-12	pending_semantics	-	-	-
-Subquery_SelectList_IndentColumnList.Indent	SC-11	pending_semantics	-	-	-
-Subquery_SelectList_IndentColumnList.OnNewLineOnly	SC-11	pending_semantics	-	-	-
-Subquery_SelectList_IndentColumnList.Size	SC-11	pending_semantics	-	-	-
-Subquery_SelectList_LineBreakBeforeFirstColumn	SC-11	pending_semantics	-	-	-
-Subquery_SelectList_StackColumns	SC-11	pending_semantics	-	-	-
-Subquery_SelectList_StackColumnsMode	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_AllAnySomeExists_AnySubquery	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_AllAnySomeExists_WhenRightMarginIsNotExceeded	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_AllAnySomeExists_WhenSubqueryContainsLessThanXWords.Checked	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_AllAnySomeExists_WhenSubqueryContainsLessThanXWords.Value	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_AllAnySomeExists_WhenSubqueryIsShorterThanXCharacters.Checked	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_AllAnySomeExists_WhenSubqueryIsShorterThanXCharacters.Value	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_CteQueries_AnySubquery	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_CteQueries_WhenRightMarginIsNotExceeded	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_CteQueries_WhenSubqueryContainsLessThanXWords.Checked	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_CteQueries_WhenSubqueryContainsLessThanXWords.Value	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_CteQueries_WhenSubqueryIsShorterThanXCharacters.Checked	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_CteQueries_WhenSubqueryIsShorterThanXCharacters.Value	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_FromListSubqueries_AnySubquery	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_FromListSubqueries_WhenRightMarginIsNotExceeded	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_FromListSubqueries_WhenSubqueryContainsLessThanXWords.Checked	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_FromListSubqueries_WhenSubqueryContainsLessThanXWords.Value	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_FromListSubqueries_WhenSubqueryIsShorterThanXCharacters.Checked	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_FromListSubqueries_WhenSubqueryIsShorterThanXCharacters.Value	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_InOperator_AnySubquery	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_InOperator_WhenRightMarginIsNotExceeded	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_InOperator_WhenSubqueryContainsLessThanXWords.Checked	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_InOperator_WhenSubqueryContainsLessThanXWords.Value	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_InOperator_WhenSubqueryIsShorterThanXCharacters.Checked	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_InOperator_WhenSubqueryIsShorterThanXCharacters.Value	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_OtherSubqueries_AnySubquery	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_OtherSubqueries_WhenRightMarginIsNotExceeded	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_OtherSubqueries_WhenSubqueryContainsLessThanXWords.Checked	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_OtherSubqueries_WhenSubqueryContainsLessThanXWords.Value	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_OtherSubqueries_WhenSubqueryIsShorterThanXCharacters.Checked	SC-11	pending_semantics	-	-	-
-Subquery_SingleLine_OtherSubqueries_WhenSubqueryIsShorterThanXCharacters.Value	SC-11	pending_semantics	-	-	-
-Subquery_UseSameFormattingAsInSelect	SC-11	pending_semantics	-	-	-
+Subquery_SelectList_IndentColumnList.Indent	SC-11	covered	subquery.list.indent.enabled:boolean:false	SubqueryParityTests.Independent_list_break_and_indent_are_applied	Independent nested SELECT list indent
+Subquery_SelectList_IndentColumnList.OnNewLineOnly	SC-11	covered	subquery.list.indent.onNewLineOnly:boolean:true	SubqueryParityTests.Independent_list_break_and_indent_are_applied	Independent nested SELECT list indent
+Subquery_SelectList_IndentColumnList.Size	SC-11	covered	subquery.list.indent.offset:integer:0	SubqueryParityTests.Independent_list_break_and_indent_are_applied	Independent nested SELECT list indent
+Subquery_SelectList_LineBreakBeforeFirstColumn	SC-11	covered	subquery.list.breakBeforeFirstColumn:choice:inherit	SubqueryParityTests.Independent_list_break_and_indent_are_applied	Independent first SELECT column break
+Subquery_SelectList_StackColumns	SC-11	covered	subquery.list.stackColumns:choice:inherit	SubqueryParityTests.Select_list_rules_are_inherited_or_isolated_by_switch	Independent nested SELECT column stacking
+Subquery_SelectList_StackColumnsMode	SC-11	covered	subquery.list.stackMode:choice:onePerLine	SubqueryParityTests.Select_list_rules_are_inherited_or_isolated_by_switch	Native onePerLine/auto stacking mode
+Subquery_SingleLine_AllAnySomeExists_AnySubquery	SC-11	covered	subquery.singleLine.allAnySomeExists.any:boolean:false	SubqueryParityTests.Single_line_any_is_scoped_to_its_subquery_category	Force this category onto one line when token-safe
+Subquery_SingleLine_AllAnySomeExists_WhenRightMarginIsNotExceeded	SC-11	covered	subquery.singleLine.allAnySomeExists.whenFitsMargin:boolean:false	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Compact only when the candidate fits the configured right margin
+Subquery_SingleLine_AllAnySomeExists_WhenSubqueryContainsLessThanXWords.Checked	SC-11	covered	subquery.singleLine.allAnySomeExists.maxWords.enabled:boolean:false	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Strict less-than word count; native threshold
+Subquery_SingleLine_AllAnySomeExists_WhenSubqueryContainsLessThanXWords.Value	SC-11	covered	subquery.singleLine.allAnySomeExists.maxWords.value:integer:10	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Strict less-than word count; native threshold
+Subquery_SingleLine_AllAnySomeExists_WhenSubqueryIsShorterThanXCharacters.Checked	SC-11	covered	subquery.singleLine.allAnySomeExists.maxCharacters.enabled:boolean:false	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Strict less-than inner-character count; native threshold
+Subquery_SingleLine_AllAnySomeExists_WhenSubqueryIsShorterThanXCharacters.Value	SC-11	covered	subquery.singleLine.allAnySomeExists.maxCharacters.value:integer:50	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Strict less-than inner-character count; native threshold
+Subquery_SingleLine_CteQueries_AnySubquery	SC-11	covered	subquery.singleLine.cteQueries.any:boolean:false	SubqueryParityTests.Single_line_any_is_scoped_to_its_subquery_category	Force this category onto one line when token-safe
+Subquery_SingleLine_CteQueries_WhenRightMarginIsNotExceeded	SC-11	covered	subquery.singleLine.cteQueries.whenFitsMargin:boolean:false	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Compact only when the candidate fits the configured right margin
+Subquery_SingleLine_CteQueries_WhenSubqueryContainsLessThanXWords.Checked	SC-11	covered	subquery.singleLine.cteQueries.maxWords.enabled:boolean:false	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Strict less-than word count; native threshold
+Subquery_SingleLine_CteQueries_WhenSubqueryContainsLessThanXWords.Value	SC-11	covered	subquery.singleLine.cteQueries.maxWords.value:integer:10	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Strict less-than word count; native threshold
+Subquery_SingleLine_CteQueries_WhenSubqueryIsShorterThanXCharacters.Checked	SC-11	covered	subquery.singleLine.cteQueries.maxCharacters.enabled:boolean:false	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Strict less-than inner-character count; native threshold
+Subquery_SingleLine_CteQueries_WhenSubqueryIsShorterThanXCharacters.Value	SC-11	covered	subquery.singleLine.cteQueries.maxCharacters.value:integer:50	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Strict less-than inner-character count; native threshold
+Subquery_SingleLine_FromListSubqueries_AnySubquery	SC-11	covered	subquery.singleLine.fromList.any:boolean:false	SubqueryParityTests.Single_line_any_is_scoped_to_its_subquery_category	Force this category onto one line when token-safe
+Subquery_SingleLine_FromListSubqueries_WhenRightMarginIsNotExceeded	SC-11	covered	subquery.singleLine.fromList.whenFitsMargin:boolean:false	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Compact only when the candidate fits the configured right margin
+Subquery_SingleLine_FromListSubqueries_WhenSubqueryContainsLessThanXWords.Checked	SC-11	covered	subquery.singleLine.fromList.maxWords.enabled:boolean:false	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Strict less-than word count; native threshold
+Subquery_SingleLine_FromListSubqueries_WhenSubqueryContainsLessThanXWords.Value	SC-11	covered	subquery.singleLine.fromList.maxWords.value:integer:10	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Strict less-than word count; native threshold
+Subquery_SingleLine_FromListSubqueries_WhenSubqueryIsShorterThanXCharacters.Checked	SC-11	covered	subquery.singleLine.fromList.maxCharacters.enabled:boolean:false	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Strict less-than inner-character count; native threshold
+Subquery_SingleLine_FromListSubqueries_WhenSubqueryIsShorterThanXCharacters.Value	SC-11	covered	subquery.singleLine.fromList.maxCharacters.value:integer:50	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Strict less-than inner-character count; native threshold
+Subquery_SingleLine_InOperator_AnySubquery	SC-11	covered	subquery.singleLine.inOperator.any:boolean:false	SubqueryParityTests.Single_line_any_is_scoped_to_its_subquery_category	Force this category onto one line when token-safe
+Subquery_SingleLine_InOperator_WhenRightMarginIsNotExceeded	SC-11	covered	subquery.singleLine.inOperator.whenFitsMargin:boolean:false	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Compact only when the candidate fits the configured right margin
+Subquery_SingleLine_InOperator_WhenSubqueryContainsLessThanXWords.Checked	SC-11	covered	subquery.singleLine.inOperator.maxWords.enabled:boolean:false	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Strict less-than word count; native threshold
+Subquery_SingleLine_InOperator_WhenSubqueryContainsLessThanXWords.Value	SC-11	covered	subquery.singleLine.inOperator.maxWords.value:integer:10	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Strict less-than word count; native threshold
+Subquery_SingleLine_InOperator_WhenSubqueryIsShorterThanXCharacters.Checked	SC-11	covered	subquery.singleLine.inOperator.maxCharacters.enabled:boolean:false	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Strict less-than inner-character count; native threshold
+Subquery_SingleLine_InOperator_WhenSubqueryIsShorterThanXCharacters.Value	SC-11	covered	subquery.singleLine.inOperator.maxCharacters.value:integer:50	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Strict less-than inner-character count; native threshold
+Subquery_SingleLine_OtherSubqueries_AnySubquery	SC-11	covered	subquery.singleLine.other.any:boolean:false	SubqueryParityTests.Single_line_any_is_scoped_to_its_subquery_category	Force this category onto one line when token-safe
+Subquery_SingleLine_OtherSubqueries_WhenRightMarginIsNotExceeded	SC-11	covered	subquery.singleLine.other.whenFitsMargin:boolean:false	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Compact only when the candidate fits the configured right margin
+Subquery_SingleLine_OtherSubqueries_WhenSubqueryContainsLessThanXWords.Checked	SC-11	covered	subquery.singleLine.other.maxWords.enabled:boolean:false	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Strict less-than word count; native threshold
+Subquery_SingleLine_OtherSubqueries_WhenSubqueryContainsLessThanXWords.Value	SC-11	covered	subquery.singleLine.other.maxWords.value:integer:10	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Strict less-than word count; native threshold
+Subquery_SingleLine_OtherSubqueries_WhenSubqueryIsShorterThanXCharacters.Checked	SC-11	covered	subquery.singleLine.other.maxCharacters.enabled:boolean:false	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Strict less-than inner-character count; native threshold
+Subquery_SingleLine_OtherSubqueries_WhenSubqueryIsShorterThanXCharacters.Value	SC-11	covered	subquery.singleLine.other.maxCharacters.value:integer:50	SubqueryParityTests.Single_line_thresholds_and_margin_limit_compaction	Strict less-than inner-character count; native threshold
+Subquery_UseSameFormattingAsInSelect	SC-11	covered	subquery.useSelectFormatting:boolean:true	SubqueryParityTests.Select_list_rules_are_inherited_or_isolated_by_switch	True inherits SELECT overrides; false selects independent nested-list overrides
 Subquery_Where_IndentWhereCondition.Indent	SC-12	pending_semantics	-	-	-
 Subquery_Where_IndentWhereCondition.OnNewLineOnly	SC-12	pending_semantics	-	-	-
 Subquery_Where_IndentWhereCondition.Size	SC-12	pending_semantics	-	-	-
