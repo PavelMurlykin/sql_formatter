@@ -821,45 +821,45 @@ TextCase_FormatQuotedIdentifier	SC-04	covered	textCase.formatQuotedIdentifier:bo
 TextCase_Identifier	SC-04	covered	textCase.identifier:choice:preserve	TextCaseFormattingTests.Identifier_and_variable_case_are_independent	Unquoted identifiers; preserve default avoids altering case-sensitive names unless explicitly requested
 TextCase_Keyword	SC-04	covered	textCase.keyword:choice:inherit	TextCaseFormattingTests.Keyword_case_can_override_version_one_keyword_setting	Keyword tokens; inherit follows v1 keywords.case
 TextCase_Variable	SC-04	covered	textCase.variable:choice:preserve	TextCaseFormattingTests.Identifier_and_variable_case_are_independent	Variable tokens independent of identifiers and keywords
-Trigger_Body_IndentAsKeyword.Indent	SC-23	pending_semantics	-	-	-
-Trigger_Body_IndentAsKeyword.OnNewLineOnly	SC-23	pending_semantics	-	-	-
-Trigger_Body_IndentAsKeyword.Size	SC-23	pending_semantics	-	-	-
-Trigger_Body_IndentBeginEndKeywords.Indent	SC-23	pending_semantics	-	-	-
-Trigger_Body_IndentBeginEndKeywords.OnNewLineOnly	SC-23	pending_semantics	-	-	-
-Trigger_Body_IndentBeginEndKeywords.Size	SC-23	pending_semantics	-	-	-
-Trigger_Body_IndentCode.Indent	SC-23	pending_semantics	-	-	-
-Trigger_Body_IndentCode.OnNewLineOnly	SC-23	pending_semantics	-	-	-
-Trigger_Body_IndentCode.Size	SC-23	pending_semantics	-	-	-
-Trigger_Body_LineBreakAfterAs	SC-23	pending_semantics	-	-	-
-Trigger_Body_LineBreakBeforeAs	SC-23	pending_semantics	-	-	-
-Trigger_Events_IndentEvents.Indent	SC-23	pending_semantics	-	-	-
-Trigger_Events_IndentEvents.OnNewLineOnly	SC-23	pending_semantics	-	-	-
-Trigger_Events_IndentEvents.Size	SC-23	pending_semantics	-	-	-
-Trigger_Events_IndentForAfterInsteadOfKeywords.Indent	SC-23	pending_semantics	-	-	-
-Trigger_Events_IndentForAfterInsteadOfKeywords.OnNewLineOnly	SC-23	pending_semantics	-	-	-
-Trigger_Events_IndentForAfterInsteadOfKeywords.Size	SC-23	pending_semantics	-	-	-
-Trigger_Events_LineBreakBeforeFirstEvent	SC-23	pending_semantics	-	-	-
-Trigger_Events_LineBreakBeforeForAfterInsteadOf	SC-23	pending_semantics	-	-	-
-Trigger_Events_StackEventsList	SC-23	pending_semantics	-	-	-
-Trigger_Events_StackEventsListMode	SC-23	pending_semantics	-	-	-
-Trigger_OnClause_IndentOnKeyword.Indent	SC-23	pending_semantics	-	-	-
-Trigger_OnClause_IndentOnKeyword.OnNewLineOnly	SC-23	pending_semantics	-	-	-
-Trigger_OnClause_IndentOnKeyword.Size	SC-23	pending_semantics	-	-	-
-Trigger_OnClause_IndentTargetObject.Indent	SC-23	pending_semantics	-	-	-
-Trigger_OnClause_IndentTargetObject.OnNewLineOnly	SC-23	pending_semantics	-	-	-
-Trigger_OnClause_IndentTargetObject.Size	SC-23	pending_semantics	-	-	-
-Trigger_OnClause_LineBreakAfterOn	SC-23	pending_semantics	-	-	-
-Trigger_OnClause_LineBreakBeforeOn	SC-23	pending_semantics	-	-	-
-Trigger_With_IndentWith.Indent	SC-23	pending_semantics	-	-	-
-Trigger_With_IndentWith.OnNewLineOnly	SC-23	pending_semantics	-	-	-
-Trigger_With_IndentWith.Size	SC-23	pending_semantics	-	-	-
-Trigger_With_IndentWithOptions.Indent	SC-23	pending_semantics	-	-	-
-Trigger_With_IndentWithOptions.OnNewLineOnly	SC-23	pending_semantics	-	-	-
-Trigger_With_IndentWithOptions.Size	SC-23	pending_semantics	-	-	-
-Trigger_With_LineBreakAfterWith	SC-23	pending_semantics	-	-	-
-Trigger_With_LineBreakBeforeWith	SC-23	pending_semantics	-	-	-
-Trigger_With_StackWithOptions	SC-23	pending_semantics	-	-	-
-Trigger_With_StackWithOptionsMode	SC-23	pending_semantics	-	-	-
+Trigger_Body_IndentAsKeyword.Indent	SC-23	covered	trigger.body.asIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_Body_IndentAsKeyword.OnNewLineOnly	SC-23	covered	trigger.body.asIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_Body_IndentAsKeyword.Size	SC-23	covered	trigger.body.asIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_Body_IndentBeginEndKeywords.Indent	SC-23	covered	trigger.body.keywordIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_Body_IndentBeginEndKeywords.OnNewLineOnly	SC-23	covered	trigger.body.keywordIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_Body_IndentBeginEndKeywords.Size	SC-23	covered	trigger.body.keywordIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_Body_IndentCode.Indent	SC-23	covered	trigger.body.codeIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_Body_IndentCode.OnNewLineOnly	SC-23	covered	trigger.body.codeIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_Body_IndentCode.Size	SC-23	covered	trigger.body.codeIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_Body_LineBreakAfterAs	SC-23	covered	trigger.body.breakAfterAs	TriggerParityTests.Create_and_alter_boundaries_support_distinct_modes	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_Body_LineBreakBeforeAs	SC-23	covered	trigger.body.breakBeforeAs	TriggerParityTests.Create_and_alter_boundaries_support_distinct_modes	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_Events_IndentEvents.Indent	SC-23	covered	trigger.events.listIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_Events_IndentEvents.OnNewLineOnly	SC-23	covered	trigger.events.listIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_Events_IndentEvents.Size	SC-23	covered	trigger.events.listIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_Events_IndentForAfterInsteadOfKeywords.Indent	SC-23	covered	trigger.events.keywordIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_Events_IndentForAfterInsteadOfKeywords.OnNewLineOnly	SC-23	covered	trigger.events.keywordIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_Events_IndentForAfterInsteadOfKeywords.Size	SC-23	covered	trigger.events.keywordIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_Events_LineBreakBeforeFirstEvent	SC-23	covered	trigger.events.breakAfter	TriggerParityTests.Create_and_alter_boundaries_support_distinct_modes	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_Events_LineBreakBeforeForAfterInsteadOf	SC-23	covered	trigger.events.breakBefore	TriggerParityTests.Create_and_alter_boundaries_support_distinct_modes	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_Events_StackEventsList	SC-23	covered	trigger.events.stackList	TriggerParityTests.Lists_support_on_off_auto_and_leading_commas	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_Events_StackEventsListMode	SC-23	covered	trigger.events.stackMode	TriggerParityTests.Lists_support_on_off_auto_and_leading_commas	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_OnClause_IndentOnKeyword.Indent	SC-23	covered	trigger.on.keywordIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_OnClause_IndentOnKeyword.OnNewLineOnly	SC-23	covered	trigger.on.keywordIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_OnClause_IndentOnKeyword.Size	SC-23	covered	trigger.on.keywordIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_OnClause_IndentTargetObject.Indent	SC-23	covered	trigger.on.targetIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_OnClause_IndentTargetObject.OnNewLineOnly	SC-23	covered	trigger.on.targetIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_OnClause_IndentTargetObject.Size	SC-23	covered	trigger.on.targetIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_OnClause_LineBreakAfterOn	SC-23	covered	trigger.on.breakAfter	TriggerParityTests.Create_and_alter_boundaries_support_distinct_modes	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_OnClause_LineBreakBeforeOn	SC-23	covered	trigger.on.breakBefore	TriggerParityTests.Create_and_alter_boundaries_support_distinct_modes	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_With_IndentWith.Indent	SC-23	covered	trigger.with.keywordIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_With_IndentWith.OnNewLineOnly	SC-23	covered	trigger.with.keywordIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_With_IndentWith.Size	SC-23	covered	trigger.with.keywordIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_With_IndentWithOptions.Indent	SC-23	covered	trigger.with.listIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_With_IndentWithOptions.OnNewLineOnly	SC-23	covered	trigger.with.listIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_With_IndentWithOptions.Size	SC-23	covered	trigger.with.listIndent	TriggerParityTests.Every_indent_honors_native_fields	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_With_LineBreakAfterWith	SC-23	covered	trigger.with.breakAfter	TriggerParityTests.Create_and_alter_boundaries_support_distinct_modes	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_With_LineBreakBeforeWith	SC-23	covered	trigger.with.breakBefore	TriggerParityTests.Create_and_alter_boundaries_support_distinct_modes	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_With_StackWithOptions	SC-23	covered	trigger.with.stackList	TriggerParityTests.Lists_support_on_off_auto_and_leading_commas	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
+Trigger_With_StackWithOptionsMode	SC-23	covered	trigger.with.stackMode	TriggerParityTests.Lists_support_on_off_auto_and_leading_commas	Native CREATE/ALTER trigger header and SQL body layout; DML/DDL/LOGON, external body preserved
 UnionExceptIntersect_IndentKeyword.Indent	SC-13	covered	setOperator.keywordIndent	CaseAndSetParityTests.Set_operator_indents_affect_nested_branches	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
 UnionExceptIntersect_IndentKeyword.OnNewLineOnly	SC-13	covered	setOperator.keywordIndent	CaseAndSetParityTests.Set_operator_indents_affect_nested_branches	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
 UnionExceptIntersect_IndentKeyword.Size	SC-13	covered	setOperator.keywordIndent	CaseAndSetParityTests.Set_operator_indents_affect_nested_branches	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed

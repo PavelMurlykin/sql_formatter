@@ -255,7 +255,7 @@ public sealed class RuleCatalog
                 descriptor.DependsOn?.Replace("select.", "subquery."), descriptor.Dialect));
         return new RuleCatalog(descriptors.Concat(subquery).Concat(UpdateDeleteRules(descriptors))
             .Concat(MergeHeaderRules(descriptors)).Concat(MergeBranchRules(descriptors)).Concat(MergeTailRules())
-            .Concat(DeclareRules()).Concat(CodeRules()).Concat(ModuleRules()).Concat(CreateTableRules()));
+            .Concat(DeclareRules()).Concat(CodeRules()).Concat(ModuleRules()).Concat(CreateTableRules()).Concat(TriggerRules()));
     }
 
     private static RuleDescriptor CaseRule(string key, string defaultValue) => new(key, "token",
@@ -481,6 +481,19 @@ public sealed class RuleCatalog
         yield return IndentDescriptor("createTable.storage.listIndent", scope);
         yield return BreakRule("createTable.storage.breakBefore", scope);
         foreach (var rule in ListRules("createTable.storage", scope)) yield return rule;
+    }
+
+    private static IEnumerable<RuleDescriptor> TriggerRules()
+    {
+        const string scope = "trigger";
+        foreach (var key in new[] { "on.keywordIndent", "on.targetIndent", "events.keywordIndent", "events.listIndent",
+                     "with.keywordIndent", "with.listIndent", "body.asIndent", "body.keywordIndent", "body.codeIndent" })
+            yield return IndentDescriptor("trigger." + key, scope);
+        foreach (var key in new[] { "on.breakBefore", "on.breakAfter", "events.breakBefore", "events.breakAfter",
+                     "with.breakBefore", "with.breakAfter", "body.breakBeforeAs", "body.breakAfterAs" })
+            yield return BreakRule("trigger." + key, scope);
+        foreach (var prefix in new[] { "trigger.events", "trigger.with" })
+            foreach (var rule in ListRules(prefix, scope)) yield return rule;
     }
 
     public IReadOnlyDictionary<string, RuleDescriptor> Definitions => definitions;

@@ -1063,6 +1063,32 @@ JSON v2 предоставляет независимые настройки:
 
 Поддержаны обычные/вычисляемые колонки, ограничения, индексы, PERIOD, graph-таблицы с определением и вложенный CREATE TABLE в коде. CTAS/CLONE и формы без определения (например FILETABLE) этот набор не переписывает. У неизвестного синтаксиса безопасный отказ; токены, порядок, комментарии и литералы сохраняются с повторной проверкой парсера. Без переопределений/v1 вывод прежний; доступ через Core/CLI и JSON в IDE, без XML numeric enum import.
 
+## Триггеры (SC-23)
+
+JSON v2 настраивает заголовки CREATE/ALTER/CREATE OR ALTER TRIGGER и SQL-тело:
+
+| Группа | Суффиксы ключей |
+| --- | --- |
+| `trigger.on` | `keywordIndent, targetIndent, breakBefore, breakAfter` |
+| `trigger.with` | `keywordIndent, listIndent, breakBefore, breakAfter, stackList, stackMode` |
+| `trigger.events` | `keywordIndent, listIndent, breakBefore, breakAfter, stackList, stackMode` |
+| `trigger.body` | `asIndent, keywordIndent, codeIndent, breakBeforeAs, breakAfterAs` |
+
+Типы общие: перенос inherit/always/never, список inherit/on/off с onePerLine/auto, отступ enabled/offset/onNewLineOnly/style/transparent. Ключевые слова ON/WITH/FOR/AFTER/INSTEAD OF и AS считаются от начала триггера; цель, опции и события — от своего ключевого слова. ALL SERVER и INSTEAD OF сохраняются как фразы. BEGIN/END считаются от AS; всё внутреннее тело — от BEGIN, либо от AS у тела без блока. Для переноса операторов и BEGIN/END внутри тела используйте также Code-настройки.
+
+Поддержаны DML-цели, ON DATABASE, ON ALL SERVER и LOGON. Порядок событий, WITH APPEND, NOT FOR REPLICATION, значения EXECUTE AS и выражения тела не меняются. Списки опций/событий независимы; учитывают общий режим запятых, auto не уплотняет комментарии. Заголовок CLR-триггера можно настроить, но EXTERNAL NAME не трактуется как SQL-тело. Неподдержанный парсером синтаксис безопасно остаётся исходным.
+
+Проверенный пример:
+
+```json
+{"version":2,"rules":{"trigger.on.breakBefore":"always","trigger.with.breakBefore":"always",
+"trigger.events.breakBefore":"always","trigger.events.stackList":"on","trigger.body.breakBeforeAs":"always",
+"trigger.body.breakAfterAs":"always","code.breakAfterBegin":"always","code.breakBeforeEnd":"always",
+"trigger.body.codeIndent":{"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false}}}
+```
+
+Core/CLI/IDE используют одну конфигурацию (в IDE пока через JSON). Новые правила опциональны; v1/default сохраняют прежнее поведение. Токены и комментарии проверяются, промежутки рядом с комментариями пропускаются, многострочные литералы не перерабатываются. Числовые режимы XML не угадываются.
+
 ## Построение `Doc` из AST
 
 `SqlDocBuilder` создаёт layout-документ из результата парсинга. Без дополнительных обработчиков он сохраняет весь исходный текст, включая комментарии и разделители `GO`:
@@ -1083,5 +1109,5 @@ Console.Write(new DocRenderer().Render(document)); // исходный текс�
 ## Ограничения
 
 - CLI выводит в stdout только stdin или один файл; каталоги и несколько файлов требуют `--write` либо `--check`. Поиск конфигурации доступен для файлов, пользовательские флаги настроек пока не реализованы.
-- Структурное форматирование охватывает только описанные формы `SELECT`, `INSERT`, `UPDATE`, `DELETE` и `MERGE`; прочие конструкции сохраняют исходное расположение.
+- Структурный Doc-режим охватывает описанные формы SELECT, DML и хранимого кода. Новые правила Code, модулей, CREATE TABLE и триггеров применяются только к описанным AST-границам при явном включении; неподдержанные формы сохраняют исходное расположение.
 - Рендерер принимает готовое дерево `Doc`; сам по себе он не разбирает SQL.

@@ -1063,6 +1063,32 @@ Verified configuration:
 
 Regular/computed columns, constraints, indexes, PERIOD, graph tables with definitions and nested CREATE TABLE statements are supported. CTAS/CLONE and definition-free forms (such as FILETABLE) are not rewritten by this policy. Unknown syntax is safely declined; tokens, order, comments and literals are preserved with parser validation. Defaults/v1 retain previous output; access is through Core/CLI and IDE JSON, without XML numeric enum import.
 
+## Triggers (SC-23)
+
+JSON v2 configures CREATE/ALTER/CREATE OR ALTER TRIGGER headers and SQL bodies:
+
+| Group | Key suffixes |
+| --- | --- |
+| `trigger.on` | `keywordIndent, targetIndent, breakBefore, breakAfter` |
+| `trigger.with` | `keywordIndent, listIndent, breakBefore, breakAfter, stackList, stackMode` |
+| `trigger.events` | `keywordIndent, listIndent, breakBefore, breakAfter, stackList, stackMode` |
+| `trigger.body` | `asIndent, keywordIndent, codeIndent, breakBeforeAs, breakAfterAs` |
+
+Types are shared: breaks inherit/always/never, lists inherit/on/off with onePerLine/auto, indents enabled/offset/onNewLineOnly/style/transparent. ON/WITH/FOR/AFTER/INSTEAD OF and AS anchor to the trigger start; targets, options and events to their keyword. ALL SERVER and INSTEAD OF remain phrases. BEGIN/END anchor to AS; the entire inner body to BEGIN, or AS for unblocked bodies. Use Code settings for statement and BEGIN/END breaks inside the body.
+
+DML targets, ON DATABASE, ON ALL SERVER and LOGON are supported. Event order, WITH APPEND, NOT FOR REPLICATION, EXECUTE AS values and body expressions are preserved. Option/event lists are independent, honor global comma settings, and auto does not compact comments. CLR trigger headers can be configured, but EXTERNAL NAME is not treated as a SQL body. Parser-unsupported syntax safely remains unchanged.
+
+Verified example:
+
+```json
+{"version":2,"rules":{"trigger.on.breakBefore":"always","trigger.with.breakBefore":"always",
+"trigger.events.breakBefore":"always","trigger.events.stackList":"on","trigger.body.breakBeforeAs":"always",
+"trigger.body.breakAfterAs":"always","code.breakAfterBegin":"always","code.breakBeforeEnd":"always",
+"trigger.body.codeIndent":{"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false}}}
+```
+
+Core/CLI/IDE share the same configuration (currently through JSON in IDEs). New rules are opt-in; v1/default retain previous behavior. Tokens/comments are validated, gaps adjacent to comments are skipped, and multiline literals are not rewritten. XML numeric modes are not guessed.
+
 ## Building a `Doc` from the AST
 
 `SqlDocBuilder` creates a layout document from a parse result. With no additional builders, it preserves the entire source, including comments and `GO` separators:
@@ -1083,5 +1109,5 @@ When parsing fails, `BuildDocument` also returns the unchanged source. You can r
 ## Limitations
 
 - The CLI writes only stdin or one file to stdout; directories and multiple files require `--write` or `--check`. Configuration discovery applies to files; custom settings flags are not implemented yet.
-- Structural Doc formatting covers the documented SELECT, DML and stored-code forms. New Code, module and CREATE TABLE rules apply only to the documented AST boundaries when explicitly enabled; unsupported forms retain their original layout.
+- Structural Doc formatting covers the documented SELECT, DML and stored-code forms. New Code, module, CREATE TABLE and trigger rules apply only to the documented AST boundaries when explicitly enabled; unsupported forms retain their original layout.
 - The renderer accepts a prepared `Doc` tree; it does not parse SQL on its own.
