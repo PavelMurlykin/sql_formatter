@@ -141,6 +141,8 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
                 request.Dialect, cancellationToken);
             rendered = TriggerLayout.ApplySafe(rendered, options, _parser,
                 request.Dialect, cancellationToken);
+            rendered = ExecuteLabelLayout.ApplySafe(rendered, options, _parser,
+                request.Dialect, cancellationToken);
             if (string.Equals(rendered, source, StringComparison.Ordinal))
             {
                 return Unchanged(source, true);
@@ -188,6 +190,8 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         output = CreateTableLayout.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);
         output = TriggerLayout.ApplySafe(output, options, _parser,
+            request.Dialect, cancellationToken);
+        output = ExecuteLabelLayout.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);
         if (string.Equals(output, source, StringComparison.Ordinal))
         {

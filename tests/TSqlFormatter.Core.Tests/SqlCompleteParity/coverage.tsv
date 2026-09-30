@@ -200,12 +200,12 @@ Delete_Where_LineBreakBeforeWhere	SC-15	covered	delete.where.breakBefore	UpdateD
 Delete_Where_WrapAfterOperatorMode	SC-15	covered	delete.where.wrapAfterOperator	UpdateDeleteParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never operator sides; XML numeric modes not assumed
 Delete_Where_WrapBeforeOperatorMode	SC-15	covered	delete.where.wrapBeforeOperator	UpdateDeleteParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never operator sides; XML numeric modes not assumed
 Delete_Where_WrapConditionMode	SC-15	covered	delete.where.wrapCondition	UpdateDeleteParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never operator sides; XML numeric modes not assumed
-Execute_IndentParameters.Indent	SC-24	pending_semantics	-	-	-
-Execute_IndentParameters.OnNewLineOnly	SC-24	pending_semantics	-	-	-
-Execute_IndentParameters.Size	SC-24	pending_semantics	-	-	-
-Execute_LineBreakBeforeParametersList	SC-24	pending_semantics	-	-	-
-Execute_StackParametersList	SC-24	pending_semantics	-	-	-
-Execute_StackParametersListMode	SC-24	pending_semantics	-	-	-
+Execute_IndentParameters.Indent	SC-24	covered	execute.parameters.listIndent	ExecuteLabelParityTests.Indents_honor_enabled_offset_newline_style_and_transparency	Native EXECUTE parameter list or label/next-statement boundary; relative/absolute label indent, XML numeric style not inferred
+Execute_IndentParameters.OnNewLineOnly	SC-24	covered	execute.parameters.listIndent	ExecuteLabelParityTests.Indents_honor_enabled_offset_newline_style_and_transparency	Native EXECUTE parameter list or label/next-statement boundary; relative/absolute label indent, XML numeric style not inferred
+Execute_IndentParameters.Size	SC-24	covered	execute.parameters.listIndent	ExecuteLabelParityTests.Indents_honor_enabled_offset_newline_style_and_transparency	Native EXECUTE parameter list or label/next-statement boundary; relative/absolute label indent, XML numeric style not inferred
+Execute_LineBreakBeforeParametersList	SC-24	covered	execute.parameters.breakBefore	ExecuteLabelParityTests.Boundaries_have_distinct_modes	Native EXECUTE parameter list or label/next-statement boundary; relative/absolute label indent, XML numeric style not inferred
+Execute_StackParametersList	SC-24	covered	execute.parameters.stackList	ExecuteLabelParityTests.Execute_lists_support_all_modes_and_do_not_rewrite_dynamic_sql_literals	Native EXECUTE parameter list or label/next-statement boundary; relative/absolute label indent, XML numeric style not inferred
+Execute_StackParametersListMode	SC-24	covered	execute.parameters.stackMode	ExecuteLabelParityTests.Execute_lists_support_all_modes_and_do_not_rewrite_dynamic_sql_literals	Native EXECUTE parameter list or label/next-statement boundary; relative/absolute label indent, XML numeric style not inferred
 Insert_ColumnList_IndentColumnList.Indent	SC-14	covered	insert.columns.listIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
 Insert_ColumnList_IndentColumnList.OnNewLineOnly	SC-14	covered	insert.columns.listIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
 Insert_ColumnList_IndentColumnList.Size	SC-14	covered	insert.columns.listIndent	InsertParityTests.Indentation_changes_its_own_boundary	Native local indent enabled/offset/onNewLineOnly; statement or list anchor; source indent shifts its complete SELECT body
@@ -266,12 +266,12 @@ Insert_Values_StackValuesExpressionsList	SC-14	covered	insert.values.stackList	I
 Insert_Values_StackValuesExpressionsListMode	SC-14	covered	insert.values.stackMode	InsertParityTests.Each_list_can_be_stacked_compact_or_automatic	Native onePerLine/auto list policy; XML numeric mode not assumed or imported
 Insert_Values_StackValuesExpressionsRowsList	SC-14	covered	insert.values.stackRows	InsertParityTests.Row_stacking_is_independent_from_expression_stacking	Native inherit/on/off list policy; INSERT-scoped lists and row separators are independent
 Insert_Values_StackValuesExpressionsRowsListMode	SC-14	covered	insert.values.stackRowsMode	InsertParityTests.Row_stacking_is_independent_from_expression_stacking	Native onePerLine/auto list policy; XML numeric mode not assumed or imported
-Labels_AddEmptyLinesAroundLabeledBlock	SC-24	pending_semantics	-	-	-
-Labels_IndentLabel.Indent	SC-24	pending_semantics	-	-	-
-Labels_IndentLabel.OnNewLineOnly	SC-24	pending_semantics	-	-	-
-Labels_IndentLabel.Size	SC-24	pending_semantics	-	-	-
-Labels_IndentLabel.Style	SC-24	pending_semantics	-	-	-
-Labels_LineBreakAfterLabel	SC-24	pending_semantics	-	-	-
+Labels_AddEmptyLinesAroundLabeledBlock	SC-24	covered	labels.blankLinesAround	ExecuteLabelParityTests.Label_start_absolute_relative_blank_lines_and_following_block_are_stable	Native EXECUTE parameter list or label/next-statement boundary; relative/absolute label indent, XML numeric style not inferred
+Labels_IndentLabel.Indent	SC-24	covered	labels.indent	ExecuteLabelParityTests.Indents_honor_enabled_offset_newline_style_and_transparency	Native EXECUTE parameter list or label/next-statement boundary; relative/absolute label indent, XML numeric style not inferred
+Labels_IndentLabel.OnNewLineOnly	SC-24	covered	labels.indent	ExecuteLabelParityTests.Indents_honor_enabled_offset_newline_style_and_transparency	Native EXECUTE parameter list or label/next-statement boundary; relative/absolute label indent, XML numeric style not inferred
+Labels_IndentLabel.Size	SC-24	covered	labels.indent	ExecuteLabelParityTests.Indents_honor_enabled_offset_newline_style_and_transparency	Native EXECUTE parameter list or label/next-statement boundary; relative/absolute label indent, XML numeric style not inferred
+Labels_IndentLabel.Style	SC-24	covered	labels.indent	ExecuteLabelParityTests.Indents_honor_enabled_offset_newline_style_and_transparency	Native EXECUTE parameter list or label/next-statement boundary; relative/absolute label indent, XML numeric style not inferred
+Labels_LineBreakAfterLabel	SC-24	covered	labels.breakAfter	ExecuteLabelParityTests.Boundaries_have_distinct_modes	Native EXECUTE parameter list or label/next-statement boundary; relative/absolute label indent, XML numeric style not inferred
 Merge_Into_IndentIntoKeyword.Indent	SC-16	covered	merge.into.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
 Merge_Into_IndentIntoKeyword.OnNewLineOnly	SC-16	covered	merge.into.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
 Merge_Into_IndentIntoKeyword.Size	SC-16	covered	merge.into.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units

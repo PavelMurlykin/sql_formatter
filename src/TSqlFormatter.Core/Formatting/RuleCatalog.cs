@@ -255,7 +255,8 @@ public sealed class RuleCatalog
                 descriptor.DependsOn?.Replace("select.", "subquery."), descriptor.Dialect));
         return new RuleCatalog(descriptors.Concat(subquery).Concat(UpdateDeleteRules(descriptors))
             .Concat(MergeHeaderRules(descriptors)).Concat(MergeBranchRules(descriptors)).Concat(MergeTailRules())
-            .Concat(DeclareRules()).Concat(CodeRules()).Concat(ModuleRules()).Concat(CreateTableRules()).Concat(TriggerRules()));
+            .Concat(DeclareRules()).Concat(CodeRules()).Concat(ModuleRules()).Concat(CreateTableRules()).Concat(TriggerRules())
+            .Concat(ExecuteLabelRules()));
     }
 
     private static RuleDescriptor CaseRule(string key, string defaultValue) => new(key, "token",
@@ -494,6 +495,16 @@ public sealed class RuleCatalog
             yield return BreakRule("trigger." + key, scope);
         foreach (var prefix in new[] { "trigger.events", "trigger.with" })
             foreach (var rule in ListRules(prefix, scope)) yield return rule;
+    }
+
+    private static IEnumerable<RuleDescriptor> ExecuteLabelRules()
+    {
+        yield return IndentDescriptor("execute.parameters.listIndent", "EXECUTE");
+        yield return BreakRule("execute.parameters.breakBefore", "EXECUTE");
+        foreach (var rule in ListRules("execute.parameters", "EXECUTE")) yield return rule;
+        yield return IndentDescriptor("labels.indent", "label");
+        yield return BreakRule("labels.breakAfter", "label");
+        yield return new RuleDescriptor("labels.blankLinesAround", "labeled statement/block", RuleValue.FromBoolean(false));
     }
 
     public IReadOnlyDictionary<string, RuleDescriptor> Definitions => definitions;

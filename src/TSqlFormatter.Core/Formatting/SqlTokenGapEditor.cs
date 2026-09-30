@@ -81,6 +81,19 @@ internal sealed class SqlTokenGapEditor
 
     public int GetLineIndent(int offset) => LineIndent(offset);
 
+    public void IndentAtBoundary(int offset, IndentRule indent, int anchorOffset)
+    {
+        if (!indent.Enabled || !indices.TryGetValue(offset, out var index)) return;
+        if (index > 0) { Before(offset, "inherit", indent, anchorOffset: anchorOffset); return; }
+        var prefix = parsed.Source.Substring(0, offset);
+        if (prefix.Any(ch => !char.IsWhiteSpace(ch))) return;
+        var lastBreak = prefix.LastIndexOfAny(new[] { '\r', '\n' });
+        var start = lastBreak + 1;
+        var replacement = new string(' ', IndentWidth(LineIndent(anchorOffset), indent));
+        if (prefix.Substring(start) != replacement)
+            edits[start] = new TextEdit(new SqlTextSpan(start, offset - start), replacement);
+    }
+
     private void Set(int leftIndex, int rightIndex, string breakMode, IndentRule? indent,
         string spaceMode, int? anchorOffset)
     {

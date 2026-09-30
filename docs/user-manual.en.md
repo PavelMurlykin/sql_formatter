@@ -1089,6 +1089,30 @@ Verified example:
 
 Core/CLI/IDE share the same configuration (currently through JSON in IDEs). New rules are opt-in; v1/default retain previous behavior. Tokens/comments are validated, gaps adjacent to comments are skipped, and multiline literals are not rewritten. XML numeric modes are not guessed.
 
+## EXECUTE and labels (SC-24)
+
+JSON v2 adds:
+
+| Group | Keys |
+| --- | --- |
+| `execute.parameters` | `listIndent, breakBefore, stackList, stackMode` |
+| `labels` | `indent, breakAfter, blankLinesAround` |
+
+EXEC/EXECUTE parameters use common indentation anchored to the statement start, inherit/always/never breaks and inherit/on/off lists with onePerLine/auto. Positional/named values, DEFAULT, OUTPUT, return codes, variable procedure names, sp_executesql and dynamic EXEC AT parameters are supported. SQL within strings is never formatted; literal commas are not parameter separators. Parameter-free executable strings are unaffected by this policy.
+
+Label indentation uses enabled/offset/onNewLineOnly/style/transparent: relative anchors to the nearest BEGIN/END, or column zero outside a block; absolute anchors to column zero; transparent is zero indentation. The first label in a file is supported. `breakAfter` controls the gap before the next statement/block. `blankLinesAround` (boolean) adds at least one blank line before the label and after the immediately following statement/block when neighbors exist; false preserves original blank lines. Label names, GOTO and statement order remain unchanged; comments are not moved.
+
+Verified configuration:
+
+```json
+{"version":2,"rules":{"execute.parameters.breakBefore":"always","execute.parameters.stackList":"on",
+"execute.parameters.listIndent":{"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false},
+"labels.breakAfter":"always","labels.blankLinesAround":true,
+"labels.indent":{"enabled":true,"offset":0,"onNewLineOnly":true,"style":"absolute","transparent":false}}}
+```
+
+Without new overrides/v1 behavior is unchanged. Common token/reparse/idempotence checks and safe preservation of invalid SQL/multiline literals apply. All 969 applicable profile-ledger paths now have implemented counterparts; 8 OptionHints paths were previously ruled inapplicable by the user. This does not import XML numeric modes. Access is through Core/CLI/IDE JSON; the full UI for new settings has not shipped yet.
+
 ## Building a `Doc` from the AST
 
 `SqlDocBuilder` creates a layout document from a parse result. With no additional builders, it preserves the entire source, including comments and `GO` separators:
