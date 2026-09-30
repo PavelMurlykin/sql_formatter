@@ -844,7 +844,63 @@ WHEN NOT MATCHED THEN
         (s.Id, s.Name);
 ```
 
-`WHEN NOT MATCHED BY SOURCE THEN DELETE` is also supported. Additional `AND` branch conditions, compound assignments, a CTE before `MERGE`, and unsupported sources retain their original layout; recognized keywords may still change case.
+`WHEN NOT MATCHED BY SOURCE THEN DELETE` is also supported. Additional `AND` branch conditions, compound assignments, a CTE before `MERGE`, and sources unsupported by the structural builder retain their original layout by default; explicit header/source rules below can change safe gaps. Recognized keywords may still change case.
+
+### MERGE header and source (JSON v2)
+
+There are 50 `merge.*` rules for INTO, the target's WITH hints, USING, source joins, source VALUES, and the main ON. Breaks accept `inherit` (default), `always`, `never`. Indents use an `enabled`/`offset`/`onNewLineOnly`/`style`/`transparent` object, like `select.list.indent`, and are disabled by default.
+
+| Group | Break boundaries | Indents |
+|---|---|---|
+| `merge.into.*` | `breakBefore`, `breakBeforeTable` | `keywordIndent`, `tableIndent` |
+| `merge.hints.*` (target WITH) | `breakBefore`, `breakBeforeOpen`, `breakAfterOpen`, `breakBeforeClose` | `keywordIndent`, `braceIndent`, `listIndent` |
+| `merge.using.*` | `breakBefore`, `breakAfter` | `keywordIndent` |
+| `merge.join.*` (source) | `breakBefore`, `breakAfter`, `onBreakBefore`, `onBreakAfter` | `keywordIndent`, `tableIndent`, `onKeywordIndent`, `onConditionIndent`, `nestedConditionIndent` |
+| `merge.on.*` (target/source matching) | `breakBefore`, `breakAfter` | `keywordIndent`, `conditionIndent`, `nestedConditionIndent` |
+| `merge.values.*` (USING source) | `breakBeforeKeyword`, `breakAfterKeyword`, `breakAfterOpen`, `breakBeforeClose` | `keywordIndent`, `braceIndent`, `listIndent` |
+
+`merge.into.breakBefore` only affects an existing INTO: the formatter does not add the optional keyword. `merge.using.breakAfter` sets a boundary before the table or opening parenthesis of the source. USING supports named/variable tables, subqueries, JOIN/APPLY, parenthesized joins, and VALUES derived tables. An inner SELECT retains its existing `subquery.*` policies; `merge.join.*` rules do not descend into it.
+
+`merge.join.useSelectFormatting` is a Boolean switch, default `false`. When `true`, `select.join.*` settings replace local `merge.join.*` settings, which are ignored. This only affects source joins: USING, VALUES, the main `merge.on.*`, and subqueries remain independent. `merge.join` and `merge.on` offer `wrapCondition` (`inherit`/`none`/`and`/`or`/`both`), `wrapBeforeOperator`, and `wrapAfterOperator` (`inherit`/`always`/`never`). The condition mode breaks before selected AND/OR operators and keeps the right operand inline unless that side is overridden. Nested parentheses and NOT are handled; AND in BETWEEN is not broken as a Boolean operator.
+
+`merge.hints.spaceBeforeOpen`, `merge.hints.spaceWithin`, `merge.values.spaceAfterKeyword`, and `merge.values.spaceWithin` accept `inherit`/`insert`/`remove` and only change inline gaps. Explicit line breaks take precedence. WITH hints retain their order, text, and nested parentheses, such as `INDEX(ix_a, ix_b)`; `hints.listIndent` applies to the first hint and subsequent hints already starting on a new line, but there is no separate vertical hint-list switch yet.
+
+`merge.values.stackList` and `stackMode` control expressions within each row; `stackRows` and `stackRowsMode` control gaps between rows. Both lists offer `inherit`/`on`/`off` and `onePerLine`/`auto`. `auto` measures the prospective compact normalized form with configured parenthesis boundaries, spaces, and anchor indentation, and keeps the list compact when that form fits `general.maxLineLength`. Extra padding before managed commas does not change the decision; lists containing comments are conservatively treated as not fitting. Boundaries before the first item are set separately. Vertical output honors `stackedList.commaPlacement` and `spaceAfterLeadingComma`. Parentheses controlled by `values.breakAfterOpen`/`breakBeforeClose` belong to an individual VALUES row, not the outer derived-table wrapper. The source alias and its column list are not rewritten. VALUES in branch INSERT actions and inside subqueries are outside these rules.
+
+INTO, target, WITH, hint parentheses, USING, JOIN, and main ON indents use the MERGE line; hints use the opening parenthesis line, JOIN tables use the JOIN line, join ON uses the JOIN line, and its condition/nested operands use that ON line. The main condition and its nested operands use the main ON line. The VALUES keyword and its row parentheses use the USING line; expressions use their row's opening parenthesis line. With a disabled local indent, list stacking retains the first item's level. `offset` is measured in `indent.size` units, with resulting widths clamped to zero. `relative`/`anchor` use the anchor line, `absolute` sets a level from the start of the line; `transparent:true` removes indentation, and `onNewLineOnly:false` also adds spaces within a line. Local indents use spaces and do not accumulate on repeated formatting.
+
+Save this in `.tsqlformatter.json` and run `dotnet run --project src/TSqlFormatter.Cli -- query.sql`:
+
+```json
+{
+  "version": 2,
+  "rules": {
+    "merge.into.breakBefore": "always",
+    "merge.using.breakBefore": "always",
+    "merge.on.breakBefore": "always",
+    "merge.on.breakAfter": "always",
+    "merge.on.conditionIndent": {"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false},
+    "merge.values.breakAfterKeyword": "always",
+    "merge.values.braceIndent": {"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false},
+    "merge.values.stackRows": "on",
+    "merge.values.stackList": "off"
+  }
+}
+```
+
+For a single-line `MERGE INTO dbo.T AS t USING (VALUES (1, 'x'), (2, 'y')) AS s(id, a) ON t.id = s.id WHEN MATCHED THEN DELETE;`, the result is:
+
+```sql
+MERGE
+INTO dbo.T AS t
+USING (VALUES
+    (1, 'x'),
+    (2, 'y')) AS s(id, a)
+ON
+    t.id = s.id WHEN MATCHED THEN DELETE;
+```
+
+In this example, the branch stays on the condition's line: the new settings do not yet control WHEN/THEN, actions, OUTPUT, or OPTION. Header/source settings also work with CTEs, TOP, additional branch conditions, and stored code, without changing expressions or action order. Comments and literals are not rewritten; gaps adjacent to comments are skipped, while other safe boundaries may change. Edits are checked by reparsing and comparing tokens. Multiline literals/quoted identifiers block rewriting of the entire script; invalid SQL stays unchanged. XML numeric modes are not imported; JSON v1 and earlier output without new overrides are retained. VS/SSMS options pages do not expose these new switches — use a configuration file.
 
 ## Building a `Doc` from the AST
 

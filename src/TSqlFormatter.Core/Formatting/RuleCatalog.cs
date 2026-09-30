@@ -253,7 +253,8 @@ public sealed class RuleCatalog
                 "subquery " + descriptor.Scope, descriptor.DefaultValue,
                 descriptor.Minimum, descriptor.Maximum, descriptor.Choices,
                 descriptor.DependsOn?.Replace("select.", "subquery."), descriptor.Dialect));
-        return new RuleCatalog(descriptors.Concat(subquery).Concat(UpdateDeleteRules(descriptors)));
+        return new RuleCatalog(descriptors.Concat(subquery).Concat(UpdateDeleteRules(descriptors))
+            .Concat(MergeHeaderRules(descriptors)));
     }
 
     private static RuleDescriptor CaseRule(string key, string defaultValue) => new(key, "token",
@@ -346,6 +347,32 @@ public sealed class RuleCatalog
         yield return StackRule(prefix + ".stackList", scope);
         yield return new RuleDescriptor(prefix + ".stackMode", scope, RuleValue.FromChoice("onePerLine"),
             choices: new[] { "onePerLine", "auto" }, dependsOn: prefix + ".stackList");
+    }
+
+    private static IEnumerable<RuleDescriptor> MergeHeaderRules(IEnumerable<RuleDescriptor> selectRules)
+    {
+        const string scope = "MERGE header/source";
+        foreach (var descriptor in selectRules.Where(rule => rule.Key.StartsWith("select.join.", StringComparison.Ordinal)))
+            yield return new RuleDescriptor("merge.join." + descriptor.Key.Substring("select.join.".Length),
+                scope + " " + descriptor.Scope, descriptor.DefaultValue, descriptor.Minimum,
+                descriptor.Maximum, descriptor.Choices);
+        yield return new RuleDescriptor("merge.join.useSelectFormatting", scope, RuleValue.FromBoolean(false));
+        foreach (var key in new[] { "into.keywordIndent", "into.tableIndent", "hints.keywordIndent", "hints.listIndent",
+                     "hints.braceIndent", "using.keywordIndent", "on.keywordIndent", "on.conditionIndent",
+                     "on.nestedConditionIndent", "values.keywordIndent", "values.listIndent", "values.braceIndent" })
+            yield return IndentDescriptor("merge." + key, scope);
+        foreach (var key in new[] { "into.breakBefore", "into.breakBeforeTable", "hints.breakBefore", "hints.breakBeforeOpen",
+                     "hints.breakAfterOpen", "hints.breakBeforeClose", "using.breakBefore", "using.breakAfter",
+                     "on.breakBefore", "on.breakAfter", "on.wrapBeforeOperator", "on.wrapAfterOperator",
+                     "values.breakBeforeKeyword", "values.breakAfterKeyword", "values.breakAfterOpen", "values.breakBeforeClose" })
+            yield return BreakRule("merge." + key, scope);
+        yield return WrapRule("merge.on.wrapCondition", scope);
+        foreach (var key in new[] { "hints.spaceBeforeOpen", "hints.spaceWithin", "values.spaceAfterKeyword", "values.spaceWithin" })
+            yield return SpacingRule("merge." + key);
+        foreach (var descriptor in ListRules("merge.values", scope)) yield return descriptor;
+        yield return StackRule("merge.values.stackRows", scope);
+        yield return new RuleDescriptor("merge.values.stackRowsMode", scope, RuleValue.FromChoice("onePerLine"),
+            choices: new[] { "onePerLine", "auto" }, dependsOn: "merge.values.stackRows");
     }
 
     public IReadOnlyDictionary<string, RuleDescriptor> Definitions => definitions;

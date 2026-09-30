@@ -844,7 +844,63 @@ WHEN NOT MATCHED THEN
         (s.Id, s.Name);
 ```
 
-Ветвь `WHEN NOT MATCHED BY SOURCE THEN DELETE` тоже поддержана. Дополнительные условия `AND` у ветвей, составные присваивания, CTE перед `MERGE` и неподдержанные источники сохраняют исходную раскладку; регистр распознанных ключевых слов может измениться.
+Ветвь `WHEN NOT MATCHED BY SOURCE THEN DELETE` тоже поддержана. Дополнительные условия `AND` у ветвей, составные присваивания, CTE перед `MERGE` и неподдержанные структурным обработчиком источники сохраняют исходную раскладку по умолчанию; явные правила заголовка и источника ниже могут менять безопасные промежутки. Регистр распознанных ключевых слов может измениться.
+
+### Заголовок и источник MERGE (JSON v2)
+
+Доступны 50 правил `merge.*` для INTO, подсказок WITH целевой таблицы, USING, соединений источника, его VALUES и основного ON. Переносы принимают `inherit` (по умолчанию), `always`, `never`. Отступы используют объект `enabled`/`offset`/`onNewLineOnly`/`style`/`transparent`, как `select.list.indent`, и по умолчанию выключены.
+
+| Группа | Границы переноса | Отступы |
+|---|---|---|
+| `merge.into.*` | `breakBefore`, `breakBeforeTable` | `keywordIndent`, `tableIndent` |
+| `merge.hints.*` (WITH цели) | `breakBefore`, `breakBeforeOpen`, `breakAfterOpen`, `breakBeforeClose` | `keywordIndent`, `braceIndent`, `listIndent` |
+| `merge.using.*` | `breakBefore`, `breakAfter` | `keywordIndent` |
+| `merge.join.*` (источник) | `breakBefore`, `breakAfter`, `onBreakBefore`, `onBreakAfter` | `keywordIndent`, `tableIndent`, `onKeywordIndent`, `onConditionIndent`, `nestedConditionIndent` |
+| `merge.on.*` (сопоставление цели с источником) | `breakBefore`, `breakAfter` | `keywordIndent`, `conditionIndent`, `nestedConditionIndent` |
+| `merge.values.*` (источник USING) | `breakBeforeKeyword`, `breakAfterKeyword`, `breakAfterOpen`, `breakBeforeClose` | `keywordIndent`, `braceIndent`, `listIndent` |
+
+`merge.into.breakBefore` действует только на уже имеющееся INTO: форматтер не добавляет необязательное ключевое слово. `merge.using.breakAfter` ставит границу перед таблицей или открывающей скобкой источника. Для USING поддержаны именованные/переменные таблицы, подзапросы, JOIN/APPLY, соединения в скобках и производные таблицы VALUES. Внутренний запрос SELECT сохраняет свои существующие правила `subquery.*`; правила `merge.join.*` не проникают в него.
+
+`merge.join.useSelectFormatting` — булев переключатель, по умолчанию `false`. При `true` настройки `select.join.*` заменяют локальные `merge.join.*`, которые игнорируются. Это касается только соединений источника: USING, VALUES, основной `merge.on.*` и подзапросы остаются независимыми. Для `merge.join` и `merge.on` доступны `wrapCondition` (`inherit`/`none`/`and`/`or`/`both`), `wrapBeforeOperator`, `wrapAfterOperator` (`inherit`/`always`/`never`). Режим условия переносит выбранные AND/OR перед оператором и оставляет правый операнд рядом, если соответствующая сторона не переопределена. Обрабатываются вложенные скобки и NOT; AND в BETWEEN не переносится как логический оператор.
+
+`merge.hints.spaceBeforeOpen`, `merge.hints.spaceWithin`, `merge.values.spaceAfterKeyword`, `merge.values.spaceWithin` принимают `inherit`/`insert`/`remove` и меняют только однострочные промежутки. Явный перенос имеет приоритет. Подсказки WITH сохраняют порядок, текст и вложенные скобки, например `INDEX(ix_a, ix_b)`; `hints.listIndent` применяется к первой и уже перенесённым следующим подсказкам, но отдельного переключателя вертикального списка подсказок пока нет.
+
+`merge.values.stackList` и `stackMode` управляют выражениями внутри каждой строки; `stackRows` и `stackRowsMode` — промежутками между строками. Для обоих списков доступны `inherit`/`on`/`off` и `onePerLine`/`auto`. `auto` оценивает компактную нормализованную форму с учётом заданных границ скобок, пробелов и опорного отступа и оставляет список компактным, если эта форма помещается в `general.maxLineLength`. Лишние пробелы перед управляемыми запятыми не меняют решение; списки с комментариями консервативно считаются не помещающимися. Границы перед первым элементом задаются отдельно. При вертикальном выводе учитываются `stackedList.commaPlacement` и `spaceAfterLeadingComma`. Скобки, управляемые `values.breakAfterOpen`/`breakBeforeClose`, относятся к отдельной строке VALUES, а не к внешним скобкам производной таблицы. Алиас источника и список его колонок не переписываются. VALUES в действиях INSERT ветвей и внутри подзапросов не относятся к этим правилам.
+
+Отступы INTO, цели, WITH, скобок подсказок, USING, JOIN и основного ON отсчитываются от строки MERGE; подсказок — от строки открывающей скобки, таблицы JOIN — от строки JOIN, ON соединения — от строки JOIN, его условия/вложенных операндов — от строки этого ON. Основное условие и его вложенные операнды используют строку основного ON. Ключевое слово VALUES и скобки его строк используют строку USING, выражения — строку открывающей скобки строки VALUES. При выключенном локальном отступе стек списков сохраняет уровень первого элемента. `offset` измеряется в единицах `indent.size`, итоговая ширина ограничивается нулём снизу. `relative`/`anchor` используют опорную строку, `absolute` — уровень от начала строки; `transparent:true` убирает отступ, `onNewLineOnly:false` также добавляет пробелы внутри строки. Локальные отступы выводятся пробелами и не накапливаются при повторном форматировании.
+
+Сохраните в `.tsqlformatter.json` и запустите `dotnet run --project src/TSqlFormatter.Cli -- query.sql`:
+
+```json
+{
+  "version": 2,
+  "rules": {
+    "merge.into.breakBefore": "always",
+    "merge.using.breakBefore": "always",
+    "merge.on.breakBefore": "always",
+    "merge.on.breakAfter": "always",
+    "merge.on.conditionIndent": {"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false},
+    "merge.values.breakAfterKeyword": "always",
+    "merge.values.braceIndent": {"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false},
+    "merge.values.stackRows": "on",
+    "merge.values.stackList": "off"
+  }
+}
+```
+
+Для однострочного `MERGE INTO dbo.T AS t USING (VALUES (1, 'x'), (2, 'y')) AS s(id, a) ON t.id = s.id WHEN MATCHED THEN DELETE;` результат:
+
+```sql
+MERGE
+INTO dbo.T AS t
+USING (VALUES
+    (1, 'x'),
+    (2, 'y')) AS s(id, a)
+ON
+    t.id = s.id WHEN MATCHED THEN DELETE;
+```
+
+В этом примере ветвь остаётся на строке условия: новые настройки пока не управляют WHEN/THEN, действиями, OUTPUT или OPTION. Заголовок и источник настраиваются и при CTE, TOP, дополнительных условиях ветвей и внутри хранимого кода, без изменения выражений или порядка действий. Комментарии и литералы не переписываются; промежутки рядом с комментариями пропускаются, остальные безопасные границы могут измениться. После правок выполняются повторный разбор и сверка токенов. Многострочные литералы/заключённые в кавычки идентификаторы блокируют переработку всего скрипта; SQL с ошибками остаётся исходным. Числовые режимы XML не импортируются; JSON v1 и прежний вывод без новых переопределений сохраняются. Новые переключатели отсутствуют на страницах параметров VS/SSMS — используйте файл конфигурации.
 
 ## Построение `Doc` из AST
 

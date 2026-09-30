@@ -272,43 +272,43 @@ Labels_IndentLabel.OnNewLineOnly	SC-24	pending_semantics	-	-	-
 Labels_IndentLabel.Size	SC-24	pending_semantics	-	-	-
 Labels_IndentLabel.Style	SC-24	pending_semantics	-	-	-
 Labels_LineBreakAfterLabel	SC-24	pending_semantics	-	-	-
-Merge_Into_IndentIntoKeyword.Indent	SC-16	pending_semantics	-	-	-
-Merge_Into_IndentIntoKeyword.OnNewLineOnly	SC-16	pending_semantics	-	-	-
-Merge_Into_IndentIntoKeyword.Size	SC-16	pending_semantics	-	-	-
-Merge_Into_IndentTable.Indent	SC-16	pending_semantics	-	-	-
-Merge_Into_IndentTable.OnNewLineOnly	SC-16	pending_semantics	-	-	-
-Merge_Into_IndentTable.Size	SC-16	pending_semantics	-	-	-
-Merge_Into_LineBreakBeforeInto	SC-16	pending_semantics	-	-	-
-Merge_Into_LineBreakBeforeTable	SC-16	pending_semantics	-	-	-
-Merge_Into_With_IndentMergeHint.Indent	SC-16	pending_semantics	-	-	-
-Merge_Into_With_IndentMergeHint.OnNewLineOnly	SC-16	pending_semantics	-	-	-
-Merge_Into_With_IndentMergeHint.Size	SC-16	pending_semantics	-	-	-
-Merge_Into_With_IndentMergeHintBraces.Indent	SC-16	pending_semantics	-	-	-
-Merge_Into_With_IndentMergeHintBraces.OnNewLineOnly	SC-16	pending_semantics	-	-	-
-Merge_Into_With_IndentMergeHintBraces.Size	SC-16	pending_semantics	-	-	-
-Merge_Into_With_IndentWithKeyword.Indent	SC-16	pending_semantics	-	-	-
-Merge_Into_With_IndentWithKeyword.OnNewLineOnly	SC-16	pending_semantics	-	-	-
-Merge_Into_With_IndentWithKeyword.Size	SC-16	pending_semantics	-	-	-
-Merge_Into_With_InsertSpaceBeforeMergeHint	SC-16	pending_semantics	-	-	-
-Merge_Into_With_InsertSpacesWithinMergeHintBraces	SC-16	pending_semantics	-	-	-
-Merge_Into_With_LineBreakAfterOpeningBrace	SC-16	pending_semantics	-	-	-
-Merge_Into_With_LineBreakBeforeClosingBrace	SC-16	pending_semantics	-	-	-
-Merge_Into_With_LineBreakBeforeOpeningBrace	SC-16	pending_semantics	-	-	-
-Merge_Into_With_LineBreakBeforeWith	SC-16	pending_semantics	-	-	-
-Merge_On_IndentOnConditions.Indent	SC-16	pending_semantics	-	-	-
-Merge_On_IndentOnConditions.OnNewLineOnly	SC-16	pending_semantics	-	-	-
-Merge_On_IndentOnConditions.Size	SC-16	pending_semantics	-	-	-
-Merge_On_IndentOnKeyword.Indent	SC-16	pending_semantics	-	-	-
-Merge_On_IndentOnKeyword.OnNewLineOnly	SC-16	pending_semantics	-	-	-
-Merge_On_IndentOnKeyword.Size	SC-16	pending_semantics	-	-	-
-Merge_On_IndentWrapConditionNestedOperations.Indent	SC-16	pending_semantics	-	-	-
-Merge_On_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-16	pending_semantics	-	-	-
-Merge_On_IndentWrapConditionNestedOperations.Size	SC-16	pending_semantics	-	-	-
-Merge_On_LineBreakAfterOn	SC-16	pending_semantics	-	-	-
-Merge_On_LineBreakBeforeOn	SC-16	pending_semantics	-	-	-
-Merge_On_WrapAfterOperatorMode	SC-16	pending_semantics	-	-	-
-Merge_On_WrapBeforeOperatorMode	SC-16	pending_semantics	-	-	-
-Merge_On_WrapConditionMode	SC-16	pending_semantics	-	-	-
+Merge_Into_IndentIntoKeyword.Indent	SC-16	covered	merge.into.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Into_IndentIntoKeyword.OnNewLineOnly	SC-16	covered	merge.into.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Into_IndentIntoKeyword.Size	SC-16	covered	merge.into.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Into_IndentTable.Indent	SC-16	covered	merge.into.tableIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Into_IndentTable.OnNewLineOnly	SC-16	covered	merge.into.tableIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Into_IndentTable.Size	SC-16	covered	merge.into.tableIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Into_LineBreakBeforeInto	SC-16	covered	merge.into.breakBefore	MergeHeaderParityTests.Every_boundary_supports_always_never_and_inherit	Native inherit/always/never whitespace boundary scoped to MERGE header/source; actions and trailing clauses are outside this policy
+Merge_Into_LineBreakBeforeTable	SC-16	covered	merge.into.breakBeforeTable	MergeHeaderParityTests.Every_boundary_supports_always_never_and_inherit	Native inherit/always/never whitespace boundary scoped to MERGE header/source; actions and trailing clauses are outside this policy
+Merge_Into_With_IndentMergeHint.Indent	SC-16	covered	merge.hints.listIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Into_With_IndentMergeHint.OnNewLineOnly	SC-16	covered	merge.hints.listIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Into_With_IndentMergeHint.Size	SC-16	covered	merge.hints.listIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Into_With_IndentMergeHintBraces.Indent	SC-16	covered	merge.hints.braceIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Into_With_IndentMergeHintBraces.OnNewLineOnly	SC-16	covered	merge.hints.braceIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Into_With_IndentMergeHintBraces.Size	SC-16	covered	merge.hints.braceIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Into_With_IndentWithKeyword.Indent	SC-16	covered	merge.hints.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Into_With_IndentWithKeyword.OnNewLineOnly	SC-16	covered	merge.hints.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Into_With_IndentWithKeyword.Size	SC-16	covered	merge.hints.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Into_With_InsertSpaceBeforeMergeHint	SC-16	covered	merge.hints.spaceBeforeOpen	MergeHeaderParityTests.Local_spaces_change_only_the_requested_source_or_hint_gap	Native inherit/insert/remove gaps around hint parentheses or USING VALUES; explicit newlines take precedence
+Merge_Into_With_InsertSpacesWithinMergeHintBraces	SC-16	covered	merge.hints.spaceWithin	MergeHeaderParityTests.Local_spaces_change_only_the_requested_source_or_hint_gap	Native inherit/insert/remove gaps around hint parentheses or USING VALUES; explicit newlines take precedence
+Merge_Into_With_LineBreakAfterOpeningBrace	SC-16	covered	merge.hints.breakAfterOpen	MergeHeaderParityTests.Every_boundary_supports_always_never_and_inherit	Native inherit/always/never whitespace boundary scoped to MERGE header/source; actions and trailing clauses are outside this policy
+Merge_Into_With_LineBreakBeforeClosingBrace	SC-16	covered	merge.hints.breakBeforeClose	MergeHeaderParityTests.Every_boundary_supports_always_never_and_inherit	Native inherit/always/never whitespace boundary scoped to MERGE header/source; actions and trailing clauses are outside this policy
+Merge_Into_With_LineBreakBeforeOpeningBrace	SC-16	covered	merge.hints.breakBeforeOpen	MergeHeaderParityTests.Every_boundary_supports_always_never_and_inherit	Native inherit/always/never whitespace boundary scoped to MERGE header/source; actions and trailing clauses are outside this policy
+Merge_Into_With_LineBreakBeforeWith	SC-16	covered	merge.hints.breakBefore	MergeHeaderParityTests.Every_boundary_supports_always_never_and_inherit	Native inherit/always/never whitespace boundary scoped to MERGE header/source; actions and trailing clauses are outside this policy
+Merge_On_IndentOnConditions.Indent	SC-16	covered	merge.on.conditionIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_On_IndentOnConditions.OnNewLineOnly	SC-16	covered	merge.on.conditionIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_On_IndentOnConditions.Size	SC-16	covered	merge.on.conditionIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_On_IndentOnKeyword.Indent	SC-16	covered	merge.on.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_On_IndentOnKeyword.OnNewLineOnly	SC-16	covered	merge.on.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_On_IndentOnKeyword.Size	SC-16	covered	merge.on.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_On_IndentWrapConditionNestedOperations.Indent	SC-16	covered	merge.on.nestedConditionIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_On_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-16	covered	merge.on.nestedConditionIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_On_IndentWrapConditionNestedOperations.Size	SC-16	covered	merge.on.nestedConditionIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_On_LineBreakAfterOn	SC-16	covered	merge.on.breakAfter	MergeHeaderParityTests.Every_boundary_supports_always_never_and_inherit	Native inherit/always/never whitespace boundary scoped to MERGE header/source; actions and trailing clauses are outside this policy
+Merge_On_LineBreakBeforeOn	SC-16	covered	merge.on.breakBefore	MergeHeaderParityTests.Every_boundary_supports_always_never_and_inherit	Native inherit/always/never whitespace boundary scoped to MERGE header/source; actions and trailing clauses are outside this policy
+Merge_On_WrapAfterOperatorMode	SC-16	covered	merge.on.wrapAfterOperator	MergeHeaderParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never sides at outer ON or source JOIN ON; XML numeric modes not assumed
+Merge_On_WrapBeforeOperatorMode	SC-16	covered	merge.on.wrapBeforeOperator	MergeHeaderParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never sides at outer ON or source JOIN ON; XML numeric modes not assumed
+Merge_On_WrapConditionMode	SC-16	covered	merge.on.wrapCondition	MergeHeaderParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never sides at outer ON or source JOIN ON; XML numeric modes not assumed
 Merge_OptionHints_IndentOptionHints.Indent	SC-18	pending_semantics	-	-	-
 Merge_OptionHints_IndentOptionHints.OnNewLineOnly	SC-18	pending_semantics	-	-	-
 Merge_OptionHints_IndentOptionHints.Size	SC-18	pending_semantics	-	-	-
@@ -390,55 +390,55 @@ Merge_TopClause_LineBreakBeforeClosingBrace	SC-18	pending_semantics	-	-	-
 Merge_TopClause_LineBreakBeforeOpeningBrace	SC-18	pending_semantics	-	-	-
 Merge_TopClause_LineBreakBeforePercent	SC-18	pending_semantics	-	-	-
 Merge_TopClause_LineBreakBeforeTop	SC-18	pending_semantics	-	-	-
-Merge_Using_IndentUsingKeyword.Indent	SC-16	pending_semantics	-	-	-
-Merge_Using_IndentUsingKeyword.OnNewLineOnly	SC-16	pending_semantics	-	-	-
-Merge_Using_IndentUsingKeyword.Size	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_IndentJoinKeyword.Indent	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_IndentJoinKeyword.OnNewLineOnly	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_IndentJoinKeyword.Size	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_IndentJoinKeyword.Style	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_IndentJoinKeyword.Transparent	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_IndentOnCondition.Indent	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_IndentOnCondition.OnNewLineOnly	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_IndentOnCondition.Size	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_IndentOnKeyword.Indent	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_IndentOnKeyword.OnNewLineOnly	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_IndentOnKeyword.Size	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_IndentTableAfterJoin.Indent	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_IndentTableAfterJoin.OnNewLineOnly	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_IndentTableAfterJoin.Size	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_IndentWrapConditionNestedOperations.Indent	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_IndentWrapConditionNestedOperations.Size	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_LineBreakAfterJoin	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_LineBreakAfterOn	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_LineBreakBeforeJoin	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_LineBreakBeforeOn	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_UseSameFormattingAsInSelect	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_WrapAfterOperatorMode	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_WrapBeforeOperatorMode	SC-16	pending_semantics	-	-	-
-Merge_Using_Join_WrapConditionMode	SC-16	pending_semantics	-	-	-
-Merge_Using_LineBreakAfterUsing	SC-16	pending_semantics	-	-	-
-Merge_Using_LineBreakBeforeUsing	SC-16	pending_semantics	-	-	-
-Merge_Using_Values_IndentValuesExpressionsList.Indent	SC-16	pending_semantics	-	-	-
-Merge_Using_Values_IndentValuesExpressionsList.OnNewLineOnly	SC-16	pending_semantics	-	-	-
-Merge_Using_Values_IndentValuesExpressionsList.Size	SC-16	pending_semantics	-	-	-
-Merge_Using_Values_IndentValuesExpressionsListBraces.Indent	SC-16	pending_semantics	-	-	-
-Merge_Using_Values_IndentValuesExpressionsListBraces.OnNewLineOnly	SC-16	pending_semantics	-	-	-
-Merge_Using_Values_IndentValuesExpressionsListBraces.Size	SC-16	pending_semantics	-	-	-
-Merge_Using_Values_IndentValuesKeyword.Indent	SC-16	pending_semantics	-	-	-
-Merge_Using_Values_IndentValuesKeyword.OnNewLineOnly	SC-16	pending_semantics	-	-	-
-Merge_Using_Values_IndentValuesKeyword.Size	SC-16	pending_semantics	-	-	-
-Merge_Using_Values_InsertSpaceAfterValuesKeyword	SC-16	pending_semantics	-	-	-
-Merge_Using_Values_InsertSpacesWithinValuesExpressionsListBraces	SC-16	pending_semantics	-	-	-
-Merge_Using_Values_LineBreakAfterOpenBrace	SC-16	pending_semantics	-	-	-
-Merge_Using_Values_LineBreakAfterValues	SC-16	pending_semantics	-	-	-
-Merge_Using_Values_LineBreakBeforeClosingBrace	SC-16	pending_semantics	-	-	-
-Merge_Using_Values_LineBreakBeforeValues	SC-16	pending_semantics	-	-	-
-Merge_Using_Values_StackValuesExpressionsList	SC-16	pending_semantics	-	-	-
-Merge_Using_Values_StackValuesExpressionsListMode	SC-16	pending_semantics	-	-	-
-Merge_Using_Values_StackValuesExpressionsRowsList	SC-16	pending_semantics	-	-	-
-Merge_Using_Values_StackValuesExpressionsRowsListMode	SC-16	pending_semantics	-	-	-
+Merge_Using_IndentUsingKeyword.Indent	SC-16	covered	merge.using.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_IndentUsingKeyword.OnNewLineOnly	SC-16	covered	merge.using.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_IndentUsingKeyword.Size	SC-16	covered	merge.using.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Join_IndentJoinKeyword.Indent	SC-16	covered	merge.join.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Join_IndentJoinKeyword.OnNewLineOnly	SC-16	covered	merge.join.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Join_IndentJoinKeyword.Size	SC-16	covered	merge.join.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Join_IndentJoinKeyword.Style	SC-16	covered	merge.join.keywordIndent	MergeHeaderParityTests.Nested_not_conditions_styles_transparency_and_signed_indents_are_stable	Native relative/absolute style and transparent indent at JOIN phrase; XML numeric Style not assumed
+Merge_Using_Join_IndentJoinKeyword.Transparent	SC-16	covered	merge.join.keywordIndent	MergeHeaderParityTests.Nested_not_conditions_styles_transparency_and_signed_indents_are_stable	Native relative/absolute style and transparent indent at JOIN phrase; XML numeric Style not assumed
+Merge_Using_Join_IndentOnCondition.Indent	SC-16	covered	merge.join.onConditionIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Join_IndentOnCondition.OnNewLineOnly	SC-16	covered	merge.join.onConditionIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Join_IndentOnCondition.Size	SC-16	covered	merge.join.onConditionIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Join_IndentOnKeyword.Indent	SC-16	covered	merge.join.onKeywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Join_IndentOnKeyword.OnNewLineOnly	SC-16	covered	merge.join.onKeywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Join_IndentOnKeyword.Size	SC-16	covered	merge.join.onKeywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Join_IndentTableAfterJoin.Indent	SC-16	covered	merge.join.tableIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Join_IndentTableAfterJoin.OnNewLineOnly	SC-16	covered	merge.join.tableIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Join_IndentTableAfterJoin.Size	SC-16	covered	merge.join.tableIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Join_IndentWrapConditionNestedOperations.Indent	SC-16	covered	merge.join.nestedConditionIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Join_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-16	covered	merge.join.nestedConditionIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Join_IndentWrapConditionNestedOperations.Size	SC-16	covered	merge.join.nestedConditionIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Join_LineBreakAfterJoin	SC-16	covered	merge.join.breakAfter	MergeHeaderParityTests.Every_boundary_supports_always_never_and_inherit	Native inherit/always/never whitespace boundary scoped to MERGE header/source; actions and trailing clauses are outside this policy
+Merge_Using_Join_LineBreakAfterOn	SC-16	covered	merge.join.onBreakAfter	MergeHeaderParityTests.Every_boundary_supports_always_never_and_inherit	Native inherit/always/never whitespace boundary scoped to MERGE header/source; actions and trailing clauses are outside this policy
+Merge_Using_Join_LineBreakBeforeJoin	SC-16	covered	merge.join.breakBefore	MergeHeaderParityTests.Every_boundary_supports_always_never_and_inherit	Native inherit/always/never whitespace boundary scoped to MERGE header/source; actions and trailing clauses are outside this policy
+Merge_Using_Join_LineBreakBeforeOn	SC-16	covered	merge.join.onBreakBefore	MergeHeaderParityTests.Every_boundary_supports_always_never_and_inherit	Native inherit/always/never whitespace boundary scoped to MERGE header/source; actions and trailing clauses are outside this policy
+Merge_Using_Join_UseSameFormattingAsInSelect	SC-16	covered	merge.join.useSelectFormatting	MergeHeaderParityTests.Join_inheritance_does_not_replace_outer_merge_on_or_derived_query_rules	Native Boolean selects SELECT JOIN rules, ignores local JOIN overrides, and leaves outer MERGE ON and derived queries independent
+Merge_Using_Join_WrapAfterOperatorMode	SC-16	covered	merge.join.wrapAfterOperator	MergeHeaderParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never sides at outer ON or source JOIN ON; XML numeric modes not assumed
+Merge_Using_Join_WrapBeforeOperatorMode	SC-16	covered	merge.join.wrapBeforeOperator	MergeHeaderParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never sides at outer ON or source JOIN ON; XML numeric modes not assumed
+Merge_Using_Join_WrapConditionMode	SC-16	covered	merge.join.wrapCondition	MergeHeaderParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never sides at outer ON or source JOIN ON; XML numeric modes not assumed
+Merge_Using_LineBreakAfterUsing	SC-16	covered	merge.using.breakAfter	MergeHeaderParityTests.Every_boundary_supports_always_never_and_inherit	Native inherit/always/never whitespace boundary scoped to MERGE header/source; actions and trailing clauses are outside this policy
+Merge_Using_LineBreakBeforeUsing	SC-16	covered	merge.using.breakBefore	MergeHeaderParityTests.Every_boundary_supports_always_never_and_inherit	Native inherit/always/never whitespace boundary scoped to MERGE header/source; actions and trailing clauses are outside this policy
+Merge_Using_Values_IndentValuesExpressionsList.Indent	SC-16	covered	merge.values.listIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Values_IndentValuesExpressionsList.OnNewLineOnly	SC-16	covered	merge.values.listIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Values_IndentValuesExpressionsList.Size	SC-16	covered	merge.values.listIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Values_IndentValuesExpressionsListBraces.Indent	SC-16	covered	merge.values.braceIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Values_IndentValuesExpressionsListBraces.OnNewLineOnly	SC-16	covered	merge.values.braceIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Values_IndentValuesExpressionsListBraces.Size	SC-16	covered	merge.values.braceIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Values_IndentValuesKeyword.Indent	SC-16	covered	merge.values.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Values_IndentValuesKeyword.OnNewLineOnly	SC-16	covered	merge.values.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Values_IndentValuesKeyword.Size	SC-16	covered	merge.values.keywordIndent	MergeHeaderParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed MERGE header/source boundary; signed offset in configured indent units
+Merge_Using_Values_InsertSpaceAfterValuesKeyword	SC-16	covered	merge.values.spaceAfterKeyword	MergeHeaderParityTests.Local_spaces_change_only_the_requested_source_or_hint_gap	Native inherit/insert/remove gaps around hint parentheses or USING VALUES; explicit newlines take precedence
+Merge_Using_Values_InsertSpacesWithinValuesExpressionsListBraces	SC-16	covered	merge.values.spaceWithin	MergeHeaderParityTests.Local_spaces_change_only_the_requested_source_or_hint_gap	Native inherit/insert/remove gaps around hint parentheses or USING VALUES; explicit newlines take precedence
+Merge_Using_Values_LineBreakAfterOpenBrace	SC-16	covered	merge.values.breakAfterOpen	MergeHeaderParityTests.Every_boundary_supports_always_never_and_inherit	Native inherit/always/never whitespace boundary scoped to MERGE header/source; actions and trailing clauses are outside this policy
+Merge_Using_Values_LineBreakAfterValues	SC-16	covered	merge.values.breakAfterKeyword	MergeHeaderParityTests.Every_boundary_supports_always_never_and_inherit	Native inherit/always/never whitespace boundary scoped to MERGE header/source; actions and trailing clauses are outside this policy
+Merge_Using_Values_LineBreakBeforeClosingBrace	SC-16	covered	merge.values.breakBeforeClose	MergeHeaderParityTests.Every_boundary_supports_always_never_and_inherit	Native inherit/always/never whitespace boundary scoped to MERGE header/source; actions and trailing clauses are outside this policy
+Merge_Using_Values_LineBreakBeforeValues	SC-16	covered	merge.values.breakBeforeKeyword	MergeHeaderParityTests.Every_boundary_supports_always_never_and_inherit	Native inherit/always/never whitespace boundary scoped to MERGE header/source; actions and trailing clauses are outside this policy
+Merge_Using_Values_StackValuesExpressionsList	SC-16	covered	merge.values.stackList	MergeHeaderParityTests.Values_lists_and_rows_support_stacking_compaction_auto_and_leading_commas	Native inherit/on/off and onePerLine/auto modes for independent USING VALUES expression/row lists; XML numeric mode not assumed
+Merge_Using_Values_StackValuesExpressionsListMode	SC-16	covered	merge.values.stackMode	MergeHeaderParityTests.Values_lists_and_rows_support_stacking_compaction_auto_and_leading_commas	Native inherit/on/off and onePerLine/auto modes for independent USING VALUES expression/row lists; XML numeric mode not assumed
+Merge_Using_Values_StackValuesExpressionsRowsList	SC-16	covered	merge.values.stackRows	MergeHeaderParityTests.Values_lists_and_rows_support_stacking_compaction_auto_and_leading_commas	Native inherit/on/off and onePerLine/auto modes for independent USING VALUES expression/row lists; XML numeric mode not assumed
+Merge_Using_Values_StackValuesExpressionsRowsListMode	SC-16	covered	merge.values.stackRowsMode	MergeHeaderParityTests.Values_lists_and_rows_support_stacking_compaction_auto_and_leading_commas	Native inherit/on/off and onePerLine/auto modes for independent USING VALUES expression/row lists; XML numeric mode not assumed
 Merge_When_IndentWhen.Indent	SC-17	pending_semantics	-	-	-
 Merge_When_IndentWhen.OnNewLineOnly	SC-17	pending_semantics	-	-	-
 Merge_When_IndentWhen.Size	SC-17	pending_semantics	-	-	-

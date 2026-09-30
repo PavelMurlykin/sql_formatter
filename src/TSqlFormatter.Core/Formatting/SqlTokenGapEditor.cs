@@ -50,6 +50,8 @@ internal sealed class SqlTokenGapEditor
             edits.Values.OrderBy(edit => edit.Span.StartOffset).ToArray(), cancellationToken);
     }
 
+    public int GetLineIndent(int offset) => LineIndent(offset);
+
     private void Set(int leftIndex, int rightIndex, string breakMode, IndentRule? indent,
         string spaceMode, int? anchorOffset)
     {
@@ -104,25 +106,37 @@ internal sealed class SqlTokenGapEditor
 
     private int LineIndent(int offset)
     {
-        var pendingBreak = edits.Values.Where(edit => edit.Span.EndOffset <= offset
-                && edit.NewText.IndexOfAny(new[] { '\r', '\n' }) >= 0)
-            .OrderByDescending(edit => edit.Span.StartOffset).FirstOrDefault();
-        if (pendingBreak is not null && parsed.Source.Substring(pendingBreak.Span.EndOffset,
-                offset - pendingBreak.Span.EndOffset).IndexOfAny(new[] { '\r', '\n' }) < 0)
+        // Read the pending line backwards. Removed breaks must not hide a newly inline anchor.
+        var chunks = new Stack<string>();
+        var end = offset;
+        foreach (var edit in edits.Values.Where(edit => edit.Span.EndOffset <= offset)
+                     .OrderByDescending(edit => edit.Span.StartOffset))
         {
-            var lastBreak = pendingBreak.NewText.LastIndexOfAny(new[] { '\r', '\n' });
-            return pendingBreak.NewText.Length - lastBreak - 1;
+            if (Push(parsed.Source, edit.Span.EndOffset, end - edit.Span.EndOffset)
+                || Push(edit.NewText, 0, edit.NewText.Length)) return Width();
+            end = edit.Span.StartOffset;
         }
-        var start = Math.Max(parsed.Source.LastIndexOf('\n', Math.Max(0, offset - 1)),
-            parsed.Source.LastIndexOf('\r', Math.Max(0, offset - 1))) + 1;
-        var end = start;
-        var width = 0;
-        while (end < parsed.Source.Length && parsed.Source[end] is ' ' or '\t')
+        Push(parsed.Source, 0, end);
+        return Width();
+
+        bool Push(string text, int start, int length)
         {
-            width += parsed.Source[end] == '\t' ? options.Indent.Size : 1;
-            end++;
+            var lastBreak = length == 0 ? -1 : text.LastIndexOfAny(new[] { '\r', '\n' }, start + length - 1, length);
+            var chunkStart = lastBreak >= 0 ? lastBreak + 1 : start;
+            chunks.Push(text.Substring(chunkStart, start + length - chunkStart));
+            return lastBreak >= 0;
         }
-        return width;
+        int Width()
+        {
+            var width = 0;
+            foreach (var chunk in chunks)
+                foreach (var ch in chunk)
+                {
+                    if (ch is not (' ' or '\t')) return width;
+                    width += ch == '\t' ? options.Indent.Size : 1;
+                }
+            return width;
+        }
     }
 
     private static bool IsComment(TSqlParserToken token) => token.TokenType is
