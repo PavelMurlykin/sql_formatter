@@ -1038,6 +1038,31 @@ JSON v2 предоставляет независимые настройки:
 
 Работает в Core/CLI и адаптерах через файл конфигурации, включая область текущего оператора. По умолчанию/v1 вывод прежний; ошибочный SQL, многострочные литералы и промежутки рядом с комментариями не переписываются. Числовые XML-режимы не импортируются. Новые переключатели пока отсутствуют на страницах IDE.
 
+## CREATE TABLE (SC-22)
+
+Для обычного определения таблицы JSON v2 поддерживает 14 правил:
+
+| Группа | Суффиксы ключей |
+| --- | --- |
+| `createTable.columns` | `listIndent, braceIndent, breakBeforeOpen, breakAfterOpen, breakBeforeClose, spaceBeforeOpen, spaceWithin, stackList, stackMode` |
+| `createTable.storage` | `listIndent, breakBefore, stackList, stackMode` |
+| `createTable` | `blankLinesAround` |
+
+Типы/режимы переноса, пробелов, отступов и списков такие же, как выше. Список объединяет колонки, табличные ограничения, индексы и PERIOD FOR SYSTEM_TIME в исходном порядке. Правила внешних скобок не затрагивают decimal(p,s), CHECK, составные ключи или выражения вычисляемых колонок.
+
+`storage.breakBefore/listIndent` действуют на ON, TEXTIMAGE_ON, FILESTREAM_ON и WITH; `storage.stackList/stackMode` — на список опций WITH, не запятые внутри PARTITIONS или SYSTEM_VERSIONING. Первый элемент WITH остаётся рядом с открывающей скобкой, если другой перенос не задан исходным текстом. Отступ скобок/ключевых слов хранения считается от CREATE TABLE, элементов — от открывающей скобки/WITH. `blankLinesAround` — boolean, false сохраняет пустые строки, true добавляет их между таблицей и соседними операторами; не добавляет перед END/GO и не переносит комментарии.
+
+Проверенная конфигурация:
+
+```json
+{"version":2,"rules":{"createTable.columns.breakBeforeOpen":"always","createTable.columns.breakAfterOpen":"always",
+"createTable.columns.breakBeforeClose":"always","createTable.columns.stackList":"on",
+"createTable.columns.listIndent":{"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false},
+"createTable.storage.breakBefore":"always","createTable.storage.stackList":"on"}}
+```
+
+Поддержаны обычные/вычисляемые колонки, ограничения, индексы, PERIOD, graph-таблицы с определением и вложенный CREATE TABLE в коде. CTAS/CLONE и формы без определения (например FILETABLE) этот набор не переписывает. У неизвестного синтаксиса безопасный отказ; токены, порядок, комментарии и литералы сохраняются с повторной проверкой парсера. Без переопределений/v1 вывод прежний; доступ через Core/CLI и JSON в IDE, без XML numeric enum import.
+
 ## Построение `Doc` из AST
 
 `SqlDocBuilder` создаёт layout-документ из результата парсинга. Без дополнительных обработчиков он сохраняет весь исходный текст, включая комментарии и разделители `GO`:

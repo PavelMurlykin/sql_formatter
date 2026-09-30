@@ -255,7 +255,7 @@ public sealed class RuleCatalog
                 descriptor.DependsOn?.Replace("select.", "subquery."), descriptor.Dialect));
         return new RuleCatalog(descriptors.Concat(subquery).Concat(UpdateDeleteRules(descriptors))
             .Concat(MergeHeaderRules(descriptors)).Concat(MergeBranchRules(descriptors)).Concat(MergeTailRules())
-            .Concat(DeclareRules()).Concat(CodeRules()).Concat(ModuleRules()));
+            .Concat(DeclareRules()).Concat(CodeRules()).Concat(ModuleRules()).Concat(CreateTableRules()));
     }
 
     private static RuleDescriptor CaseRule(string key, string defaultValue) => new(key, "token",
@@ -468,6 +468,19 @@ public sealed class RuleCatalog
         foreach (var rule in SingleLineRules("view"))
             yield return new RuleDescriptor(rule.Key.Replace("subquery.singleLine.view", "view.query.singleLine"), scope,
                 rule.DefaultValue, rule.Minimum, rule.Maximum, rule.Choices);
+    }
+
+    private static IEnumerable<RuleDescriptor> CreateTableRules()
+    {
+        const string scope = "CREATE TABLE";
+        foreach (var descriptor in InsertRules().Where(d => d.Key.StartsWith("insert.columns.", StringComparison.Ordinal)))
+            yield return new RuleDescriptor(descriptor.Key.Replace("insert.columns.", "createTable.columns."), scope,
+                descriptor.DefaultValue, descriptor.Minimum, descriptor.Maximum, descriptor.Choices,
+                descriptor.DependsOn?.Replace("insert.columns.", "createTable.columns."));
+        yield return new RuleDescriptor("createTable.blankLinesAround", scope, RuleValue.FromBoolean(false));
+        yield return IndentDescriptor("createTable.storage.listIndent", scope);
+        yield return BreakRule("createTable.storage.breakBefore", scope);
+        foreach (var rule in ListRules("createTable.storage", scope)) yield return rule;
     }
 
     public IReadOnlyDictionary<string, RuleDescriptor> Definitions => definitions;

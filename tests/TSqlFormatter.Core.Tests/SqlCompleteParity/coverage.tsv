@@ -77,26 +77,26 @@ Code_While_LineBreakAfterCondition	SC-20	covered	code.while.breakAfterCondition	
 Code_While_WrapAfterOperatorMode	SC-20	covered	code.while.wrapAfterOperator	CodeParityTests.Every_boundary_supports_distinct_modes	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
 Code_While_WrapBeforeOperatorMode	SC-20	covered	code.while.wrapBeforeOperator	CodeParityTests.Every_boundary_supports_distinct_modes	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
 Code_While_WrapConditionMode	SC-20	covered	code.while.wrapCondition	CodeParityTests.Condition_indents_and_boolean_wrapping_are_independent	Native scoped control-flow layout and lexical balanced transaction body; numeric XML modes not inferred
-CreateTable_AddEmptyLinesAroundStatement	SC-22	pending_semantics	-	-	-
-CreateTable_IndentColumnList.Indent	SC-22	pending_semantics	-	-	-
-CreateTable_IndentColumnList.OnNewLineOnly	SC-22	pending_semantics	-	-	-
-CreateTable_IndentColumnList.Size	SC-22	pending_semantics	-	-	-
-CreateTable_IndentColumnListBraces.Indent	SC-22	pending_semantics	-	-	-
-CreateTable_IndentColumnListBraces.OnNewLineOnly	SC-22	pending_semantics	-	-	-
-CreateTable_IndentColumnListBraces.Size	SC-22	pending_semantics	-	-	-
-CreateTable_IndentStorageOptions.Indent	SC-22	pending_semantics	-	-	-
-CreateTable_IndentStorageOptions.OnNewLineOnly	SC-22	pending_semantics	-	-	-
-CreateTable_IndentStorageOptions.Size	SC-22	pending_semantics	-	-	-
-CreateTable_InsertSpaceBeforeColumnsList	SC-22	pending_semantics	-	-	-
-CreateTable_InsertSpacesWithinColumnsListBraces	SC-22	pending_semantics	-	-	-
-CreateTable_LineBreakAfterOpenBrace	SC-22	pending_semantics	-	-	-
-CreateTable_LineBreakBeforeClosingBrace	SC-22	pending_semantics	-	-	-
-CreateTable_LineBreakBeforeOpenBrace	SC-22	pending_semantics	-	-	-
-CreateTable_LineBreakBeforeStorageOptions	SC-22	pending_semantics	-	-	-
-CreateTable_StackColumnsList	SC-22	pending_semantics	-	-	-
-CreateTable_StackColumnsListStyle	SC-22	pending_semantics	-	-	-
-CreateTable_StackStorageOptions	SC-22	pending_semantics	-	-	-
-CreateTable_StackStorageOptionsMode	SC-22	pending_semantics	-	-	-
+CreateTable_AddEmptyLinesAroundStatement	SC-22	covered	createTable.blankLinesAround	CreateTableParityTests.Blank_lines_and_storage_clauses_have_real_effects	Native AST-scoped CREATE TABLE definition and storage gap policies; XML numeric modes not inferred
+CreateTable_IndentColumnList.Indent	SC-22	covered	createTable.columns.listIndent	CreateTableParityTests.Every_indent_honors_native_fields	Native AST-scoped CREATE TABLE definition and storage gap policies; XML numeric modes not inferred
+CreateTable_IndentColumnList.OnNewLineOnly	SC-22	covered	createTable.columns.listIndent	CreateTableParityTests.Every_indent_honors_native_fields	Native AST-scoped CREATE TABLE definition and storage gap policies; XML numeric modes not inferred
+CreateTable_IndentColumnList.Size	SC-22	covered	createTable.columns.listIndent	CreateTableParityTests.Every_indent_honors_native_fields	Native AST-scoped CREATE TABLE definition and storage gap policies; XML numeric modes not inferred
+CreateTable_IndentColumnListBraces.Indent	SC-22	covered	createTable.columns.braceIndent	CreateTableParityTests.Every_indent_honors_native_fields	Native AST-scoped CREATE TABLE definition and storage gap policies; XML numeric modes not inferred
+CreateTable_IndentColumnListBraces.OnNewLineOnly	SC-22	covered	createTable.columns.braceIndent	CreateTableParityTests.Every_indent_honors_native_fields	Native AST-scoped CREATE TABLE definition and storage gap policies; XML numeric modes not inferred
+CreateTable_IndentColumnListBraces.Size	SC-22	covered	createTable.columns.braceIndent	CreateTableParityTests.Every_indent_honors_native_fields	Native AST-scoped CREATE TABLE definition and storage gap policies; XML numeric modes not inferred
+CreateTable_IndentStorageOptions.Indent	SC-22	covered	createTable.storage.listIndent	CreateTableParityTests.Every_indent_honors_native_fields	Native AST-scoped CREATE TABLE definition and storage gap policies; XML numeric modes not inferred
+CreateTable_IndentStorageOptions.OnNewLineOnly	SC-22	covered	createTable.storage.listIndent	CreateTableParityTests.Every_indent_honors_native_fields	Native AST-scoped CREATE TABLE definition and storage gap policies; XML numeric modes not inferred
+CreateTable_IndentStorageOptions.Size	SC-22	covered	createTable.storage.listIndent	CreateTableParityTests.Every_indent_honors_native_fields	Native AST-scoped CREATE TABLE definition and storage gap policies; XML numeric modes not inferred
+CreateTable_InsertSpaceBeforeColumnsList	SC-22	covered	createTable.columns.spaceBeforeOpen	CreateTableParityTests.Spaces_are_scoped_to_definition_braces	Native AST-scoped CREATE TABLE definition and storage gap policies; XML numeric modes not inferred
+CreateTable_InsertSpacesWithinColumnsListBraces	SC-22	covered	createTable.columns.spaceWithin	CreateTableParityTests.Spaces_are_scoped_to_definition_braces	Native AST-scoped CREATE TABLE definition and storage gap policies; XML numeric modes not inferred
+CreateTable_LineBreakAfterOpenBrace	SC-22	covered	createTable.columns.breakAfterOpen	CreateTableParityTests.Every_boundary_supports_distinct_modes	Native AST-scoped CREATE TABLE definition and storage gap policies; XML numeric modes not inferred
+CreateTable_LineBreakBeforeClosingBrace	SC-22	covered	createTable.columns.breakBeforeClose	CreateTableParityTests.Every_boundary_supports_distinct_modes	Native AST-scoped CREATE TABLE definition and storage gap policies; XML numeric modes not inferred
+CreateTable_LineBreakBeforeOpenBrace	SC-22	covered	createTable.columns.breakBeforeOpen	CreateTableParityTests.Every_boundary_supports_distinct_modes	Native AST-scoped CREATE TABLE definition and storage gap policies; XML numeric modes not inferred
+CreateTable_LineBreakBeforeStorageOptions	SC-22	covered	createTable.storage.breakBefore	CreateTableParityTests.Every_boundary_supports_distinct_modes	Native AST-scoped CREATE TABLE definition and storage gap policies; XML numeric modes not inferred
+CreateTable_StackColumnsList	SC-22	covered	createTable.columns.stackList	CreateTableParityTests.Lists_stack_compact_auto_and_preserve_inner_commas	Native AST-scoped CREATE TABLE definition and storage gap policies; XML numeric modes not inferred
+CreateTable_StackColumnsListStyle	SC-22	covered	createTable.columns.stackMode	CreateTableParityTests.Lists_stack_compact_auto_and_preserve_inner_commas	Native AST-scoped CREATE TABLE definition and storage gap policies; XML numeric modes not inferred
+CreateTable_StackStorageOptions	SC-22	covered	createTable.storage.stackList	CreateTableParityTests.Lists_stack_compact_auto_and_preserve_inner_commas	Native AST-scoped CREATE TABLE definition and storage gap policies; XML numeric modes not inferred
+CreateTable_StackStorageOptionsMode	SC-22	covered	createTable.storage.stackMode	CreateTableParityTests.Lists_stack_compact_auto_and_preserve_inner_commas	Native AST-scoped CREATE TABLE definition and storage gap policies; XML numeric modes not inferred
 Declare_Cursors_IndentCursorKeyword.Indent	SC-19	covered	declare.cursor.keywordIndent	DeclareParityTests.Every_indent_supports_enabled_offset_newline_style_and_transparency	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
 Declare_Cursors_IndentCursorKeyword.OnNewLineOnly	SC-19	covered	declare.cursor.keywordIndent	DeclareParityTests.Every_indent_supports_enabled_offset_newline_style_and_transparency	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred
 Declare_Cursors_IndentCursorKeyword.Size	SC-19	covered	declare.cursor.keywordIndent	DeclareParityTests.Every_indent_supports_enabled_offset_newline_style_and_transparency	Native DECLARE variable/table/cursor boundaries, lists or compactness; XML numeric styles not inferred

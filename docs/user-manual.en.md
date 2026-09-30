@@ -1038,6 +1038,31 @@ Verified example:
 
 Works in Core/CLI and adapters through configuration files, including current-statement scope. Defaults/v1 retain previous output; invalid SQL, multiline literals and gaps adjacent to comments are not rewritten. XML numeric modes are not imported. New switches are not yet exposed on IDE option pages.
 
+## CREATE TABLE (SC-22)
+
+JSON v2 supports 14 rules for regular table definitions:
+
+| Group | Key suffixes |
+| --- | --- |
+| `createTable.columns` | `listIndent, braceIndent, breakBeforeOpen, breakAfterOpen, breakBeforeClose, spaceBeforeOpen, spaceWithin, stackList, stackMode` |
+| `createTable.storage` | `listIndent, breakBefore, stackList, stackMode` |
+| `createTable` | `blankLinesAround` |
+
+Break, space, indent and list types/modes match the earlier sections. The list combines columns, table constraints, indexes and PERIOD FOR SYSTEM_TIME in source order. Outer-parenthesis rules do not affect decimal(p,s), CHECK, composite keys or computed-column expressions.
+
+`storage.breakBefore/listIndent` affect ON, TEXTIMAGE_ON, FILESTREAM_ON and WITH; `storage.stackList/stackMode` affect WITH options, not commas inside PARTITIONS or SYSTEM_VERSIONING. The first WITH item remains next to the opening parenthesis unless the source already wraps it. Parentheses/storage keywords anchor to CREATE TABLE; items to the opening parenthesis/WITH. `blankLinesAround` is boolean: false preserves blank lines, true inserts them between a table and neighboring statements; it does not insert before END/GO or move comments.
+
+Verified configuration:
+
+```json
+{"version":2,"rules":{"createTable.columns.breakBeforeOpen":"always","createTable.columns.breakAfterOpen":"always",
+"createTable.columns.breakBeforeClose":"always","createTable.columns.stackList":"on",
+"createTable.columns.listIndent":{"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false},
+"createTable.storage.breakBefore":"always","createTable.storage.stackList":"on"}}
+```
+
+Regular/computed columns, constraints, indexes, PERIOD, graph tables with definitions and nested CREATE TABLE statements are supported. CTAS/CLONE and definition-free forms (such as FILETABLE) are not rewritten by this policy. Unknown syntax is safely declined; tokens, order, comments and literals are preserved with parser validation. Defaults/v1 retain previous output; access is through Core/CLI and IDE JSON, without XML numeric enum import.
+
 ## Building a `Doc` from the AST
 
 `SqlDocBuilder` creates a layout document from a parse result. With no additional builders, it preserves the entire source, including comments and `GO` separators:
@@ -1058,5 +1083,5 @@ When parsing fails, `BuildDocument` also returns the unchanged source. You can r
 ## Limitations
 
 - The CLI writes only stdin or one file to stdout; directories and multiple files require `--write` or `--check`. Configuration discovery applies to files; custom settings flags are not implemented yet.
-- Structural formatting covers only the `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `MERGE` forms described above; other constructs retain their original layout.
+- Structural Doc formatting covers the documented SELECT, DML and stored-code forms. New Code, module and CREATE TABLE rules apply only to the documented AST boundaries when explicitly enabled; unsupported forms retain their original layout.
 - The renderer accepts a prepared `Doc` tree; it does not parse SQL on its own.
