@@ -125,81 +125,81 @@ Declare_Variables_LineBreakAfterDeclare	SC-19	pending_semantics	-	-	-
 Declare_Variables_LineBreakBeforeTableKeyword	SC-19	pending_semantics	-	-	-
 Declare_Variables_StackVariablesList	SC-19	pending_semantics	-	-	-
 Declare_Variables_StackVariablesListStyle	SC-19	pending_semantics	-	-	-
-Delete_From_IndentFromKeyword.Indent	SC-15	pending_semantics	-	-	-
-Delete_From_IndentFromKeyword.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Delete_From_IndentFromKeyword.Size	SC-15	pending_semantics	-	-	-
-Delete_From_IndentFromList.Indent	SC-15	pending_semantics	-	-	-
-Delete_From_IndentFromList.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Delete_From_IndentFromList.Size	SC-15	pending_semantics	-	-	-
-Delete_From_Join_IndentJoinKeyword.Indent	SC-15	pending_semantics	-	-	-
-Delete_From_Join_IndentJoinKeyword.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Delete_From_Join_IndentJoinKeyword.Size	SC-15	pending_semantics	-	-	-
-Delete_From_Join_IndentJoinKeyword.Style	SC-15	pending_semantics	-	-	-
-Delete_From_Join_IndentJoinKeyword.Transparent	SC-15	pending_semantics	-	-	-
-Delete_From_Join_IndentOnCondition.Indent	SC-15	pending_semantics	-	-	-
-Delete_From_Join_IndentOnCondition.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Delete_From_Join_IndentOnCondition.Size	SC-15	pending_semantics	-	-	-
-Delete_From_Join_IndentOnKeyword.Indent	SC-15	pending_semantics	-	-	-
-Delete_From_Join_IndentOnKeyword.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Delete_From_Join_IndentOnKeyword.Size	SC-15	pending_semantics	-	-	-
-Delete_From_Join_IndentTableAfterJoin.Indent	SC-15	pending_semantics	-	-	-
-Delete_From_Join_IndentTableAfterJoin.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Delete_From_Join_IndentTableAfterJoin.Size	SC-15	pending_semantics	-	-	-
-Delete_From_Join_IndentWrapConditionNestedOperations.Indent	SC-15	pending_semantics	-	-	-
-Delete_From_Join_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Delete_From_Join_IndentWrapConditionNestedOperations.Size	SC-15	pending_semantics	-	-	-
-Delete_From_Join_LineBreakAfterJoin	SC-15	pending_semantics	-	-	-
-Delete_From_Join_LineBreakAfterOn	SC-15	pending_semantics	-	-	-
-Delete_From_Join_LineBreakBeforeJoin	SC-15	pending_semantics	-	-	-
-Delete_From_Join_LineBreakBeforeOn	SC-15	pending_semantics	-	-	-
-Delete_From_Join_WrapAfterOperatorMode	SC-15	pending_semantics	-	-	-
-Delete_From_Join_WrapBeforeOperatorMode	SC-15	pending_semantics	-	-	-
-Delete_From_Join_WrapConditionMode	SC-15	pending_semantics	-	-	-
-Delete_From_LineBreakAfterFrom	SC-15	pending_semantics	-	-	-
-Delete_From_LineBreakBeforeFrom	SC-15	pending_semantics	-	-	-
-Delete_From_StackFromList	SC-15	pending_semantics	-	-	-
-Delete_From_StackFromListMode	SC-15	pending_semantics	-	-	-
-Delete_From_UseSameFormattingAsInSelect	SC-15	pending_semantics	-	-	-
-Delete_IndentFromKeyword.Indent	SC-15	pending_semantics	-	-	-
-Delete_IndentFromKeyword.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Delete_IndentFromKeyword.Size	SC-15	pending_semantics	-	-	-
-Delete_IndentTable.Indent	SC-15	pending_semantics	-	-	-
-Delete_IndentTable.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Delete_IndentTable.Size	SC-15	pending_semantics	-	-	-
-Delete_LineBreakBeforeFrom	SC-15	pending_semantics	-	-	-
-Delete_LineBreakBeforeMainTable	SC-15	pending_semantics	-	-	-
-Delete_OptionHints_IndentOptionHints.Indent	SC-15	pending_semantics	-	-	-
-Delete_OptionHints_IndentOptionHints.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Delete_OptionHints_IndentOptionHints.Size	SC-15	pending_semantics	-	-	-
-Delete_OptionHints_IndentOptionKeyword.Indent	SC-15	pending_semantics	-	-	-
-Delete_OptionHints_IndentOptionKeyword.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Delete_OptionHints_IndentOptionKeyword.Size	SC-15	pending_semantics	-	-	-
-Delete_OptionHints_LineBreakAfterOption	SC-15	pending_semantics	-	-	-
-Delete_OptionHints_LineBreakBeforeOption	SC-15	pending_semantics	-	-	-
-Delete_OutputClause_IndentOutputKeyword.Indent	SC-15	pending_semantics	-	-	-
-Delete_OutputClause_IndentOutputKeyword.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Delete_OutputClause_IndentOutputKeyword.Size	SC-15	pending_semantics	-	-	-
-Delete_OutputClause_IndentOutputParameters.Indent	SC-15	pending_semantics	-	-	-
-Delete_OutputClause_IndentOutputParameters.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Delete_OutputClause_IndentOutputParameters.Size	SC-15	pending_semantics	-	-	-
-Delete_OutputClause_LineBreakAfterOutput	SC-15	pending_semantics	-	-	-
-Delete_OutputClause_LineBreakBeforeOutput	SC-15	pending_semantics	-	-	-
-Delete_OutputClause_StackDmlColumnsList	SC-15	pending_semantics	-	-	-
-Delete_OutputClause_StackDmlColumnsListMode	SC-15	pending_semantics	-	-	-
-Delete_Where_IndentWhereCondition.Indent	SC-15	pending_semantics	-	-	-
-Delete_Where_IndentWhereCondition.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Delete_Where_IndentWhereCondition.Size	SC-15	pending_semantics	-	-	-
-Delete_Where_IndentWhereKeyword.Indent	SC-15	pending_semantics	-	-	-
-Delete_Where_IndentWhereKeyword.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Delete_Where_IndentWhereKeyword.Size	SC-15	pending_semantics	-	-	-
-Delete_Where_IndentWrapConditionNestedOperations.Indent	SC-15	pending_semantics	-	-	-
-Delete_Where_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Delete_Where_IndentWrapConditionNestedOperations.Size	SC-15	pending_semantics	-	-	-
-Delete_Where_LineBreakAfterWhere	SC-15	pending_semantics	-	-	-
-Delete_Where_LineBreakBeforeWhere	SC-15	pending_semantics	-	-	-
-Delete_Where_WrapAfterOperatorMode	SC-15	pending_semantics	-	-	-
-Delete_Where_WrapBeforeOperatorMode	SC-15	pending_semantics	-	-	-
-Delete_Where_WrapConditionMode	SC-15	pending_semantics	-	-	-
+Delete_From_IndentFromKeyword.Indent	SC-15	covered	delete.from.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_From_IndentFromKeyword.OnNewLineOnly	SC-15	covered	delete.from.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_From_IndentFromKeyword.Size	SC-15	covered	delete.from.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_From_IndentFromList.Indent	SC-15	covered	delete.from.listIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_From_IndentFromList.OnNewLineOnly	SC-15	covered	delete.from.listIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_From_IndentFromList.Size	SC-15	covered	delete.from.listIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_From_Join_IndentJoinKeyword.Indent	SC-15	covered	delete.join.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_From_Join_IndentJoinKeyword.OnNewLineOnly	SC-15	covered	delete.join.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_From_Join_IndentJoinKeyword.Size	SC-15	covered	delete.join.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_From_Join_IndentJoinKeyword.Style	SC-15	covered	delete.join.keywordIndent	UpdateDeleteParityTests.Nested_not_predicates_and_relative_absolute_transparent_indents_are_stable	Native relative/absolute style and transparent indentation; XML numeric Style not assumed
+Delete_From_Join_IndentJoinKeyword.Transparent	SC-15	covered	delete.join.keywordIndent	UpdateDeleteParityTests.Nested_not_predicates_and_relative_absolute_transparent_indents_are_stable	Native relative/absolute style and transparent indentation; XML numeric Style not assumed
+Delete_From_Join_IndentOnCondition.Indent	SC-15	covered	delete.join.onConditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_From_Join_IndentOnCondition.OnNewLineOnly	SC-15	covered	delete.join.onConditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_From_Join_IndentOnCondition.Size	SC-15	covered	delete.join.onConditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_From_Join_IndentOnKeyword.Indent	SC-15	covered	delete.join.onKeywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_From_Join_IndentOnKeyword.OnNewLineOnly	SC-15	covered	delete.join.onKeywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_From_Join_IndentOnKeyword.Size	SC-15	covered	delete.join.onKeywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_From_Join_IndentTableAfterJoin.Indent	SC-15	covered	delete.join.tableIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_From_Join_IndentTableAfterJoin.OnNewLineOnly	SC-15	covered	delete.join.tableIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_From_Join_IndentTableAfterJoin.Size	SC-15	covered	delete.join.tableIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_From_Join_IndentWrapConditionNestedOperations.Indent	SC-15	covered	delete.join.nestedConditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_From_Join_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-15	covered	delete.join.nestedConditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_From_Join_IndentWrapConditionNestedOperations.Size	SC-15	covered	delete.join.nestedConditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_From_Join_LineBreakAfterJoin	SC-15	covered	delete.join.breakAfter	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Delete_From_Join_LineBreakAfterOn	SC-15	covered	delete.join.onBreakAfter	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Delete_From_Join_LineBreakBeforeJoin	SC-15	covered	delete.join.breakBefore	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Delete_From_Join_LineBreakBeforeOn	SC-15	covered	delete.join.onBreakBefore	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Delete_From_Join_WrapAfterOperatorMode	SC-15	covered	delete.join.wrapAfterOperator	UpdateDeleteParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never operator sides; XML numeric modes not assumed
+Delete_From_Join_WrapBeforeOperatorMode	SC-15	covered	delete.join.wrapBeforeOperator	UpdateDeleteParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never operator sides; XML numeric modes not assumed
+Delete_From_Join_WrapConditionMode	SC-15	covered	delete.join.wrapCondition	UpdateDeleteParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never operator sides; XML numeric modes not assumed
+Delete_From_LineBreakAfterFrom	SC-15	covered	delete.from.breakAfter	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Delete_From_LineBreakBeforeFrom	SC-15	covered	delete.from.breakBefore	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Delete_From_StackFromList	SC-15	covered	delete.from.stackList	UpdateDeleteParityTests.Each_list_supports_stacking_compaction_auto_and_global_commas	Native inherit/on/off list and onePerLine/auto modes with margin and global comma policy; XML numeric mode not assumed
+Delete_From_StackFromListMode	SC-15	covered	delete.from.stackMode	UpdateDeleteParityTests.Each_list_supports_stacking_compaction_auto_and_global_commas	Native inherit/on/off list and onePerLine/auto modes with margin and global comma policy; XML numeric mode not assumed
+Delete_From_UseSameFormattingAsInSelect	SC-15	covered	delete.from.useSelectFormatting	UpdateDeleteParityTests.From_inheritance_uses_select_from_and_join_only_when_enabled	Native Boolean enables SELECT FROM/JOIN rules and ignores local FROM/JOIN overrides; WHERE remains independent
+Delete_IndentFromKeyword.Indent	SC-15	covered	delete.target.fromKeywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_IndentFromKeyword.OnNewLineOnly	SC-15	covered	delete.target.fromKeywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_IndentFromKeyword.Size	SC-15	covered	delete.target.fromKeywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_IndentTable.Indent	SC-15	covered	delete.target.indent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_IndentTable.OnNewLineOnly	SC-15	covered	delete.target.indent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_IndentTable.Size	SC-15	covered	delete.target.indent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_LineBreakBeforeFrom	SC-15	covered	delete.target.breakBeforeFrom	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Delete_LineBreakBeforeMainTable	SC-15	covered	delete.target.breakBefore	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Delete_OptionHints_IndentOptionHints.Indent	SC-15	covered	delete.option.hintsIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_OptionHints_IndentOptionHints.OnNewLineOnly	SC-15	covered	delete.option.hintsIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_OptionHints_IndentOptionHints.Size	SC-15	covered	delete.option.hintsIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_OptionHints_IndentOptionKeyword.Indent	SC-15	covered	delete.option.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_OptionHints_IndentOptionKeyword.OnNewLineOnly	SC-15	covered	delete.option.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_OptionHints_IndentOptionKeyword.Size	SC-15	covered	delete.option.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_OptionHints_LineBreakAfterOption	SC-15	covered	delete.option.breakAfter	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Delete_OptionHints_LineBreakBeforeOption	SC-15	covered	delete.option.breakBefore	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Delete_OutputClause_IndentOutputKeyword.Indent	SC-15	covered	delete.output.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_OutputClause_IndentOutputKeyword.OnNewLineOnly	SC-15	covered	delete.output.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_OutputClause_IndentOutputKeyword.Size	SC-15	covered	delete.output.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_OutputClause_IndentOutputParameters.Indent	SC-15	covered	delete.output.listIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_OutputClause_IndentOutputParameters.OnNewLineOnly	SC-15	covered	delete.output.listIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_OutputClause_IndentOutputParameters.Size	SC-15	covered	delete.output.listIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_OutputClause_LineBreakAfterOutput	SC-15	covered	delete.output.breakAfter	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Delete_OutputClause_LineBreakBeforeOutput	SC-15	covered	delete.output.breakBefore	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Delete_OutputClause_StackDmlColumnsList	SC-15	covered	delete.output.stackList	UpdateDeleteParityTests.Each_list_supports_stacking_compaction_auto_and_global_commas	Native inherit/on/off list and onePerLine/auto modes with margin and global comma policy; XML numeric mode not assumed
+Delete_OutputClause_StackDmlColumnsListMode	SC-15	covered	delete.output.stackMode	UpdateDeleteParityTests.Each_list_supports_stacking_compaction_auto_and_global_commas	Native inherit/on/off list and onePerLine/auto modes with margin and global comma policy; XML numeric mode not assumed
+Delete_Where_IndentWhereCondition.Indent	SC-15	covered	delete.where.conditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_Where_IndentWhereCondition.OnNewLineOnly	SC-15	covered	delete.where.conditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_Where_IndentWhereCondition.Size	SC-15	covered	delete.where.conditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_Where_IndentWhereKeyword.Indent	SC-15	covered	delete.where.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_Where_IndentWhereKeyword.OnNewLineOnly	SC-15	covered	delete.where.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_Where_IndentWhereKeyword.Size	SC-15	covered	delete.where.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_Where_IndentWrapConditionNestedOperations.Indent	SC-15	covered	delete.where.nestedConditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_Where_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-15	covered	delete.where.nestedConditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_Where_IndentWrapConditionNestedOperations.Size	SC-15	covered	delete.where.nestedConditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Delete_Where_LineBreakAfterWhere	SC-15	covered	delete.where.breakAfter	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Delete_Where_LineBreakBeforeWhere	SC-15	covered	delete.where.breakBefore	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Delete_Where_WrapAfterOperatorMode	SC-15	covered	delete.where.wrapAfterOperator	UpdateDeleteParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never operator sides; XML numeric modes not assumed
+Delete_Where_WrapBeforeOperatorMode	SC-15	covered	delete.where.wrapBeforeOperator	UpdateDeleteParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never operator sides; XML numeric modes not assumed
+Delete_Where_WrapConditionMode	SC-15	covered	delete.where.wrapCondition	UpdateDeleteParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never operator sides; XML numeric modes not assumed
 Execute_IndentParameters.Indent	SC-24	pending_semantics	-	-	-
 Execute_IndentParameters.OnNewLineOnly	SC-24	pending_semantics	-	-	-
 Execute_IndentParameters.Size	SC-24	pending_semantics	-	-	-
@@ -868,87 +868,87 @@ UnionExceptIntersect_IndentSubquery.OnNewLineOnly	SC-13	covered	setOperator.bran
 UnionExceptIntersect_IndentSubquery.Size	SC-13	covered	setOperator.branchIndent	CaseAndSetParityTests.Set_operator_indents_affect_nested_branches	Native indent enabled/offset/onNewLineOnly/style at parsed syntax boundary; XML numeric Style not assumed
 UnionExceptIntersect_LineBreakAfterUnion	SC-13	covered	setOperator.breakAfter	CaseAndSetParityTests.Set_operator_boundaries_cover_chained_queries	Native inherit/always/never at parsed syntax boundary; XML Boolean maps to optional policy
 UnionExceptIntersect_LineBreakBeforeUnion	SC-13	covered	setOperator.breakBefore	CaseAndSetParityTests.Set_operator_boundaries_cover_chained_queries	Native inherit/always/never at parsed syntax boundary; XML Boolean maps to optional policy
-Update_From_IndentFromKeyword.Indent	SC-15	pending_semantics	-	-	-
-Update_From_IndentFromKeyword.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Update_From_IndentFromKeyword.Size	SC-15	pending_semantics	-	-	-
-Update_From_IndentFromList.Indent	SC-15	pending_semantics	-	-	-
-Update_From_IndentFromList.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Update_From_IndentFromList.Size	SC-15	pending_semantics	-	-	-
-Update_From_Join_IndentJoinKeyword.Indent	SC-15	pending_semantics	-	-	-
-Update_From_Join_IndentJoinKeyword.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Update_From_Join_IndentJoinKeyword.Size	SC-15	pending_semantics	-	-	-
-Update_From_Join_IndentJoinKeyword.Style	SC-15	pending_semantics	-	-	-
-Update_From_Join_IndentJoinKeyword.Transparent	SC-15	pending_semantics	-	-	-
-Update_From_Join_IndentOnCondition.Indent	SC-15	pending_semantics	-	-	-
-Update_From_Join_IndentOnCondition.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Update_From_Join_IndentOnCondition.Size	SC-15	pending_semantics	-	-	-
-Update_From_Join_IndentOnKeyword.Indent	SC-15	pending_semantics	-	-	-
-Update_From_Join_IndentOnKeyword.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Update_From_Join_IndentOnKeyword.Size	SC-15	pending_semantics	-	-	-
-Update_From_Join_IndentTableAfterJoin.Indent	SC-15	pending_semantics	-	-	-
-Update_From_Join_IndentTableAfterJoin.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Update_From_Join_IndentTableAfterJoin.Size	SC-15	pending_semantics	-	-	-
-Update_From_Join_IndentWrapConditionNestedOperations.Indent	SC-15	pending_semantics	-	-	-
-Update_From_Join_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Update_From_Join_IndentWrapConditionNestedOperations.Size	SC-15	pending_semantics	-	-	-
-Update_From_Join_LineBreakAfterJoin	SC-15	pending_semantics	-	-	-
-Update_From_Join_LineBreakAfterOn	SC-15	pending_semantics	-	-	-
-Update_From_Join_LineBreakBeforeJoin	SC-15	pending_semantics	-	-	-
-Update_From_Join_LineBreakBeforeOn	SC-15	pending_semantics	-	-	-
-Update_From_Join_WrapAfterOperatorMode	SC-15	pending_semantics	-	-	-
-Update_From_Join_WrapBeforeOperatorMode	SC-15	pending_semantics	-	-	-
-Update_From_Join_WrapConditionMode	SC-15	pending_semantics	-	-	-
-Update_From_LineBreakAfterFrom	SC-15	pending_semantics	-	-	-
-Update_From_LineBreakBeforeFrom	SC-15	pending_semantics	-	-	-
-Update_From_StackFromList	SC-15	pending_semantics	-	-	-
-Update_From_StackFromListMode	SC-15	pending_semantics	-	-	-
-Update_From_UseSameFormattingAsInSelect	SC-15	pending_semantics	-	-	-
-Update_IndentTable.Indent	SC-15	pending_semantics	-	-	-
-Update_IndentTable.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Update_IndentTable.Size	SC-15	pending_semantics	-	-	-
-Update_LineBreakBeforeTable	SC-15	pending_semantics	-	-	-
-Update_OptionHints_IndentOptionHints.Indent	SC-15	pending_semantics	-	-	-
-Update_OptionHints_IndentOptionHints.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Update_OptionHints_IndentOptionHints.Size	SC-15	pending_semantics	-	-	-
-Update_OptionHints_IndentOptionKeyword.Indent	SC-15	pending_semantics	-	-	-
-Update_OptionHints_IndentOptionKeyword.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Update_OptionHints_IndentOptionKeyword.Size	SC-15	pending_semantics	-	-	-
-Update_OptionHints_LineBreakAfterOption	SC-15	pending_semantics	-	-	-
-Update_OptionHints_LineBreakBeforeOption	SC-15	pending_semantics	-	-	-
-Update_OutputClause_IndentOutputKeyword.Indent	SC-15	pending_semantics	-	-	-
-Update_OutputClause_IndentOutputKeyword.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Update_OutputClause_IndentOutputKeyword.Size	SC-15	pending_semantics	-	-	-
-Update_OutputClause_IndentOutputParameters.Indent	SC-15	pending_semantics	-	-	-
-Update_OutputClause_IndentOutputParameters.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Update_OutputClause_IndentOutputParameters.Size	SC-15	pending_semantics	-	-	-
-Update_OutputClause_LineBreakAfterOutput	SC-15	pending_semantics	-	-	-
-Update_OutputClause_LineBreakBeforeOutput	SC-15	pending_semantics	-	-	-
-Update_OutputClause_StackDmlColumnsList	SC-15	pending_semantics	-	-	-
-Update_OutputClause_StackDmlColumnsMode	SC-15	pending_semantics	-	-	-
-Update_SetClause_IndentColumnAssignmentsList.Indent	SC-15	pending_semantics	-	-	-
-Update_SetClause_IndentColumnAssignmentsList.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Update_SetClause_IndentColumnAssignmentsList.Size	SC-15	pending_semantics	-	-	-
-Update_SetClause_IndentSetKeyword.Indent	SC-15	pending_semantics	-	-	-
-Update_SetClause_IndentSetKeyword.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Update_SetClause_IndentSetKeyword.Size	SC-15	pending_semantics	-	-	-
-Update_SetClause_LineBreakAfterSet	SC-15	pending_semantics	-	-	-
-Update_SetClause_LineBreakBeforeSet	SC-15	pending_semantics	-	-	-
-Update_SetClause_StackColumnAssignmentsList	SC-15	pending_semantics	-	-	-
-Update_SetClause_StackColumnAssignmentsListMode	SC-15	pending_semantics	-	-	-
-Update_Where_IndentWhereCondition.Indent	SC-15	pending_semantics	-	-	-
-Update_Where_IndentWhereCondition.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Update_Where_IndentWhereCondition.Size	SC-15	pending_semantics	-	-	-
-Update_Where_IndentWhereKeyword.Indent	SC-15	pending_semantics	-	-	-
-Update_Where_IndentWhereKeyword.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Update_Where_IndentWhereKeyword.Size	SC-15	pending_semantics	-	-	-
-Update_Where_IndentWrapConditionNestedOperations.Indent	SC-15	pending_semantics	-	-	-
-Update_Where_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-15	pending_semantics	-	-	-
-Update_Where_IndentWrapConditionNestedOperations.Size	SC-15	pending_semantics	-	-	-
-Update_Where_LineBreakAfterWhere	SC-15	pending_semantics	-	-	-
-Update_Where_LineBreakBeforeWhere	SC-15	pending_semantics	-	-	-
-Update_Where_WrapAfterOperatorMode	SC-15	pending_semantics	-	-	-
-Update_Where_WrapBeforeOperatorMode	SC-15	pending_semantics	-	-	-
-Update_Where_WrapConditionMode	SC-15	pending_semantics	-	-	-
+Update_From_IndentFromKeyword.Indent	SC-15	covered	update.from.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_From_IndentFromKeyword.OnNewLineOnly	SC-15	covered	update.from.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_From_IndentFromKeyword.Size	SC-15	covered	update.from.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_From_IndentFromList.Indent	SC-15	covered	update.from.listIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_From_IndentFromList.OnNewLineOnly	SC-15	covered	update.from.listIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_From_IndentFromList.Size	SC-15	covered	update.from.listIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_From_Join_IndentJoinKeyword.Indent	SC-15	covered	update.join.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_From_Join_IndentJoinKeyword.OnNewLineOnly	SC-15	covered	update.join.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_From_Join_IndentJoinKeyword.Size	SC-15	covered	update.join.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_From_Join_IndentJoinKeyword.Style	SC-15	covered	update.join.keywordIndent	UpdateDeleteParityTests.Nested_not_predicates_and_relative_absolute_transparent_indents_are_stable	Native relative/absolute style and transparent indentation; XML numeric Style not assumed
+Update_From_Join_IndentJoinKeyword.Transparent	SC-15	covered	update.join.keywordIndent	UpdateDeleteParityTests.Nested_not_predicates_and_relative_absolute_transparent_indents_are_stable	Native relative/absolute style and transparent indentation; XML numeric Style not assumed
+Update_From_Join_IndentOnCondition.Indent	SC-15	covered	update.join.onConditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_From_Join_IndentOnCondition.OnNewLineOnly	SC-15	covered	update.join.onConditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_From_Join_IndentOnCondition.Size	SC-15	covered	update.join.onConditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_From_Join_IndentOnKeyword.Indent	SC-15	covered	update.join.onKeywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_From_Join_IndentOnKeyword.OnNewLineOnly	SC-15	covered	update.join.onKeywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_From_Join_IndentOnKeyword.Size	SC-15	covered	update.join.onKeywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_From_Join_IndentTableAfterJoin.Indent	SC-15	covered	update.join.tableIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_From_Join_IndentTableAfterJoin.OnNewLineOnly	SC-15	covered	update.join.tableIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_From_Join_IndentTableAfterJoin.Size	SC-15	covered	update.join.tableIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_From_Join_IndentWrapConditionNestedOperations.Indent	SC-15	covered	update.join.nestedConditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_From_Join_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-15	covered	update.join.nestedConditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_From_Join_IndentWrapConditionNestedOperations.Size	SC-15	covered	update.join.nestedConditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_From_Join_LineBreakAfterJoin	SC-15	covered	update.join.breakAfter	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Update_From_Join_LineBreakAfterOn	SC-15	covered	update.join.onBreakAfter	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Update_From_Join_LineBreakBeforeJoin	SC-15	covered	update.join.breakBefore	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Update_From_Join_LineBreakBeforeOn	SC-15	covered	update.join.onBreakBefore	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Update_From_Join_WrapAfterOperatorMode	SC-15	covered	update.join.wrapAfterOperator	UpdateDeleteParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never operator sides; XML numeric modes not assumed
+Update_From_Join_WrapBeforeOperatorMode	SC-15	covered	update.join.wrapBeforeOperator	UpdateDeleteParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never operator sides; XML numeric modes not assumed
+Update_From_Join_WrapConditionMode	SC-15	covered	update.join.wrapCondition	UpdateDeleteParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never operator sides; XML numeric modes not assumed
+Update_From_LineBreakAfterFrom	SC-15	covered	update.from.breakAfter	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Update_From_LineBreakBeforeFrom	SC-15	covered	update.from.breakBefore	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Update_From_StackFromList	SC-15	covered	update.from.stackList	UpdateDeleteParityTests.Each_list_supports_stacking_compaction_auto_and_global_commas	Native inherit/on/off list and onePerLine/auto modes with margin and global comma policy; XML numeric mode not assumed
+Update_From_StackFromListMode	SC-15	covered	update.from.stackMode	UpdateDeleteParityTests.Each_list_supports_stacking_compaction_auto_and_global_commas	Native inherit/on/off list and onePerLine/auto modes with margin and global comma policy; XML numeric mode not assumed
+Update_From_UseSameFormattingAsInSelect	SC-15	covered	update.from.useSelectFormatting	UpdateDeleteParityTests.From_inheritance_uses_select_from_and_join_only_when_enabled	Native Boolean enables SELECT FROM/JOIN rules and ignores local FROM/JOIN overrides; WHERE remains independent
+Update_IndentTable.Indent	SC-15	covered	update.target.indent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_IndentTable.OnNewLineOnly	SC-15	covered	update.target.indent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_IndentTable.Size	SC-15	covered	update.target.indent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_LineBreakBeforeTable	SC-15	covered	update.target.breakBefore	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Update_OptionHints_IndentOptionHints.Indent	SC-15	covered	update.option.hintsIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_OptionHints_IndentOptionHints.OnNewLineOnly	SC-15	covered	update.option.hintsIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_OptionHints_IndentOptionHints.Size	SC-15	covered	update.option.hintsIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_OptionHints_IndentOptionKeyword.Indent	SC-15	covered	update.option.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_OptionHints_IndentOptionKeyword.OnNewLineOnly	SC-15	covered	update.option.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_OptionHints_IndentOptionKeyword.Size	SC-15	covered	update.option.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_OptionHints_LineBreakAfterOption	SC-15	covered	update.option.breakAfter	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Update_OptionHints_LineBreakBeforeOption	SC-15	covered	update.option.breakBefore	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Update_OutputClause_IndentOutputKeyword.Indent	SC-15	covered	update.output.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_OutputClause_IndentOutputKeyword.OnNewLineOnly	SC-15	covered	update.output.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_OutputClause_IndentOutputKeyword.Size	SC-15	covered	update.output.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_OutputClause_IndentOutputParameters.Indent	SC-15	covered	update.output.listIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_OutputClause_IndentOutputParameters.OnNewLineOnly	SC-15	covered	update.output.listIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_OutputClause_IndentOutputParameters.Size	SC-15	covered	update.output.listIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_OutputClause_LineBreakAfterOutput	SC-15	covered	update.output.breakAfter	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Update_OutputClause_LineBreakBeforeOutput	SC-15	covered	update.output.breakBefore	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Update_OutputClause_StackDmlColumnsList	SC-15	covered	update.output.stackList	UpdateDeleteParityTests.Each_list_supports_stacking_compaction_auto_and_global_commas	Native inherit/on/off list and onePerLine/auto modes with margin and global comma policy; XML numeric mode not assumed
+Update_OutputClause_StackDmlColumnsMode	SC-15	covered	update.output.stackMode	UpdateDeleteParityTests.Each_list_supports_stacking_compaction_auto_and_global_commas	Native inherit/on/off list and onePerLine/auto modes with margin and global comma policy; XML numeric mode not assumed
+Update_SetClause_IndentColumnAssignmentsList.Indent	SC-15	covered	update.set.listIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_SetClause_IndentColumnAssignmentsList.OnNewLineOnly	SC-15	covered	update.set.listIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_SetClause_IndentColumnAssignmentsList.Size	SC-15	covered	update.set.listIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_SetClause_IndentSetKeyword.Indent	SC-15	covered	update.set.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_SetClause_IndentSetKeyword.OnNewLineOnly	SC-15	covered	update.set.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_SetClause_IndentSetKeyword.Size	SC-15	covered	update.set.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_SetClause_LineBreakAfterSet	SC-15	covered	update.set.breakAfter	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Update_SetClause_LineBreakBeforeSet	SC-15	covered	update.set.breakBefore	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Update_SetClause_StackColumnAssignmentsList	SC-15	covered	update.set.stackList	UpdateDeleteParityTests.Each_list_supports_stacking_compaction_auto_and_global_commas	Native inherit/on/off list and onePerLine/auto modes with margin and global comma policy; XML numeric mode not assumed
+Update_SetClause_StackColumnAssignmentsListMode	SC-15	covered	update.set.stackMode	UpdateDeleteParityTests.Each_list_supports_stacking_compaction_auto_and_global_commas	Native inherit/on/off list and onePerLine/auto modes with margin and global comma policy; XML numeric mode not assumed
+Update_Where_IndentWhereCondition.Indent	SC-15	covered	update.where.conditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_Where_IndentWhereCondition.OnNewLineOnly	SC-15	covered	update.where.conditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_Where_IndentWhereCondition.Size	SC-15	covered	update.where.conditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_Where_IndentWhereKeyword.Indent	SC-15	covered	update.where.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_Where_IndentWhereKeyword.OnNewLineOnly	SC-15	covered	update.where.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_Where_IndentWhereKeyword.Size	SC-15	covered	update.where.keywordIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_Where_IndentWrapConditionNestedOperations.Indent	SC-15	covered	update.where.nestedConditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_Where_IndentWrapConditionNestedOperations.OnNewLineOnly	SC-15	covered	update.where.nestedConditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_Where_IndentWrapConditionNestedOperations.Size	SC-15	covered	update.where.nestedConditionIndent	UpdateDeleteParityTests.Every_indent_targets_a_real_boundary_and_honors_enabled_offset_and_newline	Native indent enabled/offset/onNewLineOnly at parsed syntax boundary; offsets measured in configured indent units
+Update_Where_LineBreakAfterWhere	SC-15	covered	update.where.breakAfter	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Update_Where_LineBreakBeforeWhere	SC-15	covered	update.where.breakBefore	UpdateDeleteParityTests.Every_boundary_offers_always_never_and_inherit	Native inherit/always/never whitespace boundary with AST scope; header FROM distinct from source FROM
+Update_Where_WrapAfterOperatorMode	SC-15	covered	update.where.wrapAfterOperator	UpdateDeleteParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never operator sides; XML numeric modes not assumed
+Update_Where_WrapBeforeOperatorMode	SC-15	covered	update.where.wrapBeforeOperator	UpdateDeleteParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never operator sides; XML numeric modes not assumed
+Update_Where_WrapConditionMode	SC-15	covered	update.where.wrapCondition	UpdateDeleteParityTests.Boolean_modes_and_operator_sides_are_independent	Native inherit/none/and/or/both and independent inherit/always/never operator sides; XML numeric modes not assumed
 View_ColumnList_IndentColumnList.Indent	SC-21	pending_semantics	-	-	-
 View_ColumnList_IndentColumnList.OnNewLineOnly	SC-21	pending_semantics	-	-	-
 View_ColumnList_IndentColumnList.Size	SC-21	pending_semantics	-	-	-

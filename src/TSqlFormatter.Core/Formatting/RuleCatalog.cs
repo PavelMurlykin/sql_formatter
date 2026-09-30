@@ -253,7 +253,7 @@ public sealed class RuleCatalog
                 "subquery " + descriptor.Scope, descriptor.DefaultValue,
                 descriptor.Minimum, descriptor.Maximum, descriptor.Choices,
                 descriptor.DependsOn?.Replace("select.", "subquery."), descriptor.Dialect));
-        return new RuleCatalog(descriptors.Concat(subquery));
+        return new RuleCatalog(descriptors.Concat(subquery).Concat(UpdateDeleteRules(descriptors)));
     }
 
     private static RuleDescriptor CaseRule(string key, string defaultValue) => new(key, "token",
@@ -314,6 +314,40 @@ public sealed class RuleCatalog
         yield return new RuleDescriptor("insert.source.singleLine.maxCharacters", scope,
             RuleValue.FromThreshold(new ThresholdRule(false, 50)), 0, 1000000);
     }
+    private static IEnumerable<RuleDescriptor> UpdateDeleteRules(IEnumerable<RuleDescriptor> selectRules)
+    {
+        foreach (var prefix in new[] { "update", "delete" })
+        {
+            foreach (var descriptor in selectRules.Where(rule => new[] { "from.", "join.", "where.", "option." }
+                         .Any(group => rule.Key.StartsWith("select." + group, StringComparison.Ordinal))))
+                yield return new RuleDescriptor(prefix + descriptor.Key.Substring("select".Length),
+                    prefix.ToUpperInvariant() + " " + descriptor.Scope, descriptor.DefaultValue,
+                    descriptor.Minimum, descriptor.Maximum, descriptor.Choices,
+                    descriptor.DependsOn?.Replace("select.", prefix + "."), descriptor.Dialect);
+            yield return new RuleDescriptor(prefix + ".from.useSelectFormatting", prefix + " FROM/JOIN",
+                RuleValue.FromBoolean(false));
+            foreach (var key in new[] { "output.keywordIndent", "output.listIndent", "target.indent" })
+                yield return IndentDescriptor(prefix + "." + key, prefix);
+            foreach (var key in new[] { "output.breakBefore", "output.breakAfter", "target.breakBefore" })
+                yield return BreakRule(prefix + "." + key, prefix);
+            foreach (var descriptor in ListRules(prefix + ".output", prefix)) yield return descriptor;
+        }
+        foreach (var key in new[] { "keywordIndent", "listIndent" })
+            yield return IndentDescriptor("update.set." + key, "UPDATE SET");
+        foreach (var key in new[] { "breakBefore", "breakAfter" })
+            yield return BreakRule("update.set." + key, "UPDATE SET");
+        foreach (var descriptor in ListRules("update.set", "UPDATE SET")) yield return descriptor;
+        yield return IndentDescriptor("delete.target.fromKeywordIndent", "DELETE header FROM");
+        yield return BreakRule("delete.target.breakBeforeFrom", "DELETE header FROM");
+    }
+
+    private static IEnumerable<RuleDescriptor> ListRules(string prefix, string scope)
+    {
+        yield return StackRule(prefix + ".stackList", scope);
+        yield return new RuleDescriptor(prefix + ".stackMode", scope, RuleValue.FromChoice("onePerLine"),
+            choices: new[] { "onePerLine", "auto" }, dependsOn: prefix + ".stackList");
+    }
+
     public IReadOnlyDictionary<string, RuleDescriptor> Definitions => definitions;
     public bool TryGet(string key, out RuleDescriptor? descriptor) => definitions.TryGetValue(key, out descriptor);
 }

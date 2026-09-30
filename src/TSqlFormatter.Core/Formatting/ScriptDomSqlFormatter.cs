@@ -123,6 +123,8 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
                 request.Dialect, cancellationToken);
             rendered = InsertLayout.ApplySafe(rendered, options, _parser,
                 request.Dialect, cancellationToken);
+            rendered = UpdateDeleteLayout.ApplySafe(rendered, options, _parser,
+                request.Dialect, cancellationToken);
             if (string.Equals(rendered, source, StringComparison.Ordinal))
             {
                 return Unchanged(source, true);
@@ -152,6 +154,8 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         output = SelectCompactness.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);
         output = InsertLayout.ApplySafe(output, options, _parser,
+            request.Dialect, cancellationToken);
+        output = UpdateDeleteLayout.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);
         if (string.Equals(output, source, StringComparison.Ordinal))
         {

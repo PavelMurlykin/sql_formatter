@@ -732,7 +732,7 @@ The `insert.*` rules apply to a parsed `INSERT` with a named or variable table t
 
 ## UPDATE
 
-A basic `UPDATE` with ordinary `SET` assignments and optional `FROM` and `WHERE` is formatted clause by clause. Each assignment gets its own line; `FROM` supports the same simple tables and joins as `SELECT`:
+A basic `UPDATE` with ordinary `SET` assignments and optional `FROM` and `WHERE` is formatted clause by clause. By default, each assignment gets its own line; `FROM` supports the same simple tables and joins as `SELECT`:
 
 ```sql
 UPDATE t
@@ -744,7 +744,7 @@ WHERE
     t.Id = 1;
 ```
 
-Assignment order is retained. A supported CTE before `UPDATE` is formatted above the statement. Compound assignments such as `+=` and `TOP` do not yet receive structural formatting. Unsupported constructs retain their original layout, though recognized keywords may change case.
+Assignment order is retained. A supported CTE before `UPDATE` is formatted above the statement. Compound assignments such as `+=` and `TOP` do not receive structural formatting by default; explicit `update.*` rules described below can change their safe AST boundaries and lists without rewriting expressions.
 
 ## DELETE
 
@@ -759,11 +759,64 @@ WHERE
     u.Flag = 1;
 ```
 
-`DELETE TOP (integer)` and a supported CTE before `DELETE` are formatted structurally. Other `TOP` expressions and comments inside the `DELETE` header retain their original layout; recognized keywords may change case. Other `FROM` and `WHERE` limitations match those described for supported `SELECT` and `UPDATE`.
+`DELETE TOP (integer)` and a supported CTE before `DELETE` are formatted structurally. Other `TOP` expressions and comments inside the `DELETE` header retain their original layout by default; explicit `delete.*` rules can change other safe gaps. Recognized keywords may change case.
+
+### Flexible UPDATE and DELETE settings (JSON v2)
+
+There are 45 `update.*` rules and 41 `delete.*` rules. In the table, `p` means `update` or `delete`. Breaks accept `inherit` (default), `always`, `never`. Indents use an `enabled`/`offset`/`onNewLineOnly`/`style`/`transparent` object, like `select.list.indent`; they are disabled by default.
+
+| Group | Break boundaries | Indents |
+|---|---|---|
+| `p.target.*` | `breakBefore` (before the target table) | `indent` |
+| Additional `delete.target.*` | `breakBeforeFrom` (optional header FROM) | `fromKeywordIndent` |
+| `update.set.*` | `breakBefore`, `breakAfter` | `keywordIndent`, `listIndent` |
+| `p.from.*` | `breakBefore`, `breakAfter` | `keywordIndent`, `listIndent` |
+| `p.join.*` | `breakBefore`, `breakAfter`, `onBreakBefore`, `onBreakAfter` | `keywordIndent`, `tableIndent`, `onKeywordIndent`, `onConditionIndent`, `nestedConditionIndent` |
+| `p.where.*` | `breakBefore`, `breakAfter` | `keywordIndent`, `conditionIndent`, `nestedConditionIndent` |
+| `p.output.*` | `breakBefore`, `breakAfter` | `keywordIndent`, `listIndent` |
+| `p.option.*` | `breakBefore`, `breakAfter` (before the opening parenthesis) | `keywordIndent`, `hintsIndent` |
+
+`update.set`, `p.from`, and `p.output` have independent `stackList` (`inherit`/`on`/`off`) and `stackMode` (`onePerLine`/`auto`) rules. `onePerLine` breaks before each subsequent item; `auto` keeps the list compact when the normalized clause text with its anchor indentation fits `general.maxLineLength`. The mode does not set the boundary before the first item: use `breakAfter`. Lists honor `stackedList.commaPlacement` and `spaceAfterLeadingComma`. `alignment.setAssignments` is retained for supported vertical simple assignments; horizontal SET (`off` or a fitting `auto`) removes alignment padding before `=`. Earlier structural alignment restrictions still apply.
+
+`p.from.useSelectFormatting` is a Boolean switch (default `false`). When `true`, `select.from.*` and `select.join.*` replace local `p.from.*`/`p.join.*` rules; local overrides are ignored. Target, SET, WHERE, OUTPUT, and OPTION do not inherit SELECT. When `false`, UPDATE, DELETE, and SELECT are independent. This inheritance does not change rules inside subqueries; those still use `subquery.useSelectFormatting`.
+
+`p.join` and `p.where` offer `wrapCondition` (`inherit`/`none`/`and`/`or`/`both`), `wrapBeforeOperator`, and `wrapAfterOperator` (`inherit`/`always`/`never`). The condition mode inserts a break before selected AND/OR operators and keeps the right operand inline unless that operator side is explicitly set. Nested parentheses and NOT are handled; AND within BETWEEN is not a Boolean-list boundary.
+
+Target and clause keyword indents are relative to the UPDATE/DELETE line; SET/FROM/OUTPUT items to their keyword line, JOIN tables to the JOIN line, ON to the JOIN line, and ON conditions to the ON line. Nested operand indents use the ON/WHERE line, so they do not accumulate on repeated formatting. `option.hintsIndent` indents the parenthesis block and hints starting on a new line. With a disabled local indent, list stacking retains the first item's level. `offset` is measured in `indent.size` units, with negative resulting widths clamped to zero; `relative` and `anchor` use the anchor line, `absolute` sets a level from the start of the line, and `transparent:true` removes indentation. `onNewLineOnly:false` also adds spaces within a line. Local indentation uses spaces.
+
+Save this in `.tsqlformatter.json`, then run `dotnet run --project src/TSqlFormatter.Cli -- query.sql`:
+
+```json
+{
+  "version": 2,
+  "rules": {
+    "update.set.breakAfter": "never",
+    "update.set.stackList": "off",
+    "update.where.breakBefore": "always",
+    "update.where.breakAfter": "always",
+    "update.where.conditionIndent": {"enabled":true,"offset":1,"onNewLineOnly":true,"style":"relative","transparent":false},
+    "delete.from.useSelectFormatting": true,
+    "select.join.onBreakAfter": "always",
+    "delete.output.breakAfter": "always",
+    "delete.output.stackList": "on"
+  }
+}
+```
+
+For `UPDATE dbo.T SET a = 1, longer = 2 WHERE a = 1;`, the result is:
+
+```sql
+UPDATE dbo.T
+SET a = 1, longer = 2
+WHERE
+    a = 1;
+```
+
+Rules apply to parsed UPDATE/DELETE statements, including stored code, TOP, variable table targets, JOIN/APPLY, and nested joins. `delete.target.*` controls the `DELETE [FROM] target` header, while `delete.from.*` controls the separate source FROM. `where.*` can change the boundary before `CURRENT OF` but does not rewrite the cursor. `output.*` controls the OUTPUT projection, including OUTPUT INTO and both OUTPUT clauses of one statement; INTO target columns are not part of that projection. OPTION retains hints and their order. Comments and literals are not rewritten; gaps adjacent to comments are skipped, while other safe boundaries may change. Edits are checked by reparsing and comparing tokens. Multiline literals/quoted identifiers block rewriting of the entire script. Invalid SQL stays unchanged. XML numeric modes are not imported; without new overrides, JSON v1 and earlier output are retained. VS/SSMS options pages do not expose these new switches — use a configuration file.
 
 ## OUTPUT
 
-By default, in supported `INSERT`, `UPDATE`, and `DELETE`, the `OUTPUT` clause starts on its own line. Its projection list uses comma-space separators; `OUTPUT ... INTO table [(columns)]` is also supported. For `INSERT`, the `insert.output.*` rules described above can override that layout:
+By default, in supported `INSERT`, `UPDATE`, and `DELETE`, the `OUTPUT` clause starts on its own line. Its projection list uses comma-space separators; `OUTPUT ... INTO table [(columns)]` is also supported. The `insert.output.*`, `update.output.*`, and `delete.output.*` rules described above can override that layout:
 
 ```sql
 DELETE FROM T
@@ -772,7 +825,7 @@ WHERE
     Id = 1;
 ```
 
-Original expressions and their order are retained. A comment between `OUTPUT` items or an unsupported `INTO` target leaves the entire statement's layout unchanged. Supported `MERGE` statements can also use `OUTPUT` or `OUTPUT ... INTO`.
+Original expressions and their order are retained. A comment between `OUTPUT` items or an unsupported `INTO` target prevents structural rewriting of the statement; explicit rules can change other safe gaps. Supported `MERGE` statements can also use `OUTPUT` or `OUTPUT ... INTO`.
 
 ## MERGE
 
