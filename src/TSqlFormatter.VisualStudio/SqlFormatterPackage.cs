@@ -68,6 +68,24 @@ public sealed class SqlFormatterPackage : AsyncPackage
             commands.AddCommand(new MenuCommand(ExecuteImportProfile, new CommandID(CommandSet, 0x0300)));
             commands.AddCommand(new MenuCommand(ExecuteExportProfile, new CommandID(CommandSet, 0x0301)));
             commands.AddCommand(new MenuCommand(ExecutePasteFormatted, new CommandID(CommandSet, 0x0302)));
+            commands.AddCommand(new MenuCommand((_, _) => ShowSettings(false), new CommandID(CommandSet, 0x0400)));
+            commands.AddCommand(new MenuCommand((_, _) => ShowSettings(true), new CommandID(CommandSet, 0x0401)));
+        }
+    }
+
+    private void ShowSettings(bool profiles)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        try
+        {
+            var shell = GetService(typeof(SVsUIShell)) as IVsUIShell
+                ?? throw new InvalidOperationException("Окно IDE недоступно.");
+            ErrorHandler.ThrowOnFailure(shell.GetDialogOwnerHwnd(out IntPtr owner));
+            ((FullSettingsOptionsPage)GetDialogPage(typeof(FullSettingsOptionsPage))).ShowEditor(profiles, owner);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Не удалось открыть настройки: " + ex.Message, "SQL Formatter", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 

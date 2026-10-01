@@ -8,8 +8,8 @@ versions, not a promise of a common stable semantic-version series:
 | Component | Package identity | Version | Tested host / runtime |
 | --- | --- | --- | --- |
 | CLI | `TSqlFormatter.Tool` | `0.1.0-preview.6` | .NET 10 Runtime; package install and stdin smoke in the local build and CI |
-| Visual Studio | `TSqlFormatter.VisualStudio` | `0.2.4` | Community 2026 18.10.2 x64; settings/import, multiline preview, Document and Undo in the [installed-IDE matrix](visual-studio-smoke.md) |
-| SSMS | `TSqlFormatter.Ssms` | `0.6.3` | 22.10.2 x64, host ScriptDom 18.0.105.0; settings/preview, Document and Undo, [LIMITED SUPPORT](ssms22-compatibility.md) |
+| Visual Studio | `TSqlFormatter.VisualStudio` | `0.2.5` | Build/package and shared control checks; installed-host checks pending. Earlier 0.2.4 smoke: Community 2026 18.10.2 x64 |
+| SSMS | `TSqlFormatter.Ssms` | `0.6.4` | Build/package and shared control checks; installed-host checks pending. Earlier 0.6.3 smoke: 22.10.2 x64, host ScriptDom 18.0.105.0 |
 
 ## Build and verify
 
@@ -27,6 +27,10 @@ package into an ignored smoke directory, and formats `select 1;`. It writes
 three packages and `candidate-manifest.json` with package versions and SHA-256
 hashes under `artifacts/release-candidate/`. The 2026-10-01 local run uses
 `artifacts/parity-final-candidate/` and 1288 tests (1143 Core and 145 golden).
+The later settings-redesign run uses `artifacts/settings-ui-candidate-final/`,
+1299 tests (1154 Core and 145 golden), VSIX versions 0.2.5/0.6.4 and
+separate shared-control smoke coverage. It does not install the new VSIX
+packages into the user's IDEs.
 The script deliberately fails when the output directory is nonempty; use
 `-OutputDirectory artifacts/another-candidate` for another run. It never
 publishes or deletes packages. For a previously restored checkout, `-SkipRestore`
@@ -58,11 +62,15 @@ The second command reads SQL from stdin. For an interactive file, use
 documented in the [English](user-manual.en.md) and
 [Russian](user-manual.ru.md) manuals. Install the Visual Studio VSIX from the
 candidate directory into Visual Studio 2026 and restart it. In a disposable
-`.sql` file, use `Tools → Format T-SQL Document`, `Selection`, or `Statement`.
+`.sql` file, use `SQL Formatter → Format T-SQL Document`, `Selection`, or `Statement`.
 Install `TSqlFormatter.Ssms.vsix` into SSMS only if accepting the experimental
 version-specific boundary; do not install it into Visual Studio.
 
 ## Support and owner decisions
+
+The redesigned settings in 0.2.5/0.6.4 have a separate
+[validation checklist](settings-ui-validation.md). Previous installed-host
+evidence below does not certify these new package versions.
 
 The CLI and Core are preview quality. Visual Studio's primary commands passed
 the narrow smoke matrix, including native JSON import and full settings.

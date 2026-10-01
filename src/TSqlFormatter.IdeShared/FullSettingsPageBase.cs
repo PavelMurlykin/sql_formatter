@@ -18,13 +18,41 @@ public abstract class FullSettingsPageBase : DialogPage
     internal Func<FormattingOptions>? LegacyOptionsProvider { get; set; }
     internal Func<string?>? SqlPathProvider { get; set; }
 
-    public FormattingOptions ResolveOptions(FormattingOptions legacy) => UseFullSettings && !string.IsNullOrWhiteSpace(ConfigurationJson)
-        ? new SqlFormatterConfigurationSerializer().Deserialize(ConfigurationJson) : legacy;
+    public FormattingOptions ResolveOptions(FormattingOptions legacy) => UseFullSettings
+        ? StoredDraft(legacy) : legacy;
+
+    private FormattingOptions StoredDraft(FormattingOptions fallback) => UserProfileStore.Deserialize(ProfilesJson)
+        .ResolveDefault(string.IsNullOrWhiteSpace(ConfigurationJson) ? fallback
+            : new SqlFormatterConfigurationSerializer().Deserialize(ConfigurationJson));
 
     public void ImportOptions(FormattingOptions options)
     {
         ConfigurationJson = new SqlFormatterConfigurationSerializer().SerializeV2(options);
+        var profiles = UserProfileStore.Deserialize(ProfilesJson);
+        profiles.SetDefault(null);
+        ProfilesJson = profiles.Serialize();
         UseFullSettings = true;
+    }
+
+    internal void ShowEditor(bool showProfiles, IntPtr owner)
+    {
+        string? sqlPath = SqlPathProvider?.Invoke();
+        using var editor = new FullSettingsControl(() => sqlPath);
+        editor.LoadDraft(StoredDraft(LegacyOptionsProvider?.Invoke() ?? FormattingOptions.Default),
+            UserProfileStore.Deserialize(ProfilesJson), UseFullSettings);
+        if (showProfiles) editor.ShowProfiles();
+        using var dialog = new FormattingSettingsWindow(editor);
+        if (dialog.ShowDialog(new DialogOwner(owner)) != DialogResult.OK) return;
+        ConfigurationJson = editor.Model.Export();
+        ProfilesJson = editor.Profiles.Serialize();
+        UseFullSettings = editor.UseFullSettings;
+        SaveSettingsToStorage();
+    }
+
+    private sealed class DialogOwner : IWin32Window
+    {
+        internal DialogOwner(IntPtr handle) { Handle = handle; }
+        public IntPtr Handle { get; }
     }
 
     protected override IWin32Window Window => control ??= new FullSettingsControl(() => SqlPathProvider?.Invoke());
@@ -35,7 +63,7 @@ public abstract class FullSettingsPageBase : DialogPage
         _ = Window;
         try
         {
-            control!.LoadDraft(ResolveOptions(LegacyOptionsProvider?.Invoke() ?? FormattingOptions.Default),
+            control!.LoadDraft(StoredDraft(LegacyOptionsProvider?.Invoke() ?? FormattingOptions.Default),
                 UserProfileStore.Deserialize(ProfilesJson), UseFullSettings);
             opened = true;
         }

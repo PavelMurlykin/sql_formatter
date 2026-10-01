@@ -62,3 +62,6 @@ jobs:
       - name: Verify Visual Studio VSIX
         shell: pwsh
         run: ./scripts/Verify-Vsix.ps1
+      - name: Verify shared WinForms settings editor
+        shell: pwsh
+        run: ./scripts/Verify-SettingsUi.ps1

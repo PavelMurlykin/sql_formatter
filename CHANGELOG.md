@@ -3,6 +3,24 @@
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
 
+## Human-readable formatting settings — 2026-10-01
+
+- Visual Studio VSIX 0.2.5 / SSMS VSIX 0.6.4: separate top-level SQL Formatter
+  menu with formatting settings and saved profiles commands.
+- Resizable shared settings window with a Russian category tree, dynamic
+  search, human-labeled controls for all 1339 scalar fields, and grouped
+  compound rules. Technical IDs remain available for JSON/search.
+- Editable contextual SQL examples and formatted results in the same window;
+  explicit Format/Ctrl+Enter for custom SQL, project overlay, cancellation
+  and stale-result suppression. Preview never changes an IDE document.
+- Save named configuration snapshots and choose a persistent default from
+  built-in/native/user profiles. Older profile arrays remain readable;
+  OK commits the draft and Cancel discards it. Editing detaches the named
+  default without modifying its saved snapshot.
+- Bilingual manuals updated. Unit, menu-table and standalone WinForms smoke
+  checks added; installed-host verification for these new package versions
+  remains separate from the previous SC-27 smoke evidence.
+
 ## Local parity candidate (SC-27) — 2026-10-01
 
 - All 977 SQL Complete inventory paths resolved: 969 configurable native

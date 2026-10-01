@@ -47,7 +47,22 @@ public sealed class SsmsPackage : AsyncPackage
             commands.AddCommand(new MenuCommand(ExecuteFormatDocument, new CommandID(CommandSet, 0x0200)));
             commands.AddCommand(new MenuCommand(ExecuteFormatSelection, new CommandID(CommandSet, 0x0201)));
             commands.AddCommand(new MenuCommand(ExecuteFormatStatement, new CommandID(CommandSet, 0x0202)));
+            commands.AddCommand(new MenuCommand((_, _) => ShowSettings(false), new CommandID(CommandSet, 0x0400)));
+            commands.AddCommand(new MenuCommand((_, _) => ShowSettings(true), new CommandID(CommandSet, 0x0401)));
         }
+    }
+
+    private void ShowSettings(bool profiles)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        try
+        {
+            var shell = GetService(typeof(SVsUIShell)) as IVsUIShell
+                ?? throw new InvalidOperationException("Окно IDE недоступно.");
+            Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(shell.GetDialogOwnerHwnd(out IntPtr owner));
+            ((FullSettingsOptionsPage)GetDialogPage(typeof(FullSettingsOptionsPage))).ShowEditor(profiles, owner);
+        }
+        catch (Exception ex) { ShowMessage("Не удалось открыть настройки: " + ex.Message, true); }
     }
 
     private void ExecuteFormatDocument(object sender, EventArgs e)

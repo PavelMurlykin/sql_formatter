@@ -3,12 +3,29 @@
   <Extern href="stdidcmd.h" />
   <Extern href="vsshlids.h" />
   <Commands package="guidPackage">
+    <Menus>
+      <Menu guid="guidCommandSet" id="menuSqlFormatter" priority="0x0900" type="Menu">
+        <Parent guid="guidSHLMainMenu" id="IDG_VS_MM_TOOLSADDINS" />
+        <Strings><ButtonText>SQL Formatter</ButtonText></Strings>
+      </Menu>
+    </Menus>
     <Groups>
       <Group guid="guidCommandSet" id="grpSqlFormatter" priority="0x0600">
-        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
+        <Parent guid="guidCommandSet" id="menuSqlFormatter" />
+      </Group>
+      <Group guid="guidCommandSet" id="grpSettings" priority="0x0700">
+        <Parent guid="guidCommandSet" id="menuSqlFormatter" />
       </Group>
     </Groups>
     <Buttons>
+      <Button guid="guidCommandSet" id="cmdSettings" priority="0x0100" type="Button">
+        <Parent guid="guidCommandSet" id="grpSettings" />
+        <Strings><ButtonText>Настройки форматирования…</ButtonText></Strings>
+      </Button>
+      <Button guid="guidCommandSet" id="cmdProfiles" priority="0x0110" type="Button">
+        <Parent guid="guidCommandSet" id="grpSettings" />
+        <Strings><ButtonText>Сохранённые профили…</ButtonText></Strings>
+      </Button>
       <Button guid="guidCommandSet" id="cmdFormatDocument" priority="0x0120" type="Button">
         <Parent guid="guidCommandSet" id="grpSqlFormatter" />
         <Strings><ButtonText>T-SQL Formatter (SSMS): Format Document</ButtonText></Strings>
@@ -27,6 +44,10 @@
     <GuidSymbol name="guidPackage" value="{908068E6-40D9-4543-AB9F-1B952930F1E3}" />
     <GuidSymbol name="guidCommandSet" value="{4EE4F956-58EC-490D-9DCA-D2D198570CEC}">
       <IDSymbol name="grpSqlFormatter" value="0x1020" />
+      <IDSymbol name="menuSqlFormatter" value="0x1000" />
+      <IDSymbol name="grpSettings" value="0x1030" />
+      <IDSymbol name="cmdSettings" value="0x0400" />
+      <IDSymbol name="cmdProfiles" value="0x0401" />
       <IDSymbol name="cmdFormatDocument" value="0x0200" />
       <IDSymbol name="cmdFormatSelection" value="0x0201" />
       <IDSymbol name="cmdFormatStatement" value="0x0202" />

@@ -12,234 +12,294 @@ namespace TSqlFormatter.IdeShared;
 internal sealed class FullSettingsControl : UserControl
 {
     private readonly Func<string?> sqlPathProvider;
-    private readonly CheckBox enabled = new() { Text = "Use full settings (instead of legacy pages)", AutoSize = true };
-    private readonly ComboBox categories = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 100 };
-    private readonly TextBox search = new() { Width = 150, AccessibleName = "Search settings by key or scope" };
-    private readonly ListBox fields = new() { Dock = DockStyle.Fill, HorizontalScrollbar = true };
-    private readonly CheckBox boolean = new() { Text = "Enabled / true", AutoSize = true };
-    private readonly ComboBox choice = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 160 };
-    private readonly NumericUpDown number = new() { Width = 140 };
-    private readonly Label details = new() { AutoSize = true, Dock = DockStyle.Fill, MaximumSize = new Size(640, 0) };
-    private readonly ComboBox profiles = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 175 };
-    private readonly TextBox profileName = new() { Width = 145, MaxLength = 100, AccessibleName = "New user profile name" };
-    private readonly TextBox sample = SqlBox(false);
-    private readonly TextBox result = SqlBox(true);
-    private readonly CheckBox projectPreview = new() { Text = "Include project configuration (active SQL file)", AutoSize = true };
-    private readonly TextBox source = new() { ReadOnly = true, Dock = DockStyle.Fill, Multiline = true, Height = 42, ScrollBars = ScrollBars.Vertical };
-    private readonly Label status = new() { AutoSize = true, Dock = DockStyle.Fill };
+    private readonly SettingsPresentation presentation = new();
+    private readonly CheckBox enabled = new() { Text = "Использовать эти настройки при форматировании", AutoSize = true };
+    private readonly TextBox search = new() { Dock = DockStyle.Fill, AccessibleName = "Поиск настроек" };
+    private readonly TreeView tree = new() { Dock = DockStyle.Fill, HideSelection = false, ShowNodeToolTips = true };
+    private readonly Label heading = new() { Dock = DockStyle.Top, AutoSize = true };
+    private readonly FlowLayoutPanel editors = new() { Dock = DockStyle.Top, AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false };
+    private readonly Label description = new() { Dock = DockStyle.Top, AutoSize = true };
+    private readonly Label status = new() { Dock = DockStyle.Fill, AutoSize = true };
+    private readonly TextBox source = new() { Dock = DockStyle.Fill, ReadOnly = true };
+    private readonly RichTextBox sample = SqlBox(false);
+    private readonly RichTextBox result = SqlBox(true);
+    private readonly CheckBox projectPreview = new() { Text = "Учитывать настройки проекта активного SQL-файла", AutoSize = true };
+    private readonly ComboBox profiles = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 450, DropDownWidth = 650 };
+    private readonly TextBox profileName = new() { Width = 280, MaxLength = 100, AccessibleName = "Имя нового профиля" };
+    private readonly Label defaultProfile = new() { AutoSize = true, MaximumSize = new Size(560, 0) };
+    private readonly TabControl tabs = new() { Dock = DockStyle.Fill };
     private readonly System.Windows.Forms.Timer debounce = new() { Interval = 300 };
     private CancellationTokenSource? previewCancellation;
+    private SettingsField[] selected = Array.Empty<SettingsField>();
     private int revision;
-    private bool running;
     private bool loading;
+    private bool running;
+    private bool customSample;
 
     internal FullSettingsControl(Func<string?> sqlPathProvider)
     {
         this.sqlPathProvider = sqlPathProvider;
         Model = new SettingsEditorModel();
         Profiles = new UserProfileStore();
-        Size = new Size(480, 340);
+        Size = new Size(1000, 660);
         AutoScaleMode = AutoScaleMode.Font;
-        AutoScroll = true;
-        var layout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 2, Padding = new Padding(3) };
+        var layout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 4, Padding = new Padding(8) };
         layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 24));
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 36));
         layout.Controls.Add(enabled, 0, 0);
-        var tabs = new TabControl { Dock = DockStyle.Fill };
-        var settingsTab = new TabPage("Settings");
-        var profilesTab = new TabPage("Profiles");
-        var previewTab = new TabPage("Preview");
-        tabs.TabPages.AddRange(new[] { settingsTab, profilesTab, previewTab });
         layout.Controls.Add(tabs, 0, 1);
-        var settings = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 4 };
-        settings.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        settings.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        settings.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        settings.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        settings.Controls.Add(Row(new Label { Text = "Category", AutoSize = true }, categories,
-            new Label { Text = "Search", AutoSize = true }, search), 0, 0);
-        settings.Controls.Add(fields, 0, 1);
-        settings.Controls.Add(Row(boolean, choice, number, Button("Set value", SetValue), Button("Reset field", ResetField), Button("Reset all", ResetAll)), 0, 2);
-        settings.Controls.Add(details, 0, 3);
-        settings.SizeChanged += (_, _) => details.MaximumSize = new Size(Math.Max(150, settings.ClientSize.Width - 8), 0);
-        settingsTab.Controls.Add(settings);
-        var profileLayout = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, AutoScroll = true, WrapContents = false };
-        profileLayout.Controls.Add(Row(profiles, Button("Load profile", LoadProfile)));
-        profileLayout.Controls.Add(Row(profileName, Button("Save as…", SaveProfile)));
-        profileLayout.Controls.Add(Row(Button("Import JSON…", Import), Button("Export JSON…", Export)));
-        profileLayout.Controls.Add(new Label { AutoSize = true, MaximumSize = new Size(360, 0),
-            Text = "Named snapshots persist only after OK/Apply. Export writes a file immediately. Cancel discards unsaved settings/profile edits." });
-        profilesTab.Controls.Add(profileLayout);
-        var previews = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 7 };
-        previews.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        previews.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        previews.RowStyles.Add(new RowStyle(SizeType.Percent, 45));
-        previews.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        previews.RowStyles.Add(new RowStyle(SizeType.Percent, 55));
-        previews.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
-        previews.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        previews.Controls.Add(projectPreview, 0, 0);
-        previews.Controls.Add(new Label { Text = "Sample (not saved)", AutoSize = true }, 0, 1);
-        previews.Controls.Add(sample, 0, 2);
-        previews.Controls.Add(new Label { Text = "Core preview (not applied to editor)", AutoSize = true }, 0, 3);
-        previews.Controls.Add(result, 0, 4);
-        previews.Controls.Add(source, 0, 5);
-        previews.Controls.Add(status, 0, 6);
-        previews.SizeChanged += (_, _) => status.MaximumSize = new Size(Math.Max(150, previews.ClientSize.Width - 8), 0);
-        previewTab.Controls.Add(previews);
+        layout.Controls.Add(source, 0, 2);
+        layout.Controls.Add(status, 0, 3);
         Controls.Add(layout);
+        var settingsTab = new TabPage("Настройки форматирования");
+        var profilesTab = new TabPage("Сохранённые профили");
+        tabs.TabPages.AddRange(new[] { settingsTab, profilesTab });
+        var navigation = new SplitContainer { Size = new Size(980, 600), Dock = DockStyle.Fill, SplitterDistance = 260, Panel1MinSize = 180, Panel2MinSize = 220 };
+        var left = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 3 };
+        left.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        left.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
+        left.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        left.Controls.Add(new Label { Text = "Поиск по названию или ключевому слову", AutoSize = true }, 0, 0);
+        left.Controls.Add(search, 0, 1);
+        left.Controls.Add(tree, 0, 2);
+        navigation.Panel1.Controls.Add(left);
+        var right = new SplitContainer { Size = new Size(700, 600), Dock = DockStyle.Fill, Orientation = Orientation.Horizontal, SplitterDistance = 210, Panel1MinSize = 90, Panel2MinSize = 100 };
+        var settings = new Panel { Dock = DockStyle.Fill, AutoScroll = true, Padding = new Padding(6) };
+        settings.Controls.Add(description); settings.Controls.Add(editors); settings.Controls.Add(heading);
+        settings.SizeChanged += (_, _) => heading.MaximumSize = description.MaximumSize = new Size(Math.Max(120, settings.ClientSize.Width - 28), 0);
+        right.Panel1.Controls.Add(settings);
+        var preview = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 3 };
+        preview.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        preview.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        preview.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        preview.Controls.Add(Row(Button("Форматировать пример", FormatSample), Button("Пример выбранной настройки", UseExample)), 0, 0);
+        preview.Controls.Add(projectPreview, 0, 1);
+        var code = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 2 };
+        code.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+        code.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+        code.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        code.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        code.Controls.Add(new Label { Text = "Исходный SQL — можно ввести свой код", AutoSize = true }, 0, 0);
+        code.Controls.Add(new Label { Text = "Отформатированный SQL", AutoSize = true }, 1, 0);
+        code.Controls.Add(sample, 0, 1); code.Controls.Add(result, 1, 1);
+        preview.Controls.Add(code, 0, 2);
+        right.Panel2.Controls.Add(preview);
+        navigation.Panel2.Controls.Add(right);
+        settingsTab.Controls.Add(navigation);
+        var profileLayout = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoScroll = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, Padding = new Padding(12) };
+        profileLayout.Controls.Add(defaultProfile);
+        profileLayout.Controls.Add(new Label { Text = "Встроенные и ваши сохранённые стили", AutoSize = true });
+        profileLayout.Controls.Add(profiles);
+        profileLayout.Controls.Add(Row(Button("Загрузить в настройки", LoadProfile), Button("Использовать по умолчанию", MakeDefault)));
+        profileLayout.Controls.Add(new Label { Text = "Сохранить текущие настройки в новый профиль", AutoSize = true });
+        profileLayout.Controls.Add(profileName);
+        profileLayout.Controls.Add(Button("Сохранить профиль", SaveProfile));
+        profileLayout.Controls.Add(Row(Button("Импорт JSON…", Import), Button("Экспорт JSON…", Export)));
+        profileLayout.Controls.Add(new Label { AutoSize = true, MaximumSize = new Size(560, 0), Text =
+            "OK сохраняет настройки, профили и выбор по умолчанию. Отмена отбрасывает изменения. " +
+            "Редактирование настройки переключает профиль по умолчанию на текущие настройки. " +
+            "Экспорт записывает файл сразу и не отменяется кнопкой Отмена." });
+        profilesTab.Controls.Add(profileLayout);
         sample.MaxLength = 8192;
-        sample.Text = "SELECT a, b FROM dbo.T WHERE a = 1 AND b = 2;";
-        search.TextChanged += (_, _) => Filter();
-        categories.SelectedIndexChanged += (_, _) => Filter();
-        fields.SelectedIndexChanged += (_, _) => ShowField();
-        sample.TextChanged += (_, _) => QueuePreview();
-        projectPreview.CheckedChanged += (_, _) => QueuePreview();
+        sample.AccessibleName = "Исходный SQL";
+        result.AccessibleName = "Отформатированный SQL";
         enabled.CheckedChanged += (_, _) => QueuePreview();
+        search.TextChanged += (_, _) => Filter();
+        tree.AfterSelect += (_, _) => SelectGroup();
+        sample.TextChanged += (_, _) =>
+        {
+            if (loading) return;
+            customSample = true;
+            InvalidatePreview();
+            status.Text = "Код изменён. Нажмите «Форматировать пример» (Ctrl+Enter).";
+        };
+        sample.KeyDown += (_, e) => { if (e.Control && e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; FormatSample(); } };
+        projectPreview.CheckedChanged += (_, _) => QueuePreview();
         debounce.Tick += (_, _) => RefreshPreview();
     }
 
     internal SettingsEditorModel Model { get; private set; }
     internal UserProfileStore Profiles { get; private set; }
     internal bool UseFullSettings => enabled.Checked;
-
+    internal void ShowProfiles() => tabs.SelectedIndex = 1;
     internal void LoadDraft(FormattingOptions options, UserProfileStore store, bool useFullSettings)
     {
         loading = true;
-        Model = new SettingsEditorModel(options);
-        Profiles = store;
-        enabled.Checked = useFullSettings;
-        search.Clear();
-        categories.Items.Clear();
-        categories.Items.Add("All");
-        categories.Items.AddRange(Model.Fields.Select(f => f.Category).Distinct().OrderBy(c => c).Cast<object>().ToArray());
-        categories.SelectedIndex = 0;
-        RefreshProfiles();
-        loading = false;
-        Filter();
-        QueuePreview();
+        Model = new SettingsEditorModel(options); Profiles = store;
+        enabled.Checked = useFullSettings; search.Clear(); customSample = false;
+        RefreshProfiles(); loading = false; Filter();
     }
-
     private void Filter()
     {
         if (loading) return;
-        string? selected = (fields.SelectedItem as SettingsField)?.Id;
-        fields.BeginUpdate();
-        fields.Items.Clear();
-        fields.Items.AddRange(Model.Find(search.Text, categories.SelectedIndex <= 0 ? null : (string)categories.SelectedItem).Cast<object>().ToArray());
-        fields.EndUpdate();
-        int index = selected is null ? -1 : fields.Items.Cast<SettingsField>().ToList().FindIndex(f => f.Id == selected);
-        fields.SelectedIndex = fields.Items.Count > 0 ? Math.Max(0, index) : -1;
-        ShowField();
-    }
-
-    private void ShowField()
-    {
-        var f = fields.SelectedItem as SettingsField;
-        boolean.Visible = f?.Kind == SettingsFieldKind.Boolean;
-        number.Visible = f?.Kind == SettingsFieldKind.Integer;
-        choice.Visible = f?.Kind == SettingsFieldKind.Choice;
-        details.Text = f is null ? "No matching settings." : Model.Explain(f.Id);
-        if (f is null) return;
-        var value = Model.Get(f.Id);
-        if (f.Kind == SettingsFieldKind.Boolean) boolean.Checked = (bool)value;
-        if (f.Kind == SettingsFieldKind.Integer)
+        string? previous = selected.FirstOrDefault() is { } previousField ? presentation.GroupId(previousField) : null;
+        tree.BeginUpdate(); tree.Nodes.Clear();
+        TreeNode? first = null, restore = null;
+        var allGroups = Model.Fields.GroupBy(presentation.GroupId).ToDictionary(g => g.Key, g => g.ToArray());
+        foreach (var group in presentation.Find(Model, search.Text).GroupBy(presentation.GroupId))
         {
-            number.Minimum = int.MinValue;
-            number.Maximum = int.MaxValue;
-            number.Value = (int)value;
-            number.Minimum = f.Minimum;
-            number.Maximum = f.Maximum;
+            var field = group.First();
+            var collection = tree.Nodes;
+            string pathKey = "";
+            foreach (var segment in presentation.Path(field))
+            {
+                pathKey += "/" + segment;
+                var parent = collection.Cast<TreeNode>().FirstOrDefault(n => n.Name == pathKey);
+                if (parent is null) { parent = new TreeNode(segment) { Name = pathKey }; collection.Add(parent); }
+                collection = parent.Nodes;
+            }
+            var node = new TreeNode(presentation.Title(field)) { Name = group.Key,
+                Tag = allGroups[group.Key], ToolTipText = presentation.Context(field) };
+            collection.Add(node); first ??= node;
+            if (group.Key == previous) restore = node;
         }
-        if (f.Kind == SettingsFieldKind.Choice)
+        if (!string.IsNullOrWhiteSpace(search.Text)) tree.ExpandAll();
+        tree.SelectedNode = restore ?? first; tree.SelectedNode?.EnsureVisible(); tree.EndUpdate();
+        if (first is null)
         {
-            choice.Items.Clear();
-            choice.Items.AddRange(f.Choices.Cast<object>().ToArray());
-            choice.SelectedItem = (string)value;
+            InvalidatePreview();
+            selected = Array.Empty<SettingsField>(); ClearEditors();
+            heading.Text = "Настройки не найдены — измените запрос поиска."; description.Text = "";
+            status.Text = "Настройки не найдены.";
         }
     }
-
-    private void SetValue() => Guard(() =>
+    private void SelectGroup()
     {
-        if (fields.SelectedItem is not SettingsField f) return;
-        Model.Set(f.Id, f.Kind switch { SettingsFieldKind.Boolean => (object)boolean.Checked, SettingsFieldKind.Integer => decimal.ToInt32(number.Value), _ => (string)choice.SelectedItem });
-        enabled.Checked = true;
-        ShowField();
-        QueuePreview();
-    });
-    private void ResetField() => Guard(() =>
+        if (tree.SelectedNode?.Tag is not SettingsField[] fields)
+        {
+            var node = tree.SelectedNode;
+            while (node?.Nodes.Count > 0) node = node.Nodes[0];
+            if (node?.Tag is SettingsField[]) tree.SelectedNode = node;
+            return;
+        }
+        selected = fields; ShowFields();
+        if (!customSample) UseExample(); else QueuePreview();
+    }
+    private void ClearEditors()
     {
-        if (fields.SelectedItem is not SettingsField f) return;
-        Model.Reset(f.Id);
-        enabled.Checked = true;
-        ShowField();
-        QueuePreview();
+        foreach (Control control in editors.Controls.Cast<Control>().ToArray()) control.Dispose();
+        editors.Controls.Clear();
+    }
+    private void ShowFields()
+    {
+        loading = true; editors.SuspendLayout(); ClearEditors();
+        if (selected.Length == 0) { loading = false; editors.ResumeLayout(); return; }
+        heading.Text = presentation.Context(selected[0]);
+        description.Text = presentation.Describe(Model, selected[0]);
+        foreach (var field in selected)
+        {
+            string label = presentation.FieldLabel(field);
+            object current = Model.Get(field.Id);
+            Control editor;
+            if (field.Kind == SettingsFieldKind.Boolean)
+            {
+                var check = new CheckBox { Text = label, AutoSize = true, Checked = (bool)current, AccessibleName = label };
+                check.CheckedChanged += (_, _) => Change(field, check.Checked);
+                editor = check;
+            }
+            else if (field.Kind == SettingsFieldKind.Integer)
+            {
+                var number = new NumericUpDown { Minimum = field.Minimum, Maximum = field.Maximum, Value = (int)current, Width = 140, AccessibleName = label };
+                number.ValueChanged += (_, _) => Change(field, decimal.ToInt32(number.Value));
+                editor = Row(new Label { Text = label + $" ({field.Minimum}…{field.Maximum})", AutoSize = true }, number);
+            }
+            else
+            {
+                var choice = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Width = 260, AccessibleName = label };
+                choice.Items.AddRange(field.Choices.Select(v => new Choice(v, presentation.ChoiceLabel(v))).Cast<object>().ToArray());
+                choice.SelectedIndex = field.Choices.ToList().IndexOf((string)current);
+                choice.SelectedIndexChanged += (_, _) => { if (choice.SelectedItem is Choice value) Change(field, value.Value); };
+                editor = Row(new Label { Text = label, AutoSize = true }, choice);
+            }
+            editors.Controls.Add(editor);
+        }
+        editors.Controls.Add(Row(Button("Сбросить выбранное правило", ResetGroup), Button("Сбросить все настройки", ResetAll)));
+        editors.ResumeLayout(); loading = false;
+    }
+    private void Change(SettingsField field, object value)
+    {
+        if (loading) return;
+        Guard(() =>
+        {
+            Model.Set(field.Id, value); Profiles.SetDefault(null); enabled.Checked = true;
+            description.Text = presentation.Describe(Model, field); RefreshDefaultLabel(); QueuePreview();
+        });
+    }
+    private void ResetGroup() => Guard(() =>
+    {
+        foreach (var field in selected) Model.Reset(field.Id);
+        Profiles.SetDefault(null); enabled.Checked = true; RefreshDefaultLabel(); ShowFields(); QueuePreview();
     });
     private void ResetAll() => Guard(() =>
     {
-        if (!Confirm("Reset all draft formatting values? Saved profiles are retained.")) return;
-        Model.ResetAll();
-        enabled.Checked = true;
-        ShowField();
-        QueuePreview();
+        if (!Confirm("Сбросить все настройки? Сохранённые профили останутся.")) return;
+        Model.ResetAll(); Profiles.SetDefault(null); enabled.Checked = true; RefreshDefaultLabel(); ShowFields(); QueuePreview();
     });
-
     private void RefreshProfiles()
     {
+        string? previous = (profiles.SelectedItem as ProfileItem)?.Profile.Id ?? Profiles.DefaultProfileId;
         profiles.Items.Clear();
-        profiles.Items.AddRange(new FormattingProfileCatalog().Profiles.Select(p => "Built-in: " + p.Id).Cast<object>().ToArray());
-        profiles.Items.AddRange(Profiles.Names.Select(n => "User: " + n).Cast<object>().ToArray());
-        profiles.SelectedIndex = 0;
+        profiles.Items.AddRange(Profiles.AvailableProfiles.Select(p => new ProfileItem(p,
+            (p.Id.StartsWith("user:", StringComparison.Ordinal) ? "Мой профиль: " : "Встроенный: ") + presentation.ProfileName(p))).Cast<object>().ToArray());
+        profiles.SelectedIndex = Math.Max(0, profiles.Items.Cast<ProfileItem>().ToList().FindIndex(p => p.Profile.Id == previous));
+        RefreshDefaultLabel();
+    }
+    private void RefreshDefaultLabel()
+    {
+        var profile = Profiles.AvailableProfiles.FirstOrDefault(p => p.Id == Profiles.DefaultProfileId);
+        defaultProfile.Text = "По умолчанию: " + (profile is null ? "текущие настройки" : presentation.ProfileName(profile));
     }
     private void SaveProfile() => Guard(() =>
     {
         string name = profileName.Text.Trim();
+        if (name.Length is 0 or > 100) throw new ArgumentException("Введите имя профиля (1–100 символов).");
         bool replace = Profiles.Contains(name);
-        if (replace && !Confirm("Replace profile '" + name + "' in this draft?")) return;
-        Profiles.Save(name, Model.Options, replace);
-        RefreshProfiles();
-        profiles.SelectedItem = "User: " + name;
-        status.Text = "Profile saved in draft; choose OK/Apply to persist.";
+        if (replace && !Confirm("Заменить сохранённый профиль «" + name + "»?")) return;
+        Profiles.Save(name, Model.Options, replace); RefreshProfiles();
+        profiles.SelectedIndex = profiles.Items.Cast<ProfileItem>().ToList().FindIndex(p => string.Equals(p.Profile.Id, "user:" + name, StringComparison.OrdinalIgnoreCase));
+        status.Text = "Профиль сохранён в черновике. Нажмите OK для сохранения в IDE.";
     });
     private void LoadProfile() => Guard(() =>
     {
-        if (profiles.SelectedItem is not string selection) return;
-        FormattingOptions options;
-        if (selection.StartsWith("User: ", StringComparison.Ordinal)) options = Profiles.Get(selection.Substring(6));
-        else
-        {
-            new FormattingProfileCatalog().TryGet(selection.Substring(10), out var profile);
-            options = profile!.Options;
-        }
-        Model = new SettingsEditorModel(options);
-        enabled.Checked = true;
-        ShowField();
-        QueuePreview();
+        if (profiles.SelectedItem is not ProfileItem item) return;
+        Model = new SettingsEditorModel(item.Profile.Options); Profiles.SetDefault(null);
+        enabled.Checked = true; RefreshDefaultLabel(); ShowFields(); QueuePreview();
+    });
+    private void MakeDefault() => Guard(() =>
+    {
+        if (profiles.SelectedItem is not ProfileItem item) return;
+        Profiles.SetDefault(item.Profile.Id); Model = new SettingsEditorModel(Profiles.ResolveDefault(Model.Options));
+        enabled.Checked = true; RefreshDefaultLabel(); ShowFields(); QueuePreview();
+        status.Text = "Профиль выбран по умолчанию. Нажмите OK, чтобы применить выбор.";
     });
     private void Import() => Guard(() =>
     {
-        using var dialog = new OpenFileDialog { Filter = "Native formatter JSON (*.json)|*.json", CheckFileExists = true };
+        using var dialog = new OpenFileDialog { Filter = "Настройки SQL Formatter (*.json)|*.json", CheckFileExists = true };
         if (dialog.ShowDialog(this) != DialogResult.OK) return;
         var imported = new SqlFormatterProfileExchange().Import(dialog.FileName);
         if (!imported.Succeeded) throw new InvalidOperationException(imported.Diagnostics[0].Message);
         Model = new SettingsEditorModel(imported.Options!);
-        enabled.Checked = true;
-        ShowField();
-        QueuePreview();
+        Profiles.SetDefault(null); enabled.Checked = true; RefreshDefaultLabel(); ShowFields(); QueuePreview();
     });
     private void Export() => Guard(() =>
     {
-        using var dialog = new SaveFileDialog { Filter = "Native formatter JSON (*.json)|*.json", DefaultExt = "json", AddExtension = true, OverwritePrompt = true };
+        using var dialog = new SaveFileDialog { Filter = "Настройки SQL Formatter (*.json)|*.json", DefaultExt = "json", AddExtension = true, OverwritePrompt = true };
         if (dialog.ShowDialog(this) == DialogResult.OK) new SqlFormatterProfileExchange().Export(dialog.FileName, Model.Options);
     });
-
+    private void UseExample()
+    {
+        if (selected.Length == 0) return;
+        loading = true; sample.Text = presentation.Example(selected[0]); loading = false;
+        customSample = false; QueuePreview();
+    }
+    private void FormatSample() { InvalidatePreview(); RefreshPreview(); }
+    private void InvalidatePreview() { revision++; previewCancellation?.Cancel(); debounce.Stop(); result.Clear(); }
     private void QueuePreview()
     {
         if (loading || IsDisposed) return;
-        revision++;
-        previewCancellation?.Cancel();
-        debounce.Stop();
-        debounce.Start();
+        InvalidatePreview(); debounce.Start();
     }
     private void RefreshPreview()
     {
@@ -251,16 +311,11 @@ internal sealed class FullSettingsControl : UserControl
         try { path = projectPreview.Checked ? sqlPathProvider() : null; }
         catch (Exception ex) { status.Text = ex.Message; return; }
         if (projectPreview.Checked && string.IsNullOrEmpty(path))
-        {
-            source.Text = "No active saved .sql file; project preview unavailable.";
-            result.Clear();
-            return;
-        }
+        { source.Text = "Нет активного сохранённого SQL-файла — настройки проекта недоступны."; return; }
         int currentRevision = revision;
         var options = Model.Options;
         var cancellation = previewCancellation = new CancellationTokenSource(TimeSpan.FromSeconds(2));
-        running = true;
-        status.Text = "Previewing draft; defaults change only after OK/Apply.";
+        running = true; status.Text = "Форматирование примера… SQL-документ IDE не изменяется.";
         _ = Task.Run(() => SettingsPreview.Format(sql, options, path, cancellation.Token), cancellation.Token).ContinueWith(task =>
         {
             running = false;
@@ -268,48 +323,33 @@ internal sealed class FullSettingsControl : UserControl
             cancellation.Dispose();
             if (IsDisposed || currentRevision != revision) return;
             result.Clear();
-            if (task.IsCanceled) { status.Text = "Preview cancelled or exceeded 2 seconds."; return; }
-            if (task.IsFaulted) { status.Text = "Preview failed: " + task.Exception?.GetBaseException().Message; return; }
-            source.Text = task.Result.Source;
-            var error = task.Result.Diagnostics.FirstOrDefault();
-            // Native multiline EDIT controls require CRLF. This is display-only;
-            // the formatter's configured line endings and editor edits are unchanged.
-            if (error is null) result.Text = task.Result.Result!.Text.Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", "\r\n");
-            status.Text = error is null ? (enabled.Checked ? "Draft preview ready." : "Draft preview ready; full settings disabled for commands until enabled.") : error.Code + ": " + error.Message;
+            if (task.IsCanceled) { status.Text = "Форматирование отменено или превысило 2 секунды."; return; }
+            if (task.IsFaulted) { status.Text = "Ошибка примера: " + task.Exception?.GetBaseException().Message; return; }
+            source.Text = "Источник: " + task.Result.Source;
+            var error = task.Result.Diagnostics.FirstOrDefault(d => d.Severity == FormatterDiagnosticSeverity.Error);
+            if (error is null && task.Result.Result is { } formatted)
+            {
+                result.Text = formatted.Text; // RichTextBox supports LF without display-only EOL conversion.
+                status.Text = "Пример отформатирован. " + (enabled.Checked ? "Настройки сохранятся после OK." : "Для команд IDE включите использование этих настроек.");
+            }
+            else status.Text = error is null ? "Пример не удалось отформатировать." : error.Code + ": " + error.Message;
         }, TaskScheduler.FromCurrentSynchronizationContext());
     }
-    internal void StopPreview()
-    {
-        revision++;
-        debounce.Stop();
-        previewCancellation?.Cancel();
-    }
+    internal void StopPreview() { revision++; debounce.Stop(); previewCancellation?.Cancel(); }
     private void Guard(Action action)
-    {
-        try { action(); }
-        catch (Exception ex) { MessageBox.Show(this, ex.Message, "T-SQL Formatter", MessageBoxButtons.OK, MessageBoxIcon.Error); }
-    }
-    private bool Confirm(string message) => MessageBox.Show(this, message, "T-SQL Formatter", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
+    { try { action(); } catch (Exception ex) { MessageBox.Show(this, ex.Message, "SQL Formatter", MessageBoxButtons.OK, MessageBoxIcon.Error); } }
+    private bool Confirm(string message) => MessageBox.Show(this, message, "SQL Formatter", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
     private static FlowLayoutPanel Row(params Control[] controls)
-    {
-        var row = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoSize = true, WrapContents = true };
-        row.Controls.AddRange(controls);
-        return row;
-    }
+    { var row = new FlowLayoutPanel { AutoSize = true, WrapContents = true, Dock = DockStyle.Top }; row.Controls.AddRange(controls); return row; }
     private static Button Button(string text, Action action)
-    {
-        var button = new Button { Text = text, AutoSize = true };
-        button.Click += (_, _) => action();
-        return button;
-    }
-    private static TextBox SqlBox(bool readOnly) => new()
-    {
-        Dock = DockStyle.Fill, Multiline = true, ReadOnly = readOnly, WordWrap = false,
-        ScrollBars = ScrollBars.Both, Font = new Font(FontFamily.GenericMonospace, 9)
-    };
+    { var button = new Button { Text = text, AutoSize = true }; button.Click += (_, _) => action(); return button; }
+    private static RichTextBox SqlBox(bool readOnly) => new()
+    { Dock = DockStyle.Fill, ReadOnly = readOnly, WordWrap = false, DetectUrls = false, AcceptsTab = true,
+        ScrollBars = RichTextBoxScrollBars.Both, Font = new Font(FontFamily.GenericMonospace, 10) };
     protected override void Dispose(bool disposing)
-    {
-        if (disposing) { StopPreview(); debounce.Dispose(); }
-        base.Dispose(disposing);
-    }
+    { if (disposing) { StopPreview(); debounce.Dispose(); } base.Dispose(disposing); }
+    private sealed class Choice
+    { public Choice(string value, string label) { Value = value; Label = label; } public string Value { get; } public string Label { get; } public override string ToString() => Label; }
+    private sealed class ProfileItem
+    { public ProfileItem(FormattingProfile profile, string label) { Profile = profile; Label = label; } public FormattingProfile Profile { get; } public string Label { get; } public override string ToString() => Label; }
 }

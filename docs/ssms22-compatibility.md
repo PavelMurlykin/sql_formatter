@@ -1,5 +1,10 @@
 # SSMS 22 compatibility boundary
 
+The new settings/menu package 0.6.4 has build and shared WinForms smoke
+coverage; installed-host validation is pending. See the
+[redesign checklist](settings-ui-validation.md). LIMITED SUPPORT below is
+specific to 0.6.3 and does not certify 0.6.4 on all SSMS hosts.
+
 ## SC-27 installed-package smoke — 2026-10-01
 
 Host: SSMS 22.10.2 (22.10.12217.157), x64, instance `411fbe8f`.

@@ -1,5 +1,10 @@
 # Visual Studio 2026 installed-VSIX smoke matrix
 
+The new settings/menu package 0.2.5 has build and shared WinForms smoke
+coverage; installed-host validation is pending. See the
+[redesign checklist](settings-ui-validation.md). The results below remain
+historical evidence for 0.2.4 and earlier.
+
 ## SC-27 installed-package smoke — 2026-10-01
 
 Host: Community 2026 18.10.2 (18.10.12217.157), x64, instance `f4993804`.
