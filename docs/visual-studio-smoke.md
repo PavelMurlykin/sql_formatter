@@ -1,5 +1,39 @@
 # Visual Studio 2026 installed-VSIX smoke matrix
 
+## SC-27 installed-package smoke — 2026-10-01
+
+Host: Community 2026 18.10.2 (18.10.12217.157), x64, instance `f4993804`.
+Local package 0.2.4 installed successfully on 2026-10-01 (installer exit 0,
+installed manifest verified). No database
+connection or SQL execution was used; only `artifacts/parity-ui/vs-smoke.sql`.
+
+All settings opened from the Settings link. Its Settings/Profiles/Preview
+tabs and action buttons were accessible. Search in the preceding 0.2.3 run
+found the typed `rules.execute.parameters.stackList` field and its
+inherit/on/off choices; that search was not repeated in 0.2.4.
+ReadableVertical imported through Profiles → Import JSON, enabled full
+settings, persisted with OK, and was still enabled when reopening the page.
+Document formatted EXEC parameters, SELECT and CREATE TABLE, preserved
+`N'KeepCase'`, and wrote the disposable file to disk. One Undo restored the
+original source, which was saved afterward. Use full settings was then
+turned off with OK to restore the original command mode.
+
+The native multiline preview displayed LF output on one visual line in 0.2.3.
+In 0.2.4 the sample's SELECT/FROM/WHERE and conditions are visibly on separate
+lines. CRLF normalization is display-only; configured formatter/editor line
+endings are unchanged. ReadableVertical import, OK persistence, reopening with
+Use full settings checked, Document on EXEC/SELECT/CREATE TABLE, saving and one
+Undo restoring the original three-line file were repeated in 0.2.4. The
+literal stayed unchanged. Full settings was disabled with OK after the test.
+Named profile save/load/export, Cancel rollback and project preview have not
+been manually verified; model/preview tests cover those underlying workflows.
+The earlier 0.2.1 command checks below remain historical, not evidence for all
+new controls. The first 0.2.4 installation returned 2004 because VS was still
+closing; retry after process exit succeeded. No security dialog was automated
+and no IDE update was authorized. Static candidate/package checks also pass.
+
+## Earlier command smoke — 2026-09-29
+
 Run date: 2026-09-29. Host: Visual Studio Community 2026, 18.10.2
 (18.10.12217.157), x64, instance `f4993804`, Windows. Package: local
 `TSqlFormatter.VisualStudio.vsix` 0.2.1, not published.

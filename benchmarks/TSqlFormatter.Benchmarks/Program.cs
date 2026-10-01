@@ -1,6 +1,12 @@
 using BenchmarkDotNet.Running;
 using TSqlFormatter.Benchmarks;
 
+if (args.Contains("--parity-validation", StringComparer.Ordinal))
+{
+    ParityWorkflowValidation.Run();
+    return;
+}
+
 if (args.Contains("--editor-validation", StringComparer.Ordinal))
 {
     EditorWorkflowValidation.Run();

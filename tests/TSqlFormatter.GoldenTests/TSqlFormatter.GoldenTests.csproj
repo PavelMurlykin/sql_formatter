@@ -14,10 +14,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\TSqlFormatter.Core\TSqlFormatter.Core.csproj" />
+    <ProjectReference Include="..\..\src\TSqlFormatter.Configuration\TSqlFormatter.Configuration.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="Xunit" />
+    <None Include="parity-*.tsv" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\TSqlFormatter.Core.Tests\SqlCompleteParity\corpus.tsv" Link="parity-inventory-corpus.tsv" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,22 @@
+Name	Sql
+cte-window	WITH q (Id, Amount) AS (SELECT Id, Amount FROM dbo.T) SELECT Id, SUM(Amount) OVER (PARTITION BY Id ORDER BY Amount ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS Total FROM q;
+nested-subquery	SELECT d.Id FROM (SELECT Id FROM dbo.T WHERE Id IN (SELECT Id FROM dbo.S)) AS d WHERE EXISTS (SELECT 1 FROM dbo.U WHERE U.Id = d.Id);
+case-logic	SELECT CASE WHEN a = 1 AND (b = 2 OR c = 3) THEN N'KeepCase' ELSE N'other' END AS Flag FROM dbo.T;
+set-chain	SELECT Id FROM dbo.A UNION ALL SELECT Id FROM dbo.B EXCEPT SELECT Id FROM dbo.C;
+insert-output	INSERT INTO dbo.T (Id, Name) OUTPUT inserted.Id, inserted.Name VALUES (1, N'KeepCase'), (2, N'Other');
+update-output	UPDATE dbo.T SET a = 1, longName = N'KeepCase' OUTPUT inserted.a, deleted.a WHERE Id = 1 OPTION (RECOMPILE);
+delete-top	DELETE TOP (2) FROM dbo.T OUTPUT deleted.Id, deleted.Name WHERE Id > 0;
+merge-tail	MERGE TOP (2) dbo.T AS t USING dbo.S AS s ON t.Id = s.Id WHEN MATCHED AND s.Id > 0 THEN UPDATE SET t.Name = s.Name WHEN NOT MATCHED THEN INSERT (Id, Name) VALUES (s.Id, s.Name) OUTPUT inserted.Id, deleted.Name OPTION (RECOMPILE);
+cursor	DECLARE c CURSOR LOCAL STATIC FOR SELECT Id, Name FROM dbo.T WHERE Id > 0;
+if-while-try	IF @a > 0 BEGIN WHILE @a > 0 BEGIN SET @a = @a - 1; END; END ELSE BEGIN TRY PRINT N'KeepCase'; END TRY BEGIN CATCH PRINT ERROR_MESSAGE(); END CATCH
+transaction-label	BEGIN TRAN;\nretry: SET @a = 1; PRINT @a; COMMIT TRAN; GOTO retry;
+function-table	CREATE FUNCTION dbo.f (@a int, @b int) RETURNS @r TABLE (Id int, Name nvarchar(50)) AS BEGIN INSERT INTO @r VALUES (@a, N'KeepCase'); RETURN; END;
+inline-function	CREATE OR ALTER FUNCTION dbo.f (@a int) RETURNS TABLE AS RETURN (SELECT Id, Name FROM dbo.T WHERE Id = @a);
+alter-view	ALTER VIEW dbo.v (Id, Name) WITH SCHEMABINDING AS SELECT Id, Name FROM dbo.T;
+temporal-table	CREATE TABLE dbo.HistoryT (Id int NOT NULL PRIMARY KEY, StartAt datetime2 GENERATED ALWAYS AS ROW START NOT NULL, EndAt datetime2 GENERATED ALWAYS AS ROW END NOT NULL, PERIOD FOR SYSTEM_TIME (StartAt, EndAt)) WITH (SYSTEM_VERSIONING = ON);
+ddl-trigger	CREATE TRIGGER ddl_guard ON DATABASE FOR CREATE_TABLE, ALTER_TABLE AS BEGIN PRINT N'KeepCase'; END;
+logon-trigger	CREATE TRIGGER login_guard ON ALL SERVER FOR LOGON AS BEGIN PRINT N'KeepCase'; END;
+dynamic-execute	EXEC sys.sp_executesql N'SELECT @a, @b', N'@a int, @b int', @a = 1, @b = 2;
+comment-boundary	SELECT a, -- KeepCase\nb FROM dbo.T WHERE a = 1 /* KeepCase */ AND b = 2;
+multiline-literal	SELECT N'KeepCase\nLiteral' AS Value;
+compute-legacy	SELECT a FROM dbo.T ORDER BY a COMPUTE SUM(a) BY a;

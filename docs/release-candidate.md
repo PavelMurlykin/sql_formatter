@@ -1,14 +1,15 @@
 # Local release-candidate procedure
 
-Status: local candidate only, checked 2026-09-29. No NuGet package, VSIX, or
+Status: local candidate only, checked 2026-10-01, including the narrow
+installed-IDE SC-27 smoke checks. No NuGet package, VSIX, or
 release archive has been published. These are current package identities and
 versions, not a promise of a common stable semantic-version series:
 
 | Component | Package identity | Version | Tested host / runtime |
 | --- | --- | --- | --- |
 | CLI | `TSqlFormatter.Tool` | `0.1.0-preview.6` | .NET 10 Runtime; package install and stdin smoke in the local build and CI |
-| Visual Studio | `TSqlFormatter.VisualStudio` | `0.2.1` | Visual Studio Community 2026 18.10.2 x64, limited [installed-IDE matrix](visual-studio-smoke.md) |
-| SSMS | `TSqlFormatter.Ssms` | `0.6.0` | SSMS 22.10.1 x64 only, [LIMITED SUPPORT](ssms22-compatibility.md) |
+| Visual Studio | `TSqlFormatter.VisualStudio` | `0.2.4` | Community 2026 18.10.2 x64; settings/import, multiline preview, Document and Undo in the [installed-IDE matrix](visual-studio-smoke.md) |
+| SSMS | `TSqlFormatter.Ssms` | `0.6.3` | 22.10.2 x64, host ScriptDom 18.0.105.0; settings/preview, Document and Undo, [LIMITED SUPPORT](ssms22-compatibility.md) |
 
 ## Build and verify
 
@@ -24,8 +25,8 @@ checks the Visual Studio VSIX, packs the CLI, copies both VSIX files, checks
 their identities/targets/required assemblies, installs the CLI from the local
 package into an ignored smoke directory, and formats `select 1;`. It writes
 three packages and `candidate-manifest.json` with package versions and SHA-256
-hashes under `artifacts/release-candidate/`. A successful local run passed all
-485 tests (423 Core and 62 golden), VSIX checks, and the installed-tool smoke.
+hashes under `artifacts/release-candidate/`. The 2026-10-01 local run uses
+`artifacts/parity-final-candidate/` and 1288 tests (1143 Core and 145 golden).
 The script deliberately fails when the output directory is nonempty; use
 `-OutputDirectory artifacts/another-candidate` for another run. It never
 publishes or deletes packages. For a previously restored checkout, `-SkipRestore`
@@ -64,9 +65,11 @@ version-specific boundary; do not install it into Visual Studio.
 ## Support and owner decisions
 
 The CLI and Core are preview quality. Visual Studio's primary commands passed
-the narrow smoke matrix; format-on-save, paste, import/export, and error paths
-still need live-IDE validation before being described as fully supported.
-SSMS is LIMITED SUPPORT only for the checked 22.10.1 host, not all SSMS 22.x.
+the narrow smoke matrix, including native JSON import and full settings.
+Format-on-save, paste, named profile save/load/export and error paths still
+need live-IDE validation before being described as fully supported.
+SSMS 0.6.3 is LIMITED SUPPORT only for the checked 22.10.2 host. The older
+0.6.0/22.10.1 matrix is historical, not certification of the new package.
 
 Before external distribution, the repository owner must choose the public
 product/package name, distribution channels (for example, NuGet, extension

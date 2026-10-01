@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011">
   <Metadata>
-    <Identity Id="TSqlFormatter.VisualStudio" Version="0.2.1" Language="en-US" Publisher="TSqlFormatter" />
+    <Identity Id="TSqlFormatter.VisualStudio" Version="0.2.4" Language="en-US" Publisher="TSqlFormatter" />
     <DisplayName>T-SQL Formatter (Preview)</DisplayName>
     <Description>Preview T-SQL formatter commands for Visual Studio SQL documents. Runtime validation is still in progress.</Description>
   </Metadata>
