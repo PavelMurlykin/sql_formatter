@@ -1,6 +1,12 @@
 using BenchmarkDotNet.Running;
 using TSqlFormatter.Benchmarks;
 
+if (args.FirstOrDefault() == "--sql-prompt-validation")
+{
+    SqlPromptCorpusValidation.Run(args.Skip(1).ToArray());
+    return;
+}
+
 if (args.Contains("--parity-validation", StringComparer.Ordinal))
 {
     ParityWorkflowValidation.Run();

@@ -75,11 +75,11 @@ public sealed class TextCaseFormattingTests
     }
 
     [Fact]
-    public void All_seven_text_case_paths_are_registered()
+    public void All_eight_text_case_paths_are_registered()
     {
         var keys = RuleCatalog.Default.Definitions.Keys
             .Where(key => key.StartsWith("textCase.", StringComparison.Ordinal)).ToArray();
-        Assert.Equal(7, keys.Length);
+        Assert.Equal(8, keys.Length);
     }
 
     [Fact]

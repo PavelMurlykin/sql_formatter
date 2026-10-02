@@ -90,6 +90,7 @@ public sealed class RuleCatalog
         CaseRule("textCase.dataType", "inherit"),
         CaseRule("textCase.identifier", "preserve"),
         CaseRule("textCase.variable", "preserve"),
+        CaseRule("textCase.globalVariable", "inherit"),
         CaseRule("textCase.alias", "preserve"),
         new RuleDescriptor("textCase.formatQuotedIdentifier", "quoted identifier",
             RuleValue.FromBoolean(false)),
@@ -256,7 +257,29 @@ public sealed class RuleCatalog
         return new RuleCatalog(descriptors.Concat(subquery).Concat(UpdateDeleteRules(descriptors))
             .Concat(MergeHeaderRules(descriptors)).Concat(MergeBranchRules(descriptors)).Concat(MergeTailRules())
             .Concat(DeclareRules()).Concat(CodeRules()).Concat(ModuleRules()).Concat(CreateTableRules()).Concat(TriggerRules())
-            .Concat(ExecuteLabelRules()));
+            .Concat(ExecuteLabelRules()).Concat(ProfileLayoutRules()));
+    }
+
+    private static IEnumerable<RuleDescriptor> ProfileLayoutRules()
+    {
+        const string scope = "profile layout";
+        foreach (var key in new[] { "dmlCompact", "ddlCompact", "parenthesesCompact", "caseCompact", "subqueryCompact" })
+            yield return new RuleDescriptor("layout." + key, scope,
+                RuleValue.FromThreshold(new ThresholdRule(false, 100)), 0, 1000000);
+        foreach (var key in new[] { "listFirstItem", "functionArguments", "inValues" })
+            yield return new RuleDescriptor("layout." + key, scope, RuleValue.FromChoice("inherit"),
+                choices: new[] { "inherit", "always", "never", "multiple", "ifLong" });
+        yield return IndentDescriptor("layout.listIndent", scope);
+        yield return new RuleDescriptor("layout.parenthesesStyle", scope, RuleValue.FromChoice("inherit"),
+            choices: new[] { "inherit", "expandedToStatement", "compact" });
+        foreach (var key in new[] { "blankLinesBetweenStatements", "blankLinesAfterBatch" })
+            yield return new RuleDescriptor("layout." + key, scope, RuleValue.FromInteger(-1), -1, 10);
+        foreach (var key in new[] { "alignDeclarationValues", "alignDdlTypes", "alignListComments", "alignCommentGroups",
+                     "setValueOnNewLineIfLong", "newLineAfterTop", "restoreMoveOnNewLine", "restoreToOnNewLine", "respectFormattingDirectives" })
+            yield return new RuleDescriptor("layout." + key, scope, RuleValue.FromBoolean(false));
+        yield return SpacingRule("spacing.comparisonOperators");
+        yield return SpacingRule("spacing.beforeTypeParameters");
+        yield return SpacingRule("spacing.beforeSemicolon");
     }
 
     private static RuleDescriptor CaseRule(string key, string defaultValue) => new(key, "token",

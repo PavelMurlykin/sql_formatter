@@ -104,6 +104,35 @@ public sealed class SettingsPresentation
 
     // Every catalog segment and enum value is intentionally named; a new rule requires a label and tests.
     private const string Vocabulary = @"
+layout|Общее расположение профиля|Shared profile layout
+globalVariable|Регистр системных переменных|Global variable casing
+dmlCompact|Короткие операторы DML|Short DML statements
+ddlCompact|Короткие объявления и CREATE TABLE|Short declarations and CREATE TABLE
+parenthesesCompact|Короткое содержимое скобок|Short parenthesis contents
+caseCompact|Короткие выражения CASE|Short CASE expressions
+subqueryCompact|Короткие подзапросы|Short subqueries
+listFirstItem|Перенос первого элемента списка|First list item wrapping
+functionArguments|Перенос аргументов функции|Function argument wrapping
+inValues|Перенос значений IN|IN value wrapping
+parenthesesStyle|Расположение скобок|Parenthesis layout
+blankLinesBetweenStatements|Пустые строки между операторами (-1: сохранять)|Blank lines between statements (-1: preserve)
+blankLinesAfterBatch|Пустые строки после GO (-1: сохранять)|Blank lines after GO (-1: preserve)
+alignDeclarationValues|Выравнивать типы и значения объявлений|Align declaration types and values
+alignDdlTypes|Выравнивать типы колонок|Align column data types
+alignListComments|Выравнивать комментарии списков|Align list comments
+alignCommentGroups|Выравнивать группы однострочных комментариев|Align single line comment groups
+setValueOnNewLineIfLong|Переносить длинное значение SET|Wrap long SET values
+newLineAfterTop|Перенос после DISTINCT и TOP|Wrap after DISTINCT and TOP
+restoreMoveOnNewLine|Перенос перед MOVE в RESTORE|Wrap before RESTORE MOVE
+restoreToOnNewLine|Перенос перед TO в RESTORE MOVE|Wrap before RESTORE MOVE TO
+respectFormattingDirectives|Сохранять области SQL Prompt formatting off/on|Preserve SQL Prompt formatting off/on regions
+comparisonOperators|Пробелы вокруг операторов сравнения|Comparison operator spacing
+beforeTypeParameters|Пробел перед параметрами типа|Space before data type parameters
+beforeSemicolon|Пробел перед точкой с запятой|Space before semicolon
+multiple|Если несколько элементов|If multiple items
+ifLong|Если превышена ширина строки|If longer than line width
+expandedToStatement|Развёрнуто от начала оператора|Expanded from statement
+compact|В одной строке|Single line
 general|Общие настройки|General settings
 indent|Отступы|Indentation
 keywords|Ключевые слова|Keywords

@@ -84,7 +84,10 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         var deleteBuilder = new DeleteDocBuilder(options);
         var mergeBuilder = new MergeDocBuilder(options);
         var storedCodeBuilder = new StoredCodeDocBuilder(options);
-        var document = new SqlDocBuilder(new ISqlFragmentDocBuilder[]
+        // Shared profile layout works directly on parser token gaps at every nesting level.
+        // Avoid re-embedding opaque multiline text in structural docs on successive passes.
+        var document = NativeRules.Get(options, "layout.listFirstItem").Choice != "inherit" ? new TextDoc(source)
+            : new SqlDocBuilder(new ISqlFragmentDocBuilder[]
             { builder, insertBuilder, updateBuilder, deleteBuilder, mergeBuilder, storedCodeBuilder })
             .BuildDocument(parsed, cancellationToken);
         if (builder.Applied || insertBuilder.Applied || updateBuilder.Applied
@@ -143,6 +146,7 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
                 request.Dialect, cancellationToken);
             rendered = ExecuteLabelLayout.ApplySafe(rendered, options, _parser,
                 request.Dialect, cancellationToken);
+            rendered = ProfileLayout.ApplySafe(rendered, options, _parser, request.Dialect, cancellationToken, source);
             if (string.Equals(rendered, source, StringComparison.Ordinal))
             {
                 return Unchanged(source, true);
@@ -193,6 +197,7 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
             request.Dialect, cancellationToken);
         output = ExecuteLabelLayout.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);
+        output = ProfileLayout.ApplySafe(output, options, _parser, request.Dialect, cancellationToken, source);
         if (string.Equals(output, source, StringComparison.Ordinal))
         {
             return Unchanged(source, true);
@@ -405,11 +410,13 @@ internal static class KeywordCasing
         var dataType = Read(options, "textCase.dataType").Choice;
         var identifier = Read(options, "textCase.identifier").Choice;
         var variable = Read(options, "textCase.variable").Choice;
+        var globalVariable = Read(options, "textCase.globalVariable").Choice;
+        if (globalVariable == "inherit") globalVariable = variable;
         var alias = Read(options, "textCase.alias").Choice;
         var formatQuoted = Read(options, "textCase.formatQuotedIdentifier").Boolean;
         if (keyword == "preserve" && (builtin is "preserve" or "inherit")
             && (dataType is "preserve" or "inherit")
-            && identifier == "preserve" && variable == "preserve" && alias == "preserve")
+            && identifier == "preserve" && variable == "preserve" && globalVariable == "preserve" && alias == "preserve")
             return Array.Empty<TextEdit>();
 
         var categories = builtin != "inherit" || dataType != "inherit" || alias != "preserve"
@@ -426,7 +433,7 @@ internal static class KeywordCasing
                 TokenCategory.DataType => dataType,
                 TokenCategory.Alias => alias,
                 _ => "preserve"
-            } : token.TokenType == TSqlTokenType.Variable ? variable
+            } : token.TokenType == TSqlTokenType.Variable ? token.Text.StartsWith("@@", StringComparison.Ordinal) ? globalVariable : variable
                 : token.TokenType == TSqlTokenType.Identifier || isQuoted ? identifier
                 : token.IsKeyword() ? keyword : "preserve";
             if (style == "inherit") style = token.IsKeyword() && token.TokenType != TSqlTokenType.Identifier
@@ -460,7 +467,7 @@ internal static class KeywordCasing
                     && Builtins.Contains(call.FunctionName.Value):
                     result[call.FunctionName.StartOffset] = TokenCategory.Builtin;
                     break;
-                case DataTypeReference dataType:
+                case SqlDataTypeReference dataType:
                     var token = parsed.Tokens.FirstOrDefault(candidate => candidate.Offset >= dataType.StartOffset
                         && candidate.Offset < dataType.StartOffset + dataType.FragmentLength
                         && candidate.TokenType is not TSqlTokenType.WhiteSpace);

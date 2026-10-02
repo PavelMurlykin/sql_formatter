@@ -1166,6 +1166,33 @@ When parsing fails, `BuildDocument` also returns the unchanged source. You can r
 
 ## Limitations
 
+### SQL Prompt ADIR_SQL_Main working profile
+
+`examples/profiles/ADIR_SQL_Main.json` is an importable native JSON v2 profile mapped from
+both SQL Prompt exports and 16 settings screenshots. Install the new VSIX build, open
+**SQL Formatter → Profiles → Import JSON…**, select the file, save the profile as
+`ADIR_SQL_Main`, optionally choose **Use as default**, and confirm **OK**. The nearest
+`.tsqlformatter.json` takes precedence; the same JSON can be used as project configuration.
+Older builds do not recognize the new keys and cannot import this profile.
+
+The style uses width 160, four spaces, leading commas, uppercase built-in SQL elements,
+and one blank line between statements and after GO. New optional `layout.*` settings are
+editable: conditional first-item wrapping, shared nested list/block policies, thresholds
+for short DML/DDL/CASE/subqueries/parentheses, function arguments, IN, type/value/comment
+alignment, long SET values and RESTORE MOVE/TO. `textCase.globalVariable` separates global
+from local variables; `spacing.comparisonOperators`, `spacing.beforeTypeParameters` and
+`spacing.beforeSemicolon` control spacing. Blank-line counts accept 0–10; -1 disables
+their separate normalization. Thresholds
+use `enabled/value` and a strict “shorter than” comparison. Existing profiles do not enable
+these changes automatically.
+
+The profile preserves `-- SQL Prompt formatting off/on` regions. Object and user-defined
+type casing is preserved; database definition casing cannot be resolved. Multiline
+literal files are preserved entirely. Complex constructs and multiline comment patterns
+can differ from SQL Prompt; identical output is not claimed.
+See the [settings mapping and comparison command](sql-prompt-adir-profile.md) and
+[audit of files changed in Git during 2026](sql-prompt-adir-validation.md).
+
 - The CLI writes only stdin or one file to stdout; directories and multiple files require `--write` or `--check`. Configuration discovery applies to files; custom settings flags are not implemented yet.
 - Structural Doc formatting covers the documented SELECT, DML and stored-code forms. New Code, module, CREATE TABLE and trigger rules apply only to the documented AST boundaries when explicitly enabled; unsupported forms retain their original layout.
 - The renderer accepts a prepared `Doc` tree; it does not parse SQL on its own.

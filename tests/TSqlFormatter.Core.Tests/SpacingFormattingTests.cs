@@ -62,8 +62,8 @@ public sealed class SpacingFormattingTests
     }
 
     [Fact]
-    public void All_ten_spacing_paths_are_registered()
+    public void All_thirteen_spacing_paths_are_registered()
     {
-        Assert.Equal(10, RuleCatalog.Default.Definitions.Keys.Count(key => key.StartsWith("spacing.", StringComparison.Ordinal)));
+        Assert.Equal(13, RuleCatalog.Default.Definitions.Keys.Count(key => key.StartsWith("spacing.", StringComparison.Ordinal)));
     }
 }

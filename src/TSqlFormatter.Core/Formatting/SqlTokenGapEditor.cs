@@ -81,6 +81,27 @@ internal sealed class SqlTokenGapEditor
 
     public int GetLineIndent(int offset) => LineIndent(offset);
 
+    public int GetColumn(int offset)
+    {
+        var prefix = KeywordCasing.Apply(parsed.Source.Substring(0, offset),
+            edits.Values.Where(e => e.Span.EndOffset <= offset).OrderBy(e => e.Span.StartOffset).ToArray());
+        var start = prefix.LastIndexOfAny(new[] { '\r', '\n' }) + 1;
+        return prefix.Substring(start).Sum(c => c == '\t' ? options.Indent.Size : 1);
+    }
+
+    public void BeforeAtColumn(int offset, int column)
+    {
+        if (!indices.TryGetValue(offset, out var index) || index == 0) return;
+        var left = tokens[index - 1];
+        if (IsComment(left) || IsComment(tokens[index])) return;
+        var start = left.Offset + left.Text.Length;
+        var gap = parsed.Source.Substring(start, offset - start);
+        if (!gap.All(char.IsWhiteSpace)) return;
+        var newline = options.General.LineEnding switch
+        { DocLineEnding.CrLf => "\r\n", DocLineEnding.Cr => "\r", _ => "\n" };
+        edits[start] = new TextEdit(new SqlTextSpan(start, gap.Length), newline + new string(' ', Math.Max(0, column)));
+    }
+
     public void IndentAtBoundary(int offset, IndentRule indent, int anchorOffset)
     {
         if (!indent.Enabled || !indices.TryGetValue(offset, out var index)) return;

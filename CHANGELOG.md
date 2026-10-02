@@ -3,6 +3,24 @@
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
 
+## SQL Prompt ADIR_SQL_Main profile — 2026-10-02
+
+- Visual Studio VSIX 0.2.6 / SSMS VSIX 0.6.5: importable native ADIR_SQL_Main JSON v2
+  mapped from the supplied SQL Prompt exports and 16 screenshots; width 160, four
+  spaces, leading commas and shared nested layout policies.
+- Added optional compactness thresholds, conditional list/function/IN wrapping,
+  blank-line counts, declaration/comment alignment, long SET and RESTORE MOVE/TO
+  controls, independent global-variable casing and comparison/type/semicolon spacing.
+  All new settings have Russian and English editor labels.
+- Token-based shared layout avoids accumulating indentation on repeated formatting.
+  SQL Prompt off/on regions are preserved; built-in type casing no longer changes
+  schemas of user-defined types.
+- Read-only audit of 441 existing procedures changed in Git during 2026: 63 exact
+  layout matches, 374 stable differences, four preserved multiline-token files;
+  zero parse/token/idempotence failures. Identical SQL Prompt output is not claimed.
+- Both user manuals, mapping notes and reproducible audit documentation updated.
+  Release builds, 1181 Core + 145 golden tests and settings UI smoke passed.
+
 ## Human-readable formatting settings — 2026-10-01
 
 - Visual Studio VSIX 0.2.5 / SSMS VSIX 0.6.4: separate top-level SQL Formatter

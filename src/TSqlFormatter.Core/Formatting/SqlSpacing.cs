@@ -12,7 +12,8 @@ internal static class SqlSpacing
         "spacing.arithmeticOperators", "spacing.beforeComma", "spacing.afterComma",
         "spacing.beforeDot", "spacing.afterDot", "spacing.beforeScopeResolution",
         "spacing.afterScopeResolution", "spacing.beforeFunctionArguments",
-        "spacing.withinEmptyFunctionArguments", "spacing.withinFunctionArguments"
+        "spacing.withinEmptyFunctionArguments", "spacing.withinFunctionArguments",
+        "spacing.comparisonOperators", "spacing.beforeTypeParameters", "spacing.beforeSemicolon"
     };
 
     public static string ApplySafe(string source, FormattingOptions options, ISqlParser parser,
@@ -32,6 +33,8 @@ internal static class SqlSpacing
         CancellationToken cancellationToken)
     {
         var arithmetic = new HashSet<int>();
+        var comparison = new HashSet<int>();
+        var typeOpens = new HashSet<int>();
         var functionOpens = new HashSet<int>();
         var functionCloses = new HashSet<int>();
         var emptyFunctionOpens = new HashSet<int>();
@@ -41,6 +44,16 @@ internal static class SqlSpacing
             foreach (var fragment in new SqlFragmentWalker().Walk(parsed.Root, cancellationToken))
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                if (fragment is BooleanComparisonExpression comparisonExpression)
+                    foreach (var op in tokens.Where(t => t.Offset >= comparisonExpression.FirstExpression.StartOffset
+                                 + comparisonExpression.FirstExpression.FragmentLength
+                                 && t.Offset < comparisonExpression.SecondExpression.StartOffset)) comparison.Add(op.Offset);
+                if (fragment is SqlDataTypeReference type && type.Parameters.Count > 0)
+                {
+                    var open = tokens.FirstOrDefault(t => t.Offset >= type.StartOffset
+                        && t.Offset < type.Parameters[0].StartOffset && t.Text == "(");
+                    if (open is not null) typeOpens.Add(open.Offset);
+                }
                 if (fragment is BinaryExpression binary &&
                     Get(options, "spacing.arithmeticOperators") != "inherit")
                 {
@@ -87,9 +100,12 @@ internal static class SqlSpacing
             if (gap.Any(ch => ch is '\r' or '\n') || gap.Any(ch => !char.IsWhiteSpace(ch))) continue;
             var rule = SelectRule(left, right, arithmetic, functionOpens, functionCloses,
                 emptyFunctionOpens);
+            if (comparison.Contains(left.Offset) || comparison.Contains(right.Offset)) rule = "spacing.comparisonOperators";
+            if (typeOpens.Contains(right.Offset)) rule = "spacing.beforeTypeParameters";
             if (rule is null) continue;
             var setting = Get(options, rule);
             if (setting == "inherit") continue;
+            if (rule == "spacing.comparisonOperators" && comparison.Contains(left.Offset) && comparison.Contains(right.Offset)) setting = "remove";
             var replacement = setting == "insert" ? " " : string.Empty;
             if (gap != replacement) edits.Add(new TextEdit(new SqlTextSpan(start, length), replacement));
         }
@@ -100,6 +116,7 @@ internal static class SqlSpacing
         HashSet<int> arithmetic, HashSet<int> functionOpens,
         HashSet<int> functionCloses, HashSet<int> emptyFunctionOpens)
     {
+        if (right.Text == ";") return "spacing.beforeSemicolon";
         if (right.Text == ",") return "spacing.beforeComma";
         if (left.Text == ",") return "spacing.afterComma";
         if (right.Text == ".") return "spacing.beforeDot";
