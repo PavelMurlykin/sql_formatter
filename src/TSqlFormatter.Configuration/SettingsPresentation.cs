@@ -113,12 +113,14 @@ caseCompact|Короткие выражения CASE|Short CASE expressions
 subqueryCompact|Короткие подзапросы|Short subqueries
 listFirstItem|Перенос первого элемента списка|First list item wrapping
 functionArguments|Перенос аргументов функции|Function argument wrapping
+functionParameters|Перенос параметров CREATE FUNCTION|CREATE FUNCTION parameter wrapping
 inValues|Перенос значений IN|IN value wrapping
 parenthesesStyle|Расположение скобок|Parenthesis layout
 blankLinesBetweenStatements|Пустые строки между операторами (-1: сохранять)|Blank lines between statements (-1: preserve)
 blankLinesAfterBatch|Пустые строки после GO (-1: сохранять)|Blank lines after GO (-1: preserve)
 alignDeclarationValues|Выравнивать типы и значения объявлений|Align declaration types and values
 alignDdlTypes|Выравнивать типы колонок|Align column data types
+alignDdlConstraints|Выравнивать ограничения после типа колонки|Align constraints after column data types
 alignListComments|Выравнивать комментарии списков|Align list comments
 alignCommentGroups|Выравнивать группы однострочных комментариев|Align single line comment groups
 setValueOnNewLineIfLong|Переносить длинное значение SET|Wrap long SET values

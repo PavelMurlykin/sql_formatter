@@ -1193,6 +1193,20 @@ can differ from SQL Prompt; identical output is not claimed.
 See the [settings mapping and comparison command](sql-prompt-adir-profile.md) and
 [audit of files changed in Git during 2026](sql-prompt-adir-validation.md).
 
+For the refined profile audited against Functions/Tables/Triggers/Types/Views, install
+Visual Studio VSIX 0.2.7 or SSMS VSIX 0.6.6 and import the JSON again: previously saved
+user profiles do not update automatically. `layout.functionParameters` independently
+controls CREATE/ALTER FUNCTION parameters: `inherit` keeps the shared `routine.parameters`
+rules, `always` wraps the list, `never` keeps it inline, `multiple` wraps multiple
+parameters, and `ifLong` wraps when the entire header exceeds the line width or the
+list contains comments. ADIR_SQL_Main uses `ifLong`; procedure parameter rules remain
+the same. `layout.alignDdlConstraints` aligns the first modifier after a column data
+type (such as NULL/NOT NULL/IDENTITY), independently of `layout.alignDdlTypes`. The new
+rules default to `inherit`/`false`. The profile also explicitly wraps function RETURNS
+and view AS/query bodies. PERIOD, inline INDEX and derived table alias column lists
+use separate matching bracket pairs; JOIN AND/OR indent from ON.
+See the [additional audit and remaining differences](sql-prompt-adir-additional-validation.md).
+
 - The CLI writes only stdin or one file to stdout; directories and multiple files require `--write` or `--check`. Configuration discovery applies to files; custom settings flags are not implemented yet.
 - Structural Doc formatting covers the documented SELECT, DML and stored-code forms. New Code, module, CREATE TABLE and trigger rules apply only to the documented AST boundaries when explicitly enabled; unsupported forms retain their original layout.
 - The renderer accepts a prepared `Doc` tree; it does not parse SQL on its own.

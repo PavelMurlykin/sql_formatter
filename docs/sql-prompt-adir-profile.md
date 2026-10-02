@@ -24,7 +24,7 @@ JSON SQL Prompt не добавлялся.
 | 3. Parentheses | Скобки от начала оператора, отступ содержимого, сворачивание короткого содержимого до 120 | `layout.parenthesesStyle`, `layout.parenthesesCompact` |
 | 4. Casing | Верхний регистр ключевых слов, встроенных функций/типов, системных переменных | `textCase.keyword/builtin/dataType/globalVariable`; локальные переменные, объекты и псевдонимы сохраняются |
 | 5. DML | Сворачивание DML до 100 и подзапросов до 55; перенос после DISTINCT/TOP; FROM/WHERE рядом с первым выражением; вертикальные GROUP/ORDER при нескольких выражениях | `layout.dmlCompact`, `layout.subqueryCompact`, `layout.newLineAfterTop`, `layout.listFirstItem` |
-| 6. DDL | Параметры процедуры с новой строки, выравнивание типов/значений, короткие объявления и CREATE TABLE до 55 | `routine.parameters.*`, `layout.alignDdlTypes`, `layout.alignDeclarationValues`, `layout.ddlCompact` |
+| 6. DDL | Параметры процедуры с новой строки, выравнивание типов/значений, короткие объявления и CREATE TABLE до 55 | `routine.parameters.*`, `layout.alignDdlTypes`, `layout.alignDdlConstraints`, `layout.alignDeclarationValues`, `layout.ddlCompact`; параметры функций — отдельно `layout.functionParameters` |
 | 7. Control flow | BEGIN/END на отдельных строках, отступ содержимого, без сворачивания IF/WHILE/TRY | `code.*`, общие правила `layout.listFirstItem` для хранимого кода |
 | 8. CTE | Имя рядом с WITH, AS рядом с именем; списки колонок и тело со скобками/отступами; короткое содержимое сворачивается | `select.cte.*`, `layout.parenthesesStyle`, `layout.parenthesesCompact` |
 | 9. Variables | Выравнивание типов и значений DECLARE; отсутствие пробела перед точностью типа; перенос длинного SET после `=` | `layout.alignDeclarationValues`, `spacing.beforeTypeParameters`, `layout.setValueOnNewLineIfLong` |
@@ -38,9 +38,27 @@ JSON SQL Prompt не добавлялся.
 
 Новые `layout.*` правила отключены по умолчанию. `layout.listFirstItem`, когда задан явно,
 включает общую политику списков и вложенного хранимого кода: предложения запроса от начала
-оператора, ON и AND/OR с одним шагом отступа, BEGIN/END и отступы тела. Эта политика
+оператора, ON с одним шагом отступа, AND/OR с шагом от WHERE/HAVING/ON, BEGIN/END и отступы тела. Эта политика
 работает по промежуткам между токенами AST; обычные профили без неё используют прежние
 структурные правила. Все параметры доступны в редакторе настроек на русском и английском.
+
+## Уточнение по функциям, таблицам и представлениям
+
+Текущий JSON требует Visual Studio 0.2.7 / SSMS 0.6.6; ранее сохранённый профиль нужно
+импортировать заново. `layout.functionParameters=ifLong` выведен из примеров функций:
+общий параметр SQL Prompt `placeFirstProcedureParameterOnNewLine=always` относится к
+процедурам и не должен принудительно разбивать короткие заголовки функций. Проверяется
+длина всего заголовка до закрывающей скобки; комментарии в параметрах оставляют список
+развёрнутым. `inherit` оставляет `routine.parameters`; остальные режимы — `always`,
+`never`, `multiple`, `ifLong`. Это уточнение на основе корпуса, а не отдельное поле экспорта.
+
+`layout.alignDdlConstraints=true` дополняет `alignDataTypesAndConstraints`: выравнивается
+первый модификатор после типа колонки, включая NULL/NOT NULL/IDENTITY. Выравнивание типов
+управляется отдельно через `layout.alignDdlTypes`. У новых настроек defaults — `inherit`
+и `false`; они доступны в обоих языках редактора. `routine.returns.breakBefore=always`
+и `view.query.*` явно задают перенос RETURNS, AS и отступ запроса представления.
+Исправлены парные скобки таблиц с PERIOD/inline INDEX и псевдонимов производных таблиц.
+[Сверка пяти папок и повторная проверка процедур](sql-prompt-adir-additional-validation.md).
 
 ## Границы соответствия
 
@@ -50,7 +68,7 @@ JSON SQL Prompt не добавлялся.
 - Автоматическое выравнивание распространённых узоров внутри многострочных комментариев
   не реализовано. Текст комментариев сохраняется, группы однострочных комментариев
   выравниваются отдельной настройкой.
-- Выравнивание ограничений CREATE TABLE, перенос произвольных DDL (например GRANT/ALTER
+- Сложные ограничения CREATE TABLE, перенос произвольных DDL (например GRANT/ALTER
   AUTHORIZATION), длинных IN со смешанными вложенными выражениями и некоторых сложных
   конструкций может отличаться от SQL Prompt. Ширина 160 — ориентир, а не обязательное
   обрезание любой строки.

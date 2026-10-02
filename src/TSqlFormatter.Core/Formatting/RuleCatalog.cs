@@ -266,7 +266,7 @@ public sealed class RuleCatalog
         foreach (var key in new[] { "dmlCompact", "ddlCompact", "parenthesesCompact", "caseCompact", "subqueryCompact" })
             yield return new RuleDescriptor("layout." + key, scope,
                 RuleValue.FromThreshold(new ThresholdRule(false, 100)), 0, 1000000);
-        foreach (var key in new[] { "listFirstItem", "functionArguments", "inValues" })
+        foreach (var key in new[] { "listFirstItem", "functionArguments", "functionParameters", "inValues" })
             yield return new RuleDescriptor("layout." + key, scope, RuleValue.FromChoice("inherit"),
                 choices: new[] { "inherit", "always", "never", "multiple", "ifLong" });
         yield return IndentDescriptor("layout.listIndent", scope);
@@ -274,7 +274,7 @@ public sealed class RuleCatalog
             choices: new[] { "inherit", "expandedToStatement", "compact" });
         foreach (var key in new[] { "blankLinesBetweenStatements", "blankLinesAfterBatch" })
             yield return new RuleDescriptor("layout." + key, scope, RuleValue.FromInteger(-1), -1, 10);
-        foreach (var key in new[] { "alignDeclarationValues", "alignDdlTypes", "alignListComments", "alignCommentGroups",
+        foreach (var key in new[] { "alignDeclarationValues", "alignDdlTypes", "alignDdlConstraints", "alignListComments", "alignCommentGroups",
                      "setValueOnNewLineIfLong", "newLineAfterTop", "restoreMoveOnNewLine", "restoreToOnNewLine", "respectFormattingDirectives" })
             yield return new RuleDescriptor("layout." + key, scope, RuleValue.FromBoolean(false));
         yield return SpacingRule("spacing.comparisonOperators");

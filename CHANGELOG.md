@@ -3,6 +3,23 @@
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
 
+## SQL Prompt additional object audit — 2026-10-02
+
+- Visual Studio VSIX 0.2.7 / SSMS VSIX 0.6.6: refined ADIR_SQL_Main profile for
+  CREATE/ALTER FUNCTION parameters, column constraints and explicit function RETURNS /
+  view AS/query layout. Saved user profiles require reimporting the updated JSON.
+- Added optional function parameter wrapping and column constraint alignment with
+  Russian/English editor labels; new options default to inherit/false.
+- Corrected bracket matching for temporal PERIOD, inline INDEX and derived table
+  alias columns; JOIN boolean operators indent from ON. Function parameters now
+  participate in type/default alignment.
+- Read-only 2026 Git audit: 222 files from Functions/Tables/Triggers/Types/Views,
+  143 exact matches, 78 stable differences and one preserved multiline-token file.
+  All parse/token/idempotence checks passed. Rechecked 441 procedures: 68 exact,
+  369 stable differences and four preserved; no validation failures in all 663 files.
+- Both manuals and audit documentation updated. Release build, 1195 Core + 145
+  golden tests, settings UI smoke and VSIX package checks passed.
+
 ## SQL Prompt ADIR_SQL_Main profile — 2026-10-02
 
 - Visual Studio VSIX 0.2.6 / SSMS VSIX 0.6.5: importable native ADIR_SQL_Main JSON v2

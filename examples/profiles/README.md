@@ -1,12 +1,14 @@
 # Native profile alternatives
 
 `ADIR_SQL_Main.json` is a native v2 import profile mapped from the user-supplied SQL Prompt
-ADIR_SQL_Main exports and all 16 settings screenshots. It uses width 160, four spaces,
+ADIR_SQL_Main exports and all 16 settings screenshots, refined against 2026 Git files
+in Functions/Tables/Triggers/Types/Views. The refined profile requires Visual Studio
+0.2.7 or SSMS 0.6.6; import it again to update a saved profile. It uses width 160, four spaces,
 leading commas and opt-in shared layout policies. Install the newly built VSIX before
 importing this profile: older versions do not recognize the added rules. Import JSON on
 the Profiles page, save as ADIR_SQL_Main, and optionally select it as the default. Project
 configuration takes precedence. The [mapping and limitations](../../docs/sql-prompt-adir-profile.md)
-and [local corpus audit](../../docs/sql-prompt-adir-validation.md) distinguish native settings
+and [current local corpus audit](../../docs/sql-prompt-adir-additional-validation.md) distinguish native settings
 from verified output matches. This does not add a generic SQL Prompt style-file importer.
 
 

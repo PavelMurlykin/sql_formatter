@@ -108,6 +108,9 @@ internal static class ProfileLayout
                     case DeclareVariableStatement d when firstMode != "inherit":
                         List(d.Declarations.Cast<TSqlFragment>().ToArray(), d.StartOffset, firstMode);
                         break;
+                    case FunctionStatementBody function when Choice("functionParameters") != "inherit":
+                        FunctionParameters(function);
+                        break;
                     case ExecuteStatement execute when firstMode != "inherit" && execute.ExecuteSpecification?.ExecutableEntity is { Parameters.Count: > 0 } entity:
                         List(entity.Parameters.Cast<TSqlFragment>().ToArray(), execute.StartOffset, "always");
                         break;
@@ -181,7 +184,9 @@ internal static class ProfileLayout
                         Case(expression);
                         break;
                     case CreateTableStatement t when Choice("parenthesesStyle") != "inherit" && t.Definition is { } definition:
-                        BracketList(t, definition.ColumnDefinitions.Cast<TSqlFragment>().Concat(definition.TableConstraints).ToArray(), t.StartOffset);
+                        BracketList(t, definition.ColumnDefinitions.Cast<TSqlFragment>().Concat(definition.TableConstraints)
+                            .Concat(definition.Indexes).Concat(definition.SystemTimePeriod is { } period
+                                ? new TSqlFragment[] { period } : Array.Empty<TSqlFragment>()).OrderBy(f => f.StartOffset).ToArray(), t.StartOffset);
                         break;
                     case ParenthesisExpression p when Choice("parenthesesStyle") != "inherit":
                         Parentheses(p, p.Expression);
@@ -225,7 +230,7 @@ internal static class ProfileLayout
                 var on = editor.Find(End(join.SecondTableReference), qualified.SearchCondition.StartOffset, Is("ON"));
                 if (on is not null) editor.Before(on.Offset, "always", new IndentRule(true, 1), anchorOffset: anchor);
                 editor.Before(qualified.SearchCondition.StartOffset, "never");
-                Boolean(qualified.SearchCondition, anchor);
+                Boolean(qualified.SearchCondition, on?.Offset ?? anchor);
             }
             void Boolean(BooleanExpression expression, int anchor)
             {
@@ -263,7 +268,7 @@ internal static class ProfileLayout
             {
                 if (content is null) return;
                 var open = editor.FindLast(whole.StartOffset, content.StartOffset, t => t.Text == "(");
-                var close = editor.FindLast(End(content), End(whole), t => t.Text == ")");
+                var close = Closing(open, End(whole));
                 if (open is null || close is null) return;
                 var threshold = Threshold("parenthesesCompact");
                 var compact = Choice("parenthesesStyle") == "compact" || threshold.Enabled && Flat(parsed, content).Length < threshold.Value;
@@ -325,7 +330,7 @@ internal static class ProfileLayout
             {
                 if (items.Length == 0) return;
                 var open = editor.FindLast(whole.StartOffset, items[0].StartOffset, t => t.Text == "(");
-                var close = editor.Find(End(items[items.Length - 1]), End(whole), t => t.Text == ")");
+                var close = Closing(open, End(whole));
                 if (open is null || close is null) return;
                 var threshold = Threshold("parenthesesCompact");
                 var compact = Choice("parenthesesStyle") == "compact" || threshold.Enabled
@@ -345,6 +350,31 @@ internal static class ProfileLayout
                 List(items, anchor, compact ? "never" : "always");
                 editor.After(open.Offset, compact ? "never" : "always", compact ? null : indent, "remove", anchor);
                 editor.Before(close.Offset, compact ? "never" : "always", compact ? null : Zero(), "remove", anchor);
+            }
+            TSqlParserToken? Closing(TSqlParserToken? open, int end)
+            {
+                if (open is null) return null;
+                var depth = 0;
+                foreach (var token in parsed.Tokens.Where(t => t.Offset >= open.Offset && t.Offset < end))
+                {
+                    if (token.Text == "(") depth++;
+                    else if (token.Text == ")" && --depth == 0) return token;
+                }
+                return null;
+            }
+            void FunctionParameters(FunctionStatementBody function)
+            {
+                var items = function.Parameters.Cast<TSqlFragment>().ToArray();
+                var open = editor.Find(End(function.Name), items.FirstOrDefault()?.StartOffset ?? function.ReturnType.StartOffset, t => t.Text == "(");
+                var close = Closing(open, function.ReturnType.StartOffset);
+                if (open is null || close is null) return;
+                var mode = Choice("functionParameters");
+                var stacked = mode == "always" || mode == "multiple" && items.Length > 1
+                    || mode == "ifLong" && (HasComment(parsed, open.Offset, close.Offset)
+                        || editor.GetLineIndent(function.StartOffset) + Flat(parsed, function.StartOffset, close.Offset + 1).Length > options.General.MaxLineWidth);
+                editor.Before(open.Offset, stacked ? "always" : "never", stacked ? Zero() : null, "insert", function.StartOffset);
+                List(items, function.StartOffset, stacked ? "always" : "never");
+                editor.Before(close.Offset, stacked && items.Length > 0 ? "always" : "never", stacked ? Zero() : null, "remove", function.StartOffset);
             }
             bool Fits(TSqlFragment f, int anchor) => FitsRange(f.StartOffset, End(f), anchor);
             bool FitsRange(int start, int end, int anchor) => editor.GetLineIndent(anchor)
@@ -400,8 +430,8 @@ internal static class ProfileLayout
             foreach (var f in definitionsOnly ? Fragments(parsed) : Array.Empty<TSqlFragment>())
             {
                 if (Flag("alignDeclarationValues") && f is DeclareVariableStatement d) Definitions(d.Declarations.Cast<TSqlFragment>().ToArray());
-                if (Flag("alignDeclarationValues") && f is ProcedureStatementBody p) Definitions(p.Parameters.Cast<TSqlFragment>().ToArray());
-                if (Flag("alignDdlTypes") && f is TableDefinition table) Definitions(table.ColumnDefinitions.Cast<TSqlFragment>().ToArray());
+                if (Flag("alignDeclarationValues") && f is ProcedureStatementBodyBase p) Definitions(p.Parameters.Cast<TSqlFragment>().ToArray());
+                if (f is TableDefinition table && (Flag("alignDdlTypes") || Flag("alignDdlConstraints"))) Definitions(table.ColumnDefinitions.Cast<TSqlFragment>().ToArray());
             }
             if (!definitionsOnly && (Flag("alignListComments") || Flag("alignCommentGroups")))
             {
@@ -428,12 +458,31 @@ internal static class ProfileLayout
                 if (parts.Length < 2 || parts.Select(p => LineNumber(parsed.Source, p.Name!.StartOffset)).Distinct().Count() != parts.Length) return;
                 var nameWidth = parts.Max(p => p.Name!.FragmentLength + (LeadingComma(p.Name.StartOffset) ? 2 : 0));
                 var typeWidth = parts.Max(p => p.Type!.FragmentLength);
+                var typeEnds = parts.ToDictionary(p => p.Type!.StartOffset, p =>
+                {
+                    var column = parsed.Source.Substring(LineStart(parsed.Source, p.Type!.StartOffset),
+                        p.Type.StartOffset - LineStart(parsed.Source, p.Type.StartOffset)).Sum(c => c == '\t' ? options.Indent.Size : 1);
+                    var gap = parsed.Source.Substring(End(p.Name!), p.Type.StartOffset - End(p.Name!));
+                    if (Flag("alignDdlTypes") && gap.All(c => c is ' ' or '\t'))
+                        column += nameWidth - p.Name!.FragmentLength - (LeadingComma(p.Name.StartOffset) ? 2 : 0) + 1
+                            - gap.Sum(c => c == '\t' ? options.Indent.Size : 1);
+                    return column + p.Type.FragmentLength;
+                });
+                var constraintColumn = typeEnds.Values.Max() + 1;
                 foreach (var p in parts)
                 {
-                    Gap(End(p.Name!), p.Type!.StartOffset, new string(' ', nameWidth - p.Name!.FragmentLength - (LeadingComma(p.Name.StartOffset) ? 2 : 0) + 1));
+                    if (definitions[0] is not ColumnDefinition || Flag("alignDdlTypes"))
+                        Gap(End(p.Name!), p.Type!.StartOffset, new string(' ', nameWidth - p.Name!.FragmentLength - (LeadingComma(p.Name.StartOffset) ? 2 : 0) + 1));
+                    if (Flag("alignDdlConstraints") && definitions.FirstOrDefault(f => f.StartOffset == p.Name!.StartOffset) is ColumnDefinition column)
+                    {
+                        var next = parsed.Tokens.FirstOrDefault(t => t.Offset >= End(p.Type!) && t.Offset < End(column)
+                            && t.TokenType is not (TSqlTokenType.WhiteSpace or TSqlTokenType.EndOfFile));
+                        if (next is not null && next.TokenType is not (TSqlTokenType.SingleLineComment or TSqlTokenType.MultilineComment))
+                            Gap(End(p.Type!), next.Offset, new string(' ', constraintColumn - typeEnds[p.Type!.StartOffset]));
+                    }
                     if (p.Value is null) continue;
-                    var equals = parsed.Tokens.FirstOrDefault(t => t.Offset >= End(p.Type) && t.Offset < p.Value.StartOffset && t.Text == "=");
-                    if (equals is not null) Gap(End(p.Type), equals.Offset, new string(' ', typeWidth - p.Type.FragmentLength + 1));
+                    var equals = parsed.Tokens.FirstOrDefault(t => t.Offset >= End(p.Type!) && t.Offset < p.Value.StartOffset && t.Text == "=");
+                    if (equals is not null) Gap(End(p.Type!), equals.Offset, new string(' ', typeWidth - p.Type!.FragmentLength + 1));
                 }
             }
             bool LeadingComma(int offset) => parsed.Source.Substring(LineStart(parsed.Source, offset), offset - LineStart(parsed.Source, offset)).Trim() == ",";
