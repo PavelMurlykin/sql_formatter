@@ -15,12 +15,14 @@ internal static class SelectFromLayout
         var parsed = parser.Parse(source, dialect, cancellationToken);
         if (!parsed.ParseSucceeded || parsed.Root is not TSqlScript script) return source;
         var editor = new SqlTokenGapEditor(parsed, options);
-        foreach (var statement in script.Batches.SelectMany(batch => batch.Statements))
+        foreach (var select in SelectQueryScope.Statements(script, options, cancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (statement is not SelectStatement select
-                || select.QueryExpression is not QuerySpecification query) continue;
-            ProcessInto(select, query);
+            if (select.QueryExpression is QuerySpecification query) ProcessInto(select, query);
+        }
+        foreach (var query in SelectQueryScope.Queries(script, options, cancellationToken))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
             ProcessFrom(query);
         }
         var changed = editor.Apply(cancellationToken);

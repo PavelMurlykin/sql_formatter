@@ -133,6 +133,8 @@ beforeTypeParameters|Пробел перед параметрами типа|Spa
 beforeSemicolon|Пробел перед точкой с запятой|Space before semicolon
 multiple|Если несколько элементов|If multiple items
 ifLong|Если превышена ширина строки|If longer than line width
+relativeSpaces|Отступ в пробелах от начала строки|Offset in spaces from line indentation
+absoluteSpaces|Отступ в пробелах от края|Offset in spaces from margin
 expandedToStatement|Развёрнуто от начала оператора|Expanded from statement
 compact|В одной строке|Single line
 general|Общие настройки|General settings

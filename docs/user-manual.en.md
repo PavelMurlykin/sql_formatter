@@ -106,6 +106,46 @@ By default, preview uses only the draft. “Учитывать настройк�
 
 This interface ships in Visual Studio VSIX 0.2.5 and SSMS VSIX 0.6.4. Update the appropriate VSIX and restart the IDE to see it. Builds, label coverage, search, profile models and the automated WinForms scenario are verified; top-level menu placement and host persistence in the newly installed packages still need checking. SC-27's narrow manual smoke applies to previous packages 0.2.4/0.6.3. See [new UI validation](settings-ui-validation.md).
 
+## AV and EPM working profiles from SQL Complete
+
+`examples/profiles/AV_Profile.json` and `examples/profiles/Right-aligned-EPM-AWB2.json`
+are additional JSON v2 profiles based on the two saved SQL Complete XML exports. Install
+Visual Studio VSIX **0.2.8** or SSMS VSIX **0.6.7**, restart the editor, and open
+**SQL Formatter → Profiles → Import JSON…**. Import a file, save it under its name,
+optionally choose **Use by default**, and confirm OK. Save each profile separately:
+importing the second file changes the current draft. The nearest project configuration
+takes precedence. For CLI use, put the same JSON in `.tsqlformatter.json`; user profile
+names are not `--profile` IDs.
+
+Each profile includes 573 rules. Both exported XML files select trailing commas;
+AV uses vertical SELECT columns; EPM uses automatic list layout. Identifiers, variables and aliases retain casing; keywords, built-in functions
+and types use uppercase. When quoted-identifier casing is enabled, a built-in `[int]`
+can become `[INT]`; user object and user-defined type names retain casing. Both profiles
+select width 120, four spaces, CRLF and a final newline. Width and global indent size
+are absent from the XML: these starting values can be changed for your project.
+
+Numeric list modes, condition wrapping modes and XML Style use explicitly stated native
+approximations. Identical SQL Complete output is not claimed. The
+[mapping](../examples/profiles/sql-complete-working-mapping.tsv) records each source field,
+chosen rule and confirmation status. The eight previously agreed OptionHints exclusions
+remain. Generic XML import is not added. Existing ReadableVertical and CompactQueries
+remain separate native styles.
+
+`relativeSpaces` and `absoluteSpaces` measure `offset` in spaces, from the anchor line's
+indentation and the left margin respectively. 5 means five spaces regardless of
+`indent.size`; negative offsets reduce indentation to a minimum of zero. Legacy
+`relative`/`absolute`/`anchor` measure offsets in indent levels. Other fields
+(enabled/onNewLineOnly/transparent) retain their meaning. For example:
+`{"enabled":true,"offset":5,"onNewLineOnly":true,"style":"relativeSpaces","transparent":false}`.
+
+For profiles using space offsets, the engine normalizes interacting nested rules to a
+stable result, with a limit of eight passes. If layout fails to stabilize or tokens
+change beyond the selected casing edits, it preserves the original SQL with warning
+TSF3006/TSF3007. Multiline literals also cause whole-file preservation. These cases
+are counted separately from style matches. The [report](sql-complete-working-profiles.md)
+includes the Rac_data and Process comparison and reproduction commands. External SQL
+is never modified or executed. Exports and projects may reflect different settings versions.
+
 ## Native alternatives to SQL Complete profiles (SC-26)
 
 `examples/profiles/` provides two original ready-to-use v2 JSON styles: `ReadableVertical.json` (width 100, vertical lists, supported alignment and module boundaries) and `CompactQueries.json` (width 120, compact lists and margin-fitting queries). The latter does not flatten all procedural code. Import a file through All settings → Import JSON… and save a named profile; for CLI use it as `.tsqlformatter.json` next to SQL after backing up any existing configuration. These are settings files, not new `--profile` IDs.

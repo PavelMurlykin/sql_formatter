@@ -1,6 +1,12 @@
 using BenchmarkDotNet.Running;
 using TSqlFormatter.Benchmarks;
 
+if (args.FirstOrDefault() == "--sql-complete-profiles")
+{
+    SqlCompleteWorkingProfileExport.Run(args.Skip(1).ToArray());
+    return;
+}
+
 if (args.FirstOrDefault() == "--sql-prompt-validation")
 {
     SqlPromptCorpusValidation.Run(args.Skip(1).ToArray());

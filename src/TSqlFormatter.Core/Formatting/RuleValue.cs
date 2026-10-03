@@ -24,7 +24,7 @@ public sealed class IndentRule : IEquatable<IndentRule>
     public IndentRule(bool enabled, int offset, bool onNewLineOnly = true,
         string style = "relative", bool transparent = false)
     {
-        if (style is not ("relative" or "absolute" or "anchor"))
+        if (style is not ("relative" or "absolute" or "anchor" or "relativeSpaces" or "absoluteSpaces"))
             throw new ArgumentOutOfRangeException(nameof(style));
         Enabled = enabled;
         Offset = offset;
@@ -38,6 +38,11 @@ public sealed class IndentRule : IEquatable<IndentRule>
     public bool OnNewLineOnly { get; }
     public string Style { get; }
     public bool Transparent { get; }
+
+    /// <summary>Signed width in spaces; legacy styles measure the offset in indentation levels.</summary>
+    public int Width(int indentSize) => Offset * (Style is "relativeSpaces" or "absoluteSpaces" ? 1 : indentSize);
+    public int Column(int anchorColumn, int indentSize) => Transparent ? 0
+        : Math.Max(0, (Style is "absolute" or "absoluteSpaces" ? 0 : anchorColumn) + Width(indentSize));
 
     public bool Equals(IndentRule? other) => other is not null && Enabled == other.Enabled
         && Offset == other.Offset && OnNewLineOnly == other.OnNewLineOnly

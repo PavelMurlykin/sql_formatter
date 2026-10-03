@@ -89,3 +89,8 @@ See the architecture decision records in `docs/adr/`.
 
 Further formatting rules and CLI options are planned for later roadmap tasks. See
 the manuals for the supported subset.
+
+SQL Complete working profiles AV_Profile and Right-aligned-EPM-AWB2 are available as
+native import JSON for VSIX 0.2.8 / SSMS 0.6.7. Their source mapping, explicit numeric-mode
+approximations and audit against both EPM-RAC database projects are described in
+[the working-profile report](docs/sql-complete-working-profiles.md).

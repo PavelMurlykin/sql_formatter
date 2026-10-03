@@ -68,8 +68,7 @@ internal static class SqlFragmentLayout
                 editor.Before(item.StartOffset, "inherit", rule, anchorOffset: item.Anchor);
                 continue;
             }
-            var target = rule.Transparent ? 0 : Math.Max(0, (rule.Style == "absolute" ? 0 : editor.GetLineIndent(item.Anchor))
-                + rule.Offset * options.Indent.Size);
+            var target = rule.Column(editor.GetLineIndent(item.Anchor), options.Indent.Size);
             var delta = target - editor.GetLineIndent(item.StartOffset);
             if (delta == 0) continue;
             lastEnd = item.StartOffset + item.FragmentLength;

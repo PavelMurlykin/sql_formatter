@@ -16,10 +16,9 @@ internal static class SelectClauseLayout
         var parsed = parser.Parse(source, dialect, cancellationToken);
         if (!parsed.ParseSucceeded || parsed.Root is not TSqlScript script) return source;
         var editor = new SqlTokenGapEditor(parsed, options);
-        foreach (var statement in script.Batches.SelectMany(batch => batch.Statements))
+        foreach (var query in SelectQueryScope.Queries(script, options, cancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (statement is not SelectStatement { QueryExpression: QuerySpecification query }) continue;
             if (query.WhereClause?.SearchCondition is { } where)
                 Condition(query.WhereClause, where, "select.where", "WHERE");
             if (query.HavingClause?.SearchCondition is { } having)

@@ -16,7 +16,7 @@ internal static class SelectTailLayout
         var parsed = parser.Parse(source, dialect, cancellationToken);
         if (!parsed.ParseSucceeded || parsed.Root is not TSqlScript script) return source;
         var editor = new SqlTokenGapEditor(parsed, options);
-        foreach (var statement in script.Batches.SelectMany(batch => batch.Statements).OfType<SelectStatement>())
+        foreach (var statement in SelectQueryScope.Statements(script, options, cancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             ProcessCtes(statement);

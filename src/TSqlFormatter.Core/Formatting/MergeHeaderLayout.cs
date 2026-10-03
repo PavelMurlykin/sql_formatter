@@ -220,7 +220,7 @@ internal static class MergeHeaderLayout
             return space == "insert" ? 1 : space == "remove" ? 0 : NormalizedGap(gap);
         }
         int InlinePadding(IndentRule indent) => indent is { Enabled: true, OnNewLineOnly: false, Transparent: false }
-            ? Math.Max(0, indent.Offset * options.Indent.Size) : 0;
+            ? Math.Max(0, indent.Width(options.Indent.Size)) : 0;
         int NormalizedGap(string gap) => Regex.Replace(gap, @"[ \t]*(?:\r\n|\r|\n)[ \t]*", " ").Length;
         void Boundary(int offset, string breakKey, string indentKey, int anchor) =>
             editor.Before(offset, Choice(breakKey), Indent(indentKey), anchorOffset: anchor);

@@ -16,11 +16,11 @@ internal sealed class SqlListLayout
         this.editor = editor;
     }
 
-    public bool Apply(TSqlFragment[] items, string prefix, int anchor, int? start = null, int? end = null)
+    public bool Apply(TSqlFragment[] items, string prefix, int anchor, int? start = null, int? end = null, string? stackKey = null, string? indentKey = null)
     {
         if (items.Length == 0) return false;
-        var stack = Choice(prefix + ".stackList");
-        var indent = NativeRules.Get(options, prefix + ".listIndent").Indent;
+        var stack = Choice(stackKey ?? prefix + ".stackList");
+        var indent = NativeRules.Get(options, indentKey ?? prefix + ".listIndent").Indent;
         if (stack == "inherit" && !indent.Enabled) return false;
         var compact = stack == "off" || stack == "on" && Choice(prefix + ".stackMode") == "auto"
             && Fits(start ?? items[0].StartOffset, end ?? End(items[items.Length - 1]), anchor, indent, prefix);
@@ -67,7 +67,7 @@ internal sealed class SqlListLayout
                         : Choice(prefix + ".spaceWithin") == "remove" ? 0 : gap.Length > 0 ? 1 : 0
                     : token.Text == "," ? Choice("spacing.beforeComma") == "insert" ? 1 : 0
                     : previous.Text == "," ? 1 + (indent is { Enabled: true, OnNewLineOnly: false, Transparent: false }
-                        ? Math.Max(0, indent.Offset * options.Indent.Size) : 0)
+                        ? Math.Max(0, indent.Width(options.Indent.Size)) : 0)
                     : gap.Length > 0 ? 1 : 0;
             }
             width += token.Text.Length;

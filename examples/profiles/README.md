@@ -1,4 +1,4 @@
-# Native profile alternatives
+# Native import profiles
 
 `ADIR_SQL_Main.json` is a native v2 import profile mapped from the user-supplied SQL Prompt
 ADIR_SQL_Main exports and all 16 settings screenshots, refined against 2026 Git files
@@ -12,9 +12,25 @@ and [current local corpus audit](../../docs/sql-prompt-adir-additional-validatio
 from verified output matches. This does not add a generic SQL Prompt style-file importer.
 
 
+`AV_Profile.json` and `Right-aligned-EPM-AWB2.json` are working JSON v2 profiles
+prepared from the supplied SQL Complete exports. Each contains 573 native rules; install
+Visual Studio 0.2.8 or SSMS 0.6.7 before importing. Import each file on Profiles, save it
+under its name, and optionally select it as the default. Project configuration takes
+precedence. Both choose width 120, four spaces and CRLF because the exports do not include
+these general editor settings. New relativeSpaces/absoluteSpaces offsets are literal
+spaces; legacy offsets retain their indent-level units. Both source exports select trailing commas; AV uses vertical SELECT columns and EPM
+automatic list layout. The mapping preserves source values and explicitly
+marks unverified numeric modes/Style as native approximations. This does not certify
+SQL Complete output parity or add a generic XML importer. See the
+[working mapping](sql-complete-working-mapping.tsv) and
+[project audit and generation commands](../../docs/sql-complete-working-profiles.md).
+
+The following SC-26 artifacts remain historical native alternatives; their immutable
+source snapshot and coverage ledger are unchanged by the working-profile exporter.
+
 `ReadableVertical.json` and `CompactQueries.json` are original formatter presets, **not conversions of AV_Profile or Right aligned EPM-AWB2** and not promises of identical output. ReadableVertical uses width 100, vertical lists, supported alignment and explicit module boundaries. CompactQueries uses width 120, inline lists and margin-based query compactness; it does not flatten all procedural code. Both retain the Core's safe-layout limitations. Import either file on the IDE's All settings page or copy it to a project's `.tsqlformatter.json` after checking/backing up any existing file. CLI discovers that configuration normally; preset names are not new `--profile` IDs.
 
-The XML profiles are user-supplied requirements references. They are not distributed here. Their normalized, hash-checked snapshot records the union of all 977 scalar paths (577 groups), including the 5 fields absent from AV. Numeric XML modes and Style values have no verified control-output oracle; this release therefore takes the explicit SC-26 fallback instead of shipping a speculative XML converter. No numeric mode is guessed. This is a technical decision, not a determination of third-party licensing rights.
+The XML profiles are user-supplied requirements references. They are not distributed here. Their normalized, hash-checked snapshot records the union of all 977 scalar paths (577 groups), including the 5 fields absent from AV. Numeric XML modes and Style values have no verified control-output oracle; the SC-26 alternative export therefore takes the explicit fallback instead of shipping a speculative XML converter. That alternative exporter does not interpret numeric modes. This is a technical decision, not a determination of third-party licensing rights.
 
 `sql-complete-correspondence.tsv` gives **one row per original path**, its original type and exact AV/EPM values, coverage status, native setting, effective value of each native alternative, explicit decision, test evidence and documented native semantics. Older mappings may include a member or `:kind:default` metadata. For compound rules a whole native object is shown when the ledger maps to its root; it is not an interpretation of XML Style. `native_alternative_not_xml_conversion` always means “choose/configure the native equivalent yourself”, not “the original value was converted”. Only the 8 already user-approved Subquery OptionHints paths are excluded. All 969 applicable correspondences remain implemented and editable.
 

@@ -33,7 +33,7 @@ internal static class CaseAndSetLayout
             var endToken = editor.FindLast(expression.StartOffset, end, Is("END"));
             if (caseToken is null || endToken is null) return;
             editor.Before(caseToken.Offset, Break("case.breakBeforeCase"), Indent("case.caseIndent"));
-            editor.Before(endToken.Offset, Break("case.breakBeforeEnd"));
+            editor.Before(endToken.Offset, Break("case.breakBeforeEnd"), anchorOffset: caseToken.Offset);
             if (expression is SimpleCaseExpression { InputExpression: { } input })
                 editor.Before(input.StartOffset, Break("case.breakBeforeInput"),
                     Indent("case.inputIndent"));
@@ -58,7 +58,7 @@ internal static class CaseAndSetLayout
                     clause.ThenExpression.StartOffset, Is("THEN"));
                 if (when is null || then is null) continue;
                 editor.Before(when.Offset, Break("case.breakBeforeWhenElse"),
-                    Indent("case.whenKeywordIndent"));
+                    Indent("case.whenKeywordIndent"), anchorOffset: caseToken.Offset);
                 editor.Before(condition.StartOffset, "inherit", Indent("case.whenExpressionIndent"));
                 editor.Before(then.Offset, Break("case.breakBeforeThen"),
                     Indent("case.thenKeywordIndent"));
@@ -73,7 +73,7 @@ internal static class CaseAndSetLayout
             var elseToken = editor.Find(afterLast, otherwise.StartOffset, Is("ELSE"));
             if (elseToken is null) return;
             editor.Before(elseToken.Offset, Break("case.breakBeforeWhenElse"),
-                Indent("case.whenKeywordIndent"));
+                Indent("case.whenKeywordIndent"), anchorOffset: caseToken.Offset);
             editor.Before(otherwise.StartOffset, Break("case.breakAfterThenElse"),
                 Indent("case.codeIndent"));
         }
@@ -120,11 +120,13 @@ internal static class CaseAndSetLayout
             var op = editor.Find(left.StartOffset + left.FragmentLength, right.StartOffset, Is(word));
             if (op is null) return;
             editor.Before(op.Offset, Break("setOperator.breakBefore"),
-                Indent("setOperator.keywordIndent"));
+                Indent("setOperator.keywordIndent"), anchorOffset:
+                    SelectQueryScope.UsesSpaceOffsets(options) ? left.StartOffset : null);
             var last = binary.All ? editor.Find(op.Offset + op.Text.Length,
                 right.StartOffset, Is("ALL")) : null;
             editor.After((last ?? op).Offset, Break("setOperator.breakAfter"),
-                Indent("setOperator.branchIndent"));
+                Indent("setOperator.branchIndent"), anchorOffset:
+                    SelectQueryScope.UsesSpaceOffsets(options) ? op.Offset : null);
         }
 
         string Break(string key) => NativeRules.Get(options, key).Choice;

@@ -141,7 +141,7 @@ internal sealed class SqlTokenGapEditor
         else if (breakMode == "never")
         {
             replacement = (spaceMode == "remove" ? "" : " ") + (indent is { Enabled: true, OnNewLineOnly: false }
-                ? new string(' ', indent.Transparent ? 0 : Math.Max(0, indent.Offset * options.Indent.Size)) : "");
+                ? new string(' ', indent.Transparent ? 0 : Math.Max(0, indent.Width(options.Indent.Size))) : "");
         }
         else if (existingBreak.Success)
         {
@@ -152,7 +152,7 @@ internal sealed class SqlTokenGapEditor
         else if (indent is { Enabled: true, OnNewLineOnly: false })
         {
             replacement = (spaceMode == "remove" ? "" : " ")
-                + new string(' ', indent.Transparent ? 0 : Math.Max(0, indent.Offset * options.Indent.Size));
+                + new string(' ', indent.Transparent ? 0 : Math.Max(0, indent.Width(options.Indent.Size)));
         }
         else if (spaceMode != "inherit") replacement = spaceMode == "insert" ? " " : "";
         else return;
@@ -163,8 +163,8 @@ internal sealed class SqlTokenGapEditor
     {
         if (indent?.Enabled != true) return baseIndent;
         if (indent.Transparent) return 0;
-        var offset = indent.Offset * options.Indent.Size;
-        return Math.Max(0, indent.Style == "absolute" ? offset : baseIndent + offset);
+        var offset = indent.Width(options.Indent.Size);
+        return indent.Column(baseIndent, options.Indent.Size);
     }
 
     private int LineIndent(int offset)

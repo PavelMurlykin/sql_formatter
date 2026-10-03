@@ -71,8 +71,7 @@ internal static class SubqueryLayout
             var openLine = source.LastIndexOfAny(new[] { '\r', '\n' }, Math.Max(0, open.Offset - 1)) + 1;
             var baseIndent = source.Substring(openLine).TakeWhile(ch => ch is ' ' or '\t').Count();
             var currentIndent = wrapper.Query.StartOffset - firstLine;
-            var targetIndent = indent.Transparent ? 0 : Math.Max(0, indent.Style == "absolute"
-                ? indent.Offset * options.Indent.Size : baseIndent + indent.Offset * options.Indent.Size);
+            var targetIndent = indent.Column(baseIndent, options.Indent.Size);
             var delta = targetIndent - currentIndent;
             if (delta == 0) continue;
             var end = wrapper.Query.StartOffset + wrapper.Query.FragmentLength;

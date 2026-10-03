@@ -22,13 +22,16 @@ internal static class SelectCompactness
         var parsed = parser.Parse(source, dialect, cancellationToken);
         if (!parsed.ParseSucceeded || parsed.Root is not TSqlScript script) return source;
         var edits = new List<TextEdit>();
-        foreach (var statement in script.Batches.SelectMany(batch => batch.Statements))
+        var candidates = SelectQueryScope.UsesSpaceOffsets(options)
+            ? SelectQueryScope.Queries(script, options, cancellationToken).Where(query => query.SelectElements.Count > 0).Cast<TSqlFragment>()
+            : script.Batches.SelectMany(batch => batch.Statements).OfType<SelectStatement>()
+                .Where(select => select.QueryExpression is QuerySpecification { SelectElements.Count: > 0 }
+                    && select.WithCtesAndXmlNamespaces is null).Cast<TSqlFragment>();
+        var lastEnd = -1;
+        foreach (var statement in candidates.OrderBy(fragment => fragment.StartOffset).ThenByDescending(fragment => fragment.FragmentLength))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (statement is not SelectStatement select
-                || select.QueryExpression is not QuerySpecification query
-                || query.SelectElements.Count == 0 || select.WithCtesAndXmlNamespaces is not null
-                || statement.StartOffset < 0 || statement.FragmentLength <= 0
+            if (statement.StartOffset < lastEnd || statement.StartOffset < 0 || statement.FragmentLength <= 0
                 || statement.StartOffset + statement.FragmentLength > source.Length) continue;
             var start = statement.StartOffset;
             var end = start + statement.FragmentLength;
@@ -43,7 +46,10 @@ internal static class SelectCompactness
             var qualifies = fitsMargin || characters.Enabled && candidate.Length <= characters.Value
                 || words.Enabled && Words.Matches(candidate).Count <= words.Value;
             if (qualifies)
+            {
                 edits.Add(new TextEdit(new SqlTextSpan(start, statement.FragmentLength), candidate));
+                lastEnd = end;
+            }
         }
         if (edits.Count == 0) return source;
         var changed = KeywordCasing.Apply(source, edits, cancellationToken);

@@ -205,7 +205,7 @@ public sealed class SettingsEditorModel
                 yield return Field("enabled", SettingsFieldKind.Boolean);
                 yield return Field("offset", SettingsFieldKind.Integer);
                 yield return Field("onNewLineOnly", SettingsFieldKind.Boolean);
-                yield return Field("style", SettingsFieldKind.Choice, new[] { "relative", "absolute", "anchor" });
+                yield return Field("style", SettingsFieldKind.Choice, new[] { "relative", "absolute", "anchor", "relativeSpaces", "absoluteSpaces" });
                 yield return Field("transparent", SettingsFieldKind.Boolean);
                 break;
         }

@@ -84,6 +84,8 @@ internal static class InsertLayout
                 anchorOffset: anchor);
             editor.Before(values.RowValues[0].StartOffset, Break("values.breakAfterKeyword"),
                 Indent("values.braceIndent"), Space("values.spaceAfterKeyword"), anchor);
+            var positionRowsFirst = SelectQueryScope.UsesSpaceOffsets(options);
+            if (positionRowsFirst) PositionRows();
             foreach (var row in values.RowValues)
             {
                 if (row.ColumnValues.Count == 0) continue;
@@ -95,7 +97,10 @@ internal static class InsertLayout
                     BracedList(row.ColumnValues.Cast<TSqlFragment>().ToArray(), open, close, "values", anchor,
                         open.Offset);
             }
-            List(values.RowValues.Cast<TSqlFragment>().ToArray(), "values.stackRows", "values.stackRowsMode",
+            if (!positionRowsFirst) PositionRows();
+
+            void PositionRows() =>
+                List(values.RowValues.Cast<TSqlFragment>().ToArray(), "values.stackRows", "values.stackRowsMode",
                 "values.braceIndent", anchor, Fits(values.StartOffset,
                     values.StartOffset + values.FragmentLength, anchor));
         }
@@ -169,9 +174,7 @@ internal static class InsertLayout
             if (source.Substring(start, query.StartOffset - start).Any(ch => ch is not (' ' or '\t')))
                 continue;
             var current = LineIndent(source, query.StartOffset, options.Indent.Size);
-            var target = indent.Transparent ? 0 : Math.Max(0, indent.Style == "absolute"
-                ? indent.Offset * options.Indent.Size
-                : LineIndent(source, spec.StartOffset, options.Indent.Size) + indent.Offset * options.Indent.Size);
+            var target = indent.Column(LineIndent(source, spec.StartOffset, options.Indent.Size), options.Indent.Size);
             var delta = target - current;
             if (delta == 0) continue;
             foreach (Match line in Regex.Matches(source, @"(?:\A|(?<=\n)|(?<=\r)(?!\n))[ \t]*"))

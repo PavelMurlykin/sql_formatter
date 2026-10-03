@@ -22,6 +22,43 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         FormatRequest request,
         CancellationToken cancellationToken = default)
     {
+        var first = FormatOnce(source, options, request, cancellationToken);
+        // Space-based profiles combine many token-gap passes. A later enclosing layout may
+        // change the anchor used by an earlier pass, so normalize to a bounded fixed point.
+        if (!first.Changed || !first.ParseSucceeded || request.Scope != FormatScope.Document
+            || !options.Rules.Overrides.Values.Any(value => value.Kind == RuleValueKind.Indent
+                && value.Indent.Style is "relativeSpaces" or "absoluteSpaces")) return first;
+        var original = _parser.Parse(source, request.Dialect, cancellationToken);
+        var current = first;
+        var seen = new HashSet<string>(StringComparer.Ordinal) { source };
+        const int maximumPasses = 8;
+        for (var pass = 1; pass < maximumPasses; pass++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!seen.Add(current.Text)) break;
+            var next = FormatOnce(current.Text, options, request, cancellationToken);
+            if (next.Diagnostics.Any(d => d.Severity == FormatterDiagnosticSeverity.Error)) break;
+            if (next.Text != current.Text) { current = next; continue; }
+            if (!SqlTokenSafety.PreservesTokens(original,
+                _parser.Parse(current.Text, request.Dialect, cancellationToken), options, cancellationToken))
+                return Unchanged(source, true, new FormatterDiagnostic("TSF3007",
+                    "Formatted tokens differ from the profile's permitted casing edits; SQL was left unchanged.",
+                    FormatterDiagnosticSeverity.Warning));
+            return new FormatResult(current.Text, current.Text != source, true,
+                current.Text == source ? Array.Empty<TextEdit>() : new[] { new TextEdit(new SqlTextSpan(0, source.Length), current.Text) },
+                first.Diagnostics);
+        }
+        return Unchanged(source, true, new FormatterDiagnostic("TSF3006",
+            "Layout did not stabilize within eight passes; SQL was left unchanged.",
+            FormatterDiagnosticSeverity.Warning));
+    }
+
+    private FormatResult FormatOnce(
+        string source,
+        FormattingOptions options,
+        FormatRequest request,
+        CancellationToken cancellationToken = default)
+    {
         if (source is null) throw new ArgumentNullException(nameof(source));
         if (options is null) throw new ArgumentNullException(nameof(options));
         if (request is null) throw new ArgumentNullException(nameof(request));
@@ -86,7 +123,10 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         var storedCodeBuilder = new StoredCodeDocBuilder(options);
         // Shared profile layout works directly on parser token gaps at every nesting level.
         // Avoid re-embedding opaque multiline text in structural docs on successive passes.
-        var document = NativeRules.Get(options, "layout.listFirstItem").Choice != "inherit" ? new TextDoc(source)
+        // Literal space offsets use token gaps because Doc indentation is measured in levels.
+        var document = NativeRules.Get(options, "layout.listFirstItem").Choice != "inherit"
+            || options.Rules.Overrides.Values.Any(v => v.Kind == RuleValueKind.Indent
+                && v.Indent.Style is "relativeSpaces" or "absoluteSpaces") ? new TextDoc(source)
             : new SqlDocBuilder(new ISqlFragmentDocBuilder[]
             { builder, insertBuilder, updateBuilder, deleteBuilder, mergeBuilder, storedCodeBuilder })
             .BuildDocument(parsed, cancellationToken);
@@ -109,6 +149,8 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
                 cancellationToken);
             rendered = SqlSpacing.ApplySafe(rendered, options, _parser, request.Dialect, cancellationToken);
             rendered = SqlStackedListsAndBatches.ApplySafe(rendered, options, _parser,
+                request.Dialect, cancellationToken);
+            rendered = SelectListLayout.ApplySafe(rendered, options, _parser,
                 request.Dialect, cancellationToken);
             rendered = SelectFromLayout.ApplySafe(rendered, options, _parser,
                 request.Dialect, cancellationToken);
@@ -160,6 +202,8 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         var cased = KeywordCasing.Apply(source, edits, cancellationToken);
         var output = SqlSpacing.ApplySafe(cased, options, _parser, request.Dialect, cancellationToken);
         output = SqlStackedListsAndBatches.ApplySafe(output, options, _parser,
+            request.Dialect, cancellationToken);
+        output = SelectListLayout.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);
         output = SelectFromLayout.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);
