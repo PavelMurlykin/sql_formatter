@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel.Design;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -12,6 +12,7 @@ using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Threading;
 using TSqlFormatter.Configuration;
+using TSqlFormatter.IdeShared;
 using TSqlFormatter.Core.Formatting;
 using TSqlFormatter.Core.Parsing;
 
@@ -29,6 +30,8 @@ public sealed class SsmsPackage : AsyncPackage
     public const string PackageGuid = "908068E6-40D9-4543-AB9F-1B952930F1E3";
     private static readonly Guid CommandSet = new("4EE4F956-58EC-490D-9DCA-D2D198570CEC");
     private IVsTextManager? textManager;
+    private IVsMonitorSelection? monitorSelection;
+    private EnvDTE.DTE? dte;
     private IVsEditorAdaptersFactoryService? editorAdapters;
     private ITextUndoHistoryRegistry? undoRegistry;
 
@@ -36,20 +39,30 @@ public sealed class SsmsPackage : AsyncPackage
     {
         await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
         textManager = await GetServiceAsync(typeof(SVsTextManager)) as IVsTextManager;
+        monitorSelection = await GetServiceAsync(typeof(SVsShellMonitorSelection)) as IVsMonitorSelection;
+        dte = await GetServiceAsync(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
+        IdeHostIntegration.SetLanguage(dte);
         var components = await GetServiceAsync(typeof(SComponentModel)) as IComponentModel;
         editorAdapters = components?.GetService<IVsEditorAdaptersFactoryService>();
         undoRegistry = components?.GetService<ITextUndoHistoryRegistry>();
         var fullSettings = (FullSettingsOptionsPage)GetDialogPage(typeof(FullSettingsOptionsPage));
         fullSettings.LegacyOptionsProvider = () => ((SsmsOptionsPage)GetDialogPage(typeof(SsmsOptionsPage))).CreateOptions();
-        fullSettings.SqlPathProvider = () => ActiveQueryEditor.TryRead(textManager, out var editor) ? editor.Path : null;
+        fullSettings.SqlPathProvider = () => ActiveQueryEditor.TryRead(textManager, out var editor, monitorSelection) ? editor.Path : null;
         ActivityLog.LogInformation("T-SQL Formatter SSMS", "SSMS spike package initialized.");
+        fullSettings.ShortcutProvider = () => IdeHostIntegration.Shortcut(dte, CommandSet);
+        fullSettings.ShortcutApply = value => IdeHostIntegration.SetShortcut(dte, CommandSet, value);
         if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService commands)
         {
-            commands.AddCommand(new MenuCommand(ExecuteFormatDocument, new CommandID(CommandSet, 0x0200)));
-            commands.AddCommand(new MenuCommand(ExecuteFormatSelection, new CommandID(CommandSet, 0x0201)));
-            commands.AddCommand(new MenuCommand(ExecuteFormatStatement, new CommandID(CommandSet, 0x0202)));
-            commands.AddCommand(new MenuCommand((_, _) => ShowSettings(false), new CommandID(CommandSet, 0x0400)));
-            commands.AddCommand(new MenuCommand((_, _) => ShowSettings(true), new CommandID(CommandSet, 0x0401)));
+            var format = new OleMenuCommand(ExecuteFormatDocument, new CommandID(CommandSet, 0x0200));
+            format.BeforeQueryStatus += (_, _) =>
+            {
+                format.Text = SettingsAppearance.Text("Форматировать документ", "Format Document");
+                format.Visible = format.Enabled = ActiveQueryEditor.TryRead(textManager, out _, monitorSelection);
+            };
+            commands.AddCommand(format);
+            var settings = new OleMenuCommand((_, _) => ShowSettings(false), new CommandID(CommandSet, 0x0400));
+            settings.BeforeQueryStatus += (_, _) => settings.Text = SettingsAppearance.Text("Настройки…", "Settings…");
+            commands.AddCommand(settings);
         }
     }
 
@@ -59,11 +72,11 @@ public sealed class SsmsPackage : AsyncPackage
         try
         {
             var shell = GetService(typeof(SVsUIShell)) as IVsUIShell
-                ?? throw new InvalidOperationException("Окно IDE недоступно.");
+                ?? throw new InvalidOperationException(SettingsAppearance.Text("Окно IDE недоступно.", "IDE window is unavailable."));
             Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(shell.GetDialogOwnerHwnd(out IntPtr owner));
             ((FullSettingsOptionsPage)GetDialogPage(typeof(FullSettingsOptionsPage))).ShowEditor(profiles, owner);
         }
-        catch (Exception ex) { ShowMessage("Не удалось открыть настройки: " + ex.Message, true); }
+        catch (Exception ex) { ShowMessage(SettingsAppearance.Text("Не удалось открыть настройки: ", "Unable to open settings: ") + ex.Message, true); }
     }
 
     private void ExecuteFormatDocument(object sender, EventArgs e)
@@ -84,7 +97,7 @@ public sealed class SsmsPackage : AsyncPackage
     private async Task FormatAsync(FormatScope scope)
     {
         await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
-        if (!ActiveQueryEditor.TryRead(textManager, out var editor) || editorAdapters == null || undoRegistry == null)
+        if (!ActiveQueryEditor.TryRead(textManager, out var editor, monitorSelection) || editorAdapters == null || undoRegistry == null)
         {
             ShowMessage("Open a .sql file in the SSMS query editor first.", true);
             return;
@@ -112,7 +125,12 @@ public sealed class SsmsPackage : AsyncPackage
             snapshot = caretSnapshot;
             target = new SqlTextSpan(caret, 0);
         }
-        else snapshot = editor.CaptureSnapshot(editorAdapters);
+        else
+        {
+            snapshot = editor.CaptureSnapshot(editorAdapters);
+            if (editor.TryCaptureSelection(editorAdapters, out var selectedSnapshot, out var selected) && ReferenceEquals(selectedSnapshot, snapshot))
+            { target = new SqlTextSpan(selected.Start, selected.Length); scope = FormatScope.Selection; }
+        }
         if (snapshot == null || snapshot.Length > 16 * 1024 * 1024)
         {
             ShowMessage("The SQL buffer is unavailable or exceeds 16 Mi characters.", true);
@@ -128,8 +146,9 @@ public sealed class SsmsPackage : AsyncPackage
             {
                 var config = new SqlFormatterConfigurationResolver().ResolveForSqlFile(editor.Path, defaults);
                 if (!config.Succeeded) return (Result: (FormatResult?)null, Error: config.Diagnostics[0]);
-                var result = new ScriptDomSqlFormatter().Format(source, config.Options!,
-                    target == null ? new FormatRequest() : new FormatRequest(scope, target), DisposalToken);
+                var result = scope == FormatScope.Statement
+                    ? new ScriptDomSqlFormatter().Format(source, config.Options!, new FormatRequest(scope, target), DisposalToken)
+                    : new EditorSqlFormatter().Format(source, config.Options!, target, DisposalToken);
                 return (Result: result, Error: (FormatterDiagnostic?)null);
             }, DisposalToken);
             await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
@@ -144,7 +163,7 @@ public sealed class SsmsPackage : AsyncPackage
                 ShowMessage(diagnostic == null ? "The SQL target is already formatted."
                     : $"{diagnostic.Code}: {diagnostic.Message}", diagnostic != null);
             }
-            else if (!ActiveQueryEditor.TryRead(textManager, out var current) ||
+            else if (!ActiveQueryEditor.TryRead(textManager, out var current, monitorSelection) ||
                      !ReferenceEquals(current.Buffer, editor.Buffer) ||
                      (scope == FormatScope.Document
                          ? !editor.TryApplyDocument(snapshot, result.Text, editorAdapters, undoRegistry)

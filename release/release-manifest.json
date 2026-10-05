@@ -5,26 +5,26 @@
                   {
                       "file":  "TSqlFormatter.VS2022.vsix",
                       "host":  "VS2022",
-                      "version":  "0.2.9",
-                      "sha256":  "9d03f71020a5fceb1b5762106a254faeba5f6c17be61dc9350a23f7c49818d2f"
+                      "version":  "0.2.10",
+                      "sha256":  "e5ff0ed59f8864b2e0b6e7aa9490b46ba8a28acd9790c042b938222011928112"
                   },
                   {
                       "file":  "TSqlFormatter.VS2026.vsix",
                       "host":  "VS2026",
-                      "version":  "0.2.9",
-                      "sha256":  "d4a6c4fdf1cbed2a07dc062ecb52ff432a49bfd7ac2d30371e7c32737dfe31d4"
+                      "version":  "0.2.10",
+                      "sha256":  "d57e65df38f84bfbcb11f2d8cfc278f527c56efa467015bb67d3fa14b82e9fdd"
                   },
                   {
                       "file":  "TSqlFormatter.SSMS20.vsix",
                       "host":  "SSMS20",
-                      "version":  "0.6.8",
-                      "sha256":  "ef289447074cfc617136ff8fc8e46b76a91fd900d76d80ae6ce0d6891d9b1f7d"
+                      "version":  "0.6.9",
+                      "sha256":  "eb9b476708a739505662b55d05d25216974d1b5dfd9dc883965ce6d5466ce5e1"
                   },
                   {
                       "file":  "TSqlFormatter.SSMS22.vsix",
                       "host":  "SSMS22",
-                      "version":  "0.6.8",
-                      "sha256":  "a66a092d90cb65fbd5224fdf6814df5cfaafa978f3263e84b5b4a703ddb083e9"
+                      "version":  "0.6.9",
+                      "sha256":  "0ff29bc2d5619f597efe1e5820151770a96e0f10bd1d6d3a5ca50fb5caa94212"
                   },
                   {
                       "file":  "ADIR_SQL_Main.json",
@@ -49,7 +49,7 @@
                   {
                       "file":  "TSqlFormatter.Tool.0.1.0-preview.6.nupkg",
                       "kind":  "CLI-preview",
-                      "sha256":  "b962af220ab46768c0bc0cd3e467abfd9dc9ac26586a5e354720c614a5627b5f"
+                      "sha256":  "e23f51fd6f113bda169bc451bac54e6cedb700a2b8cf32cc1c16a7ece88e936b"
                   }
               ],
     "note":  "Package checks and bundled-profile checks passed. Installed-host checks are recorded separately in VALIDATION.md. No publication."

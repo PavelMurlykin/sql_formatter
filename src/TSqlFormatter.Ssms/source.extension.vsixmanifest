@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011">
   <Metadata>
-    <Identity Id="TSqlFormatter.Ssms" Version="0.6.8" Language="en-US" Publisher="TSqlFormatter" />
+    <Identity Id="TSqlFormatter.Ssms" Version="0.6.9" Language="en-US" Publisher="TSqlFormatter" />
     <DisplayName>T-SQL Formatter for SSMS 22 (Experimental)</DisplayName>
     <Description>Experimental T-SQL formatting for SSMS 22. Not a supported release.</Description>
   </Metadata>

@@ -7,6 +7,9 @@
   <ItemGroup>
     <Compile Include="../../src/TSqlFormatter.IdeShared/FullSettingsControl.cs" Link="FullSettingsControl.cs" />
     <Compile Include="../../src/TSqlFormatter.IdeShared/FormattingSettingsWindow.cs" Link="FormattingSettingsWindow.cs" />
+    <Compile Include="../../src/TSqlFormatter.IdeShared/SettingsAppearance.cs" Link="SettingsAppearance.cs" />
+    <Compile Include="../../src/TSqlFormatter.IdeShared/SqlPreviewBox.cs" Link="SqlPreviewBox.cs" />
+    <PackageReference Include="Microsoft.SqlServer.TransactSql.ScriptDom" />
     <ProjectReference Include="../../src/TSqlFormatter.Configuration/TSqlFormatter.Configuration.csproj" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Drawing" />

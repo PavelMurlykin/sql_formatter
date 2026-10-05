@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable">
   <Extern href="stdidcmd.h" />
   <Extern href="vsshlids.h" />
@@ -10,74 +10,30 @@
       </Menu>
     </Menus>
     <Groups>
-      <Group guid="guidCommandSet" id="grpSqlFormatter" priority="0x0600">
-        <Parent guid="guidCommandSet" id="menuSqlFormatter" />
-      </Group>
-      <Group guid="guidCommandSet" id="grpSettings" priority="0x0700">
-        <Parent guid="guidCommandSet" id="menuSqlFormatter" />
-      </Group>
+      <Group guid="guidCommandSet" id="grpSqlFormatter" priority="0x0600"><Parent guid="guidCommandSet" id="menuSqlFormatter" /></Group>
+      <Group guid="guidCommandSet" id="grpContext" priority="0x0700"><Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN" /></Group>
     </Groups>
     <Buttons>
-      <Button guid="guidCommandSet" id="cmdSettings" priority="0x0100" type="Button">
-        <Parent guid="guidCommandSet" id="grpSettings" />
-        <Strings><ButtonText>Настройки форматирования…</ButtonText></Strings>
-      </Button>
-      <Button guid="guidCommandSet" id="cmdProfiles" priority="0x0110" type="Button">
-        <Parent guid="guidCommandSet" id="grpSettings" />
-        <Strings><ButtonText>Сохранённые профили…</ButtonText></Strings>
-      </Button>
-      <Button guid="guidCommandSet" id="cmdFormatDocument" priority="0x0200" type="Button">
+      <Button guid="guidCommandSet" id="cmdFormatDocument" priority="0x0100" type="Button">
         <Parent guid="guidCommandSet" id="grpSqlFormatter" />
-        <Strings>
-          <ButtonText>Format T-SQL Document</ButtonText>
-        </Strings>
+        <CommandFlag>TextChanges</CommandFlag><CommandFlag>DynamicVisibility</CommandFlag><CommandFlag>DefaultInvisible</CommandFlag>
+        <Strings><ButtonText>Format Document</ButtonText><CanonicalName>SQLFormatter.FormatDocument</CanonicalName><LocCanonicalName>SQLFormatter.FormatDocument</LocCanonicalName></Strings>
       </Button>
-      <Button guid="guidCommandSet" id="cmdFormatSelection" priority="0x0210" type="Button">
+      <Button guid="guidCommandSet" id="cmdSettings" priority="0x0200" type="Button">
         <Parent guid="guidCommandSet" id="grpSqlFormatter" />
-        <Strings>
-          <ButtonText>Format T-SQL Selection</ButtonText>
-        </Strings>
-      </Button>
-      <Button guid="guidCommandSet" id="cmdFormatStatement" priority="0x0220" type="Button">
-        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
-        <Strings>
-          <ButtonText>Format T-SQL Statement</ButtonText>
-        </Strings>
-      </Button>
-      <Button guid="guidCommandSet" id="cmdImportProfile" priority="0x0300" type="Button">
-        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
-        <Strings>
-          <ButtonText>T-SQL Formatter: Import Profile...</ButtonText>
-        </Strings>
-      </Button>
-      <Button guid="guidCommandSet" id="cmdExportProfile" priority="0x0310" type="Button">
-        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
-        <Strings>
-          <ButtonText>T-SQL Formatter: Export Profile...</ButtonText>
-        </Strings>
-      </Button>
-      <Button guid="guidCommandSet" id="cmdPasteFormatted" priority="0x0320" type="Button">
-        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
-        <Strings>
-          <ButtonText>T-SQL Formatter: Paste Formatted SQL (Prototype)</ButtonText>
-        </Strings>
+        <CommandFlag>TextChanges</CommandFlag>
+        <Strings><ButtonText>Settings…</ButtonText><CanonicalName>SQLFormatter.Settings</CanonicalName><LocCanonicalName>SQLFormatter.Settings</LocCanonicalName></Strings>
       </Button>
     </Buttons>
   </Commands>
+  <CommandPlacements>
+    <CommandPlacement guid="guidCommandSet" id="cmdFormatDocument" priority="0x0100"><Parent guid="guidCommandSet" id="grpContext" /></CommandPlacement>
+  </CommandPlacements>
   <Symbols>
     <GuidSymbol name="guidPackage" value="{C8BAF105-2C0F-484C-93DB-DC653596796B}" />
     <GuidSymbol name="guidCommandSet" value="{164528C8-0EC5-4EEC-8380-7C17745D9701}">
-      <IDSymbol name="grpSqlFormatter" value="0x1020" />
-      <IDSymbol name="menuSqlFormatter" value="0x1000" />
-      <IDSymbol name="grpSettings" value="0x1030" />
-      <IDSymbol name="cmdSettings" value="0x0400" />
-      <IDSymbol name="cmdProfiles" value="0x0401" />
-      <IDSymbol name="cmdFormatDocument" value="0x0200" />
-      <IDSymbol name="cmdFormatSelection" value="0x0201" />
-      <IDSymbol name="cmdFormatStatement" value="0x0202" />
-      <IDSymbol name="cmdImportProfile" value="0x0300" />
-      <IDSymbol name="cmdExportProfile" value="0x0301" />
-      <IDSymbol name="cmdPasteFormatted" value="0x0302" />
+      <IDSymbol name="menuSqlFormatter" value="0x1000" /><IDSymbol name="grpSqlFormatter" value="0x1020" /><IDSymbol name="grpContext" value="0x1040" />
+      <IDSymbol name="cmdFormatDocument" value="0x0200" /><IDSymbol name="cmdSettings" value="0x0400" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

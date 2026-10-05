@@ -2,12 +2,13 @@ using System;
 using System.ComponentModel;
 using System.Windows.Forms;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.PlatformUI;
 using TSqlFormatter.Configuration;
 using TSqlFormatter.Core.Formatting;
 
 namespace TSqlFormatter.IdeShared;
 
-/// <summary>Persist only on Apply/OK. Preview and Cancel never change the formatting defaults.</summary>
+/// <summary>Explicit Save/Apply commits a draft; closing discards edits made since the last save.</summary>
 public abstract class FullSettingsPageBase : DialogPage
 {
     private FullSettingsControl? control;
@@ -17,6 +18,8 @@ public abstract class FullSettingsPageBase : DialogPage
     [Browsable(false)] public string ProfilesJson { get; set; } = "";
     internal Func<FormattingOptions>? LegacyOptionsProvider { get; set; }
     internal Func<string?>? SqlPathProvider { get; set; }
+    internal Func<string>? ShortcutProvider { get; set; }
+    internal Action<string>? ShortcutApply { get; set; }
 
     public FormattingOptions ResolveOptions(FormattingOptions legacy) => UseFullSettings
         ? StoredDraft(legacy) : legacy;
@@ -40,9 +43,21 @@ public abstract class FullSettingsPageBase : DialogPage
         using var editor = new FullSettingsControl(() => sqlPath);
         editor.LoadDraft(StoredDraft(LegacyOptionsProvider?.Invoke() ?? FormattingOptions.Default),
             UserProfileStore.Deserialize(ProfilesJson), UseFullSettings);
+        editor.Shortcut = ShortcutProvider?.Invoke() ?? "";
+        editor.SaveRequested += () => SaveEditor(editor);
         if (showProfiles) editor.ShowProfiles();
         using var dialog = new FormattingSettingsWindow(editor);
-        if (dialog.ShowDialog(new DialogOwner(owner)) != DialogResult.OK) return;
+        void ThemeChanged(ThemeChangedEventArgs _) { if (!dialog.IsDisposed) { var theme = IdeHostIntegration.Appearance(); theme.Apply(dialog); editor.ApplyAppearance(theme); } }
+        ThemeChanged(null!);
+        dialog.HandleCreated += (_, _) => IdeHostIntegration.Appearance().ApplyCaption(dialog);
+        VSColorTheme.ThemeChanged += ThemeChanged;
+        try { dialog.ShowDialog(new DialogOwner(owner)); }
+        finally { VSColorTheme.ThemeChanged -= ThemeChanged; }
+    }
+
+    private void SaveEditor(FullSettingsControl editor)
+    {
+        ShortcutApply?.Invoke(editor.Shortcut);
         ConfigurationJson = editor.Model.Export();
         ProfilesJson = editor.Profiles.Serialize();
         UseFullSettings = editor.UseFullSettings;
@@ -65,6 +80,10 @@ public abstract class FullSettingsPageBase : DialogPage
         {
             control!.LoadDraft(StoredDraft(LegacyOptionsProvider?.Invoke() ?? FormattingOptions.Default),
                 UserProfileStore.Deserialize(ProfilesJson), UseFullSettings);
+            control.Shortcut = ShortcutProvider?.Invoke() ?? "";
+            control.ApplyAppearance(IdeHostIntegration.Appearance());
+            control.SaveRequested -= SaveControl;
+            control.SaveRequested += SaveControl;
             opened = true;
         }
         catch (Exception ex)
@@ -78,12 +97,20 @@ public abstract class FullSettingsPageBase : DialogPage
     {
         if (control is not null && opened)
         {
+            try { control.PrepareSave(); ShortcutApply?.Invoke(control.Shortcut); }
+            catch (Exception ex)
+            {
+                if (ex is not OperationCanceledException) MessageBox.Show(ex.Message, "SQL Formatter", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                e.ApplyBehavior = ApplyKind.Cancel; return;
+            }
             ConfigurationJson = control.Model.Export();
             ProfilesJson = control.Profiles.Serialize();
             UseFullSettings = control.UseFullSettings;
         }
         base.OnApply(e);
     }
+
+    private void SaveControl() { if (control is not null) SaveEditor(control); }
 
     protected override void OnClosed(EventArgs e)
     {

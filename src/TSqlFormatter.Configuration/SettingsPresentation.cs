@@ -1,4 +1,4 @@
-using TSqlFormatter.Core.Formatting;
+﻿using TSqlFormatter.Core.Formatting;
 
 namespace TSqlFormatter.Configuration;
 
@@ -22,6 +22,18 @@ public sealed class SettingsPresentation
     public string FieldLabel(SettingsField field) => field.Member is null ? Title(field) : Word(field.Member);
     public string ChoiceLabel(string value) => Word(value is "insert" or "on" ? "choice." + value : value);
     public string Context(SettingsField field) => string.Join(" → ", Path(field).Concat(new[] { Title(field) }));
+
+    // Navigation contains pages of related settings, never a leaf for every scalar rule.
+    public string PageId(SettingsField field)
+    {
+        string key = GroupId(field);
+        if (field.Category is "general" or "indent") return "general";
+        int dot = key.LastIndexOf('.');
+        return dot < 0 ? key : key.Substring(0, dot);
+    }
+    public IReadOnlyList<string> PagePath(SettingsField field) => Array.AsReadOnly(PageId(field).Split('.').Select(Word).ToArray());
+    public string PageTitle(SettingsField field) => Word(PageId(field).Split('.').Last());
+    public string PageFieldLabel(SettingsField field) => field.Member is null ? Title(field) : Title(field) + ": " + Word(field.Member);
 
     public IEnumerable<SettingsField> Find(SettingsEditorModel model, string? search)
     {
@@ -116,8 +128,8 @@ functionArguments|Перенос аргументов функции|Function ar
 functionParameters|Перенос параметров CREATE FUNCTION|CREATE FUNCTION parameter wrapping
 inValues|Перенос значений IN|IN value wrapping
 parenthesesStyle|Расположение скобок|Parenthesis layout
-blankLinesBetweenStatements|Пустые строки между операторами (-1: сохранять)|Blank lines between statements (-1: preserve)
-blankLinesAfterBatch|Пустые строки после GO (-1: сохранять)|Blank lines after GO (-1: preserve)
+blankLinesBetweenStatements|Пустые строки между операторами|Blank lines between statements
+blankLinesAfterBatch|Пустые строки после GO|Blank lines after GO
 alignDeclarationValues|Выравнивать типы и значения объявлений|Align declaration types and values
 alignDdlTypes|Выравнивать типы колонок|Align column data types
 alignDdlConstraints|Выравнивать ограничения после типа колонки|Align constraints after column data types
@@ -323,7 +335,7 @@ spaceBeforeOpen|Пробел перед открывающей скобкой|Sp
 spaceWithinEmpty|Пробел в пустых скобках|Space inside empty brackets
 spaceWithin|Пробел внутри скобок|Space inside brackets
 enabled|Использовать отдельное правило|Use a separate rule
-offset|Смещение отступа (шагов)|Indent offset (steps)
+offset|Смещение отступа|Indent offset
 onNewLineOnly|Только на новой строке|Only on a new line
 transparent|Сохранять вложенные отступы|Retain nested indentation
 value|Порог|Threshold

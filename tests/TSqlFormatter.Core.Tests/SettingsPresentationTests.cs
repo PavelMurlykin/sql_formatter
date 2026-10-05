@@ -10,7 +10,7 @@ public sealed class SettingsPresentationTests
     [Theory]
     [InlineData("VisualStudio")]
     [InlineData("Ssms")]
-    public void Adapters_place_settings_and_profiles_under_their_top_level_menu(string adapter)
+    public void Adapters_expose_two_commands_and_reuse_formatting_in_editor_context(string adapter)
     {
         var document = System.Xml.Linq.XDocument.Load(Path.Combine(AppContext.BaseDirectory, "Menus", adapter + ".vsct"));
         System.Xml.Linq.XNamespace ns = "http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable";
@@ -18,11 +18,25 @@ public sealed class SettingsPresentationTests
         Assert.Equal("menuSqlFormatter", (string?)menu.Attribute("id"));
         Assert.Equal("IDG_VS_MM_TOOLSADDINS", (string?)menu.Element(ns + "Parent")!.Attribute("id"));
         Assert.Equal("SQL Formatter", menu.Element(ns + "Strings")!.Element(ns + "ButtonText")!.Value);
-        foreach (var group in document.Descendants(ns + "Group"))
-            Assert.Equal("menuSqlFormatter", (string?)group.Element(ns + "Parent")!.Attribute("id"));
+        Assert.Contains(document.Descendants(ns + "Group"), g => (string?)g.Element(ns + "Parent")!.Attribute("id") == "IDM_VS_CTXT_CODEWIN");
         var buttons = document.Descendants(ns + "Button").ToArray();
+        Assert.Equal(2, buttons.Length);
         Assert.Contains(buttons, b => (string?)b.Attribute("id") == "cmdSettings");
-        Assert.Contains(buttons, b => (string?)b.Attribute("id") == "cmdProfiles");
+        Assert.Contains(buttons, b => (string?)b.Attribute("id") == "cmdFormatDocument");
+        Assert.Equal("cmdFormatDocument", (string?)Assert.Single(document.Descendants(ns + "CommandPlacement")).Attribute("id"));
+    }
+
+    [Fact]
+    public void Navigation_groups_related_fields_and_keeps_all_settings_accessible()
+    {
+        var model = new SettingsEditorModel(); var presentation = new SettingsPresentation();
+        var pages = model.Fields.GroupBy(presentation.PageId).ToArray();
+        Assert.True(pages.Length < 150);
+        Assert.Equal(model.Fields.Count, pages.Sum(g => g.Count()));
+        Assert.Contains(pages.Single(p => p.Key == "general"), f => f.Id == "indent.size");
+        Assert.Contains(pages.Single(p => p.Key == "general"), f => f.Id == "indent.style");
+        Assert.Contains(pages.Single(p => p.Key == "execute.parameters"), f => f.Id == "rules.execute.parameters.stackList");
+        foreach (var field in model.Fields) { Assert.NotEmpty(presentation.PageTitle(field)); Assert.NotEmpty(presentation.PageFieldLabel(field)); }
     }
 
     [Theory]

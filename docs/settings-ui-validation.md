@@ -1,4 +1,31 @@
-# Formatting settings UI redesign — 2026-10-01
+﻿# Settings UI and editor update — 2026-10-05
+
+Current packages: Visual Studio 0.2.10 / SSMS 0.6.9. Release build has no warnings
+or errors; 1247 Core and 145 golden tests pass. Both menu tables contain exactly
+two commands and reuse formatting in the editor context menu.
+
+The standalone Windows WinForms smoke runs in Russian and English with light
+and dark palettes. It verifies General/Formatting tab order, grouped pages,
+shared indent controls and the ten-space limit, profile switching and persistence,
+save without closing, retained unsaved drafts, shortcut field capture,
+SQL token highlighting, stale-output clearing, custom/invalid SQL and minimum size.
+Screenshots of both tabs for all four variants are in `artifacts/settings-ui/`.
+
+Run `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Verify-SettingsUi.ps1 -SkipRestore`
+after restore, or use the full `scripts/Build-Release.ps1` pipeline.
+Installed-host behavior of this version remains unverified. See
+[the current release validation](../release/VALIDATION.md) for the distinction,
+package checks, logs and remaining VS 2022 host scenarios.
+
+Implementation follows the SDK command/culture/theme interfaces; see Microsoft's
+[command naming guidance](https://devblogs.microsoft.com/visualstudio/improve-the-commands-in-your-extensions/)
+and [keyboard customization](https://learn.microsoft.com/en-us/visualstudio/ide/identifying-and-customizing-keyboard-shortcuts-in-visual-studio).
+
+---
+
+The following is historical evidence for older versions and the former UI.
+
+## Formatting settings UI redesign — 2026-10-01
 
 Packages: Visual Studio 0.2.5 / SSMS 0.6.4. CLI formatting and JSON rule IDs
 are unchanged. This work is separate from the completed SC-27 parity audit.

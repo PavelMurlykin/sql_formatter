@@ -19,7 +19,7 @@
                      {
                          "host":  "VS2022",
                          "file":  "TSqlFormatter.VS2022.vsix",
-                         "sha256":  "9d03f71020a5fceb1b5762106a254faeba5f6c17be61dc9350a23f7c49818d2f",
+                         "sha256":  "e5ff0ed59f8864b2e0b6e7aa9490b46ba8a28acd9790c042b938222011928112",
                          "cases":  45,
                          "architecture":  "x64",
                          "result":  "passed",
@@ -28,7 +28,7 @@
                      {
                          "host":  "VS2026",
                          "file":  "TSqlFormatter.VS2026.vsix",
-                         "sha256":  "d4a6c4fdf1cbed2a07dc062ecb52ff432a49bfd7ac2d30371e7c32737dfe31d4",
+                         "sha256":  "d57e65df38f84bfbcb11f2d8cfc278f527c56efa467015bb67d3fa14b82e9fdd",
                          "cases":  45,
                          "architecture":  "x64",
                          "result":  "passed",
@@ -37,7 +37,7 @@
                      {
                          "host":  "SSMS20",
                          "file":  "TSqlFormatter.SSMS20.vsix",
-                         "sha256":  "ef289447074cfc617136ff8fc8e46b76a91fd900d76d80ae6ce0d6891d9b1f7d",
+                         "sha256":  "eb9b476708a739505662b55d05d25216974d1b5dfd9dc883965ce6d5466ce5e1",
                          "cases":  45,
                          "architecture":  "x86",
                          "result":  "passed",
@@ -46,7 +46,7 @@
                      {
                          "host":  "SSMS22",
                          "file":  "TSqlFormatter.SSMS22.vsix",
-                         "sha256":  "a66a092d90cb65fbd5224fdf6814df5cfaafa978f3263e84b5b4a703ddb083e9",
+                         "sha256":  "0ff29bc2d5619f597efe1e5820151770a96e0f10bd1d6d3a5ca50fb5caa94212",
                          "cases":  45,
                          "architecture":  "x64",
                          "result":  "passed",

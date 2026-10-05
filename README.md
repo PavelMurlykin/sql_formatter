@@ -1,4 +1,4 @@
-# T-SQL Formatter
+﻿# T-SQL Formatter
 
 An extensible T-SQL formatter under active development. The current Core exposes
 a ScriptDom-based parser, token helpers, a line map, a layout renderer, an
@@ -7,11 +7,13 @@ queries. The CLI supports stdin or one file to stdout, recursive directories and
 multiple files with `--write`/`--check`, configuration discovery, and local preview
 `dotnet tool` packaging. Broader SQL coverage is planned in
 [`CODEX_DEVELOPMENT_PLAN.md`](CODEX_DEVELOPMENT_PLAN.md).
-An experimental Visual Studio VSIX provides Document, Selection, and Statement
-commands for `.sql` files and discovers the nearest `.tsqlformatter.json`. These
-primary commands passed limited installed-IDE smoke tests. Separate installers
-target Visual Studio 2022/2026 and SSMS 20/22; see the current release validation
-for the exact checks and remaining gaps.
+The Visual Studio/SSMS extension provides **Format Document** and **Settings**.
+Formatting affects the selection, or the whole active `.sql` when no text is
+selected, and also appears in the editor context menu. Settings include named
+profiles, shortcut assignment, grouped rules and syntax-highlighted previews,
+with Russian/English labels and IDE theme colors. Separate installers target
+VS 2022/2026 and SSMS 20/22; see release validation for the exact automated
+checks and remaining installed-host validation gaps.
 The Release VSIX can be checked with `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Verify-Vsix.ps1`.
 
 Current usage: [English manual](docs/user-manual.en.md) ·
@@ -110,4 +112,4 @@ native import JSON for VSIX 0.2.8 / SSMS 0.6.7. Their source mapping, explicit n
 approximations and audit against both EPM-RAC database projects are described in
 [the working-profile report](docs/sql-complete-working-profiles.md).
 The current release includes these profiles and ADIR_SQL_Main in `release/`, with
-Visual Studio packages 0.2.9 and SSMS packages 0.6.8.
+Visual Studio packages 0.2.10 and SSMS packages 0.6.9.

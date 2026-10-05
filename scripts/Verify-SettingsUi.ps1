@@ -1,4 +1,4 @@
-param([string]$RestoreSource = '', [switch]$SkipRestore)
+﻿param([string]$RestoreSource = '', [switch]$SkipRestore)
 
 $ErrorActionPreference = 'Stop'
 $project = Join-Path $PSScriptRoot '..\tests\TSqlFormatter.SettingsUiSmoke\TSqlFormatter.SettingsUiSmoke.csproj'
@@ -11,5 +11,8 @@ if (-not $SkipRestore) {
 }
 & dotnet build $project -c Release --no-restore
 if ($LASTEXITCODE -ne 0) { throw 'Settings UI build failed.' }
-& (Join-Path $PSScriptRoot '..\tests\TSqlFormatter.SettingsUiSmoke\bin\Release\net472\TSqlFormatter.SettingsUiSmoke.exe') --verify
-if ($LASTEXITCODE -ne 0) { throw 'Settings UI smoke failed.' }
+$executable = Join-Path $PSScriptRoot '..\tests\TSqlFormatter.SettingsUiSmoke\bin\Release\net472\TSqlFormatter.SettingsUiSmoke.exe'
+foreach ($variant in @(@(), @('--english'), @('--dark'), @('--english', '--dark'))) {
+    & $executable --verify @variant
+    if ($LASTEXITCODE -ne 0) { throw 'Settings UI smoke failed.' }
+}

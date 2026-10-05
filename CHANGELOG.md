@@ -1,7 +1,22 @@
-# Changelog
+﻿# Changelog
 
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
+
+## Editor commands and settings redesign — 2026-10-05
+
+- Visual Studio VSIX 0.2.10 / SSMS VSIX 0.6.9.
+- Resolve the active document frame on each invocation, retaining editor access
+  after menu/tool-window focus changes and falling back to buffer persistence.
+- Two menu entries: Format Document and Settings; the same formatting command
+  is placed in the SQL editor context menu and supports a configurable shortcut.
+- Format only selected tokens/SQL statements, or the active document with no
+  selection. Outside text is retained, and each edit remains one Undo operation.
+- Two-tab profile editor with synchronized profile selection, import/export,
+  save without closing, grouped options, bounded numeric inputs, SQL highlighting,
+  Russian/English localization and IDE theme colors. Removed auxiliary labels.
+- Updated both user manuals and installation guides. New-package validation is
+  recorded separately from historical installed-host smoke results.
 
 ## Four IDE generations and release directory — 2026-10-05
 

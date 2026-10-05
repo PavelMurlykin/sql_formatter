@@ -7,10 +7,15 @@ namespace TSqlFormatter.Core.Formatting;
 public static class SqlTokenSafety
 {
     public static bool PreservesTokens(SqlParseResult before, SqlParseResult after,
-        FormattingOptions options, CancellationToken cancellationToken = default)
+        FormattingOptions options, CancellationToken cancellationToken = default) =>
+        PreservesTokens(before, after, options, cancellationToken, null);
+
+    public static bool PreservesTokens(SqlParseResult before, SqlParseResult after,
+        FormattingOptions options, CancellationToken cancellationToken, SqlTextSpan? allowedSpan)
     {
         if (!before.ParseSucceeded || !after.ParseSucceeded) return false;
         var casing = KeywordCasing.GetEdits(before, options, cancellationToken)
+            .Where(edit => allowedSpan is null || edit.Span.StartOffset >= allowedSpan.Value.StartOffset && edit.Span.EndOffset <= allowedSpan.Value.EndOffset)
             .ToDictionary(edit => edit.Span.StartOffset, edit => edit.NewText);
         var left = before.Tokens.Where(Meaningful).ToArray();
         var right = after.Tokens.Where(Meaningful).ToArray();

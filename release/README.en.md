@@ -1,19 +1,19 @@
-# Installing T-SQL Formatter
+﻿# Installing T-SQL Formatter
 
 Local build dated 2026-10-05. Choose the package for your IDE:
 
 | IDE | File | Extension version |
 | --- | --- | --- |
-| Visual Studio 2022 17.14.x, x64 | `TSqlFormatter.VS2022.vsix` | 0.2.9 |
-| Visual Studio 2026 18.x, x64 | `TSqlFormatter.VS2026.vsix` | 0.2.9 |
-| SSMS 20.x, x86 | `TSqlFormatter.SSMS20.vsix` + `Install-SSMS20.ps1` | 0.6.8 |
-| SSMS 22.x, x64 | `TSqlFormatter.SSMS22.vsix` | 0.6.8 |
+| Visual Studio 2022 17.14.x, x64 | `TSqlFormatter.VS2022.vsix` | 0.2.10 |
+| Visual Studio 2026 18.x, x64 | `TSqlFormatter.VS2026.vsix` | 0.2.10 |
+| SSMS 20.x, x86 | `TSqlFormatter.SSMS20.vsix` + `Install-SSMS20.ps1` | 0.6.9 |
+| SSMS 22.x, x64 | `TSqlFormatter.SSMS22.vsix` | 0.6.9 |
 
 The ready-made extensions do not require the .NET 10 SDK. They target .NET Framework 4.7.2 and bundle the formatting dependencies. Update a VS 2022 version earlier than 17.14 to the 17.14 branch.
 
 ## Visual Studio 2022 and 2026
 
-Close the corresponding Visual Studio, double-click its VSIX, select the intended IDE instance, and complete installation. Restart the IDE. Commands are under **Extensions → SQL Formatter**; open a `.sql` file and select **Format T-SQL Document**. SQL is never executed. One Ctrl+Z undoes the edit; save the file separately.
+Close the corresponding Visual Studio, double-click its VSIX, select the intended IDE instance, and complete installation. Restart the IDE. Commands are under **Extensions → SQL Formatter**; open a `.sql` file and select **Format Document**. SQL is never executed. One Ctrl+Z undoes the edit; save the file separately.
 
 ## SSMS 20
 
@@ -31,7 +31,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\Install-SSMS20.ps1 -IdeDir
 
 The script checks the SSMS generation and package contents, installs into `Extensions\TSqlFormatter.Ssms20`, and backs up an earlier installation outside `Extensions` before updating. It refuses to overwrite an unknown existing folder. SSMS 20 uses a legacy shell, so the standard VSIX Installer cannot install this package: the VSIX is the script's payload container.
 
-Start SSMS 20, open a `.sql` file without connecting to a server, and select **SQL Formatter → T-SQL Formatter (SSMS): Format Document**.
+Start SSMS 20, open a `.sql` file without connecting to a server, and select **SQL Formatter → Format Document**.
 
 ## SSMS 22
 
@@ -50,7 +50,7 @@ The distribution includes native JSON v2 profiles:
 - `ADIR_SQL_Main.json` — settings prepared from the SQL Prompt profile;
 - `AV_Profile.json` and `Right-aligned-EPM-AWB2.json` — settings from SQL Complete profiles, with 573 rules each.
 
-Open **SQL Formatter → Сохранённые профили…** (Saved profiles; in Visual Studio open **Extensions** first), click **Импорт JSON…** (Import JSON), select a file, enter its name, and click **Сохранить профиль** (Save profile). Optionally select **Использовать по умолчанию** (Use by default), then **OK**. Import and save each profile separately.
+Open **SQL Formatter → Settings… → General** (in Visual Studio open **Extensions** first), click **Import profile…**, select a file, check its name and click **Save**. Repeat for each profile. Select the active profile on either tab. **Format Document** formats the selection, or the whole active `.sql` without a selection; it also appears in the editor context menu. On **General**, press the desired shortcut in its field and save it. The window follows the IDE UI language and theme.
 
 The nearest `.tsqlformatter.json` overrides the selected IDE profile. For project settings, copy one JSON under that name beside your SQL files, backing up existing configuration first. Third-party XML/style files are not imported directly. The converted settings contain documented approximations and do not promise identical SQL Prompt/SQL Complete output.
 

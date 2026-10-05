@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel.Design;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -13,12 +13,15 @@ using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Threading;
 using TSqlFormatter.Configuration;
+using TSqlFormatter.IdeShared;
 using TSqlFormatter.Core.Formatting;
 using TSqlFormatter.Core.Parsing;
 
 namespace TSqlFormatter.VisualStudio;
 
 [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
+[ProvideAutoLoad(UIContextGuids80.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
+[ProvideAutoLoad(UIContextGuids80.SolutionExists, PackageAutoLoadFlags.BackgroundLoad)]
 [ProvideMenuResource("Menus.ctmenu", 1)]
 [ProvideOptionPage(typeof(GeneralOptionsPage), "T-SQL Formatter", "General", 0, 0, true)]
 [ProvideOptionPage(typeof(FullSettingsOptionsPage), "T-SQL Formatter", "All settings", 0, 0, true)]
@@ -34,6 +37,8 @@ public sealed class SqlFormatterPackage : AsyncPackage
     private static readonly Guid CommandSet = new("164528C8-0EC5-4EEC-8380-7C17745D9701");
     private static readonly Guid OutputPaneGuid = new("AB9C0A91-8A8C-4413-9B11-94F73D59DE7D");
     private IVsTextManager? textManager;
+    private IVsMonitorSelection? monitorSelection;
+    private EnvDTE.DTE? dte;
     private IVsEditorAdaptersFactoryService? editorAdapters;
     private ITextUndoHistoryRegistry? undoRegistry;
     private IVsStatusbar? statusbar;
@@ -46,6 +51,9 @@ public sealed class SqlFormatterPackage : AsyncPackage
     {
         await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
         textManager = await GetServiceAsync(typeof(SVsTextManager)) as IVsTextManager;
+        monitorSelection = await GetServiceAsync(typeof(SVsShellMonitorSelection)) as IVsMonitorSelection;
+        dte = await GetServiceAsync(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
+        IdeHostIntegration.SetLanguage(dte);
         statusbar = await GetServiceAsync(typeof(SVsStatusbar)) as IVsStatusbar;
         outputWindow = await GetServiceAsync(typeof(SVsOutputWindow)) as IVsOutputWindow;
         runningDocumentTable = await GetServiceAsync(typeof(SVsRunningDocumentTable)) as IVsRunningDocumentTable;
@@ -59,17 +67,21 @@ public sealed class SqlFormatterPackage : AsyncPackage
             CreateIdeOptions;
         var fullSettings = (FullSettingsOptionsPage)GetDialogPage(typeof(FullSettingsOptionsPage));
         fullSettings.LegacyOptionsProvider = CreateLegacyOptions;
-        fullSettings.SqlPathProvider = () => ActiveSqlEditor.TryRead(textManager, out var editor) ? editor.Path : null;
+        fullSettings.SqlPathProvider = () => ActiveSqlEditor.TryRead(textManager, out var editor, monitorSelection) ? editor.Path : null;
+        fullSettings.ShortcutProvider = () => IdeHostIntegration.Shortcut(dte, CommandSet);
+        fullSettings.ShortcutApply = value => IdeHostIntegration.SetShortcut(dte, CommandSet, value);
         if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService commands)
         {
-            commands.AddCommand(new MenuCommand(ExecuteFormatDocument, new CommandID(CommandSet, 0x0200)));
-            commands.AddCommand(new MenuCommand(ExecuteFormatSelection, new CommandID(CommandSet, 0x0201)));
-            commands.AddCommand(new MenuCommand(ExecuteFormatStatement, new CommandID(CommandSet, 0x0202)));
-            commands.AddCommand(new MenuCommand(ExecuteImportProfile, new CommandID(CommandSet, 0x0300)));
-            commands.AddCommand(new MenuCommand(ExecuteExportProfile, new CommandID(CommandSet, 0x0301)));
-            commands.AddCommand(new MenuCommand(ExecutePasteFormatted, new CommandID(CommandSet, 0x0302)));
-            commands.AddCommand(new MenuCommand((_, _) => ShowSettings(false), new CommandID(CommandSet, 0x0400)));
-            commands.AddCommand(new MenuCommand((_, _) => ShowSettings(true), new CommandID(CommandSet, 0x0401)));
+            var format = new OleMenuCommand(ExecuteFormatDocument, new CommandID(CommandSet, 0x0200));
+            format.BeforeQueryStatus += (_, _) =>
+            {
+                format.Text = SettingsAppearance.Text("Форматировать документ", "Format Document");
+                format.Visible = format.Enabled = ActiveSqlEditor.TryRead(textManager, out _, monitorSelection);
+            };
+            commands.AddCommand(format);
+            var settings = new OleMenuCommand((_, _) => ShowSettings(false), new CommandID(CommandSet, 0x0400));
+            settings.BeforeQueryStatus += (_, _) => settings.Text = SettingsAppearance.Text("Настройки…", "Settings…");
+            commands.AddCommand(settings);
         }
     }
 
@@ -79,13 +91,13 @@ public sealed class SqlFormatterPackage : AsyncPackage
         try
         {
             var shell = GetService(typeof(SVsUIShell)) as IVsUIShell
-                ?? throw new InvalidOperationException("Окно IDE недоступно.");
+                ?? throw new InvalidOperationException(SettingsAppearance.Text("Окно IDE недоступно.", "IDE window is unavailable."));
             ErrorHandler.ThrowOnFailure(shell.GetDialogOwnerHwnd(out IntPtr owner));
             ((FullSettingsOptionsPage)GetDialogPage(typeof(FullSettingsOptionsPage))).ShowEditor(profiles, owner);
         }
         catch (Exception ex)
         {
-            MessageBox.Show("Не удалось открыть настройки: " + ex.Message, "SQL Formatter", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(SettingsAppearance.Text("Не удалось открыть настройки: ", "Unable to open settings: ") + ex.Message, "SQL Formatter", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
@@ -121,7 +133,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
                 out string moniker, out _, out _, out IntPtr docData);
             if (docData != IntPtr.Zero) Marshal.Release(docData);
             if (ErrorHandler.Failed(hr) ||
-                !ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor) ||
+                !ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor, monitorSelection) ||
                 !string.Equals(moniker, editor.Path, StringComparison.OrdinalIgnoreCase) ||
                 !new SqlSaveFormattingPolicy().ShouldFormat(editor.Path, mode, automation.SaveExclusions))
                 return VSConstants.S_OK;
@@ -149,7 +161,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
                     NotifyFormat($"Save formatting skipped: {error.Code}: {error.Message}", true);
                 else if (result.Changed)
                 {
-                    if (ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor current) &&
+                    if (ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor current, monitorSelection) &&
                         ReferenceEquals(current.Buffer, editor.Buffer) &&
                         editor.TryApplyDocument(snapshot, result.Text, editorAdapters, undoRegistry))
                         NotifyFormat("SQL formatted before save.");
@@ -208,7 +220,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
     private async Task PasteFormattedAsync()
     {
         await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
-        if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor) ||
+        if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor, monitorSelection) ||
             editorAdapters == null || undoRegistry == null)
         {
             NotifyFormat("Open a .sql file in the text editor before pasting.", true);
@@ -267,7 +279,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
                 return;
             }
 
-            if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor current) ||
+            if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor current, monitorSelection) ||
                 !ReferenceEquals(current.Buffer, editor.Buffer) ||
                 !editor.TryApplyEdit(snapshot, start, length, result.Text,
                     "Paste formatted T-SQL", editorAdapters, undoRegistry))
@@ -404,9 +416,9 @@ public sealed class SqlFormatterPackage : AsyncPackage
     private async Task FormatStatementAsync()
     {
         await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
-        if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor) || editorAdapters == null || undoRegistry == null)
+        if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor, monitorSelection) || editorAdapters == null || undoRegistry == null)
         {
-            NotifyFormat("Open a .sql file in the text editor first.", true);
+            NotifyFormat(SettingsAppearance.Text("Откройте файл .sql в редакторе.", "Open a .sql file in the text editor first."), true);
             return;
         }
 
@@ -447,7 +459,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
                 NotifyFormat("The SQL statement is already formatted.");
             }
             else if (result.Edits.Count != 1 ||
-                     !ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor current) ||
+                     !ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor current, monitorSelection) ||
                      !ReferenceEquals(current.Buffer, editor.Buffer) ||
                      !editor.TryApplyEdit(snapshot, result.Edits[0].Span.StartOffset,
                          result.Edits[0].Span.Length, result.Edits[0].NewText,
@@ -474,9 +486,9 @@ public sealed class SqlFormatterPackage : AsyncPackage
     private async Task FormatSelectionAsync()
     {
         await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
-        if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor) || editorAdapters == null || undoRegistry == null)
+        if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor, monitorSelection) || editorAdapters == null || undoRegistry == null)
         {
-            NotifyFormat("Open a .sql file in the text editor first.", true);
+            NotifyFormat(SettingsAppearance.Text("Откройте файл .sql в редакторе.", "Open a .sql file in the text editor first."), true);
             return;
         }
 
@@ -517,7 +529,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
                 NotifyFormat("The selected SQL statement is already formatted.");
             }
             else if (result.Edits.Count != 1 ||
-                     !ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor current) ||
+                     !ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor current, monitorSelection) ||
                      !ReferenceEquals(current.Buffer, editor.Buffer) ||
                      !editor.TryApplyEdit(snapshot, result.Edits[0].Span.StartOffset,
                          result.Edits[0].Span.Length, result.Edits[0].NewText,
@@ -544,9 +556,9 @@ public sealed class SqlFormatterPackage : AsyncPackage
     private async Task FormatDocumentAsync()
     {
         await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
-        if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor) || editorAdapters == null || undoRegistry == null)
+        if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor, monitorSelection) || editorAdapters == null || undoRegistry == null)
         {
-            NotifyFormat("Open a .sql file in the text editor first.", true);
+            NotifyFormat(SettingsAppearance.Text("Откройте файл .sql в редакторе.", "Open a .sql file in the text editor first."), true);
             return;
         }
 
@@ -557,12 +569,15 @@ public sealed class SqlFormatterPackage : AsyncPackage
             return;
         }
 
+        Microsoft.VisualStudio.Text.Span? selection = null;
+        if (editor.TryCaptureSelection(editorAdapters, out var selectedSnapshot, out var selected) && ReferenceEquals(selectedSnapshot, snapshot)) selection = selected;
         string source = snapshot.GetText();
         try
         {
             FormattingOptions defaults = CreateIdeOptions();
             var configured = await Task.Run(() => FormatConfigured(
-                editor.Path, source, new FormatRequest(), defaults, DisposalToken), DisposalToken);
+                editor.Path, source, new FormatRequest(), defaults, DisposalToken,
+                selection is { } span ? new SqlTextSpan(span.Start, span.Length) : (SqlTextSpan?)null), DisposalToken);
             await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
             if (configured.Error != null)
             {
@@ -578,17 +593,19 @@ public sealed class SqlFormatterPackage : AsyncPackage
             }
             else if (!result.Changed)
             {
-                NotifyFormat("The SQL document is already formatted.");
+                NotifyFormat(result.Diagnostics.FirstOrDefault()?.Message ?? SettingsAppearance.Text("SQL уже отформатирован.", "SQL is already formatted."));
             }
-            else if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor current) ||
+            else if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor current, monitorSelection) ||
                      !ReferenceEquals(current.Buffer, editor.Buffer) ||
-                     !editor.TryApplyDocument(snapshot, result.Text, editorAdapters, undoRegistry))
+                     !(selection is null ? editor.TryApplyDocument(snapshot, result.Text, editorAdapters, undoRegistry)
+                         : result.Edits.Count == 1 && editor.TryApplyEdit(snapshot, result.Edits[0].Span.StartOffset,
+                             result.Edits[0].Span.Length, result.Edits[0].NewText, "Format T-SQL Selection", editorAdapters, undoRegistry)))
             {
                 NotifyFormat("The SQL buffer changed during formatting; no edit was applied.", true);
             }
             else
             {
-                NotifyFormat("SQL document formatted.");
+                NotifyFormat(SettingsAppearance.Text("SQL отформатирован.", "SQL formatted."));
             }
         }
         catch (OperationCanceledException)
@@ -604,7 +621,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
 
     private static (FormatResult? Result, FormatterDiagnostic? Error) FormatConfigured(
         string filePath, string source, FormatRequest request, FormattingOptions defaults,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, SqlTextSpan? editorSelection = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var config = new SqlFormatterConfigurationResolver().ResolveForSqlFile(filePath, defaults);
@@ -614,7 +631,9 @@ public sealed class SqlFormatterPackage : AsyncPackage
             return (null, config.Diagnostics.First());
         }
 
-        return (new ScriptDomSqlFormatter().Format(source, config.Options!, request, cancellationToken), null);
+        return (editorSelection is not null
+            ? new EditorSqlFormatter().Format(source, config.Options!, editorSelection, cancellationToken)
+            : new ScriptDomSqlFormatter().Format(source, config.Options!, request, cancellationToken), null);
     }
 
     private FormattingOptions CreateIdeOptions()
