@@ -7,3 +7,5 @@ artifacts/
 *.suo
 *.user
 .codex-remote-attachments/
+release/*.vsix
+release/*.nupkg

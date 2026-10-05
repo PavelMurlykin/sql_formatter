@@ -1,0 +1,56 @@
+﻿{
+    "date":  "2026-10-05",
+    "scope":  "Extracted-installer libraries: profile import, editor/store round trip, formatting, token preservation, idempotence, identical outputs. Separate from installed-IDE UI validation.",
+    "profiles":  [
+                     {
+                         "file":  "ADIR_SQL_Main.json",
+                         "sha256":  "ca8446e5a7582571dd3695c9aa4a186a8d23e92905c06b9070ba10d350ff38af"
+                     },
+                     {
+                         "file":  "AV_Profile.json",
+                         "sha256":  "787f3e7ad6d38f267d54c1aa8cec3e7a6a5bf94f04900604871c305e8b5fc66e"
+                     },
+                     {
+                         "file":  "Right-aligned-EPM-AWB2.json",
+                         "sha256":  "c3e0322c1cfc8b18de89821deb881f6e92d867ba4c35c03b5ca050fef41a6e6b"
+                     }
+                 ],
+    "packages":  [
+                     {
+                         "host":  "VS2022",
+                         "file":  "TSqlFormatter.VS2022.vsix",
+                         "sha256":  "9d03f71020a5fceb1b5762106a254faeba5f6c17be61dc9350a23f7c49818d2f",
+                         "cases":  45,
+                         "architecture":  "x64",
+                         "result":  "passed",
+                         "identicalOutput":  true
+                     },
+                     {
+                         "host":  "VS2026",
+                         "file":  "TSqlFormatter.VS2026.vsix",
+                         "sha256":  "d4a6c4fdf1cbed2a07dc062ecb52ff432a49bfd7ac2d30371e7c32737dfe31d4",
+                         "cases":  45,
+                         "architecture":  "x64",
+                         "result":  "passed",
+                         "identicalOutput":  true
+                     },
+                     {
+                         "host":  "SSMS20",
+                         "file":  "TSqlFormatter.SSMS20.vsix",
+                         "sha256":  "ef289447074cfc617136ff8fc8e46b76a91fd900d76d80ae6ce0d6891d9b1f7d",
+                         "cases":  45,
+                         "architecture":  "x86",
+                         "result":  "passed",
+                         "identicalOutput":  true
+                     },
+                     {
+                         "host":  "SSMS22",
+                         "file":  "TSqlFormatter.SSMS22.vsix",
+                         "sha256":  "a66a092d90cb65fbd5224fdf6814df5cfaafa978f3263e84b5b4a703ddb083e9",
+                         "cases":  45,
+                         "architecture":  "x64",
+                         "result":  "passed",
+                         "identicalOutput":  true
+                     }
+                 ]
+}

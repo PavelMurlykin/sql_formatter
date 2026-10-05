@@ -1,0 +1,56 @@
+﻿{
+    "schemaVersion":  1,
+    "label":  "local-release",
+    "files":  [
+                  {
+                      "file":  "TSqlFormatter.VS2022.vsix",
+                      "host":  "VS2022",
+                      "version":  "0.2.9",
+                      "sha256":  "9d03f71020a5fceb1b5762106a254faeba5f6c17be61dc9350a23f7c49818d2f"
+                  },
+                  {
+                      "file":  "TSqlFormatter.VS2026.vsix",
+                      "host":  "VS2026",
+                      "version":  "0.2.9",
+                      "sha256":  "d4a6c4fdf1cbed2a07dc062ecb52ff432a49bfd7ac2d30371e7c32737dfe31d4"
+                  },
+                  {
+                      "file":  "TSqlFormatter.SSMS20.vsix",
+                      "host":  "SSMS20",
+                      "version":  "0.6.8",
+                      "sha256":  "ef289447074cfc617136ff8fc8e46b76a91fd900d76d80ae6ce0d6891d9b1f7d"
+                  },
+                  {
+                      "file":  "TSqlFormatter.SSMS22.vsix",
+                      "host":  "SSMS22",
+                      "version":  "0.6.8",
+                      "sha256":  "a66a092d90cb65fbd5224fdf6814df5cfaafa978f3263e84b5b4a703ddb083e9"
+                  },
+                  {
+                      "file":  "ADIR_SQL_Main.json",
+                      "kind":  "native-formatting-profile",
+                      "sha256":  "ca8446e5a7582571dd3695c9aa4a186a8d23e92905c06b9070ba10d350ff38af"
+                  },
+                  {
+                      "file":  "AV_Profile.json",
+                      "kind":  "native-formatting-profile",
+                      "sha256":  "787f3e7ad6d38f267d54c1aa8cec3e7a6a5bf94f04900604871c305e8b5fc66e"
+                  },
+                  {
+                      "file":  "Right-aligned-EPM-AWB2.json",
+                      "kind":  "native-formatting-profile",
+                      "sha256":  "c3e0322c1cfc8b18de89821deb881f6e92d867ba4c35c03b5ca050fef41a6e6b"
+                  },
+                  {
+                      "file":  "Install-SSMS20.ps1",
+                      "kind":  "SSMS20-installer",
+                      "sha256":  "ff9ae9d75da7345d3986a731c8548badb86ef994142dc58a568cdf7bf4d19e79"
+                  },
+                  {
+                      "file":  "TSqlFormatter.Tool.0.1.0-preview.6.nupkg",
+                      "kind":  "CLI-preview",
+                      "sha256":  "b962af220ab46768c0bc0cd3e467abfd9dc9ac26586a5e354720c614a5627b5f"
+                  }
+              ],
+    "note":  "Package checks and bundled-profile checks passed. Installed-host checks are recorded separately in VALIDATION.md. No publication."
+}

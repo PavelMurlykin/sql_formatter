@@ -1,0 +1,1762 @@
+{
+  "version": 2,
+  "general": {
+    "maxLineLength": 120,
+    "lineEnding": "crlf",
+    "finalNewLine": true
+  },
+  "indent": {
+    "style": "spaces",
+    "size": 4
+  },
+  "keywords": {
+    "case": "upper"
+  },
+  "select": {
+    "columns": "auto"
+  },
+  "joins": {
+    "clauseNewLine": true,
+    "conditionNewLine": true
+  },
+  "where": {
+    "conditionNewLine": true,
+    "booleanOperatorNewLine": true
+  },
+  "clauses": {
+    "groupByLayout": "auto",
+    "orderByLayout": "auto"
+  },
+  "alignment": {
+    "selectAliases": false,
+    "setAssignments": false,
+    "declareTypes": false
+  },
+  "rules": {
+    "case.breakAfterThenElse": "never",
+    "case.breakBeforeCase": "never",
+    "case.breakBeforeEnd": "always",
+    "case.breakBeforeInput": "never",
+    "case.breakBeforeThen": "never",
+    "case.breakBeforeWhenElse": "always",
+    "case.caseIndent": {
+      "enabled": true,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "case.codeIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "case.inputIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "case.nestedConditionIndent": {
+      "enabled": true,
+      "offset": 4,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "case.thenKeywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "case.whenExpressionIndent": {
+      "enabled": true,
+      "offset": 5,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "case.whenKeywordIndent": {
+      "enabled": true,
+      "offset": 5,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "case.wrapAfterOperator": "never",
+    "case.wrapBeforeOperator": "always",
+    "case.wrapCondition": "both",
+    "code.block.blankLinesAround": false,
+    "code.block.bodyIndent": {
+      "enabled": true,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "code.block.breakBeforeCatch": "always",
+    "code.breakAfterBegin": "always",
+    "code.breakBeforeEnd": "always",
+    "code.if.blankLinesAround": false,
+    "code.if.bodyIndent": {
+      "enabled": true,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "code.if.breakAfterCondition": "always",
+    "code.if.breakAfterElse": "always",
+    "code.if.breakBeforeElse": "always",
+    "code.if.conditionIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "code.if.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "code.if.nestedConditionIndent": {
+      "enabled": true,
+      "offset": 3,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "code.if.wrapAfterOperator": "never",
+    "code.if.wrapBeforeOperator": "inherit",
+    "code.if.wrapCondition": "both",
+    "code.separateStatements": "always",
+    "code.transaction.bodyIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "code.while.blankLinesAround": false,
+    "code.while.bodyIndent": {
+      "enabled": true,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "code.while.breakAfterCondition": "always",
+    "code.while.conditionIndent": {
+      "enabled": true,
+      "offset": 2,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "code.while.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "code.while.nestedConditionIndent": {
+      "enabled": true,
+      "offset": 2,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "code.while.wrapAfterOperator": "never",
+    "code.while.wrapBeforeOperator": "inherit",
+    "code.while.wrapCondition": "both",
+    "createTable.blankLinesAround": true,
+    "createTable.columns.braceIndent": {
+      "enabled": false,
+      "offset": 4,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "createTable.columns.breakAfterOpen": "always",
+    "createTable.columns.breakBeforeClose": "always",
+    "createTable.columns.breakBeforeOpen": "never",
+    "createTable.columns.listIndent": {
+      "enabled": true,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "createTable.columns.spaceBeforeOpen": "remove",
+    "createTable.columns.spaceWithin": "insert",
+    "createTable.columns.stackList": "on",
+    "createTable.columns.stackMode": "auto",
+    "createTable.storage.breakBefore": "never",
+    "createTable.storage.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "createTable.storage.stackList": "on",
+    "createTable.storage.stackMode": "auto",
+    "declare.cursor.breakBefore": "never",
+    "declare.cursor.breakBeforeFor": "never",
+    "declare.cursor.breakBeforeQuery": "never",
+    "declare.cursor.forIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "declare.cursor.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "declare.cursor.queryIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "declare.cursor.singleLine.any": false,
+    "declare.cursor.singleLine.maxCharacters": {
+      "enabled": false,
+      "value": 50
+    },
+    "declare.cursor.singleLine.maxWords": {
+      "enabled": false,
+      "value": 10
+    },
+    "declare.cursor.singleLine.whenFitsMargin": false,
+    "declare.variables.breakAfter": "never",
+    "declare.variables.breakBeforeTable": "never",
+    "declare.variables.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "declare.variables.stackList": "on",
+    "declare.variables.stackMode": "auto",
+    "declare.variables.tableIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "delete.from.breakAfter": "never",
+    "delete.from.breakBefore": "always",
+    "delete.from.keywordIndent": {
+      "enabled": true,
+      "offset": 2,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "delete.from.listIndent": {
+      "enabled": true,
+      "offset": 10,
+      "onNewLineOnly": false,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "delete.from.stackList": "on",
+    "delete.from.stackMode": "onePerLine",
+    "delete.from.useSelectFormatting": false,
+    "delete.join.breakAfter": "never",
+    "delete.join.breakBefore": "always",
+    "delete.join.keywordIndent": {
+      "enabled": true,
+      "offset": 4,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": true
+    },
+    "delete.join.nestedConditionIndent": {
+      "enabled": true,
+      "offset": 2,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "delete.join.onBreakAfter": "never",
+    "delete.join.onBreakBefore": "always",
+    "delete.join.onConditionIndent": {
+      "enabled": true,
+      "offset": -1,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "delete.join.onKeywordIndent": {
+      "enabled": true,
+      "offset": 2,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "delete.join.tableIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "delete.join.wrapAfterOperator": "never",
+    "delete.join.wrapBeforeOperator": "inherit",
+    "delete.join.wrapCondition": "both",
+    "delete.option.breakAfter": "never",
+    "delete.option.breakBefore": "always",
+    "delete.option.hintsIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "delete.option.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "delete.output.breakAfter": "never",
+    "delete.output.breakBefore": "always",
+    "delete.output.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "delete.output.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "delete.output.stackList": "on",
+    "delete.output.stackMode": "onePerLine",
+    "delete.target.breakBefore": "never",
+    "delete.target.breakBeforeFrom": "never",
+    "delete.target.fromKeywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "delete.target.indent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "delete.where.breakAfter": "never",
+    "delete.where.breakBefore": "always",
+    "delete.where.conditionIndent": {
+      "enabled": true,
+      "offset": 2,
+      "onNewLineOnly": false,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "delete.where.keywordIndent": {
+      "enabled": true,
+      "offset": 1,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "delete.where.nestedConditionIndent": {
+      "enabled": true,
+      "offset": 2,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "delete.where.wrapAfterOperator": "never",
+    "delete.where.wrapBeforeOperator": "inherit",
+    "delete.where.wrapCondition": "both",
+    "execute.parameters.breakBefore": "never",
+    "execute.parameters.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "execute.parameters.stackList": "on",
+    "execute.parameters.stackMode": "onePerLine",
+    "insert.columns.braceIndent": {
+      "enabled": true,
+      "offset": 7,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "insert.columns.breakAfterOpen": "always",
+    "insert.columns.breakBeforeClose": "never",
+    "insert.columns.breakBeforeOpen": "never",
+    "insert.columns.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "insert.columns.spaceBeforeOpen": "insert",
+    "insert.columns.spaceWithin": "remove",
+    "insert.columns.stackList": "on",
+    "insert.columns.stackMode": "onePerLine",
+    "insert.into.breakBefore": "never",
+    "insert.into.breakBeforeTable": "never",
+    "insert.into.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "insert.into.tableIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "insert.output.breakAfter": "never",
+    "insert.output.breakBefore": "always",
+    "insert.output.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "insert.output.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "insert.output.stackList": "on",
+    "insert.output.stackMode": "onePerLine",
+    "insert.source.breakBefore": "always",
+    "insert.source.indent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "insert.source.singleLine.any": false,
+    "insert.source.singleLine.maxCharacters": {
+      "enabled": false,
+      "value": 50
+    },
+    "insert.source.singleLine.maxWords": {
+      "enabled": false,
+      "value": 10
+    },
+    "insert.source.singleLine.whenFitsMargin": false,
+    "insert.values.braceIndent": {
+      "enabled": true,
+      "offset": 4,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "insert.values.breakAfterKeyword": "never",
+    "insert.values.breakAfterOpen": "always",
+    "insert.values.breakBeforeClose": "never",
+    "insert.values.breakBeforeKeyword": "always",
+    "insert.values.keywordIndent": {
+      "enabled": false,
+      "offset": 1,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "insert.values.listIndent": {
+      "enabled": true,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "insert.values.spaceAfterKeyword": "insert",
+    "insert.values.spaceWithin": "remove",
+    "insert.values.stackList": "on",
+    "insert.values.stackMode": "onePerLine",
+    "insert.values.stackRows": "on",
+    "insert.values.stackRowsMode": "onePerLine",
+    "labels.blankLinesAround": false,
+    "labels.breakAfter": "always",
+    "labels.indent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.hints.braceIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.hints.breakAfterOpen": "never",
+    "merge.hints.breakBefore": "never",
+    "merge.hints.breakBeforeClose": "never",
+    "merge.hints.breakBeforeOpen": "never",
+    "merge.hints.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.hints.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.hints.spaceBeforeOpen": "insert",
+    "merge.hints.spaceWithin": "remove",
+    "merge.insert.columns.braceIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.insert.columns.breakAfterOpen": "never",
+    "merge.insert.columns.breakBeforeClose": "never",
+    "merge.insert.columns.breakBeforeOpen": "never",
+    "merge.insert.columns.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.insert.columns.spaceBeforeOpen": "insert",
+    "merge.insert.columns.spaceWithin": "remove",
+    "merge.insert.columns.stackList": "on",
+    "merge.insert.columns.stackMode": "onePerLine",
+    "merge.insert.useStatementFormatting": true,
+    "merge.insert.values.braceIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.insert.values.breakAfterKeyword": "never",
+    "merge.insert.values.breakAfterOpen": "never",
+    "merge.insert.values.breakBeforeClose": "never",
+    "merge.insert.values.breakBeforeKeyword": "always",
+    "merge.insert.values.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.insert.values.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.insert.values.spaceAfterKeyword": "insert",
+    "merge.insert.values.spaceWithin": "remove",
+    "merge.insert.values.stackList": "on",
+    "merge.insert.values.stackMode": "auto",
+    "merge.into.breakBefore": "never",
+    "merge.into.breakBeforeTable": "never",
+    "merge.into.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.into.tableIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.join.breakAfter": "never",
+    "merge.join.breakBefore": "always",
+    "merge.join.keywordIndent": {
+      "enabled": true,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": true
+    },
+    "merge.join.nestedConditionIndent": {
+      "enabled": true,
+      "offset": 7,
+      "onNewLineOnly": false,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.join.onBreakAfter": "never",
+    "merge.join.onBreakBefore": "always",
+    "merge.join.onConditionIndent": {
+      "enabled": true,
+      "offset": -1,
+      "onNewLineOnly": false,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.join.onKeywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.join.tableIndent": {
+      "enabled": true,
+      "offset": 3,
+      "onNewLineOnly": false,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.join.useSelectFormatting": false,
+    "merge.join.wrapAfterOperator": "never",
+    "merge.join.wrapBeforeOperator": "inherit",
+    "merge.join.wrapCondition": "both",
+    "merge.on.breakAfter": "never",
+    "merge.on.breakBefore": "always",
+    "merge.on.conditionIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.on.keywordIndent": {
+      "enabled": true,
+      "offset": 3,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.on.nestedConditionIndent": {
+      "enabled": true,
+      "offset": 2,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.on.wrapAfterOperator": "never",
+    "merge.on.wrapBeforeOperator": "inherit",
+    "merge.on.wrapCondition": "both",
+    "merge.option.breakAfter": "never",
+    "merge.option.breakBefore": "always",
+    "merge.option.hintsIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.option.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.output.breakAfter": "never",
+    "merge.output.breakBefore": "always",
+    "merge.output.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.output.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.output.stackList": "on",
+    "merge.output.stackMode": "onePerLine",
+    "merge.then.actionIndent": {
+      "enabled": true,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.then.breakAfter": "never",
+    "merge.then.breakBefore": "never",
+    "merge.then.keywordIndent": {
+      "enabled": false,
+      "offset": 4,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.top.breakAfterOpen": "never",
+    "merge.top.breakBefore": "never",
+    "merge.top.breakBeforeClose": "never",
+    "merge.top.breakBeforeOpen": "never",
+    "merge.top.breakBeforePercent": "never",
+    "merge.top.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.top.percentIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.top.spaceAfterKeyword": "insert",
+    "merge.top.spaceWithin": "remove",
+    "merge.update.set.breakAfter": "never",
+    "merge.update.set.breakBefore": "never",
+    "merge.update.set.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.update.set.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.update.set.stackList": "on",
+    "merge.update.set.stackMode": "onePerLine",
+    "merge.update.useStatementFormatting": true,
+    "merge.using.breakAfter": "never",
+    "merge.using.breakBefore": "always",
+    "merge.using.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.values.braceIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.values.breakAfterKeyword": "never",
+    "merge.values.breakAfterOpen": "never",
+    "merge.values.breakBeforeClose": "never",
+    "merge.values.breakBeforeKeyword": "never",
+    "merge.values.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.values.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.values.spaceAfterKeyword": "insert",
+    "merge.values.spaceWithin": "remove",
+    "merge.values.stackList": "off",
+    "merge.values.stackMode": "onePerLine",
+    "merge.values.stackRows": "on",
+    "merge.values.stackRowsMode": "onePerLine",
+    "merge.when.breakAfter": "never",
+    "merge.when.breakBefore": "always",
+    "merge.when.conditionIndent": {
+      "enabled": true,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.when.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.when.nestedConditionIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "merge.when.wrapAfterOperator": "never",
+    "merge.when.wrapBeforeOperator": "inherit",
+    "merge.when.wrapCondition": "both",
+    "misc.packageDelimiterBlankLine": false,
+    "misc.packageDelimiterBlankLineMode": "after",
+    "routine.body.asIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "routine.body.breakBefore": "always",
+    "routine.body.breakBeforeAs": "always",
+    "routine.body.codeIndent": {
+      "enabled": true,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "routine.body.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "routine.parameters.braceIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "routine.parameters.breakAfterOpen": "always",
+    "routine.parameters.breakBeforeClose": "never",
+    "routine.parameters.breakBeforeOpen": "never",
+    "routine.parameters.listIndent": {
+      "enabled": true,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "routine.parameters.spaceBeforeOpen": "insert",
+    "routine.parameters.spaceWithin": "remove",
+    "routine.parameters.spaceWithinEmpty": "remove",
+    "routine.parameters.stackList": "on",
+    "routine.parameters.stackMode": "onePerLine",
+    "routine.returns.breakBefore": "always",
+    "routine.returns.breakBeforeTable": "never",
+    "routine.returns.tableIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "routine.with.breakAfter": "never",
+    "routine.with.breakBefore": "always",
+    "routine.with.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "routine.with.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "routine.with.stackList": "off",
+    "routine.with.stackMode": "onePerLine",
+    "select.compute.breakAfter": "never",
+    "select.compute.breakBefore": "always",
+    "select.compute.expressionIndent": {
+      "enabled": true,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.compute.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.cte.breakAfterAs": "always",
+    "select.cte.breakAfterColumnOpen": "never",
+    "select.cte.breakAfterWith": "never",
+    "select.cte.breakBeforeAs": "never",
+    "select.cte.breakBeforeColumnClose": "never",
+    "select.cte.breakBeforeColumnOpen": "never",
+    "select.cte.columnBraceIndent": {
+      "enabled": false,
+      "offset": 1,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.cte.columnListIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.cte.expressionIndent": {
+      "enabled": false,
+      "offset": 2,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.cte.stackColumns": "on",
+    "select.cte.stackMode": "onePerLine",
+    "select.cte.subqueryBraceIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.for.breakAfterXml": "never",
+    "select.for.breakBefore": "always",
+    "select.for.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.for.specIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.from.breakAfter": "never",
+    "select.from.breakBefore": "always",
+    "select.from.keywordIndent": {
+      "enabled": true,
+      "offset": 2,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.from.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.from.stackList": "on",
+    "select.from.stackMode": "onePerLine",
+    "select.groupBy.breakAfter": "never",
+    "select.groupBy.breakBefore": "always",
+    "select.groupBy.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.groupBy.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.groupBy.stackList": "on",
+    "select.groupBy.stackMode": "onePerLine",
+    "select.having.breakAfter": "never",
+    "select.having.breakBefore": "always",
+    "select.having.conditionIndent": {
+      "enabled": true,
+      "offset": 3,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.having.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.having.nestedConditionIndent": {
+      "enabled": true,
+      "offset": 3,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.having.wrapAfterOperator": "never",
+    "select.having.wrapBeforeOperator": "inherit",
+    "select.having.wrapCondition": "both",
+    "select.into.breakAfter": "never",
+    "select.into.breakBefore": "always",
+    "select.into.keywordIndent": {
+      "enabled": true,
+      "offset": 2,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.into.tableIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.join.breakAfter": "never",
+    "select.join.breakBefore": "always",
+    "select.join.keywordIndent": {
+      "enabled": true,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": true
+    },
+    "select.join.nestedConditionIndent": {
+      "enabled": true,
+      "offset": 3,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.join.onBreakAfter": "never",
+    "select.join.onBreakBefore": "never",
+    "select.join.onConditionIndent": {
+      "enabled": true,
+      "offset": -1,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.join.onKeywordIndent": {
+      "enabled": true,
+      "offset": 2,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.join.tableIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.join.wrapAfterOperator": "never",
+    "select.join.wrapBeforeOperator": "always",
+    "select.join.wrapCondition": "none",
+    "select.list.breakBeforeFirstColumn": "always",
+    "select.list.indent": {
+      "enabled": true,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.list.stackColumns": "on",
+    "select.list.stackMode": "auto",
+    "select.option.breakAfter": "never",
+    "select.option.breakBefore": "always",
+    "select.option.hintsIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.option.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.orderBy.breakAfter": "never",
+    "select.orderBy.breakBefore": "always",
+    "select.orderBy.keywordIndent": {
+      "enabled": true,
+      "offset": 1,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.orderBy.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.orderBy.stackList": "on",
+    "select.orderBy.stackMode": "onePerLine",
+    "select.singleLine.maxCharacters": {
+      "enabled": true,
+      "value": 50
+    },
+    "select.singleLine.maxWords": {
+      "enabled": false,
+      "value": 10
+    },
+    "select.singleLine.whenFitsMargin": false,
+    "select.where.breakAfter": "never",
+    "select.where.breakBefore": "always",
+    "select.where.conditionIndent": {
+      "enabled": true,
+      "offset": 2,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.where.keywordIndent": {
+      "enabled": true,
+      "offset": 1,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.where.nestedConditionIndent": {
+      "enabled": true,
+      "offset": 5,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "select.where.wrapAfterOperator": "never",
+    "select.where.wrapBeforeOperator": "inherit",
+    "select.where.wrapCondition": "both",
+    "setOperator.branchIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "setOperator.breakAfter": "always",
+    "setOperator.breakBefore": "always",
+    "setOperator.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "spacing.afterComma": "insert",
+    "spacing.afterDot": "remove",
+    "spacing.afterScopeResolution": "remove",
+    "spacing.arithmeticOperators": "insert",
+    "spacing.beforeComma": "remove",
+    "spacing.beforeDot": "remove",
+    "spacing.beforeFunctionArguments": "remove",
+    "spacing.beforeScopeResolution": "remove",
+    "spacing.withinEmptyFunctionArguments": "remove",
+    "spacing.withinFunctionArguments": "remove",
+    "stackedList.commaPlacement": "trailing",
+    "stackedList.spaceAfterLeadingComma": "insert",
+    "subquery.breakAfterClose": "never",
+    "subquery.breakAfterOpen": "never",
+    "subquery.breakBeforeClose": "never",
+    "subquery.breakBeforeOpen": "never",
+    "subquery.cte.breakAfterAs": "never",
+    "subquery.cte.breakAfterColumnOpen": "never",
+    "subquery.cte.breakAfterWith": "never",
+    "subquery.cte.breakBeforeAs": "never",
+    "subquery.cte.breakBeforeColumnClose": "never",
+    "subquery.cte.breakBeforeColumnOpen": "never",
+    "subquery.cte.columnBraceIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.cte.columnListIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.cte.expressionIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.cte.stackColumns": "off",
+    "subquery.cte.stackMode": "auto",
+    "subquery.cte.subqueryBraceIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.for.breakAfterXml": "never",
+    "subquery.for.breakBefore": "always",
+    "subquery.for.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.for.specIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.from.breakAfter": "never",
+    "subquery.from.breakBefore": "never",
+    "subquery.from.keywordIndent": {
+      "enabled": true,
+      "offset": 2,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.from.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.from.stackList": "on",
+    "subquery.from.stackMode": "onePerLine",
+    "subquery.groupBy.breakAfter": "never",
+    "subquery.groupBy.breakBefore": "always",
+    "subquery.groupBy.keywordIndent": {
+      "enabled": true,
+      "offset": 1,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.groupBy.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.groupBy.stackList": "on",
+    "subquery.groupBy.stackMode": "onePerLine",
+    "subquery.having.breakAfter": "never",
+    "subquery.having.breakBefore": "always",
+    "subquery.having.conditionIndent": {
+      "enabled": true,
+      "offset": 3,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.having.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.having.nestedConditionIndent": {
+      "enabled": true,
+      "offset": 2,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.having.wrapAfterOperator": "never",
+    "subquery.having.wrapBeforeOperator": "inherit",
+    "subquery.having.wrapCondition": "both",
+    "subquery.indent": {
+      "enabled": true,
+      "offset": 4,
+      "onNewLineOnly": false,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.join.breakAfter": "never",
+    "subquery.join.breakBefore": "always",
+    "subquery.join.keywordIndent": {
+      "enabled": true,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": true
+    },
+    "subquery.join.nestedConditionIndent": {
+      "enabled": true,
+      "offset": 3,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.join.onBreakAfter": "never",
+    "subquery.join.onBreakBefore": "always",
+    "subquery.join.onConditionIndent": {
+      "enabled": true,
+      "offset": -1,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.join.onKeywordIndent": {
+      "enabled": true,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.join.tableIndent": {
+      "enabled": true,
+      "offset": -2,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.join.wrapAfterOperator": "never",
+    "subquery.join.wrapBeforeOperator": "inherit",
+    "subquery.join.wrapCondition": "both",
+    "subquery.list.breakBeforeFirstColumn": "never",
+    "subquery.list.indent": {
+      "enabled": true,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.list.stackColumns": "on",
+    "subquery.list.stackMode": "onePerLine",
+    "subquery.orderBy.breakAfter": "never",
+    "subquery.orderBy.breakBefore": "always",
+    "subquery.orderBy.keywordIndent": {
+      "enabled": true,
+      "offset": 1,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.orderBy.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.orderBy.stackList": "on",
+    "subquery.orderBy.stackMode": "onePerLine",
+    "subquery.singleLine.allAnySomeExists.any": false,
+    "subquery.singleLine.allAnySomeExists.maxCharacters": {
+      "enabled": false,
+      "value": 50
+    },
+    "subquery.singleLine.allAnySomeExists.maxWords": {
+      "enabled": false,
+      "value": 10
+    },
+    "subquery.singleLine.allAnySomeExists.whenFitsMargin": true,
+    "subquery.singleLine.cteQueries.any": false,
+    "subquery.singleLine.cteQueries.maxCharacters": {
+      "enabled": false,
+      "value": 50
+    },
+    "subquery.singleLine.cteQueries.maxWords": {
+      "enabled": false,
+      "value": 10
+    },
+    "subquery.singleLine.cteQueries.whenFitsMargin": false,
+    "subquery.singleLine.fromList.any": false,
+    "subquery.singleLine.fromList.maxCharacters": {
+      "enabled": false,
+      "value": 50
+    },
+    "subquery.singleLine.fromList.maxWords": {
+      "enabled": false,
+      "value": 10
+    },
+    "subquery.singleLine.fromList.whenFitsMargin": true,
+    "subquery.singleLine.inOperator.any": false,
+    "subquery.singleLine.inOperator.maxCharacters": {
+      "enabled": false,
+      "value": 50
+    },
+    "subquery.singleLine.inOperator.maxWords": {
+      "enabled": false,
+      "value": 10
+    },
+    "subquery.singleLine.inOperator.whenFitsMargin": true,
+    "subquery.singleLine.other.any": false,
+    "subquery.singleLine.other.maxCharacters": {
+      "enabled": false,
+      "value": 50
+    },
+    "subquery.singleLine.other.maxWords": {
+      "enabled": false,
+      "value": 10
+    },
+    "subquery.singleLine.other.whenFitsMargin": true,
+    "subquery.useSelectFormatting": true,
+    "subquery.where.breakAfter": "never",
+    "subquery.where.breakBefore": "never",
+    "subquery.where.conditionIndent": {
+      "enabled": true,
+      "offset": 2,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.where.keywordIndent": {
+      "enabled": true,
+      "offset": 1,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.where.nestedConditionIndent": {
+      "enabled": true,
+      "offset": 3,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "subquery.where.wrapAfterOperator": "never",
+    "subquery.where.wrapBeforeOperator": "inherit",
+    "subquery.where.wrapCondition": "both",
+    "textCase.alias": "preserve",
+    "textCase.builtin": "upper",
+    "textCase.dataType": "upper",
+    "textCase.formatQuotedIdentifier": true,
+    "textCase.identifier": "preserve",
+    "textCase.keyword": "upper",
+    "textCase.variable": "preserve",
+    "trigger.body.asIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "trigger.body.breakAfterAs": "always",
+    "trigger.body.breakBeforeAs": "always",
+    "trigger.body.codeIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": false,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "trigger.body.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "trigger.events.breakAfter": "never",
+    "trigger.events.breakBefore": "always",
+    "trigger.events.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "trigger.events.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "trigger.events.stackList": "on",
+    "trigger.events.stackMode": "auto",
+    "trigger.on.breakAfter": "never",
+    "trigger.on.breakBefore": "always",
+    "trigger.on.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "trigger.on.targetIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "trigger.with.breakAfter": "never",
+    "trigger.with.breakBefore": "always",
+    "trigger.with.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "trigger.with.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "trigger.with.stackList": "on",
+    "trigger.with.stackMode": "onePerLine",
+    "update.from.breakAfter": "never",
+    "update.from.breakBefore": "always",
+    "update.from.keywordIndent": {
+      "enabled": true,
+      "offset": 2,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "update.from.listIndent": {
+      "enabled": true,
+      "offset": 4,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "update.from.stackList": "on",
+    "update.from.stackMode": "onePerLine",
+    "update.from.useSelectFormatting": false,
+    "update.join.breakAfter": "never",
+    "update.join.breakBefore": "always",
+    "update.join.keywordIndent": {
+      "enabled": true,
+      "offset": 5,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": true
+    },
+    "update.join.nestedConditionIndent": {
+      "enabled": true,
+      "offset": 3,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "update.join.onBreakAfter": "never",
+    "update.join.onBreakBefore": "always",
+    "update.join.onConditionIndent": {
+      "enabled": true,
+      "offset": -1,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "update.join.onKeywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "update.join.tableIndent": {
+      "enabled": true,
+      "offset": 2,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "update.join.wrapAfterOperator": "never",
+    "update.join.wrapBeforeOperator": "inherit",
+    "update.join.wrapCondition": "both",
+    "update.option.breakAfter": "never",
+    "update.option.breakBefore": "always",
+    "update.option.hintsIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "update.option.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "update.output.breakAfter": "never",
+    "update.output.breakBefore": "always",
+    "update.output.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "update.output.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "update.output.stackList": "on",
+    "update.output.stackMode": "onePerLine",
+    "update.set.breakAfter": "never",
+    "update.set.breakBefore": "always",
+    "update.set.keywordIndent": {
+      "enabled": true,
+      "offset": 3,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "update.set.listIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "update.set.stackList": "on",
+    "update.set.stackMode": "onePerLine",
+    "update.target.breakBefore": "never",
+    "update.target.indent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "update.where.breakAfter": "never",
+    "update.where.breakBefore": "always",
+    "update.where.conditionIndent": {
+      "enabled": true,
+      "offset": 2,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "update.where.keywordIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "update.where.nestedConditionIndent": {
+      "enabled": true,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "update.where.wrapAfterOperator": "never",
+    "update.where.wrapBeforeOperator": "inherit",
+    "update.where.wrapCondition": "both",
+    "view.columns.braceIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "view.columns.breakAfterOpen": "never",
+    "view.columns.breakBeforeClose": "never",
+    "view.columns.breakBeforeOpen": "never",
+    "view.columns.listIndent": {
+      "enabled": true,
+      "offset": 4,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "view.columns.spaceBeforeOpen": "insert",
+    "view.columns.spaceWithin": "remove",
+    "view.columns.stackList": "on",
+    "view.columns.stackMode": "onePerLine",
+    "view.query.asIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "view.query.breakAfterAs": "always",
+    "view.query.breakBeforeAs": "always",
+    "view.query.queryIndent": {
+      "enabled": false,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relativeSpaces",
+      "transparent": false
+    },
+    "view.query.singleLine.any": false,
+    "view.query.singleLine.maxCharacters": {
+      "enabled": false,
+      "value": 50
+    },
+    "view.query.singleLine.maxWords": {
+      "enabled": false,
+      "value": 10
+    },
+    "view.query.singleLine.whenFitsMargin": false
+  }
+}

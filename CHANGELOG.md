@@ -3,6 +3,22 @@
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
 
+## Four IDE generations and release directory — 2026-10-05
+
+- Visual Studio VSIX 0.2.9: separate packages for VS 2022 17.14 x64 and VS 2026 18.x x64.
+- SSMS VSIX 0.6.8: separate packages for SSMS 20 x86 and SSMS 22 x64. The SSMS 20
+  adapter compiles against SDK 15 and includes a compatibility bridge for task
+  error logging. Shared formatter, settings and commands remain the same.
+- Added an SSMS 20 deployment script with host/package checks and update backups;
+  the legacy shell cannot use the modern VSIX Installer.
+- `Build-Release.ps1` produces four installers, three converted native profiles,
+  CLI preview and SHA-256 manifest in root `release/`. The previous candidate
+  script invokes the same process. AGENTS.md preserves the delivery rule.
+- Release build, 1238 Core + 145 golden tests, four package checks, settings UI
+  smoke, CLI package smoke and 180 extracted-package profile cases passed.
+  Installed-host checks and their limits are recorded in `release/VALIDATION.md`.
+- Updated Russian/English user manuals and distribution installation guides.
+
 ## SQL Prompt additional object audit — 2026-10-02
 
 - Visual Studio VSIX 0.2.7 / SSMS VSIX 0.6.6: refined ADIR_SQL_Main profile for

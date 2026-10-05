@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <VSSDKBuildToolsAutoSetup>true</VSSDKBuildToolsAutoSetup>
+    <GenerateVsixContainer>true</GenerateVsixContainer>
+    <GeneratePkgDefFile>true</GeneratePkgDefFile>
+    <!-- The isolated SSMS shell has no Visual Studio Installer prerequisites.
+         Verify-Vsix.ps1 validates this legacy manifest separately. -->
+    <BypassVsixValidation>true</BypassVsixValidation>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\TSqlFormatter.Ssms\*.cs" Link="Ssms\%(Filename)%(Extension)" />
+    <Compile Include="..\TSqlFormatter.IdeShared\*.cs" Link="IdeShared\%(Filename)%(Extension)" />
+    <ProjectCapability Include="CreateVsixContainer" />
+    <PackageReference Include="Microsoft.VisualStudio.SDK" VersionOverride="15.0.1" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" />
+    <PackageReference Include="Microsoft.SqlServer.TransactSql.ScriptDom" />
+    <PackageReference Include="Newtonsoft.Json">
+      <ForceIncludeInVSIX>true</ForceIncludeInVSIX>
+    </PackageReference>
+    <ProjectReference Include="..\TSqlFormatter.Core\TSqlFormatter.Core.csproj" />
+    <ProjectReference Include="..\TSqlFormatter.Configuration\TSqlFormatter.Configuration.csproj" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
+    <VSCTCompile Include="..\TSqlFormatter.Ssms\Commands.vsct" Link="Commands.vsct">
+      <ResourceName>Menus.ctmenu</ResourceName>
+    </VSCTCompile>
+  </ItemGroup>
+</Project>

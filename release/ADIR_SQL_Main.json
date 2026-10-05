@@ -1,0 +1,166 @@
+{
+  "version": 2,
+  "general": {
+    "maxLineLength": 160,
+    "lineEnding": "crlf",
+    "finalNewLine": true
+  },
+  "indent": {
+    "style": "spaces",
+    "size": 4
+  },
+  "keywords": {
+    "case": "upper"
+  },
+  "select": {
+    "columns": "onePerLine"
+  },
+  "joins": {
+    "clauseNewLine": true,
+    "conditionNewLine": true
+  },
+  "where": {
+    "conditionNewLine": false,
+    "booleanOperatorNewLine": true
+  },
+  "clauses": {
+    "groupByLayout": "onePerLine",
+    "orderByLayout": "onePerLine"
+  },
+  "alignment": {
+    "selectAliases": false,
+    "setAssignments": false,
+    "declareTypes": true
+  },
+  "rules": {
+    "textCase.keyword": "upper",
+    "textCase.builtin": "upper",
+    "textCase.dataType": "upper",
+    "textCase.globalVariable": "upper",
+    "textCase.identifier": "preserve",
+    "textCase.variable": "preserve",
+    "textCase.alias": "preserve",
+    "textCase.formatQuotedIdentifier": false,
+    "spacing.arithmeticOperators": "insert",
+    "spacing.comparisonOperators": "insert",
+    "spacing.beforeComma": "remove",
+    "spacing.afterComma": "insert",
+    "spacing.beforeFunctionArguments": "remove",
+    "spacing.withinEmptyFunctionArguments": "remove",
+    "spacing.withinFunctionArguments": "remove",
+    "spacing.beforeTypeParameters": "remove",
+    "spacing.beforeSemicolon": "remove",
+    "stackedList.commaPlacement": "leading",
+    "stackedList.spaceAfterLeadingComma": "insert",
+    "layout.listFirstItem": "multiple",
+    "layout.listIndent": {
+      "enabled": true,
+      "offset": 1,
+      "onNewLineOnly": true,
+      "style": "relative",
+      "transparent": false
+    },
+    "layout.dmlCompact": {
+      "enabled": true,
+      "value": 100
+    },
+    "layout.ddlCompact": {
+      "enabled": true,
+      "value": 55
+    },
+    "layout.parenthesesCompact": {
+      "enabled": true,
+      "value": 120
+    },
+    "layout.caseCompact": {
+      "enabled": true,
+      "value": 78
+    },
+    "layout.subqueryCompact": {
+      "enabled": true,
+      "value": 55
+    },
+    "layout.parenthesesStyle": "expandedToStatement",
+    "layout.functionArguments": "ifLong",
+    "layout.functionParameters": "ifLong",
+    "layout.inValues": "ifLong",
+    "layout.blankLinesBetweenStatements": 1,
+    "layout.blankLinesAfterBatch": 1,
+    "layout.alignDeclarationValues": true,
+    "layout.alignDdlTypes": true,
+    "layout.alignDdlConstraints": true,
+    "layout.alignListComments": true,
+    "layout.alignCommentGroups": true,
+    "layout.setValueOnNewLineIfLong": true,
+    "layout.newLineAfterTop": true,
+    "layout.restoreMoveOnNewLine": true,
+    "layout.restoreToOnNewLine": true,
+    "layout.respectFormattingDirectives": true,
+    "routine.parameters.breakAfterOpen": "always",
+    "routine.parameters.stackList": "on",
+    "routine.parameters.listIndent": {
+      "enabled": true,
+      "offset": 1,
+      "onNewLineOnly": true,
+      "style": "relative",
+      "transparent": false
+    },
+    "routine.returns.breakBefore": "always",
+    "view.query.breakBeforeAs": "always",
+    "view.query.breakAfterAs": "always",
+    "view.query.queryIndent": {
+      "enabled": true,
+      "offset": 1,
+      "onNewLineOnly": true,
+      "style": "relative",
+      "transparent": false
+    },
+    "routine.body.breakBeforeAs": "always",
+    "routine.body.breakBefore": "always",
+    "routine.body.asIndent": {
+      "enabled": true,
+      "offset": 0,
+      "onNewLineOnly": true,
+      "style": "relative",
+      "transparent": false
+    },
+    "code.breakAfterBegin": "always",
+    "code.breakBeforeEnd": "always",
+    "code.if.breakAfterCondition": "always",
+    "code.if.breakBeforeElse": "always",
+    "code.if.breakAfterElse": "always",
+    "code.while.breakAfterCondition": "always",
+    "insert.values.breakBeforeKeyword": "always",
+    "insert.values.breakAfterKeyword": "always",
+    "insert.values.stackRows": "on",
+    "execute.parameters.breakBefore": "always",
+    "execute.parameters.stackList": "on",
+    "execute.parameters.listIndent": {
+      "enabled": true,
+      "offset": 1,
+      "onNewLineOnly": true,
+      "style": "relative",
+      "transparent": false
+    },
+    "case.breakBeforeCase": "never",
+    "case.breakBeforeWhenElse": "always",
+    "case.breakBeforeThen": "never",
+    "case.breakAfterThenElse": "always",
+    "case.breakBeforeEnd": "always",
+    "select.cte.breakAfterWith": "never",
+    "select.cte.breakBeforeAs": "never",
+    "select.cte.breakAfterAs": "always",
+    "select.cte.breakBeforeColumnOpen": "always",
+    "select.cte.breakAfterColumnOpen": "always",
+    "select.cte.breakBeforeColumnClose": "always",
+    "select.cte.columnListIndent": {
+      "enabled": true,
+      "offset": 1,
+      "onNewLineOnly": true,
+      "style": "relative",
+      "transparent": false
+    },
+    "select.cte.stackColumns": "on",
+    "subquery.useSelectFormatting": true
+  }
+}

@@ -1,5 +1,11 @@
 # Native import profiles
 
+Delivery copies of ADIR_SQL_Main, AV_Profile and Right-aligned-EPM-AWB2 are in
+[`release/`](../../release/) beside the four current installers (VS 0.2.9 / SSMS
+0.6.8). The release builder copies these canonical sources and verifies all three
+with the libraries extracted from every package; see
+[installation](../../release/README.en.md) and [validation](../../release/VALIDATION.md).
+
 `ADIR_SQL_Main.json` is a native v2 import profile mapped from the user-supplied SQL Prompt
 ADIR_SQL_Main exports and all 16 settings screenshots, refined against 2026 Git files
 in Functions/Tables/Triggers/Types/Views. The refined profile requires Visual Studio
