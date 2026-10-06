@@ -13,7 +13,8 @@ internal sealed class FullSettingsControl : UserControl
 {
     private readonly SettingsPresentation presentation = new(SettingsAppearance.Russian);
     private readonly TextBox search = new() { Dock = DockStyle.Fill, BorderStyle = BorderStyle.None, Margin = new Padding(2, 5, 2, 0), AccessibleName = "SettingsSearch" };
-    private readonly TreeView tree = new() { Dock = DockStyle.Fill, HideSelection = false, ShowLines = false, ShowRootLines = false, BorderStyle = BorderStyle.None, ItemHeight = 26, Indent = 16 };
+    private readonly TreeView tree = new() { Dock = DockStyle.Fill, HideSelection = false, ShowLines = false, ShowRootLines = false, ShowPlusMinus = false, BorderStyle = BorderStyle.None, ItemHeight = 36, Indent = 22 };
+    private readonly Font navigationGroupFont = new("Segoe UI", 9, FontStyle.Bold);
     private readonly Label heading = new() { AutoSize = true, Font = new Font("Segoe UI", 14, FontStyle.Bold), Margin = new Padding(0, 0, 0, 18) };
     private readonly FlowLayoutPanel editors = new() { Dock = DockStyle.Fill, AutoScroll = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, Padding = new Padding(18) };
     private readonly Label error = new() { AutoSize = true, ForeColor = Color.Firebrick, MaximumSize = new Size(700, 0) };
@@ -115,16 +116,13 @@ internal sealed class FullSettingsControl : UserControl
         string? previous = selected.FirstOrDefault() is { } f ? presentation.PageId(f) : null;
         tree.BeginUpdate(); tree.Nodes.Clear(); TreeNode? first = null, restore = null;
         var all = Model.Fields.GroupBy(presentation.PageId).ToDictionary(g => g.Key, g => g.ToArray());
-        foreach (var group in presentation.Find(Model, search.Text).GroupBy(presentation.PageId))
+        foreach (var group in presentation.Find(Model, search.Text).GroupBy(presentation.PageId).OrderBy(g => presentation.PageOrder(g.First())))
         {
-            var field = group.First(); var collection = tree.Nodes; string key = ""; TreeNode? node = null;
-            foreach (string segment in presentation.PagePath(field))
-            {
-                key += "/" + segment; node = collection.Cast<TreeNode>().FirstOrDefault(n => n.Name == key);
-                if (node is null) { node = new TreeNode(segment) { Name = key }; collection.Add(node); }
-                collection = node.Nodes;
-            }
-            node!.Tag = all[group.Key]; first ??= node; if (group.Key == previous) restore = node;
+            var field = group.First(); var path = presentation.PagePath(field); string groupId = group.Key.Split('.')[0];
+            var header = tree.Nodes.Cast<TreeNode>().FirstOrDefault(n => n.Name == groupId);
+            if (header is null) { header = new TreeNode(path[0]) { Name = groupId, NodeFont = navigationGroupFont }; tree.Nodes.Add(header); }
+            var node = new TreeNode(path[1]) { Name = group.Key, Tag = all[group.Key] }; header.Nodes.Add(node);
+            first ??= node; if (group.Key == previous) restore = node;
         }
         tree.ExpandAll(); tree.SelectedNode = restore ?? first; tree.SelectedNode?.EnsureVisible(); tree.EndUpdate();
         if (first is null) { InvalidatePreview(); selected = Array.Empty<SettingsField>(); ClearEditors(); editors.Controls.Add(Title(T("Настройки не найдены", "No matching options"))); }
@@ -137,7 +135,11 @@ internal sealed class FullSettingsControl : UserControl
             if (node?.Tag is SettingsField[]) tree.SelectedNode = node; return;
         }
         selected = fields; ShowFields();
-        if (!customSample) { loading = true; sample.Text = presentation.Example(fields[0]); loading = false; }
+        if (!customSample)
+        {
+            var exampleField = presentation.Find(Model, search.Text).First(f => presentation.PageId(f) == presentation.PageId(fields[0]));
+            loading = true; sample.Text = presentation.Example(exampleField); loading = false;
+        }
         QueuePreview();
     }
     private void ClearEditors()
@@ -147,33 +149,38 @@ internal sealed class FullSettingsControl : UserControl
         loading = true; editors.SuspendLayout(); ClearEditors();
         if (selected.Length == 0) { loading = false; editors.ResumeLayout(); return; }
         heading.Text = presentation.PageTitle(selected[0]); editors.Controls.Add(heading);
-        foreach (var field in selected)
+        var matchingSections = presentation.Find(Model, search.Text).Select(presentation.SectionId).Distinct().ToArray();
+        foreach (var section in selected.GroupBy(presentation.SectionId).Where(g => matchingSections.Contains(g.Key)))
         {
-            string label = presentation.PageFieldLabel(field); object current = Model.Get(field.Id); Control editor;
-            if (field.Kind == SettingsFieldKind.Boolean)
+            editors.Controls.Add(new Label { Text = presentation.SectionTitle(section.First()), AutoSize = true, MaximumSize = new Size(610, 0), Font = navigationGroupFont, Margin = new Padding(0, 16, 0, 10), AccessibleName = "Section:" + section.Key });
+            foreach (var field in section)
             {
-                var check = new CheckBox { Text = label, AutoSize = true, Checked = (bool)current, AccessibleName = field.Id, Margin = new Padding(0, 5, 0, 6) };
-                check.CheckedChanged += (_, _) => Change(field, check.Checked); editor = check;
-            }
-            else if (field.Kind == SettingsFieldKind.Integer)
-            {
-                int maximum = field.Id == "indent.size" ? 10 : field.Id == "general.maxLineLength" ? 4096 : field.Member == "offset" ? Math.Min(100, field.Maximum) : field.Id.Contains("blankLines") ? 10 : Math.Min(4096, field.Maximum);
-                // Existing imported profiles remain intact until the user edits this value.
-                var number = new NumericUpDown { Minimum = field.Minimum, Maximum = Math.Max(maximum, (int)current), Value = (int)current, Width = 100, AccessibleName = field.Id };
-                number.ValueChanged += (_, _) =>
+                string label = presentation.PageFieldLabel(field); object current = Model.Get(field.Id); Control editor;
+                if (field.Kind == SettingsFieldKind.Boolean)
                 {
-                    if (number.Value > maximum) { number.Value = maximum; return; }
-                    Change(field, decimal.ToInt32(number.Value));
-                };
-                editor = FieldRow(label, number);
+                    var check = new CheckBox { Text = label, AutoSize = true, Checked = (bool)current, AccessibleName = field.Id, Margin = new Padding(0, 5, 0, 6) };
+                    check.CheckedChanged += (_, _) => Change(field, check.Checked); editor = check;
+                }
+                else if (field.Kind == SettingsFieldKind.Integer)
+                {
+                    int maximum = field.Id == "indent.size" ? 10 : field.Id == "general.maxLineLength" ? 4096 : field.Member == "offset" ? Math.Min(100, field.Maximum) : field.Id.Contains("blankLines") ? 10 : Math.Min(4096, field.Maximum);
+                    // Existing imported profiles remain intact until the user edits this value.
+                    var number = new NumericUpDown { Minimum = field.Minimum, Maximum = Math.Max(maximum, (int)current), Value = (int)current, Width = 100, AccessibleName = field.Id };
+                    number.ValueChanged += (_, _) =>
+                    {
+                        if (number.Value > maximum) { number.Value = maximum; return; }
+                        Change(field, decimal.ToInt32(number.Value));
+                    };
+                    editor = FieldRow(label, number);
+                }
+                else
+                {
+                    var choice = new SettingsComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Width = 270, AccessibleName = field.Id };
+                    choice.Items.AddRange(field.Choices.Select(v => new Choice(v, presentation.ChoiceLabel(v))).Cast<object>().ToArray()); choice.SelectedIndex = field.Choices.ToList().IndexOf((string)current);
+                    choice.SelectedIndexChanged += (_, _) => { if (choice.SelectedItem is Choice value) Change(field, value.Value); }; editor = FieldRow(label, choice);
+                }
+                editors.Controls.Add(editor);
             }
-            else
-            {
-                var choice = new SettingsComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Width = 270, AccessibleName = field.Id };
-                choice.Items.AddRange(field.Choices.Select(v => new Choice(v, presentation.ChoiceLabel(v))).Cast<object>().ToArray()); choice.SelectedIndex = field.Choices.ToList().IndexOf((string)current);
-                choice.SelectedIndexChanged += (_, _) => { if (choice.SelectedItem is Choice value) Change(field, value.Value); }; editor = FieldRow(label, choice);
-            }
-            editors.Controls.Add(editor);
         }
         appearance.Apply(editors); editors.ResumeLayout(); loading = false;
     }
@@ -268,7 +275,7 @@ internal sealed class FullSettingsControl : UserControl
     { var button = new Button { Text = text, AutoSize = true, MinimumSize = new Size(95, 30), Margin = new Padding(0, 6, 8, 6) }; button.Click += (_, _) => action(); return button; }
     private static Button Button(string text, Func<bool> action) => Button(text, () => { action(); });
     protected override void Dispose(bool disposing)
-    { if (disposing) { StopPreview(); debounce.Dispose(); heading.Dispose(); } base.Dispose(disposing); }
+    { if (disposing) { StopPreview(); debounce.Dispose(); heading.Dispose(); } base.Dispose(disposing); if (disposing) navigationGroupFont.Dispose(); }
     private sealed class Choice
     { public Choice(string value, string label) { Value = value; Label = label; } public string Value { get; } public string Label { get; } public override string ToString() => Label; }
     private sealed class ProfileItem

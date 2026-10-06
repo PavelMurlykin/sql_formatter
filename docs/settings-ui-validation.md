@@ -1,15 +1,21 @@
-﻿# Settings UI and editor update — 2026-10-05
+﻿# Compact settings navigation — 2026-10-06
 
-Current packages: Visual Studio 0.2.10 / SSMS 0.6.9. Release build has no warnings
-or errors; 1247 Core and 145 golden tests pass. Both menu tables contain exactly
+Current packages: Visual Studio 0.2.11 / SSMS 0.6.10. Release build has no warnings
+or errors; 1248 Core and 145 golden tests pass. Both menu tables contain exactly
 two commands and reuse formatting in the editor context menu.
 
 The standalone Windows WinForms smoke runs in Russian and English with light
-and dark palettes. It verifies General/Formatting tab order, grouped pages,
+and dark palettes. It verifies four bold groups, twelve pages with one child
+level, increased spacing, access to every field on combined pages and matching
+right-pane sections during search. A matching automatic SQL example is checked
+in both themes; color-only RichEdit events must not mark it as user-edited.
+It also verifies General/Formatting tab order,
 shared indent controls and the ten-space limit, profile switching and persistence,
 save without closing, retained unsaved drafts, shortcut field capture,
 SQL token highlighting, stale-output clearing, custom/invalid SQL and minimum size.
-Screenshots of both tabs for all four variants are in `artifacts/settings-ui/`.
+Screenshots of both tabs and a combined detail page for all four variants are
+in `artifacts/settings-ui/`; the formatting and detail screenshots were inspected.
+Full release pipeline log: `artifacts/compact-navigation-release.log`.
 
 Run `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Verify-SettingsUi.ps1 -SkipRestore`
 after restore, or use the full `scripts/Build-Release.ps1` pipeline.

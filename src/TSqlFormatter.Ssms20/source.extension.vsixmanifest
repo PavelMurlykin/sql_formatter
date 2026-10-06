@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011">
   <Metadata>
-    <Identity Id="TSqlFormatter.Ssms20" Version="0.6.9" Language="en-US" Publisher="TSqlFormatter" />
+    <Identity Id="TSqlFormatter.Ssms20" Version="0.6.10" Language="en-US" Publisher="TSqlFormatter" />
     <DisplayName>T-SQL Formatter for SSMS 20 (Experimental)</DisplayName>
     <Description>T-SQL formatting and native JSON profiles for the SSMS 20 32-bit isolated shell. Install with the supplied SSMS 20 installer.</Description>
   </Metadata>

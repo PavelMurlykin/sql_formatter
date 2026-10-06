@@ -6,6 +6,7 @@ namespace TSqlFormatter.Configuration;
 public sealed class SettingsPresentation
 {
     private readonly bool russian;
+    private static readonly string[] pageIds = { "global.basics", "global.lists", "global.casingSpacing", "queries.select", "queries.joinsConditions", "queries.subqueriesUnion", "data.insert", "data.updateDelete", "data.merge", "schema.tablesViews", "schema.routinesTriggers", "schema.blocksVariables" };
     private static readonly IReadOnlyDictionary<string, string[]> words = Vocabulary.Split('\n')
         .Select(line => line.Trim()).Where(line => line.Length > 0).Select(line => line.Split('|'))
         .ToDictionary(parts => parts[0], parts => parts.Skip(1).ToArray(), StringComparer.Ordinal);
@@ -23,23 +24,49 @@ public sealed class SettingsPresentation
     public string ChoiceLabel(string value) => Word(value is "insert" or "on" ? "choice." + value : value);
     public string Context(SettingsField field) => string.Join(" → ", Path(field).Concat(new[] { Title(field) }));
 
-    // Navigation contains pages of related settings, never a leaf for every scalar rule.
+    // Stable, compact navigation: a group and one page level. Catalog detail stays in the page.
     public string PageId(SettingsField field)
     {
         string key = GroupId(field);
-        if (field.Category is "general" or "indent") return "general";
+        return field.Category switch
+        {
+            "general" or "indent" or "misc" => "global.basics",
+            "stackedList" => "global.lists",
+            "layout" => key.IndexOf("list", StringComparison.OrdinalIgnoreCase) >= 0 || key.IndexOf("parenthes", StringComparison.OrdinalIgnoreCase) >= 0
+                ? "global.lists" : "global.basics",
+            "keywords" or "textCase" or "spacing" => "global.casingSpacing",
+            "joins" or "where" => "queries.joinsConditions",
+            "alignment" => key == "alignment.selectAliases" ? "queries.select" : key == "alignment.setAssignments" ? "data.updateDelete" : "schema.blocksVariables",
+            "clauses" => "queries.select",
+            "select" => key.StartsWith("select.join.", StringComparison.Ordinal) || key.StartsWith("select.where.", StringComparison.Ordinal) || key.StartsWith("select.having.", StringComparison.Ordinal)
+                ? "queries.joinsConditions" : "queries.select",
+            "subquery" or "setOperator" => "queries.subqueriesUnion",
+            "insert" => "data.insert",
+            "update" or "delete" => "data.updateDelete",
+            "merge" => "data.merge",
+            "createTable" or "view" => "schema.tablesViews",
+            "routine" or "trigger" or "execute" => "schema.routinesTriggers",
+            "code" or "declare" or "labels" or "case" => "schema.blocksVariables",
+            _ => throw new ArgumentException("Missing navigation page for category: " + field.Category, nameof(field))
+        };
+    }
+    public IReadOnlyList<string> PagePath(SettingsField field) => Array.AsReadOnly(PageId(field).Split('.').Select(id => Word("navigation." + id)).ToArray());
+    public int PageOrder(SettingsField field) => Array.IndexOf(pageIds, PageId(field));
+    public string PageTitle(SettingsField field) => PagePath(field)[1];
+    public string SectionId(SettingsField field)
+    {
+        string key = GroupId(field);
         int dot = key.LastIndexOf('.');
         return dot < 0 ? key : key.Substring(0, dot);
     }
-    public IReadOnlyList<string> PagePath(SettingsField field) => Array.AsReadOnly(PageId(field).Split('.').Select(Word).ToArray());
-    public string PageTitle(SettingsField field) => Word(PageId(field).Split('.').Last());
+    public string SectionTitle(SettingsField field) => string.Join(" · ", SectionId(field).Split('.').Select(Word));
     public string PageFieldLabel(SettingsField field) => field.Member is null ? Title(field) : Title(field) + ": " + Word(field.Member);
 
     public IEnumerable<SettingsField> Find(SettingsEditorModel model, string? search)
     {
         var terms = (search ?? "").Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
         return model.Fields.Where(field => terms.All(term =>
-            (Context(field) + " " + FieldLabel(field) + " " + field.Id + " " + field.Scope)
+            (Context(field) + " " + FieldLabel(field) + " " + string.Join(" ", PagePath(field)) + " " + field.Id + " " + field.Scope)
                 .IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0));
     }
 
@@ -116,6 +143,22 @@ public sealed class SettingsPresentation
 
     // Every catalog segment and enum value is intentionally named; a new rule requires a label and tests.
     private const string Vocabulary = @"
+navigation.global|Общие|Global
+navigation.queries|Запросы|Queries
+navigation.data|Изменение данных|Data changes
+navigation.schema|Схема и код|Schema and code
+navigation.basics|Основные|Basics
+navigation.lists|Списки и скобки|Lists and parentheses
+navigation.casingSpacing|Регистр и пробелы|Casing and spacing
+navigation.select|SELECT|SELECT
+navigation.joinsConditions|JOIN и условия|JOIN and conditions
+navigation.subqueriesUnion|Подзапросы и UNION|Subqueries and UNION
+navigation.insert|INSERT|INSERT
+navigation.updateDelete|UPDATE и DELETE|UPDATE and DELETE
+navigation.merge|MERGE|MERGE
+navigation.tablesViews|Таблицы и VIEW|Tables and VIEW
+navigation.routinesTriggers|Процедуры и триггеры|Routines and triggers
+navigation.blocksVariables|Блоки и переменные|Blocks and variables
 layout|Общее расположение профиля|Shared profile layout
 globalVariable|Регистр системных переменных|Global variable casing
 dmlCompact|Короткие операторы DML|Short DML statements

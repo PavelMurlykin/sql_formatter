@@ -26,17 +26,27 @@ public sealed class SettingsPresentationTests
         Assert.Equal("cmdFormatDocument", (string?)Assert.Single(document.Descendants(ns + "CommandPlacement")).Attribute("id"));
     }
 
-    [Fact]
-    public void Navigation_groups_related_fields_and_keeps_all_settings_accessible()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Navigation_has_one_page_level_and_keeps_details_accessible(bool russian)
     {
-        var model = new SettingsEditorModel(); var presentation = new SettingsPresentation();
+        var model = new SettingsEditorModel(); var presentation = new SettingsPresentation(russian);
         var pages = model.Fields.GroupBy(presentation.PageId).ToArray();
-        Assert.True(pages.Length < 150);
+        Assert.Equal(12, pages.Length);
+        Assert.Equal(4, pages.Select(p => p.Key.Split('.')[0]).Distinct().Count());
         Assert.Equal(model.Fields.Count, pages.Sum(g => g.Count()));
-        Assert.Contains(pages.Single(p => p.Key == "general"), f => f.Id == "indent.size");
-        Assert.Contains(pages.Single(p => p.Key == "general"), f => f.Id == "indent.style");
-        Assert.Contains(pages.Single(p => p.Key == "execute.parameters"), f => f.Id == "rules.execute.parameters.stackList");
-        foreach (var field in model.Fields) { Assert.NotEmpty(presentation.PageTitle(field)); Assert.NotEmpty(presentation.PageFieldLabel(field)); }
+        Assert.Contains(pages.Single(p => p.Key == "global.basics"), f => f.Id == "indent.size");
+        Assert.Contains(pages.Single(p => p.Key == "global.basics"), f => f.Id == "indent.style");
+        Assert.Contains(pages.Single(p => p.Key == "schema.routinesTriggers"), f => f.Id == "rules.execute.parameters.stackList");
+        Assert.True(pages.Single(p => p.Key == "schema.routinesTriggers").Select(presentation.SectionId).Distinct().Count() > 1);
+        foreach (var field in model.Fields)
+        {
+            Assert.Equal(2, presentation.PagePath(field).Count);
+            Assert.InRange(presentation.PageOrder(field), 0, 11);
+            Assert.NotEmpty(presentation.PageTitle(field)); Assert.NotEmpty(presentation.PageFieldLabel(field));
+            Assert.NotEmpty(presentation.SectionTitle(field));
+        }
     }
 
     [Theory]

@@ -1,13 +1,13 @@
 ﻿# Installing T-SQL Formatter
 
-Local build dated 2026-10-05. Choose the package for your IDE:
+Local build dated 2026-10-06. Choose the package for your IDE:
 
 | IDE | File | Extension version |
 | --- | --- | --- |
-| Visual Studio 2022 17.14.x, x64 | `TSqlFormatter.VS2022.vsix` | 0.2.10 |
-| Visual Studio 2026 18.x, x64 | `TSqlFormatter.VS2026.vsix` | 0.2.10 |
-| SSMS 20.x, x86 | `TSqlFormatter.SSMS20.vsix` + `Install-SSMS20.ps1` | 0.6.9 |
-| SSMS 22.x, x64 | `TSqlFormatter.SSMS22.vsix` | 0.6.9 |
+| Visual Studio 2022 17.14.x, x64 | `TSqlFormatter.VS2022.vsix` | 0.2.11 |
+| Visual Studio 2026 18.x, x64 | `TSqlFormatter.VS2026.vsix` | 0.2.11 |
+| SSMS 20.x, x86 | `TSqlFormatter.SSMS20.vsix` + `Install-SSMS20.ps1` | 0.6.10 |
+| SSMS 22.x, x64 | `TSqlFormatter.SSMS22.vsix` | 0.6.10 |
 
 The ready-made extensions do not require the .NET 10 SDK. They target .NET Framework 4.7.2 and bundle the formatting dependencies. Update a VS 2022 version earlier than 17.14 to the 17.14 branch.
 
@@ -51,6 +51,8 @@ The distribution includes native JSON v2 profiles:
 - `AV_Profile.json` and `Right-aligned-EPM-AWB2.json` — settings from SQL Complete profiles, with 573 rules each.
 
 Open **SQL Formatter → Settings… → General** (in Visual Studio open **Extensions** first), click **Import profile…**, select a file, check its name and click **Save**. Repeat for each profile. Select the active profile on either tab. **Format Document** formats the selection, or the whole active `.sql` without a selection; it also appears in the editor context menu. On **General**, press the desired shortcut in its field and save it. The window follows the IDE UI language and theme.
+
+On **Formatting**, the tree contains four bold groups and twelve pages at one child level. Edit details on the right; search narrows pages and their parameter sections.
 
 The nearest `.tsqlformatter.json` overrides the selected IDE profile. For project settings, copy one JSON under that name beside your SQL files, backing up existing configuration first. Third-party XML/style files are not imported directly. The converted settings contain documented approximations and do not promise identical SQL Prompt/SQL Complete output.
 

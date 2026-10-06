@@ -44,7 +44,7 @@ The repository also has an active [GitHub Actions workflow](../.github/workflows
 
 ## Installers and local release
 
-Ready-made packages and profiles are in the repository-root `release/` directory: `TSqlFormatter.VS2022.vsix` and `TSqlFormatter.VS2026.vsix` version **0.2.10**, `TSqlFormatter.SSMS20.vsix` and `TSqlFormatter.SSMS22.vsix` version **0.6.9**, plus CLI `0.1.0-preview.6`. VS 2022 requires the 17.14 branch (x64); VS 2026 requires 18.x (x64); SSMS 20 is x86; SSMS 22 is x64. Running the extensions does not require the .NET 10 SDK.
+Ready-made packages and profiles are in the repository-root `release/` directory: `TSqlFormatter.VS2022.vsix` and `TSqlFormatter.VS2026.vsix` version **0.2.11**, `TSqlFormatter.SSMS20.vsix` and `TSqlFormatter.SSMS22.vsix` version **0.6.10**, plus CLI `0.1.0-preview.6`. VS 2022 requires the 17.14 branch (x64); VS 2026 requires 18.x (x64); SSMS 20 is x86; SSMS 22 is x64. Running the extensions does not require the .NET 10 SDK.
 
 Close the IDE before installation. For Visual Studio, open the corresponding VSIX. For SSMS 22, use the VSIX Installer from its installation directory. For SSMS 20, keep the VSIX beside `Install-SSMS20.ps1` and run `powershell -NoProfile -ExecutionPolicy Bypass -File .\Install-SSMS20.ps1` from that folder in an Administrator PowerShell. The script checks the generation and backs up an earlier installation when updating; the standard VSIX Installer does not work for this legacy shell. See the [installation guide](../release/README.en.md) for details and custom paths.
 
@@ -70,7 +70,9 @@ Open **SQL Formatter → Settings…**. The resizable window uses current IDE th
 
 To assign a shortcut, focus the field and press a combination such as Ctrl+Alt+F. A single combination with Ctrl/Alt/Shift or a function key is supported. Backspace/Delete clears it. Click **Save** to assign it to the IDE command. A conflict with another command in the same scope is rejected with that command's name. No initial shortcut is imposed; the extension reads the existing IDE assignment. For two-step chords or additional scopes use **Tools → Options → Environment → Keyboard**, command `SQLFormatter.FormatDocument`.
 
-The **Formatting** tab navigates groups of related rules instead of a leaf for every value. **General settings** combines indent style/size, line width and endings. Select a group to edit several options together on the right. The magnifier search finds labels and technical keys, for example `EXEC vertically` or `rules.execute.parameters.stackList`; clear it to restore all groups. Numeric input is bounded: general indent size 0–10, line width 1–4096 and up to ten blank lines; thresholds and offsets are also bounded. Previously imported larger values are retained until that field is first edited.
+The **Formatting** tree has four bold group headings: **Global**, **Queries**, **Data changes**, and **Schema and code**. They contain one level of child pages, with 12 entries in total. Row spacing is increased; individual rules and values stay in the right pane. For example, **Routines and triggers** combines procedures, functions, triggers and EXEC, with parameter, body and clause details under headings on the right. **Basics** combines indent style/size, line width and endings.
+
+The magnifier search finds labels, groups and technical keys, for example `EXEC vertically` or `rules.execute.parameters.stackList`. The tree retains matching pages and the right pane shows matching sections with all their related parameters. The automatic SQL example corresponds to the matching section. Clear the search to restore all pages and details. Numeric input is bounded: general indent size 0–10, line width 1–4096 and up to ten blank lines; thresholds and offsets are also bounded. Previously imported larger values are retained until that field is first edited.
 
 Compound indentation includes enablement, offset, style, new-line-only application and nested indentation retention. `relative`/`absolute`/`anchor` offsets use general indent steps; `relativeSpaces`/`absoluteSpaces` use spaces. Disable **Inherit SELECT settings** for independent subquery rules. Inactive values are retained. Path/source/inheritance/reset/project-preview explanatory labels have been removed.
 
@@ -84,7 +86,7 @@ Both selectors list built-in styles and user profiles. Selecting one loads it in
 
 **Import profile…** accepts native JSON v1/v2 up to 1 MiB, including all rules/alignment, and suggests the file name as the profile name. Click **Save** after each import. **Export profile…** writes the current JSON snapshot immediately, prompting before overwriting; closing the window does not undo that file. SQL Complete/SQL Prompt XML/style files are not imported directly. User profiles are stored in per-user IDE settings; export `.tsqlformatter.json` beside SQL for the CLI. User profile names are not `--profile` IDs.
 
-This interface ships in VS **0.2.10** and SSMS **0.6.9** packages. Shared WinForms editor scenarios cover Russian/English and light/dark themes; this is separate from installed Visual Studio validation. See [UI validation](settings-ui-validation.md).
+This interface ships in VS **0.2.11** and SSMS **0.6.10** packages. Shared WinForms editor scenarios cover Russian/English and light/dark themes; this is separate from installed Visual Studio validation. See [UI validation](settings-ui-validation.md).
 
 ## AV and EPM working profiles from SQL Complete
 

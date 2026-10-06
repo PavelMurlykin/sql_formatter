@@ -1,5 +1,5 @@
 ﻿{
-    "date":  "2026-10-05",
+    "date":  "2026-10-06",
     "scope":  "Extracted-installer libraries: profile import, editor/store round trip, formatting, token preservation, idempotence, identical outputs. Separate from installed-IDE UI validation.",
     "profiles":  [
                      {
@@ -19,7 +19,7 @@
                      {
                          "host":  "VS2022",
                          "file":  "TSqlFormatter.VS2022.vsix",
-                         "sha256":  "e5ff0ed59f8864b2e0b6e7aa9490b46ba8a28acd9790c042b938222011928112",
+                         "sha256":  "7d72eb21b480180756f2d146272e1b56fe59e065eefd762a2d36f0cc22345979",
                          "cases":  45,
                          "architecture":  "x64",
                          "result":  "passed",
@@ -28,7 +28,7 @@
                      {
                          "host":  "VS2026",
                          "file":  "TSqlFormatter.VS2026.vsix",
-                         "sha256":  "d57e65df38f84bfbcb11f2d8cfc278f527c56efa467015bb67d3fa14b82e9fdd",
+                         "sha256":  "d107afa290d0688049b075267a3e019fcab745e11658aac370873e81ab448b9c",
                          "cases":  45,
                          "architecture":  "x64",
                          "result":  "passed",
@@ -37,7 +37,7 @@
                      {
                          "host":  "SSMS20",
                          "file":  "TSqlFormatter.SSMS20.vsix",
-                         "sha256":  "eb9b476708a739505662b55d05d25216974d1b5dfd9dc883965ce6d5466ce5e1",
+                         "sha256":  "c1384f36bc89f9a36cc9a9be8f3e1c32ea9738dfa6a1cc06b0b3469deb1877c8",
                          "cases":  45,
                          "architecture":  "x86",
                          "result":  "passed",
@@ -46,7 +46,7 @@
                      {
                          "host":  "SSMS22",
                          "file":  "TSqlFormatter.SSMS22.vsix",
-                         "sha256":  "0ff29bc2d5619f597efe1e5820151770a96e0f10bd1d6d3a5ca50fb5caa94212",
+                         "sha256":  "b0259b513ed48b2c9ded07db6e72f814fed3082785b2a9436af0c4972b1bf89d",
                          "cases":  45,
                          "architecture":  "x64",
                          "result":  "passed",

@@ -10,6 +10,7 @@ namespace TSqlFormatter.IdeShared;
 internal sealed class SqlPreviewBox : RichTextBox
 {
     private bool highlighting;
+    private string previousText = "";
     private SettingsAppearance appearance = SettingsAppearance.Light;
     internal SqlPreviewBox(bool readOnly)
     {
@@ -21,6 +22,11 @@ internal sealed class SqlPreviewBox : RichTextBox
     protected override void OnTextChanged(EventArgs e)
     {
         if (highlighting) return;
+        // RichEdit also reports color/theme changes as TextChanged. Only content edits
+        // should mark the source as a custom example and stop automatic examples.
+        string currentText = Text;
+        if (currentText == previousText) return;
+        previousText = currentText;
         Highlight(); base.OnTextChanged(e);
     }
     private void Highlight()

@@ -3,6 +3,15 @@
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
 
+## Compact formatting navigation — 2026-10-06
+
+- Visual Studio VSIX 0.2.11 / SSMS VSIX 0.6.10.
+- Four bold navigation groups with one level of twelve child pages and larger
+  row spacing. All scalar settings remain in sections on the right.
+- Search filters pages and their detail sections, keeps compound controls
+  together and chooses a corresponding SQL example.
+- Updated Russian/English manuals, UI smoke coverage and release packages.
+
 ## Editor commands and settings redesign — 2026-10-05
 
 - Visual Studio VSIX 0.2.10 / SSMS VSIX 0.6.9.

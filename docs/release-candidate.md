@@ -37,10 +37,10 @@ separately in [release validation](../release/VALIDATION.md).
 
 | Host | Package | Adapter version |
 | --- | --- | --- |
-| VS 2022 17.14 x64 | TSqlFormatter.VS2022.vsix | 0.2.10 |
-| VS 2026 18.x x64 | TSqlFormatter.VS2026.vsix | 0.2.10 |
-| SSMS 20 x86 | TSqlFormatter.SSMS20.vsix + Install-SSMS20.ps1 | 0.6.9 |
-| SSMS 22 x64 | TSqlFormatter.SSMS22.vsix | 0.6.9 |
+| VS 2022 17.14 x64 | TSqlFormatter.VS2022.vsix | 0.2.11 |
+| VS 2026 18.x x64 | TSqlFormatter.VS2026.vsix | 0.2.11 |
+| SSMS 20 x86 | TSqlFormatter.SSMS20.vsix + Install-SSMS20.ps1 | 0.6.10 |
+| SSMS 22 x64 | TSqlFormatter.SSMS22.vsix | 0.6.10 |
 | CLI, .NET 10 Runtime | TSqlFormatter.Tool.0.1.0-preview.6.nupkg | 0.1.0-preview.6 |
 
 Profiles: `ADIR_SQL_Main.json`, `AV_Profile.json`, `Right-aligned-EPM-AWB2.json`.
