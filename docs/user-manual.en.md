@@ -1,4 +1,4 @@
-﻿# T-SQL Formatter — user manual
+# T-SQL Formatter — user manual
 
 ## Current status
 
@@ -28,11 +28,11 @@ To use the parser in your C# project, add a reference to `src/TSqlFormatter.Core
 
 ## Local dotnet tool and CI examples
 
-The CLI packs as `TSqlFormatter.Tool` version `0.1.0-preview.6` with the `tsqlformat` command. Building needs a .NET 10 SDK and running needs a .NET 10 Runtime; a .NET 8 Runtime alone is insufficient. From the repository root, build and install into a Git-ignored directory (PowerShell):
+The CLI packs as `TSqlFormatter.Tool` version `0.1.0-preview.7` with the `tsqlformat` command. Building needs a .NET 10 SDK and running needs a .NET 10 Runtime; a .NET 8 Runtime alone is insufficient. From the repository root, build and install into a Git-ignored directory (PowerShell):
 
 ```powershell
 dotnet pack src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj -c Release -o release
-dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source release --version 0.1.0-preview.6
+dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source release --version 0.1.0-preview.7
 .\artifacts\tool-bin\tsqlformat.exe query.sql --check
 ```
 
@@ -44,7 +44,7 @@ The repository also has an active [GitHub Actions workflow](../.github/workflows
 
 ## Installers and local release
 
-Ready-made packages and profiles are in the repository-root `release/` directory: `TSqlFormatter.VS2022.vsix` and `TSqlFormatter.VS2026.vsix` version **0.2.11**, `TSqlFormatter.SSMS20.vsix` and `TSqlFormatter.SSMS22.vsix` version **0.6.10**, plus CLI `0.1.0-preview.6`. VS 2022 requires the 17.14 branch (x64); VS 2026 requires 18.x (x64); SSMS 20 is x86; SSMS 22 is x64. Running the extensions does not require the .NET 10 SDK.
+Ready-made packages and profiles are in the repository-root `release/` directory: `TSqlFormatter.VS2022.vsix` and `TSqlFormatter.VS2026.vsix` version **0.2.12**, `TSqlFormatter.SSMS20.vsix` and `TSqlFormatter.SSMS22.vsix` version **0.6.11**, plus CLI `0.1.0-preview.7`. VS 2022 requires the 17.14 branch (x64); VS 2026 requires 18.x (x64); SSMS 20 is x86; SSMS 22 is x64. Running the extensions does not require the .NET 10 SDK.
 
 Close the IDE before installation. For Visual Studio, open the corresponding VSIX. For SSMS 22, use the VSIX Installer from its installation directory. For SSMS 20, keep the VSIX beside `Install-SSMS20.ps1` and run `powershell -NoProfile -ExecutionPolicy Bypass -File .\Install-SSMS20.ps1` from that folder in an Administrator PowerShell. The script checks the generation and backs up an earlier installation when updating; the standard VSIX Installer does not work for this legacy shell. See the [installation guide](../release/README.en.md) for details and custom paths.
 
@@ -86,7 +86,7 @@ Both selectors list built-in styles and user profiles. Selecting one loads it in
 
 **Import profile…** accepts native JSON v1/v2 up to 1 MiB, including all rules/alignment, and suggests the file name as the profile name. Click **Save** after each import. **Export profile…** writes the current JSON snapshot immediately, prompting before overwriting; closing the window does not undo that file. SQL Complete/SQL Prompt XML/style files are not imported directly. User profiles are stored in per-user IDE settings; export `.tsqlformatter.json` beside SQL for the CLI. User profile names are not `--profile` IDs.
 
-This interface ships in VS **0.2.11** and SSMS **0.6.10** packages. Shared WinForms editor scenarios cover Russian/English and light/dark themes; this is separate from installed Visual Studio validation. See [UI validation](settings-ui-validation.md).
+This interface ships in VS **0.2.12** and SSMS **0.6.11** packages. Shared WinForms editor scenarios cover Russian/English and light/dark themes; this is separate from installed Visual Studio validation. See [UI validation](settings-ui-validation.md).
 
 ## AV and EPM working profiles from SQL Complete
 
@@ -120,9 +120,9 @@ indentation and the left margin respectively. 5 means five spaces regardless of
 (enabled/onNewLineOnly/transparent) retain their meaning. For example:
 `{"enabled":true,"offset":5,"onNewLineOnly":true,"style":"relativeSpaces","transparent":false}`.
 
-For profiles using space offsets, the engine normalizes interacting nested rules to a
+For profiles using space offsets or enabled syntax rules, the engine normalizes interacting nested rules to a
 stable result, with a limit of eight passes. If layout fails to stabilize or tokens
-change beyond the selected casing edits, it preserves the original SQL with warning
+change beyond the permitted casing and syntax edits, it preserves the original SQL with warning
 TSF3006/TSF3007. Multiline literals also cause whole-file preservation. These cases
 are counted separately from style matches. The [report](sql-complete-working-profiles.md)
 includes the Rac_data and Process comparison and reproduction commands. External SQL
@@ -1208,6 +1208,29 @@ their separate normalization. Thresholds
 use `enabled/value` and a strict “shorter than” comparison. Existing profiles do not enable
 these changes automatically.
 
+In VS 0.2.12 / SSMS 0.6.11 the profile also enables
+`syntax.removeOptionalBrackets=true` and `syntax.addSemicolons=true`. On
+**Formatting → Global → Basics → SQL syntax**, use **Remove optional square brackets**
+and **Terminate statements with semicolons**. For example, `USE [WorkDb]` becomes
+`USE WorkDb;`. Reserved words, names containing spaces or an escaped `]` retain their
+brackets; literals and comments remain intact. Terminators follow statement boundaries,
+including block bodies, without terminating GO or a query inside an inline table-valued
+function. Existing `;` are not duplicated. Both rules default to false and can be
+enabled independently.
+After bracket removal, the selected identifier/alias casing applies;
+ADIR_SQL_Main preserves the original name casing.
+
+`code.if.breakAfterElseIf=never` keeps `ELSE IF` on one line and every branch in the
+chain at the original IF column. A genuinely nested IF in the body retains its indent.
+Find this setting in the IF section of the Blocks and variables page; `inherit` uses
+`code.if.breakAfterElse`, while `always` wraps IF. Formatting an expression or WHERE
+selection does not terminate its enclosing statement outside the selection.
+
+Import **release/ADIR_SQL_Main.json** again, replace the profile with the same name,
+select it as active and click **Save**: installing a VSIX does not update saved profile
+snapshots. If a nearby `.tsqlformatter.json` exists, add the rules there or update that
+configuration too; it takes precedence over the IDE profile.
+
 The profile preserves `-- SQL Prompt formatting off/on` regions. Object and user-defined
 type casing is preserved; database definition casing cannot be resolved. Multiline
 literal files are preserved entirely. Complex constructs and multiline comment patterns
@@ -1216,7 +1239,7 @@ See the [settings mapping and comparison command](sql-prompt-adir-profile.md) an
 [audit of files changed in Git during 2026](sql-prompt-adir-validation.md).
 
 For the refined profile audited against Functions/Tables/Triggers/Types/Views, install
-Visual Studio VSIX 0.2.7 or SSMS VSIX 0.6.6 and import the JSON again: previously saved
+Visual Studio VSIX 0.2.12 or SSMS VSIX 0.6.11 and import the JSON again: previously saved
 user profiles do not update automatically. `layout.functionParameters` independently
 controls CREATE/ALTER FUNCTION parameters: `inherit` keeps the shared `routine.parameters`
 rules, `always` wraps the list, `never` keeps it inline, `multiple` wraps multiple

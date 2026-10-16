@@ -5,31 +5,31 @@
                   {
                       "file":  "TSqlFormatter.VS2022.vsix",
                       "host":  "VS2022",
-                      "version":  "0.2.11",
-                      "sha256":  "7d72eb21b480180756f2d146272e1b56fe59e065eefd762a2d36f0cc22345979"
+                      "version":  "0.2.12",
+                      "sha256":  "75dcf556979ff0640b84453a1d8d7b4689d3d7c9095bc1d5253de88d19fd61a9"
                   },
                   {
                       "file":  "TSqlFormatter.VS2026.vsix",
                       "host":  "VS2026",
-                      "version":  "0.2.11",
-                      "sha256":  "d107afa290d0688049b075267a3e019fcab745e11658aac370873e81ab448b9c"
+                      "version":  "0.2.12",
+                      "sha256":  "53a78f8bccd960060c2a9102d2c2d901f7f6a79d2be05267b2b96fac2e51d66e"
                   },
                   {
                       "file":  "TSqlFormatter.SSMS20.vsix",
                       "host":  "SSMS20",
-                      "version":  "0.6.10",
-                      "sha256":  "c1384f36bc89f9a36cc9a9be8f3e1c32ea9738dfa6a1cc06b0b3469deb1877c8"
+                      "version":  "0.6.11",
+                      "sha256":  "f1965d61d363525a3c3e76b8166298cf9487912c5e655da05f96cebcb289c393"
                   },
                   {
                       "file":  "TSqlFormatter.SSMS22.vsix",
                       "host":  "SSMS22",
-                      "version":  "0.6.10",
-                      "sha256":  "b0259b513ed48b2c9ded07db6e72f814fed3082785b2a9436af0c4972b1bf89d"
+                      "version":  "0.6.11",
+                      "sha256":  "0a57cea9e27f812d29f0b9105b2feed69cb2830776d229d217b0c729c0b564c7"
                   },
                   {
                       "file":  "ADIR_SQL_Main.json",
                       "kind":  "native-formatting-profile",
-                      "sha256":  "ca8446e5a7582571dd3695c9aa4a186a8d23e92905c06b9070ba10d350ff38af"
+                      "sha256":  "5a7ad3adca399496bba2d7f20f890c2e41e52c39e3474d3357591a56cd953dab"
                   },
                   {
                       "file":  "AV_Profile.json",
@@ -47,9 +47,9 @@
                       "sha256":  "ff9ae9d75da7345d3986a731c8548badb86ef994142dc58a568cdf7bf4d19e79"
                   },
                   {
-                      "file":  "TSqlFormatter.Tool.0.1.0-preview.6.nupkg",
+                      "file":  "TSqlFormatter.Tool.0.1.0-preview.7.nupkg",
                       "kind":  "CLI-preview",
-                      "sha256":  "f0c9f4758cae67a723e69ff9a9d4d7517986ec0565b55fd44c400b243de682c0"
+                      "sha256":  "09192b4f4377b84837ad191fc8cb3eb6ee999b666c4a53447f37f923164313dd"
                   }
               ],
     "note":  "Package checks and bundled-profile checks passed. Installed-host checks are recorded separately in VALIDATION.md. No publication."

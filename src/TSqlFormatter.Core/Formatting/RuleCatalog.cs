@@ -94,6 +94,8 @@ public sealed class RuleCatalog
         CaseRule("textCase.alias", "preserve"),
         new RuleDescriptor("textCase.formatQuotedIdentifier", "quoted identifier",
             RuleValue.FromBoolean(false)),
+        new RuleDescriptor("syntax.removeOptionalBrackets", "SQL syntax", RuleValue.FromBoolean(false)),
+        new RuleDescriptor("syntax.addSemicolons", "SQL syntax", RuleValue.FromBoolean(false)),
         SpacingRule("spacing.arithmeticOperators"),
         SpacingRule("spacing.beforeComma"),
         SpacingRule("spacing.afterComma"),
@@ -468,6 +470,8 @@ public sealed class RuleCatalog
         }
         yield return BreakRule("code.if.breakBeforeElse", scope);
         yield return BreakRule("code.if.breakAfterElse", scope);
+        yield return new RuleDescriptor("code.if.breakAfterElseIf", scope, RuleValue.FromChoice("never"),
+            choices: new[] { "inherit", "always", "never" });
     }
 
     private static IEnumerable<RuleDescriptor> ModuleRules()

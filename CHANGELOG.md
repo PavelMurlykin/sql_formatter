@@ -3,6 +3,18 @@
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
 
+## ADIR syntax and ELSE IF fixes — 2026-10-08
+
+- Visual Studio VSIX 0.2.12 / SSMS VSIX 0.6.11 / CLI 0.1.0-preview.7.
+- Optional bracket removal and AST-based statement terminators, enabled in the
+  updated ADIR_SQL_Main profile. Required quotes, literals, comments, formatting
+  directives and selection boundaries are retained. Existing terminators stay intact.
+- ELSE IF chains keep the original IF column and can remain on one line;
+  truly nested IF bodies retain their indentation.
+- Added bilingual settings labels/examples, regression coverage and extracted
+  installer checks. Saved profiles require reimporting the updated JSON.
+- Updated Russian/English manuals and all four release packages.
+
 ## Compact formatting navigation — 2026-10-06
 
 - Visual Studio VSIX 0.2.11 / SSMS VSIX 0.6.10.

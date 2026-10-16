@@ -29,7 +29,11 @@ internal static class Program
         "SELECT Id FROM dbo.Items WHERE Id IN (1, 2, 3, 4, 5);",
         "SELECT Id, -- first\nName -- second\nFROM dbo.Items;",
         "USE tempdb;\nGO\nSELECT 1;\nSELECT 2;",
-        "SELECT Id, ROW_NUMBER() OVER (PARTITION BY Name ORDER BY Id) AS rn FROM dbo.Items;"
+        "SELECT Id, ROW_NUMBER() OVER (PARTITION BY Name ORDER BY Id) AS rn FROM dbo.Items;",
+        "USE [WorkDb]\nGO\nSELECT [Id] FROM [WorkDb].[dbo].[Items]\nEXEC [dbo].[ReadItems]",
+        "IF @var=1 BEGIN SELECT 1 END\n\tELSE IF @var=2 BEGIN SELECT 2 END\n\t\tELSE IF @var=3 BEGIN SELECT 3 END",
+        "SELECT [Group], [Order Details], [a]]b], N'[dbo].[Items];' FROM [dbo].[Items] -- keep [brackets];",
+        "CREATE FUNCTION [dbo].[ReadItems]() RETURNS TABLE AS RETURN (SELECT [Id] FROM [dbo].[Items])"
     };
 
     private static int Main(string[] args)
@@ -69,18 +73,22 @@ internal static class Program
                 var restored = UserProfileStore.Deserialize(store.Serialize()).ResolveDefault(FormattingOptions.Default);
                 Require(model.Export() == new SettingsEditorModel(restored).Export(), name + ": default profile persistence failed");
                 if (name != "ADIR_SQL_Main") Require(options.Rules.Overrides.Count == 573, name + ": rules missing");
+                else Require(options.Rules.Get("syntax.removeOptionalBrackets").Boolean
+                    && options.Rules.Get("syntax.addSemicolons").Boolean
+                    && options.Rules.Get("code.if.breakAfterElseIf").Choice == "never", name + ": syntax/ELSE IF policies missing");
                 for (int index = 0; index < Sources.Length; index++)
                 {
                     string source = Sources[index];
                     var result = formatter.Format(source, restored, new FormatRequest());
                     Require(result.ParseSucceeded && !result.Diagnostics.Any(d => d.Severity == FormatterDiagnosticSeverity.Error), name + ": format failed " + index);
+                    Require(!result.Diagnostics.Any(d => d.Code is "TSF3006" or "TSF3007"), name + ": unsafe or unstable output " + index);
                     Require(result.Text == formatter.Format(result.Text, restored, new FormatRequest()).Text, name + ": unstable output " + index);
                     var before = parser.Parse(source, SqlDialectVersion.Auto);
                     var after = parser.Parse(result.Text, SqlDialectVersion.Auto);
-                    Require(after.ParseSucceeded && TokenSignature(before) == TokenSignature(after), name + ": tokens changed " + index);
+                    Require(after.ParseSucceeded && SqlTokenSafety.PreservesTokens(before, after, restored), name + ": unexpected token edits " + index);
                     File.WriteAllText(Path.Combine(output, name + "-" + index + ".sql"), result.Text, new UTF8Encoding(false));
                 }
-                Console.WriteLine(name + ": import, settings/store round trip, 15 SQL cases, token safety and idempotence passed.");
+                Console.WriteLine(name + ": import, settings/store round trip, " + Sources.Length + " SQL cases, token safety and idempotence passed.");
             }
             using var sha = SHA256.Create();
             foreach (var assembly in new[] { typeof(ScriptDomSqlFormatter).Assembly, typeof(SettingsEditorModel).Assembly, typeof(TSqlParser).Assembly })
@@ -90,11 +98,6 @@ internal static class Program
         }
         catch (Exception exception) { Console.Error.WriteLine(exception); return 1; }
     }
-
-    private static string TokenSignature(SqlParseResult result) => string.Join("\n", result.Tokens
-        .Where(t => t.TokenType is not (TSqlTokenType.WhiteSpace or TSqlTokenType.EndOfFile))
-        .Select(t => t.TokenType is TSqlTokenType.AsciiStringLiteral or TSqlTokenType.UnicodeStringLiteral
-            or TSqlTokenType.SingleLineComment or TSqlTokenType.MultilineComment ? t.Text : t.Text.ToUpperInvariant().Trim('[', ']')));
 
     private static void Require(bool condition, string message)
     { if (!condition) throw new InvalidOperationException(message); }

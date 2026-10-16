@@ -1,4 +1,27 @@
-﻿# Compact settings navigation — 2026-10-06
+# Current settings validation — 2026-10-08
+
+Packages: Visual Studio 0.2.12 / SSMS 0.6.11. Release build: zero warnings/errors;
+1282 Core + 145 golden = 1427 tests. The standalone Windows settings scenarios
+pass in ru/en × light/dark. New SQL syntax settings share the Basics page;
+the tree retains four bold groups and twelve pages at one child level. New
+syntax and IF examples use the shared token highlighter and localized labels.
+The scenarios also cover profiles, drafts, save without closing, search/detail
+sections, shortcut capture, numeric limits and SQL preview editing.
+
+Screenshots: `artifacts/settings-ui/`; ru/light Formatting and en/dark details
+were visually inspected. Pipeline log: `artifacts/adir-release-build.log`.
+The four VSIX libraries passed 228 profile/SQL checks. Installing/running the
+new adapters inside Visual Studio or SSMS was not part of this pass; see
+[current release validation](../release/VALIDATION.md).
+
+Run `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Verify-SettingsUi.ps1 -SkipRestore`
+after restore, or the full `scripts/Build-Release.ps1` pipeline.
+
+---
+
+The following records describe previous versions.
+
+## Historical compact settings navigation — 2026-10-06
 
 Current packages: Visual Studio 0.2.11 / SSMS 0.6.10. Release build has no warnings
 or errors; 1248 Core and 145 golden tests pass. Both menu tables contain exactly

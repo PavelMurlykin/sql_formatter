@@ -30,7 +30,13 @@ internal static class CodeLayout
                     if (keyword is not null)
                     {
                         editor.Before(keyword.Offset, Choice("if.breakBeforeElse"), anchorOffset: node.StartOffset);
-                        editor.BeforeFragment(alternative.StartOffset, Choice("if.breakAfterElse"), keyword.Offset);
+                        if (alternative is IfStatement)
+                        {
+                            string mode = Choice("if.breakAfterElseIf");
+                            editor.Before(alternative.StartOffset, mode == "inherit" ? Choice("if.breakAfterElse") : mode,
+                                new IndentRule(true, 0), anchorOffset: node.StartOffset);
+                        }
+                        else editor.BeforeFragment(alternative.StartOffset, Choice("if.breakAfterElse"), keyword.Offset);
                     }
                 }
                 Around(node, "if");
@@ -92,7 +98,7 @@ internal static class CodeLayout
                 {
                     if (conditional.ThenStatement is { } then && then is not BeginEndBlockStatement)
                         yield return new FragmentIndent(then, node.StartOffset, Indent("if.bodyIndent"));
-                    if (conditional.ElseStatement is { } alternative && alternative is not BeginEndBlockStatement)
+                    if (conditional.ElseStatement is { } alternative && alternative is not (BeginEndBlockStatement or IfStatement))
                         yield return new FragmentIndent(alternative, node.StartOffset, Indent("if.bodyIndent"));
                 }
                 else if (node is WhileStatement { Statement: { } body } && body is not BeginEndBlockStatement)

@@ -33,6 +33,8 @@
     "declareTypes": true
   },
   "rules": {
+    "syntax.removeOptionalBrackets": true,
+    "syntax.addSemicolons": true,
     "textCase.keyword": "upper",
     "textCase.builtin": "upper",
     "textCase.dataType": "upper",
@@ -129,6 +131,7 @@
     "code.if.breakAfterCondition": "always",
     "code.if.breakBeforeElse": "always",
     "code.if.breakAfterElse": "always",
+    "code.if.breakAfterElseIf": "never",
     "code.while.breakAfterCondition": "always",
     "insert.values.breakBeforeKeyword": "always",
     "insert.values.breakAfterKeyword": "always",

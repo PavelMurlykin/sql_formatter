@@ -119,6 +119,7 @@ public sealed class SqlPromptAdditionalObjectsTests
         var first = formatter.Format(source, options, new FormatRequest());
         Assert.True(first.ParseSucceeded);
         Assert.DoesNotContain(first.Diagnostics, d => d.Severity == FormatterDiagnosticSeverity.Error);
+        Assert.DoesNotContain(first.Diagnostics, d => d.Code is "TSF3006" or "TSF3007");
         Assert.Equal(first.Text, formatter.Format(first.Text, options, new FormatRequest()).Text);
         var parser = new ScriptDomSqlParser();
         Assert.Equal(Tokens(parser.Parse(source, SqlDialectVersion.Auto)), Tokens(parser.Parse(first.Text, SqlDialectVersion.Auto)));

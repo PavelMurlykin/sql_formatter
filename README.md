@@ -1,4 +1,4 @@
-﻿# T-SQL Formatter
+# T-SQL Formatter
 
 An extensible T-SQL formatter under active development. The current Core exposes
 a ScriptDom-based parser, token helpers, a line map, a layout renderer, an
@@ -25,6 +25,9 @@ Installers and converted SQL Prompt / SQL Complete profiles are delivered in
 [`release/`](release/), as required by [AGENTS.md](AGENTS.md).
 Use the [installation guide](release/README.en.md) and
 [validation results](release/VALIDATION.md).
+The updated ADIR_SQL_Main removes optional object brackets, adds statement
+terminators and aligns ELSE IF chains. Reimport its JSON to replace an older saved
+profile after installing the new extension.
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Build-Release.ps1
@@ -61,7 +64,7 @@ To build and install the preview tool from this repository:
 
 ```powershell
 dotnet pack src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj -c Release -o release
-dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source release --version 0.1.0-preview.6
+dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source release --version 0.1.0-preview.7
 .\artifacts\tool-bin\tsqlformat.exe query.sql --check
 ```
 
@@ -112,4 +115,4 @@ native import JSON for VSIX 0.2.8 / SSMS 0.6.7. Their source mapping, explicit n
 approximations and audit against both EPM-RAC database projects are described in
 [the working-profile report](docs/sql-complete-working-profiles.md).
 The current release includes these profiles and ADIR_SQL_Main in `release/`, with
-Visual Studio packages 0.2.11 and SSMS packages 0.6.10.
+Visual Studio packages 0.2.12 and SSMS packages 0.6.11.

@@ -30,7 +30,7 @@ public sealed class SettingsPresentation
         string key = GroupId(field);
         return field.Category switch
         {
-            "general" or "indent" or "misc" => "global.basics",
+            "general" or "indent" or "misc" or "syntax" => "global.basics",
             "stackedList" => "global.lists",
             "layout" => key.IndexOf("list", StringComparison.OrdinalIgnoreCase) >= 0 || key.IndexOf("parenthes", StringComparison.OrdinalIgnoreCase) >= 0
                 ? "global.lists" : "global.basics",
@@ -109,6 +109,8 @@ public sealed class SettingsPresentation
     public string Example(SettingsField field)
     {
         string key = GroupId(field);
+        if (key.StartsWith("syntax", StringComparison.Ordinal)) return "USE [WorkDb]\nGO\nSELECT [Id], [Group] FROM [dbo].[Items]\nEXEC [dbo].[ReadItems]";
+        if (key.StartsWith("code.if", StringComparison.Ordinal)) return "IF @id = 1 BEGIN SELECT 1 END ELSE IF @id = 2 BEGIN SELECT 2 END ELSE BEGIN SELECT 3 END";
         if (key.StartsWith("select.singleLine", StringComparison.Ordinal)) return "SELECT Id, Name FROM dbo.Items WHERE Id > 0;";
         if (key.StartsWith("textCase", StringComparison.Ordinal) || key.StartsWith("spacing", StringComparison.Ordinal))
             return "SELECT T.Id AS ItemId, [MixedName], @Value + 2 AS Amount, COUNT(*) AS Total, GETDATE(), geometry::STGeomFromText('POINT(0 0)', 0) FROM dbo.Items AS T GROUP BY T.Id, [MixedName];";
@@ -143,6 +145,10 @@ public sealed class SettingsPresentation
 
     // Every catalog segment and enum value is intentionally named; a new rule requires a label and tests.
     private const string Vocabulary = @"
+syntax|Синтаксис SQL|SQL syntax
+removeOptionalBrackets|Удалять необязательные квадратные скобки|Remove optional square brackets
+addSemicolons|Добавлять точку с запятой после операторов|Terminate statements with semicolons
+breakAfterElseIf|Перенос между ELSE и IF|Line break between ELSE and IF
 navigation.global|Общие|Global
 navigation.queries|Запросы|Queries
 navigation.data|Изменение данных|Data changes

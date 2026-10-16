@@ -23,10 +23,10 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         CancellationToken cancellationToken = default)
     {
         var first = FormatOnce(source, options, request, cancellationToken);
-        // Space-based profiles combine many token-gap passes. A later enclosing layout may
-        // change the anchor used by an earlier pass, so normalize to a bounded fixed point.
+        // Enclosing layout changes anchors; syntax edits can also change width thresholds.
+        // Normalize these interacting passes to a bounded fixed point.
         if (!first.Changed || !first.ParseSucceeded || request.Scope != FormatScope.Document
-            || !options.Rules.Overrides.Values.Any(value => value.Kind == RuleValueKind.Indent
+            || !SqlSyntaxPolicy.Enabled(options) && !options.Rules.Overrides.Values.Any(value => value.Kind == RuleValueKind.Indent
                 && value.Indent.Style is "relativeSpaces" or "absoluteSpaces")) return first;
         var original = _parser.Parse(source, request.Dialect, cancellationToken);
         var current = first;
@@ -42,7 +42,7 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
             if (!SqlTokenSafety.PreservesTokens(original,
                 _parser.Parse(current.Text, request.Dialect, cancellationToken), options, cancellationToken))
                 return Unchanged(source, true, new FormatterDiagnostic("TSF3007",
-                    "Formatted tokens differ from the profile's permitted casing edits; SQL was left unchanged.",
+                    "Formatted tokens differ from the profile's permitted casing and syntax edits; SQL was left unchanged.",
                     FormatterDiagnosticSeverity.Warning));
             return new FormatResult(current.Text, current.Text != source, true,
                 current.Text == source ? Array.Empty<TextEdit>() : new[] { new TextEdit(new SqlTextSpan(0, source.Length), current.Text) },
@@ -189,6 +189,7 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
             rendered = ExecuteLabelLayout.ApplySafe(rendered, options, _parser,
                 request.Dialect, cancellationToken);
             rendered = ProfileLayout.ApplySafe(rendered, options, _parser, request.Dialect, cancellationToken, source);
+            rendered = SqlSyntaxPolicy.ApplySafe(rendered, options, _parser, request.Dialect, cancellationToken);
             if (string.Equals(rendered, source, StringComparison.Ordinal))
             {
                 return Unchanged(source, true);
@@ -242,6 +243,7 @@ public sealed class ScriptDomSqlFormatter : ISqlFormatter
         output = ExecuteLabelLayout.ApplySafe(output, options, _parser,
             request.Dialect, cancellationToken);
         output = ProfileLayout.ApplySafe(output, options, _parser, request.Dialect, cancellationToken, source);
+        output = SqlSyntaxPolicy.ApplySafe(output, options, _parser, request.Dialect, cancellationToken);
         if (string.Equals(output, source, StringComparison.Ordinal))
         {
             return Unchanged(source, true);

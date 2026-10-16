@@ -75,7 +75,14 @@ internal static class ProfileLayout
                         {
                             var elseToken = editor.FindLast(conditional.StartOffset, alternative.StartOffset, Is("ELSE"));
                             if (elseToken is not null) editor.BeforeAtColumn(elseToken.Offset, ifColumn);
-                            editor.BeforeAtColumn(alternative.StartOffset, ifColumn + (alternative is BeginEndBlockStatement ? 0 : options.Indent.Size));
+                            if (alternative is IfStatement)
+                            {
+                                string mode = NativeRules.Get(options, "code.if.breakAfterElseIf").Choice;
+                                if (mode == "inherit") mode = NativeRules.Get(options, "code.if.breakAfterElse").Choice;
+                                if (mode == "never") editor.Before(alternative.StartOffset, "never", spaceMode: "insert");
+                                else editor.BeforeAtColumn(alternative.StartOffset, ifColumn);
+                            }
+                            else editor.BeforeAtColumn(alternative.StartOffset, ifColumn + (alternative is BeginEndBlockStatement ? 0 : options.Indent.Size));
                         }
                         break;
                     case WhileStatement loop when firstMode != "inherit":

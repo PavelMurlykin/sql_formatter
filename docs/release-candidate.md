@@ -1,4 +1,4 @@
-﻿# Local release packaging
+# Local release packaging
 
 All distributable installers and formatting profiles are saved in repository-root
 `release/`, following [AGENTS.md](../AGENTS.md). Build intermediates and logs stay
@@ -37,11 +37,11 @@ separately in [release validation](../release/VALIDATION.md).
 
 | Host | Package | Adapter version |
 | --- | --- | --- |
-| VS 2022 17.14 x64 | TSqlFormatter.VS2022.vsix | 0.2.11 |
-| VS 2026 18.x x64 | TSqlFormatter.VS2026.vsix | 0.2.11 |
-| SSMS 20 x86 | TSqlFormatter.SSMS20.vsix + Install-SSMS20.ps1 | 0.6.10 |
-| SSMS 22 x64 | TSqlFormatter.SSMS22.vsix | 0.6.10 |
-| CLI, .NET 10 Runtime | TSqlFormatter.Tool.0.1.0-preview.6.nupkg | 0.1.0-preview.6 |
+| VS 2022 17.14 x64 | TSqlFormatter.VS2022.vsix | 0.2.12 |
+| VS 2026 18.x x64 | TSqlFormatter.VS2026.vsix | 0.2.12 |
+| SSMS 20 x86 | TSqlFormatter.SSMS20.vsix + Install-SSMS20.ps1 | 0.6.11 |
+| SSMS 22 x64 | TSqlFormatter.SSMS22.vsix | 0.6.11 |
+| CLI, .NET 10 Runtime | TSqlFormatter.Tool.0.1.0-preview.7.nupkg | 0.1.0-preview.7 |
 
 Profiles: `ADIR_SQL_Main.json`, `AV_Profile.json`, `Right-aligned-EPM-AWB2.json`.
 The conversion limitations remain documented in the manuals and profile reports.
@@ -56,7 +56,7 @@ the modern SDK. The shared formatter and settings are bundled in all packages.
 Install the additional local CLI without publishing:
 
 ```powershell
-dotnet tool install TSqlFormatter.Tool --tool-path artifacts/eval-tool --source release --version 0.1.0-preview.6
+dotnet tool install TSqlFormatter.Tool --tool-path artifacts/eval-tool --source release --version 0.1.0-preview.7
 .\artifacts\eval-tool\tsqlformat.exe query.sql --check
 ```
 

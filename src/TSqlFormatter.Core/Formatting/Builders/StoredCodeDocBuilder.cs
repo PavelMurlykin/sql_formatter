@@ -77,7 +77,7 @@ internal sealed class StoredCodeDocBuilder : ISqlFragmentDocBuilder
                 return null;
             parts.Add(HardLineDoc.Instance);
             parts.Add(new TextDoc("ELSE"));
-            parts.Add(Branch(alternative, context));
+            parts.Add(alternative is IfStatement ? Join(new TextDoc(" "), context.BuildFragment(alternative)) : Branch(alternative, context));
         }
         else if (!White(Between(context, End(statement.ThenStatement), End(statement)))) return null;
         return Join(parts);
