@@ -3,6 +3,18 @@
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
 
+## SQL transformations with preview — 2026-10-25
+
+- Transformation engine in Core (`TSqlFormatter.Core.Refactoring.SqlTransformer`): the statement under an
+  offset is rebuilt from a modified AST (`Sql150ScriptGenerator`) and the whole document is formatted with
+  the active profile. Three transformations: single-row INSERT → UPDATE with a WHERE stub, multi-row
+  VALUES → `SELECT … UNION ALL SELECT …` with column aliases, and EXEC gaining
+  `DECLARE @returnCode AS INT` with return-code capture.
+- New commands in both the Visual Studio and SSMS packages (SQL Formatter menu): **Convert INSERT to
+  UPDATE**, **Convert VALUES to UNION ALL** and **EXEC: Capture Return Code**. Each parses on a
+  background snapshot, shows a before/after preview dialog and applies the formatted document in one
+  Undo transaction; unsuitable statements produce a clear message.
+
 ## Script outline and go-to-declaration — 2026-10-25
 
 - Navigation engine in Core (`TSqlFormatter.Core.Navigation`): `ScriptOutlineBuilder`

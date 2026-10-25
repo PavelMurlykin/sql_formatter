@@ -131,6 +131,12 @@ public sealed class SqlFormatterPackage : AsyncPackage
                 goToDeclaration.Visible = goToDeclaration.Enabled = ActiveSqlEditor.TryRead(textManager, out _, monitorSelection);
             };
             commands.AddCommand(goToDeclaration);
+            AddTransformCommand(commands, 0x0250, SqlTransformationKind.InsertToUpdate,
+                "Преобразовать INSERT в UPDATE", "Convert INSERT to UPDATE");
+            AddTransformCommand(commands, 0x0251, SqlTransformationKind.ValuesToUnionAll,
+                "Преобразовать VALUES в UNION ALL", "Convert VALUES to UNION ALL");
+            AddTransformCommand(commands, 0x0252, SqlTransformationKind.ExecWithReturnCode,
+                "EXEC: перехватить код возврата", "EXEC: Capture Return Code");
             var settings = new OleMenuCommand((_, _) => ShowSettings(false), new CommandID(CommandSet, 0x0400));
             settings.BeforeQueryStatus += (_, _) => settings.Text = SettingsAppearance.Text("Настройки…", "Settings…");
             commands.AddCommand(settings);
@@ -272,6 +278,24 @@ public sealed class SqlFormatterPackage : AsyncPackage
     private void ExecuteGoToDeclaration(object sender, EventArgs e)
     {
         JoinableTaskFactory.RunAsync(GoToDeclarationAsync).FileAndForget("TSqlFormatter/GoToDeclaration");
+    }
+
+    private void AddTransformCommand(OleMenuCommandService commands, int id,
+        SqlTransformationKind kind, string ruText, string enText)
+    {
+        var command = new OleMenuCommand((_, _) => ExecuteTransform(kind), new CommandID(CommandSet, id));
+        command.BeforeQueryStatus += (_, _) =>
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            command.Text = SettingsAppearance.Text(ruText, enText);
+            command.Visible = command.Enabled = ActiveSqlEditor.TryRead(textManager, out _, monitorSelection);
+        };
+        commands.AddCommand(command);
+    }
+
+    private void ExecuteTransform(SqlTransformationKind kind)
+    {
+        JoinableTaskFactory.RunAsync(() => TransformAsync(kind)).FileAndForget("TSqlFormatter/Transform");
     }
 
     private void ExecuteFormatSelection(object sender, EventArgs e)
@@ -819,6 +843,71 @@ public sealed class SqlFormatterPackage : AsyncPackage
         analysisWindow = null;
         analysisWindowOwner?.ReleaseHandle();
         analysisWindowOwner = null;
+    }
+
+    private async Task TransformAsync(SqlTransformationKind kind)
+    {
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor, monitorSelection) ||
+            editorAdapters == null || undoRegistry == null)
+        {
+            NotifyFormat(SettingsAppearance.Text("Откройте файл .sql в редакторе.", "Open a .sql file in the text editor first."), true);
+            return;
+        }
+
+        if (!editor.TryCaptureCaret(editorAdapters, out var snapshot, out int caret) ||
+            snapshot.Length > 16 * 1024 * 1024)
+        {
+            NotifyFormat("The SQL caret is unavailable or the buffer exceeds 16 Mi characters.", true);
+            return;
+        }
+
+        string source = snapshot.GetText();
+        FormattingOptions defaults = CreateIdeOptions();
+        SqlTransformationResult transformation;
+        try
+        {
+            transformation = await Task.Run(
+                () => SqlTransformer.Transform(kind, source, caret, defaults, DisposalToken), DisposalToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+        catch (Exception ex)
+        {
+            await JoinableTaskFactory.SwitchToMainThreadAsync();
+            NotifyFormat($"Transformation failed: {ex.Message}", true);
+            return;
+        }
+
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (!transformation.Succeeded)
+        {
+            NotifyFormat(transformation.Error ?? "The transformation was not applied.", true);
+            return;
+        }
+
+        var before = source.Substring(
+            transformation.ReplacedSpan.StartOffset, transformation.ReplacedSpan.Length);
+        using (var preview = new TransformationPreviewWindow(
+            SettingsAppearance.Text("Преобразование SQL", "SQL Transformation"), before, transformation.NewStatementText))
+        {
+            if (ShowDialog(preview) != DialogResult.OK)
+            {
+                return;
+            }
+        }
+
+        if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor current, monitorSelection) ||
+            !ReferenceEquals(current.Buffer, editor.Buffer) ||
+            !editor.TryApplyDocument(snapshot, transformation.NewDocumentText, editorAdapters, undoRegistry))
+        {
+            NotifyFormat("The SQL buffer changed during transformation; no edit was applied.", true);
+            return;
+        }
+
+        NotifyFormat(SettingsAppearance.Text("Преобразование применено.", "Transformation applied."));
     }
 
     private async Task ShowOutlineAsync()
