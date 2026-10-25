@@ -15,6 +15,7 @@ using Microsoft.VisualStudio.Threading;
 using TSqlFormatter.Configuration;
 using TSqlFormatter.IdeShared;
 using TSqlFormatter.Core.Formatting;
+using TSqlFormatter.Core.Navigation;
 using TSqlFormatter.Core.Parsing;
 using TSqlFormatter.Core.Refactoring;
 using TSqlFormatter.Core.Snippets;
@@ -41,6 +42,8 @@ public sealed class SsmsPackage : AsyncPackage
     private AnalysisReportWindow? analysisWindow;
     private System.Windows.Forms.NativeWindow? analysisWindowOwner;
     private SnippetInsertionSession? snippetSession;
+    private ScriptOutlineWindow? outlineWindow;
+    private System.Windows.Forms.NativeWindow? outlineWindowOwner;
 
     protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
     {
@@ -95,6 +98,20 @@ public sealed class SsmsPackage : AsyncPackage
                 rename.Visible = rename.Enabled = ActiveQueryEditor.TryRead(textManager, out _, monitorSelection);
             };
             commands.AddCommand(rename);
+            var showOutline = new OleMenuCommand(ExecuteShowOutline, new CommandID(CommandSet, 0x0240));
+            showOutline.BeforeQueryStatus += (_, _) =>
+            {
+                showOutline.Text = SettingsAppearance.Text("Структура скрипта", "Script Outline");
+                showOutline.Visible = showOutline.Enabled = ActiveQueryEditor.TryRead(textManager, out _, monitorSelection);
+            };
+            commands.AddCommand(showOutline);
+            var goToDeclaration = new OleMenuCommand(ExecuteGoToDeclaration, new CommandID(CommandSet, 0x0241));
+            goToDeclaration.BeforeQueryStatus += (_, _) =>
+            {
+                goToDeclaration.Text = SettingsAppearance.Text("Перейти к объявлению", "Go To Declaration");
+                goToDeclaration.Visible = goToDeclaration.Enabled = ActiveQueryEditor.TryRead(textManager, out _, monitorSelection);
+            };
+            commands.AddCommand(goToDeclaration);
             var settings = new OleMenuCommand((_, _) => ShowSettings(false), new CommandID(CommandSet, 0x0400));
             settings.BeforeQueryStatus += (_, _) => settings.Text = SettingsAppearance.Text("Настройки…", "Settings…");
             commands.AddCommand(settings);
@@ -137,6 +154,172 @@ public sealed class SsmsPackage : AsyncPackage
     private void ExecuteRenameSymbol(object sender, EventArgs e)
     {
         JoinableTaskFactory.RunAsync(RenameSymbolAsync).FileAndForget("TSqlFormatter.Ssms/RenameSymbol");
+    }
+
+    private void ExecuteShowOutline(object sender, EventArgs e)
+    {
+        JoinableTaskFactory.RunAsync(ShowOutlineAsync).FileAndForget("TSqlFormatter.Ssms/ShowOutline");
+    }
+
+    private void ExecuteGoToDeclaration(object sender, EventArgs e)
+    {
+        JoinableTaskFactory.RunAsync(GoToDeclarationAsync).FileAndForget("TSqlFormatter.Ssms/GoToDeclaration");
+    }
+
+    private async Task ShowOutlineAsync()
+    {
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (!ActiveQueryEditor.TryRead(textManager, out var editor, monitorSelection) ||
+            editorAdapters == null)
+        {
+            ShowMessage("Open a .sql file in the SSMS query editor first.", true);
+            return;
+        }
+
+        var snapshot = editor.CaptureSnapshot(editorAdapters);
+        if (snapshot == null || snapshot.Length > 16 * 1024 * 1024)
+        {
+            ShowMessage("The SQL buffer is unavailable or exceeds 16 Mi characters.", true);
+            return;
+        }
+
+        string source = snapshot.GetText();
+        ScriptOutlineNode? outline;
+        try
+        {
+            outline = await Task.Run(() =>
+            {
+                var parseResult = new ScriptDomSqlParser().Parse(source, SqlDialectVersion.Auto, DisposalToken);
+                return new ScriptOutlineBuilder().Build(parseResult);
+            }, DisposalToken);
+        }
+        catch (OperationCanceledException) { return; }
+        catch (Exception ex)
+        {
+            await JoinableTaskFactory.SwitchToMainThreadAsync();
+            ShowMessage($"Script outline failed: {ex.Message}", true);
+            return;
+        }
+
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (outline is null)
+        {
+            ShowMessage("SQL could not be parsed; the outline is unavailable.", true);
+            return;
+        }
+
+        var lineMap = new SqlLineMap(source);
+        CloseOutlineWindow();
+        var window = new ScriptOutlineWindow(outline);
+        window.Navigate += node =>
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            if (ActiveQueryEditor.TryRead(textManager, out var current, monitorSelection) &&
+                ReferenceEquals(current.Buffer, editor.Buffer))
+            {
+                var position = lineMap.GetLinePosition(node.Span.StartOffset);
+                SqlEditorNavigation.GoTo(current.View, position.Line, position.Column);
+            }
+        };
+        window.FormClosed += (_, _) =>
+        {
+            outlineWindow = null;
+            outlineWindowOwner?.ReleaseHandle();
+            outlineWindowOwner = null;
+        };
+        outlineWindow = window;
+        ShowOwned(window, ref outlineWindowOwner);
+    }
+
+    private void ShowOwned(System.Windows.Forms.Form window, ref System.Windows.Forms.NativeWindow? owner)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        try
+        {
+            if (GetService(typeof(SVsUIShell)) is IVsUIShell shell &&
+                Microsoft.VisualStudio.ErrorHandler.Succeeded(shell.GetDialogOwnerHwnd(out IntPtr ownerHwnd)))
+            {
+                owner = new System.Windows.Forms.NativeWindow();
+                owner.AssignHandle(ownerHwnd);
+                window.Show(owner);
+                return;
+            }
+        }
+        catch (Exception)
+        {
+            // An ownerless modeless window still displays.
+        }
+
+        window.Show();
+    }
+
+    private async Task GoToDeclarationAsync()
+    {
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (!ActiveQueryEditor.TryRead(textManager, out var editor, monitorSelection) ||
+            editorAdapters == null)
+        {
+            ShowMessage("Open a .sql file in the SSMS query editor first.", true);
+            return;
+        }
+
+        if (!editor.TryCaptureCaret(editorAdapters, out var snapshot, out int caret) ||
+            snapshot.Length > 16 * 1024 * 1024)
+        {
+            ShowMessage("The SQL caret is unavailable or the buffer exceeds 16 Mi characters.", true);
+            return;
+        }
+
+        string source = snapshot.GetText();
+        SqlTextSpan? declaration;
+        try
+        {
+            declaration = await Task.Run(() =>
+            {
+                var parseResult = new ScriptDomSqlParser().Parse(source, SqlDialectVersion.Auto, DisposalToken);
+                return new SymbolLocator().FindVariableDeclaration(parseResult, caret);
+            }, DisposalToken);
+        }
+        catch (OperationCanceledException) { return; }
+        catch (Exception ex)
+        {
+            await JoinableTaskFactory.SwitchToMainThreadAsync();
+            ShowMessage($"Go to declaration failed: {ex.Message}", true);
+            return;
+        }
+
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (declaration is null)
+        {
+            ShowMessage(SettingsAppearance.Text(
+                "Объявление переменной под курсором не найдено.",
+                "No declaration found for the variable under the caret."), true);
+            return;
+        }
+
+        if (!ActiveQueryEditor.TryRead(textManager, out var current, monitorSelection) ||
+            !ReferenceEquals(current.Buffer, editor.Buffer))
+        {
+            ShowMessage("The SQL buffer changed; navigation was not applied.", true);
+            return;
+        }
+
+        var position = new SqlLineMap(source).GetLinePosition(declaration.Value.StartOffset);
+        SqlEditorNavigation.GoTo(current.View, position.Line, position.Column);
+        ActivityLog.LogInformation("T-SQL Formatter SSMS", "Moved to a variable declaration.");
+    }
+
+    private void CloseOutlineWindow()
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        if (outlineWindow is not null && !outlineWindow.IsDisposed)
+        {
+            outlineWindow.Close();
+        }
+
+        outlineWindow = null;
+        outlineWindowOwner?.ReleaseHandle();
+        outlineWindowOwner = null;
     }
 
     private async Task RenameSymbolAsync()

@@ -54,7 +54,7 @@ To reproducibly build all four extensions and the CLI and verify profiles, run `
 
 ## VS and SSMS: formatting a document
 
-Install the matching package from `release/` and restart the IDE. In Visual Studio open **Extensions → SQL Formatter**; in SSMS use the top-level **SQL Formatter** menu. It contains **Format Document**, **Analyze Document**, **Insert Snippet**, **Rename Symbol**, **Clear Analysis Markers** (shown when markers exist) and **Settings…**. Commands, tabs, built-in profiles, rules and values use the IDE UI language: Russian for ru, English for other languages. Restart the IDE after changing its language.
+Install the matching package from `release/` and restart the IDE. In Visual Studio open **Extensions → SQL Formatter**; in SSMS use the top-level **SQL Formatter** menu. It contains **Format Document**, **Analyze Document**, **Insert Snippet**, **Rename Symbol**, **Script Outline**, **Go To Declaration**, **Clear Analysis Markers** (shown when markers exist) and **Settings…**. Commands, tabs, built-in profiles, rules and values use the IDE UI language: Russian for ru, English for other languages. Restart the IDE after changing its language.
 
 **Format Document** is available for the active `.sql` tab, including its text editor context menu. A nonempty selection formats only that fragment; without a selection it formats the entire active document. Selections may contain several statements, an expression list or a query clause. Text outside the selection stays unchanged. For example, selecting `where Id=1 and Amount>0` in a SELECT formats only that condition. A boundary cutting a token or a fragment that cannot safely be processed leaves the text unchanged with a diagnostic. Fully selected standalone statements can be formatted even with invalid SQL outside the selection.
 
@@ -95,6 +95,12 @@ Built-in snippets: `proc` (stored procedure template with TRY/CATCH), `try`, `tr
 - a **table alias** (`FROM dbo.T AS t`) — the alias and all `t.Column` qualifiers within the declaring query are renamed, including correlated references from nested subqueries; a same-name alias declared in a nested query shadows the outer one and is left untouched.
 
 After you type the new name (validated: a variable is `@` plus an identifier; an alias is a plain identifier without `@`), a preview lists position, old and new text; applying happens in one Undo transaction. When no supported symbol is under the caret, a message is shown. Limitations: aliases in `UPDATE`/`DELETE` statements (no query specification) and quoted aliases `[t]` are not supported.
+
+## VS and SSMS: script outline and navigation
+
+**Script Outline** opens a modeless window with the tree of the active document: batches, modules (`PROCEDURE`/`FUNCTION`/`VIEW`/`TRIGGER` with full names), statements (SELECT/INSERT/UPDATE/…, including nested `IF`/`WHILE`/`BEGIN…END`), CTEs and `@variable` declarations. Double-click or Enter moves the caret to the corresponding place; re-running the command rebuilds the tree from the current text. Parsing runs in the background over a buffer snapshot; a parse error leaves the outline unavailable.
+
+**Go To Declaration** (menu and editor context menu) moves the caret from a `@variable` under the cursor to the nearest `DECLARE` above within the same batch. When the variable is not declared above or the caret is not on a variable, a message is shown.
 
 ## Formatting settings and profiles in VS/SSMS
 

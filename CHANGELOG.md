@@ -3,6 +3,16 @@
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
 
+## Script outline and go-to-declaration — 2026-10-25
+
+- Navigation engine in Core (`TSqlFormatter.Core.Navigation`): `ScriptOutlineBuilder`
+  produces a tree of batches, modules (procedure/function/view/trigger with full names),
+  statements (including nested IF/WHILE/BEGIN…END), CTEs and variable declarations;
+  `SymbolLocator` finds the nearest `DECLARE` above a variable reference within its batch.
+- New commands in both the Visual Studio and SSMS packages: **Script Outline** (modeless
+  tree window, double-click navigates, rebuilt per invocation over a background snapshot)
+  and **Go To Declaration** for the `@variable` under the caret (menu and context menu).
+
 ## Rename for variables and aliases — 2026-10-25
 
 - Rename engine in Core (`TSqlFormatter.Core.Refactoring`): local variables are scoped to
