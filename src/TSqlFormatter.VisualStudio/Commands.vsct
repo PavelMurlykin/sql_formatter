@@ -64,6 +64,11 @@
         <CommandFlag>TextChanges</CommandFlag><CommandFlag>DynamicVisibility</CommandFlag><CommandFlag>DefaultInvisible</CommandFlag>
         <Strings><ButtonText>EXEC: Capture Return Code</ButtonText><CanonicalName>SQLFormatter.ConvertExecReturnCode</CanonicalName><LocCanonicalName>SQLFormatter.ConvertExecReturnCode</LocCanonicalName></Strings>
       </Button>
+      <Button guid="guidCommandSet" id="cmdGenerateCrud" priority="0x0180" type="Button">
+        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
+        <CommandFlag>TextChanges</CommandFlag><CommandFlag>DynamicVisibility</CommandFlag><CommandFlag>DefaultInvisible</CommandFlag>
+        <Strings><ButtonText>Generate CRUD from CREATE TABLE</ButtonText><CanonicalName>SQLFormatter.GenerateCrud</CanonicalName><LocCanonicalName>SQLFormatter.GenerateCrud</LocCanonicalName></Strings>
+      </Button>
       <Button guid="guidCommandSet" id="cmdSettings" priority="0x0200" type="Button">
         <Parent guid="guidCommandSet" id="grpSqlFormatter" />
         <CommandFlag>TextChanges</CommandFlag>
@@ -82,7 +87,7 @@
     <GuidSymbol name="guidPackage" value="{C8BAF105-2C0F-484C-93DB-DC653596796B}" />
     <GuidSymbol name="guidCommandSet" value="{164528C8-0EC5-4EEC-8380-7C17745D9701}">
       <IDSymbol name="menuSqlFormatter" value="0x1000" /><IDSymbol name="grpSqlFormatter" value="0x1020" /><IDSymbol name="grpContext" value="0x1040" />
-      <IDSymbol name="cmdFormatDocument" value="0x0200" /><IDSymbol name="cmdAnalyzeDocument" value="0x0210" /><IDSymbol name="cmdClearAnalysisMarkers" value="0x0211" /><IDSymbol name="cmdInsertSnippet" value="0x0220" /><IDSymbol name="cmdRenameSymbol" value="0x0230" /><IDSymbol name="cmdShowOutline" value="0x0240" /><IDSymbol name="cmdGoToDeclaration" value="0x0241" /><IDSymbol name="cmdConvertInsertToUpdate" value="0x0250" /><IDSymbol name="cmdConvertValuesToUnion" value="0x0251" /><IDSymbol name="cmdConvertExecReturnCode" value="0x0252" /><IDSymbol name="cmdSettings" value="0x0400" />
+      <IDSymbol name="cmdFormatDocument" value="0x0200" /><IDSymbol name="cmdAnalyzeDocument" value="0x0210" /><IDSymbol name="cmdClearAnalysisMarkers" value="0x0211" /><IDSymbol name="cmdInsertSnippet" value="0x0220" /><IDSymbol name="cmdRenameSymbol" value="0x0230" /><IDSymbol name="cmdShowOutline" value="0x0240" /><IDSymbol name="cmdGoToDeclaration" value="0x0241" /><IDSymbol name="cmdConvertInsertToUpdate" value="0x0250" /><IDSymbol name="cmdConvertValuesToUnion" value="0x0251" /><IDSymbol name="cmdConvertExecReturnCode" value="0x0252" /><IDSymbol name="cmdGenerateCrud" value="0x0260" /><IDSymbol name="cmdSettings" value="0x0400" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

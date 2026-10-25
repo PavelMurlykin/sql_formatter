@@ -137,6 +137,15 @@ public sealed class SqlFormatterPackage : AsyncPackage
                 "Преобразовать VALUES в UNION ALL", "Convert VALUES to UNION ALL");
             AddTransformCommand(commands, 0x0252, SqlTransformationKind.ExecWithReturnCode,
                 "EXEC: перехватить код возврата", "EXEC: Capture Return Code");
+            var generateCrud = new OleMenuCommand(ExecuteGenerateCrud, new CommandID(CommandSet, 0x0260));
+            generateCrud.BeforeQueryStatus += (_, _) =>
+            {
+                ThreadHelper.ThrowIfNotOnUIThread();
+                generateCrud.Text = SettingsAppearance.Text(
+                    "Сгенерировать CRUD по CREATE TABLE", "Generate CRUD from CREATE TABLE");
+                generateCrud.Visible = generateCrud.Enabled = ActiveSqlEditor.TryRead(textManager, out _, monitorSelection);
+            };
+            commands.AddCommand(generateCrud);
             var settings = new OleMenuCommand((_, _) => ShowSettings(false), new CommandID(CommandSet, 0x0400));
             settings.BeforeQueryStatus += (_, _) => settings.Text = SettingsAppearance.Text("Настройки…", "Settings…");
             commands.AddCommand(settings);
@@ -296,6 +305,11 @@ public sealed class SqlFormatterPackage : AsyncPackage
     private void ExecuteTransform(SqlTransformationKind kind)
     {
         JoinableTaskFactory.RunAsync(() => TransformAsync(kind)).FileAndForget("TSqlFormatter/Transform");
+    }
+
+    private void ExecuteGenerateCrud(object sender, EventArgs e)
+    {
+        JoinableTaskFactory.RunAsync(GenerateCrudAsync).FileAndForget("TSqlFormatter/GenerateCrud");
     }
 
     private void ExecuteFormatSelection(object sender, EventArgs e)
@@ -843,6 +857,96 @@ public sealed class SqlFormatterPackage : AsyncPackage
         analysisWindow = null;
         analysisWindowOwner?.ReleaseHandle();
         analysisWindowOwner = null;
+    }
+
+    private async Task GenerateCrudAsync()
+    {
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor, monitorSelection) ||
+            editorAdapters == null || undoRegistry == null)
+        {
+            NotifyFormat(SettingsAppearance.Text("Откройте файл .sql в редакторе.", "Open a .sql file in the text editor first."), true);
+            return;
+        }
+
+        var snapshot = editor.CaptureSnapshot(editorAdapters);
+        if (snapshot == null || snapshot.Length > 16 * 1024 * 1024)
+        {
+            NotifyFormat("The SQL buffer is unavailable or exceeds 16 Mi characters.", true);
+            return;
+        }
+
+        string source = snapshot.GetText();
+        var scope = new SqlTextSpan(0, source.Length);
+        if (editor.TryCaptureSelection(editorAdapters, out var selectedSnapshot, out var selected) &&
+            ReferenceEquals(selectedSnapshot, snapshot) && selected.Length > 0)
+        {
+            scope = new SqlTextSpan(selected.Start, selected.Length);
+        }
+
+        FormattingOptions defaults = CreateIdeOptions();
+        TSqlFormatter.Core.Generation.SqlTableDefinition? table = null;
+        string generated = string.Empty;
+        try
+        {
+            var tableLocal = table;
+            var generatedLocal = generated;
+            await Task.Run(() =>
+            {
+                var parseResult = new ScriptDomSqlParser().Parse(source, SqlDialectVersion.Auto, DisposalToken);
+                tableLocal = new TSqlFormatter.Core.Generation.TableDefinitionReader().Read(parseResult, scope);
+                if (tableLocal is not null)
+                {
+                    generatedLocal = TSqlFormatter.Core.Generation.CrudGenerator.Generate(tableLocal, defaults, DisposalToken);
+                }
+            }, DisposalToken);
+            table = tableLocal;
+            generated = generatedLocal;
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+        catch (Exception ex)
+        {
+            await JoinableTaskFactory.SwitchToMainThreadAsync();
+            NotifyFormat($"CRUD generation failed: {ex.Message}", true);
+            return;
+        }
+
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (table is null)
+        {
+            NotifyFormat(SettingsAppearance.Text(
+                "CREATE TABLE не найден в документе или выделении.",
+                "No CREATE TABLE was found in the document or selection."), true);
+            return;
+        }
+
+        var before = source.Substring(table.StatementSpan.StartOffset, table.StatementSpan.Length);
+        using (var preview = new TransformationPreviewWindow(
+            SettingsAppearance.Text("Генерация CRUD — ", "Generate CRUD — ") + table.DisplayName,
+            before, generated))
+        {
+            if (ShowDialog(preview) != DialogResult.OK)
+            {
+                return;
+            }
+        }
+
+        var insertAt = table.StatementSpan.EndOffset;
+        if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor current, monitorSelection) ||
+            !ReferenceEquals(current.Buffer, editor.Buffer) ||
+            !editor.TryApplyEdit(snapshot, insertAt, 0,
+                Environment.NewLine + Environment.NewLine + generated.TrimEnd() + Environment.NewLine,
+                "Generate T-SQL CRUD", editorAdapters, undoRegistry))
+        {
+            NotifyFormat("The SQL buffer changed during generation; no edit was applied.", true);
+            return;
+        }
+
+        NotifyFormat(SettingsAppearance.Text(
+            "CRUD сгенерирован после CREATE TABLE.", "CRUD templates were generated after the CREATE TABLE."));
     }
 
     private async Task TransformAsync(SqlTransformationKind kind)

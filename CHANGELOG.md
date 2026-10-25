@@ -3,6 +3,18 @@
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
 
+## CRUD generation from CREATE TABLE — 2026-10-25
+
+- Generation engine in Core (`TSqlFormatter.Core.Generation`): `TableDefinitionReader` parses the first
+  `CREATE TABLE` (whole document or a selection scope) into a column model with types, nullability and
+  identity flags; `CrudGenerator` produces SELECT, INSERT, UPDATE, DELETE templates and an
+  `usp_<Table>_Upsert` procedure stub, formatted with the active profile. IDENTITY columns are excluded
+  from writable parts; WHERE clauses carry `/* TODO: key */` placeholders; the procedure lives in its own
+  batch after `GO`. No live database connection is used.
+- New command in both the Visual Studio and SSMS packages (SQL Formatter menu): **Generate CRUD from
+  CREATE TABLE** — background parse of a buffer snapshot, before/after preview, insertion right after
+  the CREATE TABLE statement in one Undo transaction.
+
 ## SQL transformations with preview — 2026-10-25
 
 - Transformation engine in Core (`TSqlFormatter.Core.Refactoring.SqlTransformer`): the statement under an

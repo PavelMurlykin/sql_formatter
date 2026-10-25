@@ -54,7 +54,7 @@ To reproducibly build all four extensions and the CLI and verify profiles, run `
 
 ## VS and SSMS: formatting a document
 
-Install the matching package from `release/` and restart the IDE. In Visual Studio open **Extensions → SQL Formatter**; in SSMS use the top-level **SQL Formatter** menu. It contains **Format Document**, **Analyze Document**, **Insert Snippet**, **Rename Symbol**, **Script Outline**, **Go To Declaration**, three **SQL transformation** commands (see below), **Clear Analysis Markers** (shown when markers exist) and **Settings…**. Commands, tabs, built-in profiles, rules and values use the IDE UI language: Russian for ru, English for other languages. Restart the IDE after changing its language.
+Install the matching package from `release/` and restart the IDE. In Visual Studio open **Extensions → SQL Formatter**; in SSMS use the top-level **SQL Formatter** menu. It contains **Format Document**, **Analyze Document**, **Insert Snippet**, **Rename Symbol**, **Script Outline**, **Go To Declaration**, the three **SQL transformation** commands and **Generate CRUD from CREATE TABLE** (see below), **Clear Analysis Markers** (shown when markers exist) and **Settings…**. Commands, tabs, built-in profiles, rules and values use the IDE UI language: Russian for ru, English for other languages. Restart the IDE after changing its language.
 
 **Format Document** is available for the active `.sql` tab, including its text editor context menu. A nonempty selection formats only that fragment; without a selection it formats the entire active document. Selections may contain several statements, an expression list or a query clause. Text outside the selection stays unchanged. For example, selecting `where Id=1 and Amount>0` in a SELECT formats only that condition. A boundary cutting a token or a fragment that cannot safely be processed leaves the text unchanged with a diagnostic. Fully selected standalone statements can be formatted even with invalid SQL outside the selection.
 
@@ -111,6 +111,12 @@ Three commands transform the statement under the caret and show a before/after p
 - **EXEC: Capture Return Code** — a `DECLARE @returnCode AS INT;` is added before the `EXEC`, and the call becomes `EXEC @returnCode = …`. When the EXEC already captures a return code, an error is reported.
 
 The commands target the statement under the caret of the active `.sql` tab; an unsuitable statement produces a clear message without changing the text. Parsing runs in the background over a buffer snapshot.
+
+## VS and SSMS: generating CRUD from CREATE TABLE
+
+**Generate CRUD from CREATE TABLE** parses the first `CREATE TABLE` of the document (or of the selection, when nonempty) and, after a preview, inserts data-access templates into the document: a `SELECT` of all columns, an `INSERT` with an explicit column list and parameters, an `UPDATE` with `SET` and a WHERE stub, a `DELETE` with a WHERE stub, and a `CREATE OR ALTER PROCEDURE <schema>.usp_<Table>_Upsert` stub with per-column parameters (in its own batch after `GO`). The output is formatted with the active profile; the insertion happens right after the `CREATE TABLE` statement in one Undo transaction.
+
+IDENTITY columns are excluded from INSERT/UPDATE and procedure parameters; columns without an explicit `NULL`/`NOT NULL` constraint count as nullable (the T-SQL default). Generation requires an explicit key: the `WHERE` clauses of UPDATE/DELETE and the procedure are marked `/* TODO: key */` — fill in the key condition before use. No live database connection is required or performed. When no `CREATE TABLE` is found in the scope, a message is shown and the text stays unchanged.
 
 ## Formatting settings and profiles in VS/SSMS
 
