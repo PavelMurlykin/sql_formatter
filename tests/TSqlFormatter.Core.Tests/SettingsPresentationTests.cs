@@ -10,7 +10,7 @@ public sealed class SettingsPresentationTests
     [Theory]
     [InlineData("VisualStudio")]
     [InlineData("Ssms")]
-    public void Adapters_expose_two_commands_and_reuse_formatting_in_editor_context(string adapter)
+    public void Adapters_expose_formatting_and_analysis_commands_and_reuse_editor_context(string adapter)
     {
         var document = System.Xml.Linq.XDocument.Load(Path.Combine(AppContext.BaseDirectory, "Menus", adapter + ".vsct"));
         System.Xml.Linq.XNamespace ns = "http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable";
@@ -20,10 +20,17 @@ public sealed class SettingsPresentationTests
         Assert.Equal("SQL Formatter", menu.Element(ns + "Strings")!.Element(ns + "ButtonText")!.Value);
         Assert.Contains(document.Descendants(ns + "Group"), g => (string?)g.Element(ns + "Parent")!.Attribute("id") == "IDM_VS_CTXT_CODEWIN");
         var buttons = document.Descendants(ns + "Button").ToArray();
-        Assert.Equal(2, buttons.Length);
+        Assert.Equal(4, buttons.Length);
         Assert.Contains(buttons, b => (string?)b.Attribute("id") == "cmdSettings");
         Assert.Contains(buttons, b => (string?)b.Attribute("id") == "cmdFormatDocument");
-        Assert.Equal("cmdFormatDocument", (string?)Assert.Single(document.Descendants(ns + "CommandPlacement")).Attribute("id"));
+        Assert.Contains(buttons, b => (string?)b.Attribute("id") == "cmdAnalyzeDocument");
+        Assert.Contains(buttons, b => (string?)b.Attribute("id") == "cmdClearAnalysisMarkers");
+        var placements = document.Descendants(ns + "CommandPlacement").ToArray();
+        Assert.Equal(2, placements.Length);
+        Assert.Contains(placements, p => (string?)p.Attribute("id") == "cmdFormatDocument"
+            && (string?)p.Element(ns + "Parent")!.Attribute("id") == "grpContext");
+        Assert.Contains(placements, p => (string?)p.Attribute("id") == "cmdAnalyzeDocument"
+            && (string?)p.Element(ns + "Parent")!.Attribute("id") == "grpContext");
     }
 
     [Theory]

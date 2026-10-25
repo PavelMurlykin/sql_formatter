@@ -54,7 +54,7 @@ To reproducibly build all four extensions and the CLI and verify profiles, run `
 
 ## VS and SSMS: formatting a document
 
-Install the matching package from `release/` and restart the IDE. In Visual Studio open **Extensions → SQL Formatter**; in SSMS use the top-level **SQL Formatter** menu. It contains two entries: **Format Document** and **Settings…**. Commands, tabs, built-in profiles, rules and values use the IDE UI language: Russian for ru, English for other languages. Restart the IDE after changing its language.
+Install the matching package from `release/` and restart the IDE. In Visual Studio open **Extensions → SQL Formatter**; in SSMS use the top-level **SQL Formatter** menu. It contains **Format Document**, **Analyze Document**, **Clear Analysis Markers** (shown when markers exist) and **Settings…**. Commands, tabs, built-in profiles, rules and values use the IDE UI language: Russian for ru, English for other languages. Restart the IDE after changing its language.
 
 **Format Document** is available for the active `.sql` tab, including its text editor context menu. A nonempty selection formats only that fragment; without a selection it formats the entire active document. Selections may contain several statements, an expression list or a query clause. Text outside the selection stays unchanged. For example, selecting `where Id=1 and Amount>0` in a SELECT formats only that condition. A boundary cutting a token or a fragment that cannot safely be processed leaves the text unchanged with a diagnostic. Fully selected standalone statements can be formatted even with invalid SQL outside the selection.
 
@@ -63,6 +63,12 @@ Every invocation obtains the current document tab again, including after opening
 The active profile supplies IDE defaults. `.editorconfig` and the nearest `.tsqlformatter.json` still override them. A configuration or SQL error prevents an edit. [Release validation](../release/VALIDATION.md) distinguishes new-package checks from installed-host validation; a successful build does not verify behavior inside VS/SSMS.
 
 Experimental VS save formatting remains under **Tools → Options → T-SQL Formatter → General**: `Format on save` defaults to Off, supports ActiveSqlDocument and RequireProjectConfig, and `Save exclusions` takes `;`-separated patterns. Automatic save formatting is limited to 8192 characters with a nominal two-second cooperative timeout. Ordinary Ctrl+V does not trigger formatting.
+
+## VS and SSMS: static SQL analysis
+
+**Analyze Document** is available for the active `.sql` tab, including its text editor context menu. The extension captures a text snapshot, analyzes it in the background, and underlines the reported ranges with squiggles. A modeless **SQL Analysis** window lists the findings as position, code, severity and message; double-click or Enter moves the caret to the finding. Re-running the command refreshes the markers and the window; **Clear Analysis Markers** removes the underlines and closes the window.
+
+The rules are the same as in the CLI (`TSQL001`–`TSQL005`); settings come from the `analysis` section of the nearest `.tsqlformatter.json` (see the `--analyze` section above), so no separate settings page is needed. When the SQL cannot be parsed, the command reports the parse error and applies no markers. Analysis never modifies the file and does not participate in save formatting. The behavior is covered by the build and package checks; validation inside an installed VS/SSMS is described in the [release validation](../release/VALIDATION.md).
 
 ## Formatting settings and profiles in VS/SSMS
 

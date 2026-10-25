@@ -34,6 +34,9 @@ public sealed class SsmsPackage : AsyncPackage
     private EnvDTE.DTE? dte;
     private IVsEditorAdaptersFactoryService? editorAdapters;
     private ITextUndoHistoryRegistry? undoRegistry;
+    private readonly SqlAnalysisMarkers analysisMarkers = new();
+    private AnalysisReportWindow? analysisWindow;
+    private System.Windows.Forms.NativeWindow? analysisWindowOwner;
 
     protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
     {
@@ -60,6 +63,20 @@ public sealed class SsmsPackage : AsyncPackage
                 format.Visible = format.Enabled = ActiveQueryEditor.TryRead(textManager, out _, monitorSelection);
             };
             commands.AddCommand(format);
+            var analyze = new OleMenuCommand(ExecuteAnalyzeDocument, new CommandID(CommandSet, 0x0210));
+            analyze.BeforeQueryStatus += (_, _) =>
+            {
+                analyze.Text = SettingsAppearance.Text("Проанализировать документ", "Analyze Document");
+                analyze.Visible = analyze.Enabled = ActiveQueryEditor.TryRead(textManager, out _, monitorSelection);
+            };
+            commands.AddCommand(analyze);
+            var clearAnalysis = new OleMenuCommand(ExecuteClearAnalysis, new CommandID(CommandSet, 0x0211));
+            clearAnalysis.BeforeQueryStatus += (_, _) =>
+            {
+                clearAnalysis.Text = SettingsAppearance.Text("Очистить замечания анализа", "Clear Analysis Markers");
+                clearAnalysis.Visible = clearAnalysis.Enabled = analysisMarkers.Count > 0;
+            };
+            commands.AddCommand(clearAnalysis);
             var settings = new OleMenuCommand((_, _) => ShowSettings(false), new CommandID(CommandSet, 0x0400));
             settings.BeforeQueryStatus += (_, _) => settings.Text = SettingsAppearance.Text("Настройки…", "Settings…");
             commands.AddCommand(settings);
@@ -82,6 +99,132 @@ public sealed class SsmsPackage : AsyncPackage
     private void ExecuteFormatDocument(object sender, EventArgs e)
     {
         JoinableTaskFactory.RunAsync(() => FormatAsync(FormatScope.Document)).FileAndForget("TSqlFormatter.Ssms/FormatDocument");
+    }
+
+    private void ExecuteAnalyzeDocument(object sender, EventArgs e)
+    {
+        JoinableTaskFactory.RunAsync(AnalyzeDocumentAsync).FileAndForget("TSqlFormatter.Ssms/AnalyzeDocument");
+    }
+
+    private void ExecuteClearAnalysis(object sender, EventArgs e)
+    {
+        JoinableTaskFactory.RunAsync(ClearAnalysisAsync).FileAndForget("TSqlFormatter.Ssms/ClearAnalysis");
+    }
+
+    private async Task AnalyzeDocumentAsync()
+    {
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (!ActiveQueryEditor.TryRead(textManager, out var editor, monitorSelection) || editorAdapters == null)
+        {
+            ShowMessage("Open a .sql file in the SSMS query editor first.", true);
+            return;
+        }
+
+        var snapshot = editor.CaptureSnapshot(editorAdapters);
+        if (snapshot == null || snapshot.Length > 16 * 1024 * 1024)
+        {
+            ShowMessage("The SQL buffer is unavailable or exceeds 16 Mi characters.", true);
+            return;
+        }
+
+        string source = snapshot.GetText();
+        try
+        {
+            var analysis = await Task.Run(() => SqlDocumentAnalysis.Run(editor.Path, source, DisposalToken), DisposalToken);
+            await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+            if (analysis.Error is { } error)
+            {
+                analysisMarkers.Clear();
+                CloseAnalysisWindow();
+                ShowMessage($"{error.Code}: {error.Message}", true);
+                return;
+            }
+
+            if (!ActiveQueryEditor.TryRead(textManager, out var current, monitorSelection) ||
+                !ReferenceEquals(current.Buffer, editor.Buffer))
+            {
+                ShowMessage("The SQL buffer changed during analysis; markers were not applied.", true);
+                return;
+            }
+
+            analysisMarkers.Apply(editor.Buffer, analysis);
+            if (analysis.Diagnostics.Count == 0)
+            {
+                CloseAnalysisWindow();
+                ShowMessage(SettingsAppearance.Text("Анализ: замечаний нет.", "Analysis finished: no findings."));
+                return;
+            }
+
+            ShowAnalysisWindow(editor, analysis.Diagnostics);
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex)
+        {
+            await JoinableTaskFactory.SwitchToMainThreadAsync();
+            ShowMessage($"Analysis failed: {ex.Message}", true);
+        }
+    }
+
+    private async Task ClearAnalysisAsync()
+    {
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        analysisMarkers.Clear();
+        CloseAnalysisWindow();
+        ActivityLog.LogInformation("T-SQL Formatter SSMS", "Analysis markers cleared.");
+    }
+
+    private void ShowAnalysisWindow(ActiveQueryEditor editor,
+        IReadOnlyList<TSqlFormatter.Core.Analysis.AnalysisDiagnostic> diagnostics)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        CloseAnalysisWindow();
+        var window = new AnalysisReportWindow(diagnostics);
+        window.Navigate += diagnostic =>
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            if (ActiveQueryEditor.TryRead(textManager, out var current, monitorSelection) &&
+                ReferenceEquals(current.Buffer, editor.Buffer))
+            {
+                SqlEditorNavigation.GoTo(current.View, diagnostic.Line, diagnostic.Column);
+            }
+        };
+        window.FormClosed += (_, _) =>
+        {
+            analysisWindow = null;
+            analysisWindowOwner?.ReleaseHandle();
+            analysisWindowOwner = null;
+        };
+        analysisWindow = window;
+        try
+        {
+            if (GetService(typeof(SVsUIShell)) is Microsoft.VisualStudio.Shell.Interop.IVsUIShell shell &&
+                Microsoft.VisualStudio.ErrorHandler.Succeeded(shell.GetDialogOwnerHwnd(out IntPtr owner)))
+            {
+                analysisWindowOwner = new System.Windows.Forms.NativeWindow();
+                analysisWindowOwner.AssignHandle(owner);
+                window.Show(analysisWindowOwner);
+                return;
+            }
+        }
+        catch (Exception)
+        {
+            // An ownerless modeless window still displays the findings.
+        }
+
+        window.Show();
+    }
+
+    private void CloseAnalysisWindow()
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        if (analysisWindow is not null && !analysisWindow.IsDisposed)
+        {
+            analysisWindow.Close();
+        }
+
+        analysisWindow = null;
+        analysisWindowOwner?.ReleaseHandle();
+        analysisWindowOwner = null;
     }
 
     private void ExecuteFormatSelection(object sender, EventArgs e)

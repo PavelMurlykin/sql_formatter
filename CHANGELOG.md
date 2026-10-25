@@ -3,7 +3,7 @@
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
 
-## Static analysis core and CLI `--analyze` — 2026-10-25
+## Static analysis: core, CLI `--analyze` and editor commands — 2026-10-25
 
 - Static analysis engine in Core (`TSqlFormatter.Core.Analysis`): rules TSQL001–TSQL005
   (`SELECT *`, `INSERT` without a column list, `TOP` without `ORDER BY`, `UPDATE`/`DELETE`
@@ -13,8 +13,14 @@ locally built preview packages; version numbers belong to separate adapters.
   0 — no findings, 1 — findings, 2 — errors.
 - Optional `analysis` section (`disabled`, `severity`) in `.tsqlformatter.json`
   versions 1 and 2, discovered per file like the formatting settings.
-- Editor integration of the analyzer is planned next (roadmap stage 3);
-  VSIX packages are unchanged in this entry.
+- New editor commands in both the Visual Studio and SSMS packages: **Analyze Document**
+  (Tools/SQL Formatter menu and the editor context menu) underlines the findings with
+  squiggle markers and opens a modeless report window that navigates to a finding on
+  double-click, plus **Clear Analysis Markers**. Analysis runs on a background snapshot
+  and applies markers only when the buffer is unchanged.
+- VSIX command tables of both adapters gained the two commands; package versions are
+  unchanged until the next release build. Installed-host validation is still pending
+  (see `release/VALIDATION.md`).
 
 ## ADIR syntax and ELSE IF fixes — 2026-10-08
 
