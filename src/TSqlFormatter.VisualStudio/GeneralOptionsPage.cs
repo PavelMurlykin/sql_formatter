@@ -63,6 +63,11 @@ public sealed class GeneralOptionsPage : DialogPage
     [DefaultValue("")]
     public string SaveExclusions { get; set; } = string.Empty;
 
+    [Category("Automation"), DisplayName("Keep editor history")]
+    [Description("Stores a local snapshot of every saved SQL document under %USERPROFILE%\\.tsqlformatter\\history so it can be restored later. All data stays on this machine.")]
+    [DefaultValue(true)]
+    public bool KeepEditorHistory { get; set; } = true;
+
     public FormattingOptions CreateOptions() => FormattingOptions.Default.With(
         general: new GeneralOptions(MaxLineLength, LineEnding, FinalNewLine),
         indent: new IndentOptions(IndentSize, UseTabs),

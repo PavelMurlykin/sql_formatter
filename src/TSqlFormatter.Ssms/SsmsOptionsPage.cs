@@ -61,6 +61,11 @@ public sealed class SsmsOptionsPage : DialogPage
     [DefaultValue(KeywordCase.Upper)]
     public KeywordCase KeywordCase { get; set; } = KeywordCase.Upper;
 
+    [Category("Automation"), DisplayName("Keep editor history")]
+    [Description("Stores a local snapshot of every saved SQL document under %USERPROFILE%\\.tsqlformatter\\history so it can be restored later. All data stays on this machine.")]
+    [DefaultValue(true)]
+    public bool KeepEditorHistory { get; set; } = true;
+
     public FormattingOptions CreateOptions()
     {
         if (Profile != SsmsProfileId.Default)

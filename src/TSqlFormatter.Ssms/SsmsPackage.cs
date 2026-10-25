@@ -15,6 +15,7 @@ using Microsoft.VisualStudio.Threading;
 using TSqlFormatter.Configuration;
 using TSqlFormatter.IdeShared;
 using TSqlFormatter.Core.Formatting;
+using TSqlFormatter.Core.History;
 using TSqlFormatter.Core.Navigation;
 using TSqlFormatter.Core.Parsing;
 using TSqlFormatter.Core.Refactoring;
@@ -44,6 +45,8 @@ public sealed class SsmsPackage : AsyncPackage
     private SnippetInsertionSession? snippetSession;
     private ScriptOutlineWindow? outlineWindow;
     private System.Windows.Forms.NativeWindow? outlineWindowOwner;
+    private IVsRunningDocumentTable? runningDocumentTable;
+    private uint runningDocumentTableCookie;
 
     protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
     {
@@ -61,6 +64,10 @@ public sealed class SsmsPackage : AsyncPackage
         ActivityLog.LogInformation("T-SQL Formatter SSMS", "SSMS spike package initialized.");
         fullSettings.ShortcutProvider = () => IdeHostIntegration.Shortcut(dte, CommandSet);
         fullSettings.ShortcutApply = value => IdeHostIntegration.SetShortcut(dte, CommandSet, value);
+        runningDocumentTable = await GetServiceAsync(typeof(SVsRunningDocumentTable)) as IVsRunningDocumentTable;
+        if (runningDocumentTable != null)
+            Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(runningDocumentTable.AdviseRunningDocTableEvents(
+                new RdtEvents(HandleBeforeSave), out runningDocumentTableCookie));
         if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService commands)
         {
             var format = new OleMenuCommand(ExecuteFormatDocument, new CommandID(CommandSet, 0x0200));
@@ -127,10 +134,144 @@ public sealed class SsmsPackage : AsyncPackage
                 generateCrud.Visible = generateCrud.Enabled = ActiveQueryEditor.TryRead(textManager, out _, monitorSelection);
             };
             commands.AddCommand(generateCrud);
+            var restoreHistory = new OleMenuCommand(ExecuteRestoreFromHistory, new CommandID(CommandSet, 0x0270));
+            restoreHistory.BeforeQueryStatus += (_, _) =>
+            {
+                ThreadHelper.ThrowIfNotOnUIThread();
+                restoreHistory.Text = SettingsAppearance.Text("Восстановить закрытый скрипт", "Restore Closed Script");
+                restoreHistory.Visible = restoreHistory.Enabled = true;
+            };
+            commands.AddCommand(restoreHistory);
             var settings = new OleMenuCommand((_, _) => ShowSettings(false), new CommandID(CommandSet, 0x0400));
             settings.BeforeQueryStatus += (_, _) => settings.Text = SettingsAppearance.Text("Настройки…", "Settings…");
             commands.AddCommand(settings);
         }
+    }
+
+    private void ExecuteRestoreFromHistory(object sender, EventArgs e)
+    {
+        JoinableTaskFactory.RunAsync(RestoreFromHistoryAsync).FileAndForget("TSqlFormatter.Ssms/RestoreFromHistory");
+    }
+
+    private async Task RestoreFromHistoryAsync()
+    {
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (dte is null)
+        {
+            ShowMessage("The IDE automation service is unavailable.", true);
+            return;
+        }
+
+        System.Collections.Generic.IReadOnlyList<EditorSnapshot> snapshots;
+        try
+        {
+            snapshots = await Task.Run(() => new EditorSnapshotStore().List(), DisposalToken);
+        }
+        catch (OperationCanceledException) { return; }
+
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (snapshots.Count == 0)
+        {
+            ShowMessage(SettingsAppearance.Text(
+                "История пуста: снимки появляются после сохранения SQL-документов.",
+                "The history is empty: snapshots appear when SQL documents are saved."), true);
+            return;
+        }
+
+        using (var picker = new HistoryPickerWindow(snapshots))
+        {
+            if (ShowDialog(picker) != System.Windows.Forms.DialogResult.OK ||
+                picker.SelectedSnapshot is not { } snapshot)
+            {
+                return;
+            }
+
+            try
+            {
+                dte.ItemOperations.NewFile("General\\Text File");
+                if (dte.ActiveDocument?.Object("TextDocument") is EnvDTE.TextDocument document)
+                {
+                    document.StartPoint.CreateEditPoint().Insert(snapshot.Content);
+                    ActivityLog.LogInformation("T-SQL Formatter SSMS", $"Snapshot restored: {snapshot.DisplayName}");
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Restore failed: {ex.Message}", true);
+            }
+        }
+    }
+
+    private void HandleBeforeSave(uint docCookie)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        try
+        {
+            if (runningDocumentTable == null)
+            {
+                return;
+            }
+
+            int hr = runningDocumentTable.GetDocumentInfo(docCookie, out _, out _, out _,
+                out string moniker, out _, out _, out IntPtr docData);
+            string? content = null;
+            if (docData != IntPtr.Zero)
+            {
+                if (Marshal.GetObjectForIUnknown(docData) is IVsTextLines textLines &&
+                    Microsoft.VisualStudio.ErrorHandler.Succeeded(textLines.GetLastLineIndex(out int lastLine, out int lastColumn)) &&
+                    Microsoft.VisualStudio.ErrorHandler.Succeeded(textLines.GetLineText(0, 0, lastLine, lastColumn, out string text)))
+                {
+                    content = text;
+                }
+
+                Marshal.Release(docData);
+            }
+
+            if (Microsoft.VisualStudio.ErrorHandler.Succeeded(hr) && content != null)
+            {
+                var automation = (SsmsOptionsPage)GetDialogPage(typeof(SsmsOptionsPage));
+                if (automation.KeepEditorHistory)
+                {
+                    new EditorSnapshotStore().Save(moniker ?? string.Empty, content);
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // History is best-effort; storage failures never break saving.
+        }
+    }
+
+    private sealed class RdtEvents : IVsRunningDocTableEvents
+    {
+        private readonly Action<uint> beforeSave;
+
+        public RdtEvents(Action<uint> beforeSave)
+        {
+            this.beforeSave = beforeSave;
+        }
+
+        public int OnBeforeSave(uint docCookie)
+        {
+            beforeSave(docCookie);
+            return Microsoft.VisualStudio.VSConstants.S_OK;
+        }
+
+        public int OnAfterFirstDocumentLock(uint docCookie, uint dwRDTLockType,
+            uint dwReadLocksRemaining, uint dwEditLocksRemaining) => Microsoft.VisualStudio.VSConstants.S_OK;
+
+        public int OnBeforeLastDocumentUnlock(uint docCookie, uint dwRDTLockType,
+            uint dwReadLocksRemaining, uint dwEditLocksRemaining) => Microsoft.VisualStudio.VSConstants.S_OK;
+
+        public int OnAfterSave(uint docCookie) => Microsoft.VisualStudio.VSConstants.S_OK;
+
+        public int OnAfterAttributeChange(uint docCookie, uint grfAttribs) => Microsoft.VisualStudio.VSConstants.S_OK;
+
+        public int OnBeforeDocumentWindowShow(uint docCookie, int fFirstShow,
+            IVsWindowFrame pFrame) => Microsoft.VisualStudio.VSConstants.S_OK;
+
+        public int OnAfterDocumentWindowHide(uint docCookie,
+            IVsWindowFrame pFrame) => Microsoft.VisualStudio.VSConstants.S_OK;
     }
 
     private void ShowSettings(bool profiles)
@@ -966,6 +1107,21 @@ public sealed class SsmsPackage : AsyncPackage
             await JoinableTaskFactory.SwitchToMainThreadAsync();
             ShowMessage($"Formatting failed: {ex.Message}", true);
         }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing && runningDocumentTable != null && runningDocumentTableCookie != 0)
+        {
+            JoinableTaskFactory.Run(async () =>
+            {
+                await JoinableTaskFactory.SwitchToMainThreadAsync();
+                runningDocumentTable.UnadviseRunningDocTableEvents(runningDocumentTableCookie);
+                runningDocumentTableCookie = 0;
+            });
+        }
+
+        base.Dispose(disposing);
     }
 
     private void ShowMessage(string message, bool error = false)

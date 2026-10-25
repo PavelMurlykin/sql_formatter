@@ -3,6 +3,18 @@
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
 
+## Editor history and restore — 2026-10-25
+
+- Local snapshot store in Core (`TSqlFormatter.Core.History`): every saved SQL document
+  gets a JSON snapshot under `%USERPROFILE%\.tsqlformatter\history` (newest-100 rotation,
+  1M-character per-snapshot limit). Everything is strictly local.
+- Both the Visual Studio and SSMS packages advise running-document-table save events and
+  write snapshots on save (SSMS support is best-effort per ADR 0005). History can be fully
+  disabled with the new **Keep editor history** option on the General settings pages.
+- New command in both packages: **Restore Closed Script** — a filterable dialog with a
+  content preview that opens the selected snapshot in a new document. Restoring documents
+  discarded without saving is not supported.
+
 ## CRUD generation from CREATE TABLE — 2026-10-25
 
 - Generation engine in Core (`TSqlFormatter.Core.Generation`): `TableDefinitionReader` parses the first

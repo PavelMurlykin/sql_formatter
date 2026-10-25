@@ -16,6 +16,7 @@ using Microsoft.VisualStudio.Threading;
 using TSqlFormatter.Configuration;
 using TSqlFormatter.IdeShared;
 using TSqlFormatter.Core.Formatting;
+using TSqlFormatter.Core.History;
 using TSqlFormatter.Core.Navigation;
 using TSqlFormatter.Core.Parsing;
 using TSqlFormatter.Core.Refactoring;
@@ -146,6 +147,14 @@ public sealed class SqlFormatterPackage : AsyncPackage
                 generateCrud.Visible = generateCrud.Enabled = ActiveSqlEditor.TryRead(textManager, out _, monitorSelection);
             };
             commands.AddCommand(generateCrud);
+            var restoreHistory = new OleMenuCommand(ExecuteRestoreFromHistory, new CommandID(CommandSet, 0x0270));
+            restoreHistory.BeforeQueryStatus += (_, _) =>
+            {
+                ThreadHelper.ThrowIfNotOnUIThread();
+                restoreHistory.Text = SettingsAppearance.Text("Восстановить закрытый скрипт", "Restore Closed Script");
+                restoreHistory.Visible = restoreHistory.Enabled = true;
+            };
+            commands.AddCommand(restoreHistory);
             var settings = new OleMenuCommand((_, _) => ShowSettings(false), new CommandID(CommandSet, 0x0400));
             settings.BeforeQueryStatus += (_, _) => settings.Text = SettingsAppearance.Text("Настройки…", "Settings…");
             commands.AddCommand(settings);
@@ -183,6 +192,44 @@ public sealed class SqlFormatterPackage : AsyncPackage
         base.Dispose(disposing);
     }
 
+    private static string? ReadBufferText(IntPtr docData)
+    {
+        try
+        {
+            if (Marshal.GetObjectForIUnknown(docData) is IVsTextLines textLines &&
+                ErrorHandler.Succeeded(textLines.GetLastLineIndex(out int lastLine, out int lastColumn)) &&
+                ErrorHandler.Succeeded(textLines.GetLineText(0, 0, lastLine, lastColumn, out string text)))
+            {
+                return text;
+            }
+        }
+        catch (Exception)
+        {
+            // History is best-effort; unreadable buffers are skipped.
+        }
+
+        return null;
+    }
+
+    private void SaveEditorSnapshot(string moniker, string text)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        try
+        {
+            var automation = (GeneralOptionsPage)GetDialogPage(typeof(GeneralOptionsPage));
+            if (!automation.KeepEditorHistory)
+            {
+                return;
+            }
+
+            new EditorSnapshotStore().Save(moniker ?? string.Empty, text);
+        }
+        catch (Exception)
+        {
+            // History is best-effort; a settings or storage failure is ignored.
+        }
+    }
+
     private int HandleBeforeSave(uint docCookie)
     {
         ThreadHelper.ThrowIfNotOnUIThread();
@@ -198,7 +245,17 @@ public sealed class SqlFormatterPackage : AsyncPackage
 
             int hr = runningDocumentTable.GetDocumentInfo(docCookie, out _, out _, out _,
                 out string moniker, out _, out _, out IntPtr docData);
-            if (docData != IntPtr.Zero) Marshal.Release(docData);
+            string? historyContent = null;
+            if (docData != IntPtr.Zero)
+            {
+                historyContent = ReadBufferText(docData);
+                Marshal.Release(docData);
+            }
+
+            if (ErrorHandler.Succeeded(hr) && historyContent != null)
+            {
+                SaveEditorSnapshot(moniker, historyContent);
+            }
             if (ErrorHandler.Failed(hr) ||
                 !ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor, monitorSelection) ||
                 !string.Equals(moniker, editor.Path, StringComparison.OrdinalIgnoreCase) ||
@@ -310,6 +367,64 @@ public sealed class SqlFormatterPackage : AsyncPackage
     private void ExecuteGenerateCrud(object sender, EventArgs e)
     {
         JoinableTaskFactory.RunAsync(GenerateCrudAsync).FileAndForget("TSqlFormatter/GenerateCrud");
+    }
+
+    private void ExecuteRestoreFromHistory(object sender, EventArgs e)
+    {
+        JoinableTaskFactory.RunAsync(RestoreFromHistoryAsync).FileAndForget("TSqlFormatter/RestoreFromHistory");
+    }
+
+    private async Task RestoreFromHistoryAsync()
+    {
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (dte is null)
+        {
+            NotifyFormat("The IDE automation service is unavailable.", true);
+            return;
+        }
+
+        IReadOnlyList<EditorSnapshot> snapshots;
+        try
+        {
+            snapshots = await Task.Run(() => new EditorSnapshotStore().List(), DisposalToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (snapshots.Count == 0)
+        {
+            NotifyFormat(SettingsAppearance.Text(
+                "История пуста: снимки появляются после сохранения SQL-документов.",
+                "The history is empty: snapshots appear when SQL documents are saved."), true);
+            return;
+        }
+
+        using (var picker = new HistoryPickerWindow(snapshots))
+        {
+            if (ShowDialog(picker) != DialogResult.OK || picker.SelectedSnapshot is not { } snapshot)
+            {
+                return;
+            }
+
+            try
+            {
+                dte.ItemOperations.NewFile("General\\Text File");
+                if (dte.ActiveDocument?.Object("TextDocument") is EnvDTE.TextDocument document)
+                {
+                    document.StartPoint.CreateEditPoint().Insert(snapshot.Content);
+                    NotifyFormat(string.Format(SettingsAppearance.Text(
+                        "Снимок «{0}» открыт в новом документе.", "Snapshot '{0}' opened in a new document."),
+                        snapshot.DisplayName));
+                }
+            }
+            catch (Exception ex)
+            {
+                NotifyFormat($"Restore failed: {ex.Message}", true);
+            }
+        }
     }
 
     private void ExecuteFormatSelection(object sender, EventArgs e)

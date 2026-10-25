@@ -20,7 +20,7 @@ public sealed class SettingsPresentationTests
         Assert.Equal("SQL Formatter", menu.Element(ns + "Strings")!.Element(ns + "ButtonText")!.Value);
         Assert.Contains(document.Descendants(ns + "Group"), g => (string?)g.Element(ns + "Parent")!.Attribute("id") == "IDM_VS_CTXT_CODEWIN");
         var buttons = document.Descendants(ns + "Button").ToArray();
-        Assert.Equal(12, buttons.Length);
+        Assert.Equal(13, buttons.Length);
         Assert.Contains(buttons, b => (string?)b.Attribute("id") == "cmdSettings");
         Assert.Contains(buttons, b => (string?)b.Attribute("id") == "cmdFormatDocument");
         Assert.Contains(buttons, b => (string?)b.Attribute("id") == "cmdAnalyzeDocument");
@@ -33,6 +33,7 @@ public sealed class SettingsPresentationTests
         Assert.Contains(buttons, b => (string?)b.Attribute("id") == "cmdConvertValuesToUnion");
         Assert.Contains(buttons, b => (string?)b.Attribute("id") == "cmdConvertExecReturnCode");
         Assert.Contains(buttons, b => (string?)b.Attribute("id") == "cmdGenerateCrud");
+        Assert.Contains(buttons, b => (string?)b.Attribute("id") == "cmdRestoreFromHistory");
         var placements = document.Descendants(ns + "CommandPlacement").ToArray();
         Assert.Equal(5, placements.Length);
         Assert.Contains(placements, p => (string?)p.Attribute("id") == "cmdFormatDocument"
