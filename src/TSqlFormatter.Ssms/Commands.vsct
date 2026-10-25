@@ -34,6 +34,11 @@
         <CommandFlag>TextChanges</CommandFlag><CommandFlag>DynamicVisibility</CommandFlag><CommandFlag>DefaultInvisible</CommandFlag>
         <Strings><ButtonText>Insert Snippet</ButtonText><CanonicalName>SQLFormatter.InsertSnippet</CanonicalName><LocCanonicalName>SQLFormatter.InsertSnippet</LocCanonicalName></Strings>
       </Button>
+      <Button guid="guidCommandSet" id="cmdRenameSymbol" priority="0x0140" type="Button">
+        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
+        <CommandFlag>TextChanges</CommandFlag><CommandFlag>DynamicVisibility</CommandFlag><CommandFlag>DefaultInvisible</CommandFlag>
+        <Strings><ButtonText>Rename Symbol</ButtonText><CanonicalName>SQLFormatter.RenameSymbol</CanonicalName><LocCanonicalName>SQLFormatter.RenameSymbol</LocCanonicalName></Strings>
+      </Button>
       <Button guid="guidCommandSet" id="cmdSettings" priority="0x0200" type="Button">
         <Parent guid="guidCommandSet" id="grpSqlFormatter" />
         <CommandFlag>TextChanges</CommandFlag>
@@ -45,12 +50,13 @@
     <CommandPlacement guid="guidCommandSet" id="cmdFormatDocument" priority="0x0100"><Parent guid="guidCommandSet" id="grpContext" /></CommandPlacement>
     <CommandPlacement guid="guidCommandSet" id="cmdAnalyzeDocument" priority="0x0110"><Parent guid="guidCommandSet" id="grpContext" /></CommandPlacement>
     <CommandPlacement guid="guidCommandSet" id="cmdInsertSnippet" priority="0x0120"><Parent guid="guidCommandSet" id="grpContext" /></CommandPlacement>
+    <CommandPlacement guid="guidCommandSet" id="cmdRenameSymbol" priority="0x0130"><Parent guid="guidCommandSet" id="grpContext" /></CommandPlacement>
   </CommandPlacements>
   <Symbols>
     <GuidSymbol name="guidPackage" value="{908068E6-40D9-4543-AB9F-1B952930F1E3}" />
     <GuidSymbol name="guidCommandSet" value="{4EE4F956-58EC-490D-9DCA-D2D198570CEC}">
       <IDSymbol name="menuSqlFormatter" value="0x1000" /><IDSymbol name="grpSqlFormatter" value="0x1020" /><IDSymbol name="grpContext" value="0x1040" />
-      <IDSymbol name="cmdFormatDocument" value="0x0200" /><IDSymbol name="cmdAnalyzeDocument" value="0x0210" /><IDSymbol name="cmdClearAnalysisMarkers" value="0x0211" /><IDSymbol name="cmdInsertSnippet" value="0x0220" /><IDSymbol name="cmdSettings" value="0x0400" />
+      <IDSymbol name="cmdFormatDocument" value="0x0200" /><IDSymbol name="cmdAnalyzeDocument" value="0x0210" /><IDSymbol name="cmdClearAnalysisMarkers" value="0x0211" /><IDSymbol name="cmdInsertSnippet" value="0x0220" /><IDSymbol name="cmdRenameSymbol" value="0x0230" /><IDSymbol name="cmdSettings" value="0x0400" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

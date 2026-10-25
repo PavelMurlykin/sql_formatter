@@ -16,6 +16,7 @@ using TSqlFormatter.Configuration;
 using TSqlFormatter.IdeShared;
 using TSqlFormatter.Core.Formatting;
 using TSqlFormatter.Core.Parsing;
+using TSqlFormatter.Core.Refactoring;
 using TSqlFormatter.Core.Snippets;
 
 namespace TSqlFormatter.Ssms;
@@ -87,6 +88,13 @@ public sealed class SsmsPackage : AsyncPackage
                 insertSnippet.Visible = insertSnippet.Enabled = ActiveQueryEditor.TryRead(textManager, out _, monitorSelection);
             };
             commands.AddCommand(insertSnippet);
+            var rename = new OleMenuCommand(ExecuteRenameSymbol, new CommandID(CommandSet, 0x0230));
+            rename.BeforeQueryStatus += (_, _) =>
+            {
+                rename.Text = SettingsAppearance.Text("Переименовать символ", "Rename Symbol");
+                rename.Visible = rename.Enabled = ActiveQueryEditor.TryRead(textManager, out _, monitorSelection);
+            };
+            commands.AddCommand(rename);
             var settings = new OleMenuCommand((_, _) => ShowSettings(false), new CommandID(CommandSet, 0x0400));
             settings.BeforeQueryStatus += (_, _) => settings.Text = SettingsAppearance.Text("Настройки…", "Settings…");
             commands.AddCommand(settings);
@@ -124,6 +132,133 @@ public sealed class SsmsPackage : AsyncPackage
     private void ExecuteInsertSnippet(object sender, EventArgs e)
     {
         JoinableTaskFactory.RunAsync(InsertSnippetAsync).FileAndForget("TSqlFormatter.Ssms/InsertSnippet");
+    }
+
+    private void ExecuteRenameSymbol(object sender, EventArgs e)
+    {
+        JoinableTaskFactory.RunAsync(RenameSymbolAsync).FileAndForget("TSqlFormatter.Ssms/RenameSymbol");
+    }
+
+    private async Task RenameSymbolAsync()
+    {
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (!ActiveQueryEditor.TryRead(textManager, out var editor, monitorSelection) ||
+            editorAdapters == null || undoRegistry == null)
+        {
+            ShowMessage("Open a .sql file in the SSMS query editor first.", true);
+            return;
+        }
+
+        if (!editor.TryCaptureCaret(editorAdapters, out var snapshot, out int caret) ||
+            snapshot.Length > 16 * 1024 * 1024)
+        {
+            ShowMessage("The SQL caret is unavailable or the buffer exceeds 16 Mi characters.", true);
+            return;
+        }
+
+        string source = snapshot.GetText();
+        RenameSymbol? symbol;
+        try
+        {
+            symbol = await Task.Run(() =>
+            {
+                var parseResult = new ScriptDomSqlParser().Parse(source, SqlDialectVersion.Auto, DisposalToken);
+                return new RenameAnalyzer().FindSymbol(parseResult, caret);
+            }, DisposalToken);
+        }
+        catch (OperationCanceledException) { return; }
+        catch (Exception ex)
+        {
+            await JoinableTaskFactory.SwitchToMainThreadAsync();
+            ShowMessage($"Rename failed: {ex.Message}", true);
+            return;
+        }
+
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (symbol is null)
+        {
+            ShowMessage(SettingsAppearance.Text(
+                "Под курсором нет локальной переменной или алиаса таблицы.",
+                "No local variable or table alias is found under the caret."), true);
+            return;
+        }
+
+        using (var prompt = new RenamePromptWindow(symbol.Name, symbol.Kind))
+        {
+            if (ShowDialog(prompt) != System.Windows.Forms.DialogResult.OK)
+            {
+                return;
+            }
+
+            System.Collections.Generic.IReadOnlyList<TSqlFormatter.Core.Formatting.TextEdit> edits;
+            try
+            {
+                edits = new RenameAnalyzer().Plan(symbol, prompt.NewName);
+            }
+            catch (ArgumentException exception)
+            {
+                ShowMessage(exception.Message, true);
+                return;
+            }
+
+            var lineMap = new SqlLineMap(source);
+            var changes = edits
+                .Select(edit =>
+                {
+                    var position = lineMap.GetLinePosition(edit.Span.StartOffset);
+                    return ($"{position.Line},{position.Column}",
+                        source.Substring(edit.Span.StartOffset, edit.Span.Length),
+                        edit.NewText);
+                })
+                .ToArray();
+            using (var preview = new RenamePreviewWindow(changes))
+            {
+                if (ShowDialog(preview) != System.Windows.Forms.DialogResult.OK)
+                {
+                    return;
+                }
+            }
+
+            var spans = edits.Select(edit => new Microsoft.VisualStudio.Text.Span(
+                edit.Span.StartOffset, edit.Span.Length)).ToArray();
+            var replacements = edits.Select(edit => edit.NewText).ToArray();
+            if (!editor.TryApplyEdits(snapshot, spans, replacements,
+                    "Rename T-SQL Symbol", editorAdapters, undoRegistry))
+            {
+                ShowMessage("The SQL buffer changed during rename; no edit was applied.", true);
+                return;
+            }
+
+            ActivityLog.LogInformation("T-SQL Formatter SSMS", $"Renamed occurrences: {edits.Count}");
+        }
+    }
+
+    private System.Windows.Forms.DialogResult ShowDialog(System.Windows.Forms.Form form)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        try
+        {
+            if (GetService(typeof(SVsUIShell)) is IVsUIShell shell &&
+                Microsoft.VisualStudio.ErrorHandler.Succeeded(shell.GetDialogOwnerHwnd(out IntPtr owner)))
+            {
+                var nativeOwner = new System.Windows.Forms.NativeWindow();
+                nativeOwner.AssignHandle(owner);
+                try
+                {
+                    return form.ShowDialog(nativeOwner);
+                }
+                finally
+                {
+                    nativeOwner.ReleaseHandle();
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // An ownerless dialog still works.
+        }
+
+        return form.ShowDialog();
     }
 
     private async Task InsertSnippetAsync()

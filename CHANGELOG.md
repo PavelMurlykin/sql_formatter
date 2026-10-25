@@ -3,6 +3,18 @@
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
 
+## Rename for variables and aliases — 2026-10-25
+
+- Rename engine in Core (`TSqlFormatter.Core.Refactoring`): local variables are scoped to
+  their batch; table aliases are scoped to the declaring query specification, covering
+  `alias.Column` qualifiers and correlated references while honoring shadowing by
+  same-name aliases in nested queries. Name validation for both kinds.
+- New **Rename Symbol** command in both the Visual Studio and SSMS packages (menu and
+  editor context menu): parses on a background snapshot, prompts for the new name with
+  validation, shows a position-by-position preview and applies all replacements in one
+  Undo transaction. Quoted aliases and aliases outside query specifications are not
+  supported.
+
 ## SQL snippets — 2026-10-25
 
 - Snippet engine in Core (`TSqlFormatter.Core.Snippets`): JSON snippets with `$name$`

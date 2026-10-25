@@ -65,6 +65,40 @@ internal sealed class ActiveQueryEditor
             "Format T-SQL Document", adapters, undoRegistry);
     }
 
+    public bool TryApplyEdits(ITextSnapshot original, IReadOnlyList<Span> spans, IReadOnlyList<string> replacements,
+        string description, IVsEditorAdaptersFactoryService adapters, ITextUndoHistoryRegistry undoRegistry)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        var textView = adapters.GetWpfTextView(View);
+        if (textView == null || !ReferenceEquals(textView.TextBuffer.CurrentSnapshot, original) ||
+            spans.Count == 0 || spans.Count != replacements.Count)
+            return false;
+
+        var history = undoRegistry.RegisterHistory(textView.TextBuffer);
+        using (var transaction = history.CreateTransaction(description))
+        {
+            using (var edit = textView.TextBuffer.CreateEdit())
+            {
+                for (var index = 0; index < spans.Count; index++)
+                {
+                    if (!edit.Replace(spans[index], replacements[index]))
+                    {
+                        edit.Cancel();
+                        return false;
+                    }
+                }
+
+                var updated = edit.Apply();
+                textView.Caret.MoveTo(new SnapshotPoint(updated,
+                    Math.Min(updated.Length, spans[0].Start + replacements[0].Length)));
+            }
+
+            transaction.Complete();
+        }
+
+        return true;
+    }
+
     public bool TryApplyEdit(ITextSnapshot original, int start, int length, string replacement,
         string description, IVsEditorAdaptersFactoryService adapters, ITextUndoHistoryRegistry undoRegistry)
     {

@@ -54,7 +54,7 @@ To reproducibly build all four extensions and the CLI and verify profiles, run `
 
 ## VS and SSMS: formatting a document
 
-Install the matching package from `release/` and restart the IDE. In Visual Studio open **Extensions → SQL Formatter**; in SSMS use the top-level **SQL Formatter** menu. It contains **Format Document**, **Analyze Document**, **Insert Snippet**, **Clear Analysis Markers** (shown when markers exist) and **Settings…**. Commands, tabs, built-in profiles, rules and values use the IDE UI language: Russian for ru, English for other languages. Restart the IDE after changing its language.
+Install the matching package from `release/` and restart the IDE. In Visual Studio open **Extensions → SQL Formatter**; in SSMS use the top-level **SQL Formatter** menu. It contains **Format Document**, **Analyze Document**, **Insert Snippet**, **Rename Symbol**, **Clear Analysis Markers** (shown when markers exist) and **Settings…**. Commands, tabs, built-in profiles, rules and values use the IDE UI language: Russian for ru, English for other languages. Restart the IDE after changing its language.
 
 **Format Document** is available for the active `.sql` tab, including its text editor context menu. A nonempty selection formats only that fragment; without a selection it formats the entire active document. Selections may contain several statements, an expression list or a query clause. Text outside the selection stays unchanged. For example, selecting `where Id=1 and Amount>0` in a SELECT formats only that condition. A boundary cutting a token or a fragment that cannot safely be processed leaves the text unchanged with a diagnostic. Fully selected standalone statements can be formatted even with invalid SQL outside the selection.
 
@@ -86,6 +86,15 @@ Built-in snippets: `proc` (stored procedure template with TRY/CATCH), `try`, `tr
   "body": "SELECT TOP (100) $columns$\nFROM dbo.Audit\nORDER BY Id DESC;"
 }
 ```
+
+## VS and SSMS: renaming variables and aliases
+
+**Rename Symbol** (menu and editor context menu) works on the active `.sql` tab and recognizes two symbol kinds under the caret:
+
+- a **local `@variable`** — the declaration and every reference within the same batch (up to the next `GO`) are renamed;
+- a **table alias** (`FROM dbo.T AS t`) — the alias and all `t.Column` qualifiers within the declaring query are renamed, including correlated references from nested subqueries; a same-name alias declared in a nested query shadows the outer one and is left untouched.
+
+After you type the new name (validated: a variable is `@` plus an identifier; an alias is a plain identifier without `@`), a preview lists position, old and new text; applying happens in one Undo transaction. When no supported symbol is under the caret, a message is shown. Limitations: aliases in `UPDATE`/`DELETE` statements (no query specification) and quoted aliases `[t]` are not supported.
 
 ## Formatting settings and profiles in VS/SSMS
 

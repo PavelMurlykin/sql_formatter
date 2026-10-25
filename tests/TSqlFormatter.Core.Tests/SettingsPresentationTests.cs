@@ -20,19 +20,22 @@ public sealed class SettingsPresentationTests
         Assert.Equal("SQL Formatter", menu.Element(ns + "Strings")!.Element(ns + "ButtonText")!.Value);
         Assert.Contains(document.Descendants(ns + "Group"), g => (string?)g.Element(ns + "Parent")!.Attribute("id") == "IDM_VS_CTXT_CODEWIN");
         var buttons = document.Descendants(ns + "Button").ToArray();
-        Assert.Equal(5, buttons.Length);
+        Assert.Equal(6, buttons.Length);
         Assert.Contains(buttons, b => (string?)b.Attribute("id") == "cmdSettings");
         Assert.Contains(buttons, b => (string?)b.Attribute("id") == "cmdFormatDocument");
         Assert.Contains(buttons, b => (string?)b.Attribute("id") == "cmdAnalyzeDocument");
         Assert.Contains(buttons, b => (string?)b.Attribute("id") == "cmdClearAnalysisMarkers");
         Assert.Contains(buttons, b => (string?)b.Attribute("id") == "cmdInsertSnippet");
+        Assert.Contains(buttons, b => (string?)b.Attribute("id") == "cmdRenameSymbol");
         var placements = document.Descendants(ns + "CommandPlacement").ToArray();
-        Assert.Equal(3, placements.Length);
+        Assert.Equal(4, placements.Length);
         Assert.Contains(placements, p => (string?)p.Attribute("id") == "cmdFormatDocument"
             && (string?)p.Element(ns + "Parent")!.Attribute("id") == "grpContext");
         Assert.Contains(placements, p => (string?)p.Attribute("id") == "cmdAnalyzeDocument"
             && (string?)p.Element(ns + "Parent")!.Attribute("id") == "grpContext");
         Assert.Contains(placements, p => (string?)p.Attribute("id") == "cmdInsertSnippet"
+            && (string?)p.Element(ns + "Parent")!.Attribute("id") == "grpContext");
+        Assert.Contains(placements, p => (string?)p.Attribute("id") == "cmdRenameSymbol"
             && (string?)p.Element(ns + "Parent")!.Attribute("id") == "grpContext");
     }
 
