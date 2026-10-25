@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Threading;
@@ -16,6 +17,7 @@ using TSqlFormatter.Configuration;
 using TSqlFormatter.IdeShared;
 using TSqlFormatter.Core.Formatting;
 using TSqlFormatter.Core.Parsing;
+using TSqlFormatter.Core.Snippets;
 
 namespace TSqlFormatter.VisualStudio;
 
@@ -49,6 +51,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
     private readonly SqlAnalysisMarkers analysisMarkers = new();
     private AnalysisReportWindow? analysisWindow;
     private NativeWindow? analysisWindowOwner;
+    private SnippetInsertionSession? snippetSession;
 
     protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
     {
@@ -96,6 +99,13 @@ public sealed class SqlFormatterPackage : AsyncPackage
                 clearAnalysis.Visible = clearAnalysis.Enabled = analysisMarkers.Count > 0;
             };
             commands.AddCommand(clearAnalysis);
+            var insertSnippet = new OleMenuCommand(ExecuteInsertSnippet, new CommandID(CommandSet, 0x0220));
+            insertSnippet.BeforeQueryStatus += (_, _) =>
+            {
+                insertSnippet.Text = SettingsAppearance.Text("Вставить сниппет", "Insert Snippet");
+                insertSnippet.Visible = insertSnippet.Enabled = ActiveSqlEditor.TryRead(textManager, out _, monitorSelection);
+            };
+            commands.AddCommand(insertSnippet);
             var settings = new OleMenuCommand((_, _) => ShowSettings(false), new CommandID(CommandSet, 0x0400));
             settings.BeforeQueryStatus += (_, _) => settings.Text = SettingsAppearance.Text("Настройки…", "Settings…");
             commands.AddCommand(settings);
@@ -217,6 +227,11 @@ public sealed class SqlFormatterPackage : AsyncPackage
     private void ExecuteClearAnalysis(object sender, EventArgs e)
     {
         JoinableTaskFactory.RunAsync(ClearAnalysisAsync).FileAndForget("TSqlFormatter/ClearAnalysis");
+    }
+
+    private void ExecuteInsertSnippet(object sender, EventArgs e)
+    {
+        JoinableTaskFactory.RunAsync(InsertSnippetAsync).FileAndForget("TSqlFormatter/InsertSnippet");
     }
 
     private void ExecuteFormatSelection(object sender, EventArgs e)
@@ -764,6 +779,131 @@ public sealed class SqlFormatterPackage : AsyncPackage
         analysisWindow = null;
         analysisWindowOwner?.ReleaseHandle();
         analysisWindowOwner = null;
+    }
+
+    private async Task InsertSnippetAsync()
+    {
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (!ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor, monitorSelection) ||
+            editorAdapters == null || undoRegistry == null)
+        {
+            NotifyFormat(SettingsAppearance.Text("Откройте файл .sql в редакторе.", "Open a .sql file in the text editor first."), true);
+            return;
+        }
+
+        var textView = editorAdapters.GetWpfTextView(editor.View);
+        var snapshot = editor.CaptureSnapshot(editorAdapters);
+        if (textView == null || snapshot == null)
+        {
+            NotifyFormat("The SQL buffer is unavailable.", true);
+            return;
+        }
+
+        if (snippetSession is { } session && session.IsCurrent(textView.TextBuffer.CurrentSnapshot))
+        {
+            var parameter = session.NextParameter();
+            var sessionSnapshot = session.Snapshot;
+            textView.Selection.Select(
+                new SnapshotSpan(sessionSnapshot, parameter.StartOffset, parameter.Length), false);
+            textView.Caret.MoveTo(new SnapshotPoint(sessionSnapshot, parameter.EndOffset));
+            return;
+        }
+
+        snippetSession = null;
+        System.Collections.Generic.IReadOnlyList<SqlSnippet> snippets;
+        try
+        {
+            snippets = await Task.Run(() => new SnippetStore().Load(), DisposalToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (snippets.Count == 0)
+        {
+            NotifyFormat(SettingsAppearance.Text("Сниппеты недоступны.", "No snippets are available."), true);
+            return;
+        }
+
+        using var picker = new SnippetPickerWindow(snippets);
+        if (!ShowSnippetPicker(picker) || picker.SelectedSnippet is not { } snippet)
+        {
+            return;
+        }
+
+        if (!editor.TryCaptureCaret(editorAdapters, out var caretSnapshot, out int caret) ||
+            !ReferenceEquals(caretSnapshot, snapshot) || snapshot.Length > 16 * 1024 * 1024)
+        {
+            NotifyFormat("The SQL buffer changed during snippet insertion; no edit was applied.", true);
+            return;
+        }
+
+        int start = caret;
+        int length = 0;
+        if (editor.TryCaptureSelection(editorAdapters, out var selectedSnapshot, out var selected) &&
+            ReferenceEquals(selectedSnapshot, snapshot))
+        {
+            start = selected.Start;
+            length = selected.Length;
+        }
+
+        var expanded = SnippetExpander.Expand(snippet.Body);
+        if (!editor.TryApplyEdit(snapshot, start, length, expanded.Text,
+                "Insert T-SQL Snippet", editorAdapters, undoRegistry))
+        {
+            NotifyFormat("The SQL buffer changed during snippet insertion; no edit was applied.", true);
+            return;
+        }
+
+        var updated = textView.TextBuffer.CurrentSnapshot;
+        if (expanded.Parameters.Count > 0)
+        {
+            var absolute = new SqlTextSpan[expanded.Parameters.Count];
+            for (var index = 0; index < expanded.Parameters.Count; index++)
+            {
+                absolute[index] = new SqlTextSpan(
+                    start + expanded.Parameters[index].StartOffset,
+                    expanded.Parameters[index].Length);
+            }
+
+            snippetSession = new SnippetInsertionSession(updated, absolute);
+            textView.Selection.Select(
+                new SnapshotSpan(updated, absolute[0].StartOffset, absolute[0].Length), false);
+            textView.Caret.MoveTo(new SnapshotPoint(updated, absolute[0].EndOffset));
+        }
+
+        NotifyFormat(string.Format(SettingsAppearance.Text(
+            "Сниппет «{0}» вставлен.", "Snippet '{0}' inserted."), snippet.Name));
+    }
+
+    private bool ShowSnippetPicker(SnippetPickerWindow picker)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        try
+        {
+            if (GetService(typeof(SVsUIShell)) is IVsUIShell shell &&
+                ErrorHandler.Succeeded(shell.GetDialogOwnerHwnd(out IntPtr owner)))
+            {
+                var nativeOwner = new NativeWindow();
+                nativeOwner.AssignHandle(owner);
+                try
+                {
+                    return picker.ShowDialog(nativeOwner) == DialogResult.OK;
+                }
+                finally
+                {
+                    nativeOwner.ReleaseHandle();
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // An ownerless dialog still works.
+        }
+
+        return picker.ShowDialog() == DialogResult.OK;
     }
 
     private static (FormatResult? Result, FormatterDiagnostic? Error) FormatConfigured(

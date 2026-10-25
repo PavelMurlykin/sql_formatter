@@ -54,7 +54,7 @@ To reproducibly build all four extensions and the CLI and verify profiles, run `
 
 ## VS and SSMS: formatting a document
 
-Install the matching package from `release/` and restart the IDE. In Visual Studio open **Extensions → SQL Formatter**; in SSMS use the top-level **SQL Formatter** menu. It contains **Format Document**, **Analyze Document**, **Clear Analysis Markers** (shown when markers exist) and **Settings…**. Commands, tabs, built-in profiles, rules and values use the IDE UI language: Russian for ru, English for other languages. Restart the IDE after changing its language.
+Install the matching package from `release/` and restart the IDE. In Visual Studio open **Extensions → SQL Formatter**; in SSMS use the top-level **SQL Formatter** menu. It contains **Format Document**, **Analyze Document**, **Insert Snippet**, **Clear Analysis Markers** (shown when markers exist) and **Settings…**. Commands, tabs, built-in profiles, rules and values use the IDE UI language: Russian for ru, English for other languages. Restart the IDE after changing its language.
 
 **Format Document** is available for the active `.sql` tab, including its text editor context menu. A nonempty selection formats only that fragment; without a selection it formats the entire active document. Selections may contain several statements, an expression list or a query clause. Text outside the selection stays unchanged. For example, selecting `where Id=1 and Amount>0` in a SELECT formats only that condition. A boundary cutting a token or a fragment that cannot safely be processed leaves the text unchanged with a diagnostic. Fully selected standalone statements can be formatted even with invalid SQL outside the selection.
 
@@ -69,6 +69,23 @@ Experimental VS save formatting remains under **Tools → Options → T-SQL Form
 **Analyze Document** is available for the active `.sql` tab, including its text editor context menu. The extension captures a text snapshot, analyzes it in the background, and underlines the reported ranges with squiggles. A modeless **SQL Analysis** window lists the findings as position, code, severity and message; double-click or Enter moves the caret to the finding. Re-running the command refreshes the markers and the window; **Clear Analysis Markers** removes the underlines and closes the window.
 
 The rules are the same as in the CLI (`TSQL001`–`TSQL005`); settings come from the `analysis` section of the nearest `.tsqlformatter.json` (see the `--analyze` section above), so no separate settings page is needed. When the SQL cannot be parsed, the command reports the parse error and applies no markers. Analysis never modifies the file and does not participate in save formatting. The behavior is covered by the build and package checks; validation inside an installed VS/SSMS is described in the [release validation](../release/VALIDATION.md).
+
+## VS and SSMS: SQL snippets
+
+**Insert Snippet** is available in the SQL Formatter menu and the editor context menu for the active `.sql` tab. The dialog filters by shortcut, name and description; Enter or double-click inserts the template at the caret (a nonempty selection is replaced). Insertion is one Undo transaction.
+
+Template parameters are written as `$name$`: after insertion the first parameter is selected, and re-running the command jumps to the next parameter in a cycle while the text stays unchanged. Separate Tab navigation between parameters is not implemented yet.
+
+Built-in snippets: `proc` (stored procedure template with TRY/CATCH), `try`, `tran` (transaction with rollback and a conditional commit), `select` (query with JOIN) and `insert`. Put your own snippets as JSON files into `%USERPROFILE%\.tsqlformatter\snippets` (the directory is created on demand): each file is an object or an array of objects with `name`, `shortcut` (optional, no whitespace), `description` and `body` fields. A user snippet with the same shortcut or name replaces the built-in one; changes are picked up on the next command invocation without restarting the IDE; invalid files are skipped.
+
+```json
+{
+  "name": "Audit query",
+  "shortcut": "audit",
+  "description": "Last audit rows",
+  "body": "SELECT TOP (100) $columns$\nFROM dbo.Audit\nORDER BY Id DESC;"
+}
+```
 
 ## Formatting settings and profiles in VS/SSMS
 

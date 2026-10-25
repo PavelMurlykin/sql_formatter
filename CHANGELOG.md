@@ -3,6 +3,19 @@
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
 
+## SQL snippets — 2026-10-25
+
+- Snippet engine in Core (`TSqlFormatter.Core.Snippets`): JSON snippets with `$name$`
+  parameters, five built-in templates (`proc`, `try`, `tran`, `select`, `insert`) and a
+  user directory `%USERPROFILE%\.tsqlformatter\snippets` created on demand; user
+  snippets override built-ins by shortcut or name, invalid files are skipped.
+- New **Insert Snippet** command in both the Visual Studio and SSMS packages (menu and
+  editor context menu): filterable picker, insertion at the caret or over the selection
+  in one Undo transaction, first `$parameter$` selected; re-running the command cycles
+  to the next parameter while the buffer is unchanged. Tab navigation is not implemented.
+- Core now references Newtonsoft.Json for snippet JSON parsing; the VSIX payloads are
+  unchanged because the assembly was already shipped.
+
 ## Static analysis: core, CLI `--analyze` and editor commands — 2026-10-25
 
 - Static analysis engine in Core (`TSqlFormatter.Core.Analysis`): rules TSQL001–TSQL005
