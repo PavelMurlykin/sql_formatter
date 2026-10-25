@@ -1,6 +1,8 @@
 using System.Text;
 using TSqlFormatter.Configuration;
+using TSqlFormatter.Core.Analysis;
 using TSqlFormatter.Core.Formatting;
+using TSqlFormatter.Core.Parsing;
 
 namespace TSqlFormatter.Cli;
 
@@ -44,9 +46,10 @@ public static class SqlFormatterCli
 
         if (args.Length == 1 && args[0] == "--help")
         {
-            await output.WriteLineAsync("Usage: tsqlformat [file.sql | -] [--write | --check] [--profile Default|Compact|Expanded]");
-            await output.WriteLineAsync("       tsqlformat <file-or-directory> [more-paths...] (--write | --check) [--exclude <relative-path>]... [--profile <id>]");
+            await output.WriteLineAsync("Usage: tsqlformat [file.sql | -] [--write | --check | --analyze] [--profile Default|Compact|Expanded]");
+            await output.WriteLineAsync("       tsqlformat <file-or-directory> [more-paths...] (--write | --check | --analyze) [--exclude <relative-path>]... [--profile <id>]");
             await output.WriteLineAsync("Reads T-SQL from stdin or one file to stdout; batch mode checks or writes .sql files recursively.");
+            await output.WriteLineAsync("--analyze reports static-analysis findings as 'path(line,column): TSQL00x [severity] message'; exit code is 1 when findings exist.");
             return 0;
         }
 
@@ -55,6 +58,9 @@ public static class SqlFormatterCli
             await error.WriteLineAsync($"TSF2000: Unknown formatting profile '{profileId}'.");
             return 2;
         }
+
+        if (args.Contains("--analyze"))
+            return await RunAnalyzeAsync(args, input, output, error, cancellationToken);
 
         if (ShouldUseBatchMode(args))
             return await RunBatchAsync(args, profileId, input, output, error, cancellationToken);
@@ -251,6 +257,220 @@ public static class SqlFormatterCli
         }
 
         return hasError ? 2 : needsFormatting ? 1 : 0;
+    }
+
+    private static async Task<int> RunAnalyzeAsync(string[] args, TextReader input, TextWriter output,
+        TextWriter error, CancellationToken cancellationToken)
+    {
+        var paths = new List<string>();
+        var exclusions = new List<string>();
+        var analyzeCount = 0;
+        var stdinRequested = false;
+        for (var index = 0; index < args.Length; index++)
+        {
+            var argument = args[index];
+            if (argument == "--analyze")
+            {
+                analyzeCount++;
+            }
+            else if (argument == "--exclude")
+            {
+                if (++index >= args.Length || !TryNormalizeExclusion(args[index], out var exclusion))
+                    return await InvalidAnalyzeArgumentsAsync(error);
+                exclusions.Add(exclusion);
+            }
+            else if (argument == "-")
+            {
+                stdinRequested = true;
+            }
+            else if (string.IsNullOrWhiteSpace(argument) ||
+                     argument.StartsWith("-", StringComparison.Ordinal))
+            {
+                return await InvalidAnalyzeArgumentsAsync(error);
+            }
+            else
+            {
+                paths.Add(argument);
+            }
+        }
+
+        if (analyzeCount != 1 || (stdinRequested && paths.Count > 0) ||
+            (!stdinRequested && paths.Count == 0) ||
+            (exclusions.Count > 0 && (stdinRequested || !paths.Any(Directory.Exists))))
+            return await InvalidAnalyzeArgumentsAsync(error);
+
+        if (stdinRequested)
+            return await AnalyzeStdinAsync(input, output, error, cancellationToken);
+
+        if (paths.Count == 1 && !Directory.Exists(paths[0]))
+        {
+            return await AnalyzeFileAsync(paths[0], paths[0], output, error, cancellationToken);
+        }
+
+        var comparer = OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase :
+            StringComparer.Ordinal;
+        var files = new SortedSet<string>(comparer);
+        var hasError = false;
+        foreach (var path in paths)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                var absolutePath = Path.GetFullPath(path);
+                if (!Directory.Exists(absolutePath))
+                {
+                    files.Add(absolutePath);
+                    continue;
+                }
+
+                var directoryFiles = FindSqlFiles(absolutePath, exclusions, comparer,
+                    cancellationToken);
+                if (directoryFiles.Count == 0)
+                {
+                    await error.WriteLineAsync($"TSF9000: No SQL files found in directory: {absolutePath}");
+                    hasError = true;
+                    continue;
+                }
+
+                foreach (var file in directoryFiles) files.Add(file);
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException
+                or ArgumentException or NotSupportedException)
+            {
+                await error.WriteLineAsync($"TSF9000: Failed to enumerate SQL path '{path}': {exception.Message}");
+                hasError = true;
+            }
+        }
+
+        var hasFindings = false;
+        foreach (var file in files)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var result = await AnalyzeFileAsync(file, file, output, error, cancellationToken);
+            if (result == 1) hasFindings = true;
+            else if (result == 2) hasError = true;
+        }
+
+        return hasError ? 2 : hasFindings ? 1 : 0;
+    }
+
+    private static async Task<int> InvalidAnalyzeArgumentsAsync(TextWriter error)
+    {
+        await error.WriteLineAsync("TSF9000: --analyze requires stdin or SQL paths, without --write/--check; use --help for usage.");
+        return 2;
+    }
+
+    private static async Task<int> AnalyzeStdinAsync(TextReader input, TextWriter output,
+        TextWriter error, CancellationToken cancellationToken)
+    {
+        string source;
+        try
+        {
+            source = await ReadBoundedAsync(input, cancellationToken);
+        }
+        catch (InputTooLargeException exception)
+        {
+            await error.WriteLineAsync($"TSF9001: {exception.Message}");
+            return 2;
+        }
+
+        return await AnalyzeSourceAsync(source, new AnalysisOptions(), "-", output, error,
+            cancellationToken);
+    }
+
+    private static async Task<int> AnalyzeFileAsync(string path, string displayPath, TextWriter output,
+        TextWriter error, CancellationToken cancellationToken)
+    {
+        string source;
+        try
+        {
+            (source, _) = await ReadUtf8FileAsync(path, cancellationToken);
+        }
+        catch (InputTooLargeException exception)
+        {
+            await error.WriteLineAsync($"TSF9001: {exception.Message}");
+            return 2;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException
+            or DecoderFallbackException)
+        {
+            await error.WriteLineAsync($"{displayPath}: TSF9000: Failed to read SQL file: {exception.Message}");
+            return 2;
+        }
+
+        var options = await ResolveAnalysisOptionsAsync(path, error, cancellationToken);
+        if (options is null) return 2;
+
+        return await AnalyzeSourceAsync(source, options, displayPath, output, error, cancellationToken);
+    }
+
+    private static async Task<AnalysisOptions?> ResolveAnalysisOptionsAsync(string filePath,
+        TextWriter error, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var configPath = new SqlFormatterConfigurationDiscovery().FindForFile(filePath);
+            if (configPath is null) return new AnalysisOptions();
+
+            if (new FileInfo(configPath).Length > SqlFormatterConfigurationResolver.MaxConfigurationBytes)
+            {
+                await error.WriteLineAsync($"TSF9001: {configPath}: configuration exceeds {SqlFormatterConfigurationResolver.MaxConfigurationBytes} bytes.");
+                return null;
+            }
+
+            var json = await File.ReadAllTextAsync(configPath, new UTF8Encoding(false, true),
+                cancellationToken);
+            if (json.Length > SqlFormatterConfigurationResolver.MaxConfigurationCharacters)
+            {
+                await error.WriteLineAsync($"TSF9001: {configPath}: configuration exceeds {SqlFormatterConfigurationResolver.MaxConfigurationCharacters} characters.");
+                return null;
+            }
+
+            var formatting = new SqlFormatterConfigurationSerializer().Parse(json);
+            if (!formatting.Succeeded)
+            {
+                foreach (var diagnostic in formatting.Diagnostics)
+                    await error.WriteLineAsync($"{configPath}: {diagnostic.Code}: {diagnostic.Message}");
+                return null;
+            }
+
+            var analysis = new AnalysisConfigurationParser().Parse(json);
+            if (!analysis.Succeeded)
+            {
+                foreach (var diagnostic in analysis.Diagnostics)
+                    await error.WriteLineAsync($"{configPath}: {diagnostic.Code}: {diagnostic.Message}");
+                return null;
+            }
+
+            return analysis.Configuration!.ToAnalysisOptions();
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException
+            or DecoderFallbackException or ArgumentException)
+        {
+            await error.WriteLineAsync($"TSF9000: Cannot load SQL configuration: {exception.Message}");
+            return null;
+        }
+    }
+
+    private static async Task<int> AnalyzeSourceAsync(string source, AnalysisOptions options,
+        string displayPath, TextWriter output, TextWriter error, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var parseResult = new ScriptDomSqlParser().Parse(source, SqlDialectVersion.Auto, cancellationToken);
+        if (parseResult.Diagnostics.Count > 0)
+        {
+            foreach (var diagnostic in parseResult.Diagnostics)
+                await error.WriteLineAsync(
+                    $"{displayPath}({diagnostic.Line},{diagnostic.Column}): TSF1000: {diagnostic.Message}");
+            return 2;
+        }
+
+        var result = new SqlAnalyzer().Analyze(parseResult, options, cancellationToken);
+        foreach (var diagnostic in result.Diagnostics)
+            await output.WriteLineAsync(
+                $"{displayPath}({diagnostic.Line},{diagnostic.Column}): {diagnostic.Code} [{diagnostic.Severity}] {diagnostic.Message}");
+
+        return result.HasDiagnostics ? 1 : 0;
     }
 
     private static async Task<int> InvalidBatchArgumentsAsync(TextWriter error)

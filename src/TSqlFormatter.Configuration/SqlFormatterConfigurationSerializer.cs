@@ -198,6 +198,8 @@ public sealed class SqlFormatterConfigurationSerializer
                 case "where":
                 case "clauses":
                 case "alignment":
+                case "analysis":
+                    // The analysis section is validated by AnalysisConfigurationParser.
                     break;
                 default:
                     diagnostics.Add(Diagnostic($"Unknown configuration property '{property.Name}'."));

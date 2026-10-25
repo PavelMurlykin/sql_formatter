@@ -148,7 +148,7 @@ After building, pass SQL through stdin from the repository root:
 'select Id from T' | dotnet run --project src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj --no-restore
 ```
 
-Formatted SQL goes to stdout; `-` can be passed instead of no argument. `--help` shows brief usage. Diagnostics go to stderr. Exit code `0` means formatting succeeded; `2` means a SQL parse, configuration, I/O, or argument error. Code `1` is used only with `--check` when formatting is required. No SQL is printed on a parse error. The CLI uses `Default` unless `--profile` selects `Default`, `Compact`, or `Expanded` (case-insensitive); this works for stdin, one file, and batches. No other settings flags are supported.
+Formatted SQL goes to stdout; `-` can be passed instead of no argument. `--help` shows brief usage. Diagnostics go to stderr. Exit code `0` means formatting succeeded; `2` means a SQL parse, configuration, I/O, or argument error. Code `1` is used with `--check` (formatting required) and with `--analyze` (findings reported). No SQL is printed on a parse error. The CLI uses `Default` unless `--profile` selects `Default`, `Compact`, or `Expanded` (case-insensitive); this works for stdin, one file, and batches. No other settings flags are supported.
 
 To read one `query.sql` file from the current directory:
 
@@ -174,6 +174,32 @@ $LASTEXITCODE
 ```
 
 Code `0` means the file is already formatted; `1` means formatting is needed; `2` means a SQL, configuration, read, or argument error. `--check` never writes the file and leaves stdout empty. It is not available for stdin (`-`) yet.
+
+### Static SQL analysis (`--analyze`)
+
+The `--analyze` mode runs the static analyzer and never modifies files:
+
+```powershell
+dotnet run --project src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj --no-restore -- query.sql --analyze
+tsqlformat ./sql --analyze
+'select * from T' | tsqlformat - --analyze
+```
+
+Findings are printed to stdout one per line as `path(line,column): CODE [severity] message`, for example `query.sql(1,8): TSQL001 [Warning] SELECT * is used; list the required columns explicitly.`. stdin reports the path `-`. SQL parse errors (`TSF1000`) and configuration errors go to stderr. Exit codes: `0` — no findings, `1` — findings reported, `2` — input, parse, or configuration error. Directories are scanned recursively for `.sql` files with `--exclude` support, as in `--check`; `--analyze` cannot be combined with `--write`/`--check` and requires an explicit `-` for stdin.
+
+Rules are configured in the optional `analysis` section of `.tsqlformatter.json` (works with versions 1 and 2):
+
+```json
+{
+  "version": 1,
+  "analysis": {
+    "disabled": ["TSQL003"],
+    "severity": { "TSQL004": "warning" }
+  }
+}
+```
+
+`disabled` turns rules off by code; `severity` overrides the severity (`info`, `warning`, `error`, case-insensitive). The configuration is discovered per file exactly as for formatting; stdin uses the default rule set. Current rules: `TSQL001` — `SELECT *`, `TSQL002` — `INSERT` without a column list, `TSQL003` — `TOP` without `ORDER BY`, `TSQL004` — `UPDATE` without `WHERE`, `TSQL005` — `DELETE` without `WHERE`.
 
 ### Batch checking and writing
 

@@ -3,6 +3,19 @@
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
 
+## Static analysis core and CLI `--analyze` — 2026-10-25
+
+- Static analysis engine in Core (`TSqlFormatter.Core.Analysis`): rules TSQL001–TSQL005
+  (`SELECT *`, `INSERT` without a column list, `TOP` without `ORDER BY`, `UPDATE`/`DELETE`
+  without `WHERE`), per-rule disable and severity overrides, positioned diagnostics.
+- CLI `--analyze` mode for stdin, one file, and recursive directories with `--exclude`:
+  findings are printed as `path(line,column): TSQL00x [severity] message`; exit codes
+  0 — no findings, 1 — findings, 2 — errors.
+- Optional `analysis` section (`disabled`, `severity`) in `.tsqlformatter.json`
+  versions 1 and 2, discovered per file like the formatting settings.
+- Editor integration of the analyzer is planned next (roadmap stage 3);
+  VSIX packages are unchanged in this entry.
+
 ## ADIR syntax and ELSE IF fixes — 2026-10-08
 
 - Visual Studio VSIX 0.2.12 / SSMS VSIX 0.6.11 / CLI 0.1.0-preview.7.
