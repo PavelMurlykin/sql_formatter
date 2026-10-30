@@ -69,6 +69,12 @@ public static class SqlTransformer
         var replaced = source
             .Remove(statement.StartOffset, statement.FragmentLength)
             .Insert(statement.StartOffset, statementText);
+        var parser = new ScriptDomSqlParser();
+        if (!parser.Parse(replaced, SqlDialectVersion.Auto, cancellationToken).ParseSucceeded)
+        {
+            return SqlTransformationResult.Failed("The generated SQL could not be parsed; the transformation was not applied.");
+        }
+
         var formatted = new ScriptDomSqlFormatter().Format(
             replaced, options, new FormatRequest(), cancellationToken);
         var document = formatted.ParseSucceeded &&
@@ -76,6 +82,11 @@ public static class SqlTransformer
                        !string.IsNullOrEmpty(formatted.Text)
             ? formatted.Text
             : replaced;
+        if (!parser.Parse(document, SqlDialectVersion.Auto, cancellationToken).ParseSucceeded)
+        {
+            return SqlTransformationResult.Failed("The transformed document could not be parsed; the transformation was not applied.");
+        }
+
         return SqlTransformationResult.Ok(
             document, statementText, new SqlTextSpan(statement.StartOffset, statement.FragmentLength));
     }
@@ -176,7 +187,7 @@ public static class SqlTransformer
                 {
                     element.ColumnName = new IdentifierOrValueExpression
                     {
-                        Identifier = new Identifier { Value = ColumnName(specification.Columns[index]) }
+                        Identifier = ColumnIdentifier(specification.Columns[index])
                     };
                 }
 
@@ -216,9 +227,10 @@ public static class SqlTransformer
 
         execute.ExecuteSpecification.Variable =
             new VariableReference { Name = ReturnCodeVariable };
-        var script = new TSqlScript();
-        var batch = new TSqlBatch();
-        batch.Statements.Add(new DeclareVariableStatement
+        // Replacing a single IF/ELSE/WHILE body with two statements must retain
+        // its scope. Always emit one block, including at the top level.
+        var block = new BeginEndBlockStatement { StatementList = new StatementList() };
+        block.StatementList.Statements.Add(new DeclareVariableStatement
         {
             Declarations =
             {
@@ -229,12 +241,11 @@ public static class SqlTransformer
                 }
             }
         });
-        batch.Statements.Add(execute);
-        script.Batches.Add(batch);
-        return Generate(script).TrimEnd() + ";";
+        block.StatementList.Statements.Add(execute);
+        return Generate(block).TrimEnd();
     }
 
-    private static string ColumnName(ColumnReferenceExpression column)
+    private static Identifier ColumnIdentifier(ColumnReferenceExpression column)
     {
         var identifiers = column.MultiPartIdentifier?.Identifiers;
         if (identifiers is null || identifiers.Count == 0)
@@ -242,7 +253,8 @@ public static class SqlTransformer
             throw new TransformationException("An INSERT column could not be resolved.");
         }
 
-        return identifiers[identifiers.Count - 1].Value;
+        var identifier = identifiers[identifiers.Count - 1];
+        return new Identifier { Value = identifier.Value, QuoteType = identifier.QuoteType };
     }
 
     private static string Generate(TSqlFragment fragment)

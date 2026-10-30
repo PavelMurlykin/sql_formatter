@@ -53,7 +53,7 @@ public sealed class EditorSnapshotStore
         {
             Directory.CreateDirectory(directory);
             var timestamp = (timestampUtc ?? DateTime.UtcNow).ToUniversalTime();
-            var name = $"{timestamp.ToLocalTime():yyyyMMdd-HHmmss}-{MakeFileSafe(filePath)}.json";
+            var name = $"{timestamp.ToLocalTime():yyyyMMdd-HHmmss}-{MakeFileSafe(filePath)}-{Guid.NewGuid():N}.json";
             var path = System.IO.Path.Combine(directory, name);
             var document = new JObject
             {
@@ -62,7 +62,14 @@ public sealed class EditorSnapshotStore
                 ["timestampUtc"] = timestamp.ToString("o", CultureInfo.InvariantCulture),
                 ["content"] = content
             };
-            File.WriteAllText(path, document.ToString(Newtonsoft.Json.Formatting.None));
+            // CreateNew also prevents overwriting an existing snapshot if a
+            // generated filename is ever reused. Finish writing before pruning.
+            using (var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            using (var writer = new StreamWriter(stream))
+            {
+                writer.Write(document.ToString(Newtonsoft.Json.Formatting.None));
+            }
+
             Prune();
             return path;
         }

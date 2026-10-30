@@ -20,11 +20,11 @@ public sealed class RenamePromptWindow : Form
             : RenameNames.IsValidIdentifier;
         validationError = kind == RenameSymbolKind.LocalVariable
             ? SettingsAppearance.Text(
-                "Имя переменной: @ и идентификатор (буква/_/#, затем буквы, цифры, _, #).",
-                "A variable name is @ followed by an identifier (letter/_/#, then letters, digits, _, #).")
+                "Имя переменной: @ и идентификатор (буква/_/#, затем буквы, цифры, _, #), не более 128 символов вместе с @.",
+                "A variable name is @ plus an identifier (letter/_/#, then letters, digits, _, #), at most 128 characters including @.")
             : SettingsAppearance.Text(
-                "Алиас — идентификатор без @: буква/_/#, затем буквы, цифры, _, #.",
-                "An alias is a plain identifier without @: letter/_/#, then letters, digits, _, #.");
+                "Алиас — идентификатор без @, не более 128 символов; ключевые слова SQL недопустимы.",
+                "An alias is a plain identifier without @, at most 128 characters; reserved SQL words are not allowed.");
 
         Text = SettingsAppearance.Text("Переименование: ", "Rename: ") + currentName;
         StartPosition = FormStartPosition.CenterParent;

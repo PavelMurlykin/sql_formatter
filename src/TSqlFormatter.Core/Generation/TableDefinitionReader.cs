@@ -110,7 +110,7 @@ public sealed class TableDefinitionReader
 
         if (dataType is ParameterizedDataTypeReference named && named.Name is not null)
         {
-            var text = string.Join(".", named.Name.Identifiers.Select(identifier => identifier.Value));
+            var text = string.Join(".", named.Name.Identifiers.Select(identifier => SqlIdentifierText.Format(identifier.Value)));
             if (named.Parameters.Count > 0)
             {
                 text += "(" + ParametersText(named) + ")";

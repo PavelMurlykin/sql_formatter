@@ -42,6 +42,51 @@ public sealed class EditorSnapshotStoreTests
         Assert.Equal("A", snapshots[1].Content);
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(100)]
+    public void Save_keeps_both_versions_of_the_same_file_within_one_second(int milliseconds)
+    {
+        var store = CreateStore();
+        var timestamp = new DateTime(2026, 10, 30, 12, 0, 0, DateTimeKind.Utc);
+
+        var first = store.Save(@"C:\work\query.sql", "SELECT 1;", timestamp);
+        var second = store.Save(@"C:\work\query.sql", "SELECT 2;", timestamp.AddMilliseconds(milliseconds));
+
+        Assert.NotNull(first);
+        Assert.NotNull(second);
+        Assert.NotEqual(first, second);
+        Assert.Contains("SELECT 1;", File.ReadAllText(first), StringComparison.Ordinal);
+        Assert.Contains("SELECT 2;", File.ReadAllText(second), StringComparison.Ordinal);
+        Assert.Equal(2, store.List().Count);
+    }
+
+    [Fact]
+    public void Save_does_not_confuse_files_with_the_same_truncated_path()
+    {
+        var store = CreateStore();
+        var filename = new string('q', 45) + ".sql";
+        var timestamp = new DateTime(2026, 10, 30, 12, 0, 0, DateTimeKind.Utc);
+
+        var first = store.Save(@"C:\first\" + filename, "FIRST", timestamp);
+        var second = store.Save(@"C:\second\" + filename, "SECOND", timestamp);
+
+        Assert.NotNull(first);
+        Assert.NotNull(second);
+        Assert.NotEqual(first, second);
+        Assert.Equal(2, store.List().Count);
+    }
+
+    [Fact]
+    public void List_reads_snapshots_with_the_legacy_filename()
+    {
+        Directory.CreateDirectory(directory);
+        File.WriteAllText(Path.Combine(directory, "20261025-120000-query.sql.json"),
+            "{\"version\":1,\"filePath\":\"query.sql\",\"timestampUtc\":\"2026-10-25T12:00:00Z\",\"content\":\"SELECT 1;\"}");
+
+        Assert.Equal("SELECT 1;", Assert.Single(CreateStore().List()).Content);
+    }
+
     [Fact]
     public void Save_respects_enabled_switch_and_size_limit()
     {

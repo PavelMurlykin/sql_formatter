@@ -1,3 +1,4 @@
+using Microsoft.SqlServer.TransactSql.ScriptDom;
 using TSqlFormatter.Core.Formatting;
 using TSqlFormatter.Core.Parsing;
 using TSqlFormatter.Core.Refactoring;
@@ -111,6 +112,60 @@ public sealed class SqlTransformerTests
         AssertResultParses(result);
         Assert.Contains("DECLARE @returnCode AS INT", result.NewStatementText, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("@returnCode = dbo.DoWork", result.NewStatementText, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Theory]
+    [InlineData("IF 1 = 0 EXEC dbo.DoWork;", "then")]
+    [InlineData("IF 1 = 0 SELECT 1; ELSE EXEC dbo.DoWork;", "else")]
+    [InlineData("WHILE 1 = 0 EXEC dbo.DoWork;", "while")]
+    public void ExecWithReturnCode_keeps_both_statements_inside_the_controlled_body(string sql, string branch)
+    {
+        var result = Transform(SqlTransformationKind.ExecWithReturnCode, sql, "EXEC");
+
+        AssertResultParses(result);
+        var script = Assert.IsType<TSqlScript>(_parser.Parse(result.NewDocumentText, SqlDialectVersion.Auto).Root);
+        var outer = Assert.Single(Assert.Single(script.Batches).Statements);
+        var body = branch switch
+        {
+            "then" => Assert.IsType<IfStatement>(outer).ThenStatement,
+            "else" => Assert.IsType<IfStatement>(outer).ElseStatement,
+            _ => Assert.IsType<WhileStatement>(outer).Statement
+        };
+        var statements = Assert.IsType<BeginEndBlockStatement>(body).StatementList.Statements;
+        Assert.Collection(statements,
+            statement => Assert.IsType<DeclareVariableStatement>(statement),
+            statement => Assert.IsType<ExecuteStatement>(statement));
+    }
+
+    [Theory]
+    [InlineData("[Order Id]", "Order Id")]
+    [InlineData("[select]", "select")]
+    [InlineData("[a]]b]", "a]b")]
+    [InlineData("\"Order Id\"", "Order Id")]
+    public void ValuesToUnionAll_preserves_delimited_column_aliases(string identifier, string expectedName)
+    {
+        var sql = $"INSERT INTO dbo.T ({identifier}) VALUES (1), (2);";
+
+        var result = Transform(SqlTransformationKind.ValuesToUnionAll, sql, "INSERT");
+
+        AssertResultParses(result);
+        var script = Assert.IsType<TSqlScript>(_parser.Parse(result.NewDocumentText, SqlDialectVersion.Auto).Root);
+        var select = Assert.IsType<SelectStatement>(Assert.Single(Assert.Single(script.Batches).Statements));
+        var union = Assert.IsType<BinaryQueryExpression>(select.QueryExpression);
+        var first = Assert.IsType<QuerySpecification>(union.FirstQueryExpression);
+        var alias = Assert.IsType<SelectScalarExpression>(Assert.Single(first.SelectElements)).ColumnName.Identifier;
+        Assert.Equal(expectedName, alias.Value);
+        Assert.NotEqual(QuoteType.NotQuoted, alias.QuoteType);
+    }
+
+    [Fact]
+    public void ValuesToUnionAll_rejects_a_result_that_does_not_parse()
+    {
+        var result = Transform(SqlTransformationKind.ValuesToUnionAll,
+            "INSERT INTO dbo.T (a) VALUES (DEFAULT);", "INSERT");
+
+        Assert.False(result.Succeeded);
+        Assert.Empty(result.NewDocumentText);
     }
 
     [Theory]

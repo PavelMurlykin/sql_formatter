@@ -66,7 +66,7 @@ public sealed class RenameAnalyzer
             throw new ArgumentException(
                 symbol.Kind == RenameSymbolKind.LocalVariable
                     ? "The new variable name must be @ followed by an identifier."
-                    : "The new alias must be a plain identifier.",
+                    : "The new alias must be a plain identifier of at most 128 characters, not a reserved SQL word.",
                 nameof(newName));
         }
 

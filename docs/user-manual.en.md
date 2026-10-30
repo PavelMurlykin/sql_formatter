@@ -54,7 +54,7 @@ To reproducibly build all four extensions and the CLI and verify profiles, run `
 
 ## VS and SSMS: formatting a document
 
-Install the matching package from `release/` and restart the IDE. In Visual Studio open **Extensions → SQL Formatter**; in SSMS use the top-level **SQL Formatter** menu. It contains **Format Document**, **Analyze Document**, **Insert Snippet**, **Rename Symbol**, **Script Outline**, **Go To Declaration**, the three **SQL transformation** commands, **Generate CRUD from CREATE TABLE**, **Restore Closed Script**, **Clear Analysis Markers** (shown when markers exist) and **Settings…**. Commands, tabs, built-in profiles, rules and values use the IDE UI language: Russian for ru, English for other languages. Restart the IDE after changing its language.
+The additional commands below belong to a build of the `feature/extra_functions` branch. The existing VSIX files in `release/` still provide formatting and settings only; the release of additional features is planned for stage 12. To try the new commands, build and install the matching VSIX from this branch, then restart the IDE. In Visual Studio open **Extensions → SQL Formatter**; in SSMS use the top-level **SQL Formatter** menu. It contains **Format Document**, **Analyze Document**, **Insert Snippet**, **Rename Symbol**, **Script Outline**, **Go To Declaration**, the three **SQL transformation** commands, **Generate CRUD from CREATE TABLE**, **Restore Closed Script**, **Clear Analysis Markers** (shown when markers exist) and **Settings…**. Commands, tabs, built-in profiles, rules and values use the IDE UI language: Russian for ru, English for other languages. Restart the IDE after changing its language.
 
 **Format Document** is available for the active `.sql` tab, including its text editor context menu. A nonempty selection formats only that fragment; without a selection it formats the entire active document. Selections may contain several statements, an expression list or a query clause. Text outside the selection stays unchanged. For example, selecting `where Id=1 and Amount>0` in a SELECT formats only that condition. A boundary cutting a token or a fragment that cannot safely be processed leaves the text unchanged with a diagnostic. Fully selected standalone statements can be formatted even with invalid SQL outside the selection.
 
@@ -68,7 +68,7 @@ Experimental VS save formatting remains under **Tools → Options → T-SQL Form
 
 **Analyze Document** is available for the active `.sql` tab, including its text editor context menu. The extension captures a text snapshot, analyzes it in the background, and underlines the reported ranges with squiggles. A modeless **SQL Analysis** window lists the findings as position, code, severity and message; double-click or Enter moves the caret to the finding. Re-running the command refreshes the markers and the window; **Clear Analysis Markers** removes the underlines and closes the window.
 
-The rules are the same as in the CLI (`TSQL001`–`TSQL005`); settings come from the `analysis` section of the nearest `.tsqlformatter.json` (see the `--analyze` section above), so no separate settings page is needed. When the SQL cannot be parsed, the command reports the parse error and applies no markers. Analysis never modifies the file and does not participate in save formatting. The behavior is covered by the build and package checks; validation inside an installed VS/SSMS is described in the [release validation](../release/VALIDATION.md).
+The rules are the same as in the CLI (`TSQL001`–`TSQL005`); settings come from the `analysis` section of the nearest `.tsqlformatter.json` (see the `--analyze` section). UI controls for enabling/disabling analysis and managing rules are not implemented yet: this is unfinished stage 3 work. Analysis runs on command, not automatically while typing. When the SQL cannot be parsed, the command reports the parse error and applies no markers. Analysis never modifies the file and does not participate in save formatting. Successful builds and package checks do not replace validation of the new commands inside an installed VS/SSMS.
 
 ## VS and SSMS: SQL snippets
 
@@ -94,7 +94,7 @@ Built-in snippets: `proc` (stored procedure template with TRY/CATCH), `try`, `tr
 - a **local `@variable`** — the declaration and every reference within the same batch (up to the next `GO`) are renamed;
 - a **table alias** (`FROM dbo.T AS t`) — the alias and all `t.Column` qualifiers within the declaring query are renamed, including correlated references from nested subqueries; a same-name alias declared in a nested query shadows the outer one and is left untouched.
 
-After you type the new name (validated: a variable is `@` plus an identifier; an alias is a plain identifier without `@`), a preview lists position, old and new text; applying happens in one Undo transaction. When no supported symbol is under the caret, a message is shown. Limitations: aliases in `UPDATE`/`DELETE` statements (no query specification) and quoted aliases `[t]` are not supported.
+After you type the new name (a variable is `@` plus an identifier; an alias is a plain identifier without `@`), a preview lists position, old and new text; applying happens in one Undo transaction. Names are limited to 128 characters, including a variable's `@`. Reserved SQL words such as `SELECT` cannot be new aliases; `@select` is a valid variable name. Invalid names are rejected before the preview. When no supported symbol is under the caret, a message is shown. Limitations: aliases in `UPDATE`/`DELETE` statements (no query specification) and quoted aliases `[t]` are not supported; conflicts with existing names are not checked.
 
 ## VS and SSMS: script outline and navigation
 
@@ -108,9 +108,9 @@ Three commands transform the statement under the caret and show a before/after p
 
 - **Convert INSERT to UPDATE** — a single-row `INSERT … (columns) VALUES (…)` becomes `UPDATE … SET column = value` with a `WHERE 1 = 1 /* TODO */` stub. An explicit column list and exactly one row are required.
 - **Convert VALUES to UNION ALL** — a multi-row `VALUES` becomes a `SELECT … UNION ALL SELECT …` chain; the first row's columns get aliases from the INSERT column list.
-- **EXEC: Capture Return Code** — a `DECLARE @returnCode AS INT;` is added before the `EXEC`, and the call becomes `EXEC @returnCode = …`. When the EXEC already captures a return code, an error is reported.
+- **EXEC: Capture Return Code** — the `DECLARE @returnCode AS INT;` declaration and `EXEC @returnCode = …` call are placed in one `BEGIN…END` block. The block stays inside the original `IF`/`ELSE` branch or `WHILE` body, preserving the call's execution condition. When the EXEC already captures a return code, an error is reported.
 
-The commands target the statement under the caret of the active `.sql` tab; an unsuitable statement produces a clear message without changing the text. Parsing runs in the background over a buffer snapshot.
+The commands target the statement under the caret of the active `.sql` tab; an unsuitable statement produces a clear message without changing the text. Parsing runs in the background over a buffer snapshot. VALUES conversion preserves delimited column names, including `[Order Id]` and `[a]]b]`. Both the raw replacement and the final document are parsed again: syntactically invalid results (such as a SELECT with DEFAULT) are rejected without offering an edit.
 
 ## VS and SSMS: generating CRUD from CREATE TABLE
 
@@ -118,11 +118,13 @@ The commands target the statement under the caret of the active `.sql` tab; an u
 
 IDENTITY columns are excluded from INSERT/UPDATE and procedure parameters; columns without an explicit `NULL`/`NOT NULL` constraint count as nullable (the T-SQL default). Generation requires an explicit key: the `WHERE` clauses of UPDATE/DELETE and the procedure are marked `/* TODO: key */` — fill in the key condition before use. No live database connection is required or performed. When no `CREATE TABLE` is found in the scope, a message is shown and the text stays unchanged.
 
+CRUD generation retains necessary brackets around schema, table, column and user-defined type names. Columns that cannot form valid parameter names, such as `[Order Id]`, use names such as `@column1` with a suffix on collision; the same mapping is used throughout the templates. Procedure names are limited to 128 characters while keeping `usp_` and `_Upsert`. Syntactically invalid generated SQL produces an error without inserting text.
+
 ## VS and SSMS: editor history and restore
 
 Every time an SQL document is saved, the extension writes a local snapshot of its content to `%USERPROFILE%\.tsqlformatter\history` (JSON, one file per snapshot, rotation keeps the newest 100; snapshots above 1 million characters are not stored). All data stays on this machine and is never sent anywhere. History is enabled by default and can be turned off entirely with **Keep editor history** under **Tools → Options → T-SQL Formatter → General** (in SSMS — the matching **T-SQL Formatter (SSMS) → General** page); disabling keeps the existing files on disk.
 
-**Restore Closed Script** opens a dialog listing the snapshots (newest first) with a filter over name, path and content, a preview of the selected snapshot, and an action that opens its content in a new document. Snapshots are written on save; restoring documents discarded without saving is not supported. To wipe the history, clear the `%USERPROFILE%\.tsqlformatter\history` directory.
+**Restore Closed Script** opens a dialog listing the snapshots (newest first) with a filter over name, path and content, a preview of the selected snapshot, and an action that opens its content in a new document. Each save gets a separate file even with an identical timestamp; snapshots with legacy filenames remain readable. Snapshots on close and recovery of discarded unsaved edits are not implemented yet: stage 9 is partially complete. Configurable limits/age-based rotation and server/database context also remain planned; the current options are fixed count-based rotation and fully disabling history. To wipe the history, clear the `%USERPROFILE%\.tsqlformatter\history` directory.
 
 ## Formatting settings and profiles in VS/SSMS
 

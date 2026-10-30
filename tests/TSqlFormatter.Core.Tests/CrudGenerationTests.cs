@@ -1,3 +1,4 @@
+using Microsoft.SqlServer.TransactSql.ScriptDom;
 using TSqlFormatter.Core.Formatting;
 using TSqlFormatter.Core.Generation;
 using TSqlFormatter.Core.Parsing;
@@ -139,6 +140,59 @@ public sealed class CrudGenerationTests
         Assert.DoesNotContain("INSERT INTO", sql, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("UPDATE", sql, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("CREATE OR ALTER PROCEDURE", sql, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Theory]
+    [InlineData("CREATE TABLE dbo.[Order Details] ([Order Id] INT NOT NULL, [select] NVARCHAR(20));")]
+    [InlineData("CREATE TABLE [sales team].[Order]]Details] ([a]]b] INT, [x.y] INT);")]
+    [InlineData("CREATE TABLE \"Order Details\" (\"Order Id\" INT);")]
+    [InlineData("CREATE TABLE dbo.T ([Order Id] INT, [column1] INT, [a-b] INT, [a b] INT);")]
+    [InlineData("CREATE TABLE dbo.T ([value] [custom schema].[custom type]);")]
+    public void Generator_handles_delimited_names_and_unique_parameter_names(string source)
+    {
+        var table = Read(source);
+        Assert.NotNull(table);
+
+        var sql = CrudGenerator.Generate(table, FormattingOptions.Default);
+
+        AssertParses(sql);
+        var script = Assert.IsType<TSqlScript>(_parser.Parse(sql, SqlDialectVersion.Auto).Root);
+        var select = Assert.IsType<SelectStatement>(script.Batches[0].Statements[0]);
+        var query = Assert.IsType<QuerySpecification>(select.QueryExpression);
+        var from = Assert.IsType<NamedTableReference>(Assert.Single(query.FromClause.TableReferences));
+        Assert.Equal(table.Name, from.SchemaObject.BaseIdentifier.Value);
+        Assert.Equal(table.Columns.Select(column => column.Name), query.SelectElements
+            .Cast<SelectScalarExpression>()
+            .Select(element => Assert.IsType<ColumnReferenceExpression>(element.Expression).MultiPartIdentifier.Identifiers.Last().Value));
+        var procedure = Assert.IsType<CreateOrAlterProcedureStatement>(Assert.Single(script.Batches[1].Statements));
+        var parameters = procedure.Parameters.Select(parameter => parameter.VariableName.Value).ToArray();
+        Assert.Equal(parameters.Length, parameters.Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        var insert = Assert.IsType<InsertStatement>(script.Batches[0].Statements[1]);
+        var values = Assert.IsType<ValuesInsertSource>(insert.InsertSpecification.InsertSource);
+        Assert.Equal(parameters, Assert.Single(values.RowValues).ColumnValues.Cast<VariableReference>().Select(v => v.Name));
+    }
+
+    [Fact]
+    public void Generator_keeps_derived_procedure_and_parameter_names_within_sql_limits()
+    {
+        var table = Read($"CREATE TABLE dbo.[{new string('t', 128)}] ([{new string('c', 128)}] INT);");
+
+        var sql = CrudGenerator.Generate(table!, FormattingOptions.Default);
+
+        AssertParses(sql);
+        var script = Assert.IsType<TSqlScript>(_parser.Parse(sql, SqlDialectVersion.Auto).Root);
+        var procedure = Assert.IsType<CreateOrAlterProcedureStatement>(Assert.Single(script.Batches[1].Statements));
+        Assert.InRange(procedure.ProcedureReference.Name.BaseIdentifier.Value.Length, 1, 128);
+        Assert.InRange(Assert.Single(procedure.Parameters).VariableName.Value.Length, 2, 128);
+    }
+
+    [Fact]
+    public void Generator_rejects_unparseable_generated_sql()
+    {
+        var table = new SqlTableDefinition("dbo", "T",
+            new[] { new TableColumn("a", "?", true, false) }, new SqlTextSpan(0, 0));
+
+        Assert.Throws<InvalidOperationException>(() => CrudGenerator.Generate(table, FormattingOptions.Default));
     }
 
     [Fact]

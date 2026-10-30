@@ -194,6 +194,48 @@ public sealed class RenameAnalyzerTests
         Assert.Equal(2, _analyzer.Plan(symbol!, "t2").Count);
     }
 
+    [Theory]
+    [InlineData("SELECT")]
+    [InlineData("select")]
+    [InlineData("FROM")]
+    [InlineData("WHERE")]
+    [InlineData("ORDER")]
+    [InlineData("UNION")]
+    public void Alias_plan_rejects_reserved_words_before_producing_edits(string name)
+    {
+        var symbol = Find("SELECT t.Id FROM dbo.T AS t;", "t.Id");
+
+        Assert.False(RenameNames.IsValidIdentifier(name));
+        Assert.Throws<ArgumentException>(() => _analyzer.Plan(symbol!, name));
+    }
+
+    [Theory]
+    [InlineData("source")]
+    [InlineData("_source2")]
+    [InlineData("Источник")]
+    public void Alias_plan_produces_parseable_sql_for_valid_names(string name)
+    {
+        const string sql = "SELECT t.Id FROM dbo.T AS t WHERE t.Id > 0;";
+        var symbol = Find(sql, "t.Id");
+        var changed = sql;
+        foreach (var edit in _analyzer.Plan(symbol!, name).OrderByDescending(edit => edit.Span.StartOffset))
+        {
+            changed = changed.Remove(edit.Span.StartOffset, edit.Span.Length).Insert(edit.Span.StartOffset, edit.NewText);
+        }
+
+        Assert.True(_parser.Parse(changed, SqlDialectVersion.Auto).ParseSucceeded);
+    }
+
+    [Fact]
+    public void Variable_name_may_contain_a_keyword_but_names_must_fit_the_sql_limit()
+    {
+        Assert.True(RenameNames.IsValidVariableName("@select"));
+        Assert.True(RenameNames.IsValidIdentifier(new string('a', 128)));
+        Assert.False(RenameNames.IsValidIdentifier(new string('a', 129)));
+        Assert.True(RenameNames.IsValidVariableName("@" + new string('a', 127)));
+        Assert.False(RenameNames.IsValidVariableName("@" + new string('a', 128)));
+    }
+
     [Fact]
     public void Alias_plan_covers_select_and_where_qualifiers()
     {

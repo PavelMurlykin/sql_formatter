@@ -7,7 +7,13 @@ queries. The CLI supports stdin or one file to stdout, recursive directories and
 multiple files with `--write`/`--check`, configuration discovery, and local preview
 `dotnet tool` packaging. Broader SQL coverage is planned in
 [`CODEX_DEVELOPMENT_PLAN.md`](CODEX_DEVELOPMENT_PLAN.md).
-The Visual Studio/SSMS extension provides **Format Document** and **Settings**.
+The current development branch also provides static analysis (`--analyze` and IDE
+commands), SQL snippets, variable/alias rename, script navigation, SQL transformations,
+CRUD templates from CREATE TABLE, and local save history. See the
+[development roadmap](docs/development/ROADMAP.md) for the unfinished UI settings
+of stage 3 and close-time history/recovery of stage 9. The installers in `release/`
+still contain the earlier formatter; the consolidated release is stage 12.
+The released Visual Studio/SSMS extension provides **Format Document** and **Settings**.
 Formatting affects the selection, or the whole active `.sql` when no text is
 selected, and also appears in the editor context menu. Settings include named
 profiles, shortcut assignment, grouped rules and syntax-highlighted previews,

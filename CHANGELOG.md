@@ -3,6 +3,24 @@
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
 
+## Development branch fixes (unreleased) — 2026-10-30
+
+- EXEC return-code capture emits a single BEGIN/END block so IF/ELSE and WHILE
+  keep control of the call. SQL transformations validate their replacement and final
+  document; VALUES-to-UNION preserves delimited column aliases.
+- Rename rejects reserved SQL aliases and names above 128 characters, including
+  the leading @ for variables; the dialog explains the restrictions in RU/EN.
+- CRUD quotes identifiers and user-defined types when needed, maps unsuitable column
+  names to valid unique parameters, bounds procedure names, and rejects invalid output.
+- History uses unique filenames and create-new writes, retaining snapshots saved
+  within one second and keeping legacy snapshots readable.
+- Added 29 regression scenarios; all 1601 tests and four VSIX package checks pass.
+  Stage 3 (analysis UI settings) and stage 9 (close-time
+  snapshots, discarded edits and remaining retention/context options) are explicitly
+  partially complete. Updated RU/EN manuals, README and development documentation.
+- Versions and distributables in release/ are unchanged; consolidated packaging and
+  installed-host validation remain outstanding.
+
 ## Editor history and restore — 2026-10-25
 
 - Local snapshot store in Core (`TSqlFormatter.Core.History`): every saved SQL document
