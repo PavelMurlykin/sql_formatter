@@ -1,4 +1,113 @@
-# Проверка выпуска VS 0.2.12 / SSMS 0.6.11 — 2026-10-08
+# Проверка выпуска VS 0.2.13 / SSMS 0.6.12 — 2026-10-31
+
+Текущие файлы в `release/` включают завершённые этапы 1–9, в том числе настройки
+анализа и историю закрытия. Это локальные preview-пакеты без публикации и подписи.
+
+| Файл | Версия | Цель |
+|---|---|---|
+| TSqlFormatter.VS2022.vsix | 0.2.13 | VS 17.14–17.x, amd64 |
+| TSqlFormatter.VS2026.vsix | 0.2.13 | VS 18.x, amd64 |
+| TSqlFormatter.SSMS20.vsix | 0.6.12 | SSMS 20, x86; комплектный Install-SSMS20.ps1 |
+| TSqlFormatter.SSMS22.vsix | 0.6.12 | SSMS 22.x, amd64 |
+| TSqlFormatter.Tool.0.1.0-preview.8.nupkg | 0.1.0-preview.8 | CLI, .NET 10 Runtime |
+
+## Автоматические проверки текущих пакетов
+
+Windows, .NET SDK 10.0.401, Release. `scripts/Build-Release.ps1 -SkipRestore`
+завершился успешно; сборка решения — **0 ошибок, 0 предупреждений**.
+
+| Проверка | Результат |
+|---|---|
+| Решение | 1478 Core/Configuration/CLI + 145 golden = **1623**, все прошли |
+| Verify-Vsix | Все 4 пакета: identity, диапазон хоста, архитектура и обязательные библиотеки |
+| Профили из готовых VSIX | **228 сочетаний**: 4 пакета × 3 профиля × 19 SQL-примеров; импорт, хранение, токены, идемпотентность; одинаковый вывод для 57 сочетаний профиля/SQL |
+| Этапы 3 и 9 в библиотеках VSIX | Все 4 пакета: настройки анализа/истории, проектные переопределения, отключение анализа, несохранённый буфер закрытия, метаданные, возраст/количество и отключение истории |
+| Общая форма настроек | RU/EN × light/dark — все 4 сценария, включая привязку/сохранение/отмену настроек анализа и истории |
+| Установщик SSMS20 | Миграция управляемых копий, повторное обновление, запрет копий внутри IDE и отказ от перемещения неуправляемых каталогов |
+| Упакованный CLI | Локальная установка preview.8; форматирование stdin с кодом 0 и анализ SELECT * с TSQL001 и кодом 1 |
+
+Проверка готовых VSIX извлекает библиотеки в отдельные каталоги `artifacts/`,
+запускает .NET Framework-хост x86 для SSMS20 и x64 для остальных пакетов,
+подтверждает загрузку именно комплектных Core/Configuration. Для SSMS заранее
+загружается установленный ScriptDom; комплектный ScriptDom 18 используется движком.
+Эта проверка библиотек отдельно от служб редактора внутри IDE.
+
+В поставку скопирован исправленный `Install-SSMS20.ps1`: резервные копии находятся
+в `%LOCALAPPDATA%\TSqlFormatter\SSMS20\Backups`, вне рекурсивных путей загрузки
+оболочки. Управляемые копии прежнего установщика внутри IDE переносятся туда же.
+Три нативных JSON-профиля сохранены без изменения настроек; анализ и история
+не входят в профили форматирования. Хэши всех 9 установочных файлов/профилей
+содержатся в [release-manifest.json](release-manifest.json); отдельные хэши четырёх
+VSIX и результаты профилей/этапов 3, 9 — в [profile-verification.json](profile-verification.json).
+
+Лог конвейера: `artifacts/release-2026-10-31/build-release.log`,
+TRX: `artifacts/release-tests/`, SQL и логи пакетов:
+`artifacts/release-profile-smoke/`, снимки формы: `artifacts/settings-ui/`.
+
+## Установленные хосты: отдельные результаты реализации
+
+**Свежая установка именно VS 0.2.13 / SSMS 0.6.12 в этом проходе не выполнялась.**
+Ни сборка, ни проверки извлечённых библиотек не подтверждают установку и работу
+служб IDE. Следующая таблица относится к проверке реализации этапов 3 и 9
+2026-10-31 до обновления версий установочных пакетов; детали и ограничения — в
+[отчёте этапов 3 и 9](../docs/development/stages-3-9-validation.md).
+
+| Ранее проверенный установленный хост | Подтверждённые сценарии |
+|---|---|
+| VS2022 17.14 x64 | Сохранение, отброшенные правки и несохранённый SQL; отчёт TSQL001; выключение анализа сохранено/перечитано, исходное включение восстановлено |
+| VS2026 18.10 x64 | Три сценария истории; регистрация 13 команд и вызов анализа; отдельный цикл сохранения настроек не повторялся |
+| SSMS20 20.2 x86 | Три сценария истории; 13 команд, отчёт TSQL001 Warning; правильный CodeBase после переноса старых резервных копий |
+| SSMS22 22.10 x64 | Три сценария истории; 13 команд, отчёт TSQL001 Warning; реальные элементы анализа и лимитов истории в настройках |
+
+SQL и подключения к серверу в этих сценариях не выполнялись. Сохранение имён
+живого сервера/БД не проверялось; они необязательны. Поля метаданных покрыты
+автоматическим round-trip. Восстановление в новом документе не проходило отдельный
+повторный UI-цикл в каждом поколении. Эти границы сохраняются для текущего выпуска.
+
+## Повторение и проверка после установки
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Build-Release.ps1 -SkipRestore
+```
+
+Без восстановленных зависимостей уберите `-SkipRestore`. Скрипт не устанавливает
+расширения в IDE. Следуйте [RU](README.ru.md) / [EN](README.en.md) инструкции,
+перезапустите IDE и на отдельных тестовых SQL проверьте Analyze Document,
+сохранение/повторное открытие настроек, сохранение и закрытие с отказом от записи,
+новый несохранённый SQL и Restore Closed Script. SQL выполнять не требуется.
+Проверьте активную вкладку и проектную секцию `analysis`, если ожидаемое правило
+не появляется. Для SSMS20 замените старый установочный скрипт комплектным.
+
+## English
+
+The current VS **0.2.13**, SSMS **0.6.12** and CLI **0.1.0-preview.8** packages
+include completed stages 1–9. The Release pipeline passed with zero warnings/errors,
+**1623 solution tests**, four VSIX checks, **228** extracted-package profile cases,
+four extracted-package analysis/history feature probes, four RU/EN/theme UI variants,
+the SSMS20 installer regression and packaged CLI formatting/analysis smoke.
+All 57 profile/SQL outputs match across the four packages. Core and Configuration
+load from each extracted installer; SSMS20 runs in x86 and the others in x64.
+
+The bundled SSMS20 installer keeps and migrates managed backups outside the IDE
+package search paths. The three native profiles are unchanged. SHA-256 values and
+package-scoped results are recorded in the JSON manifests linked above.
+
+**Fresh installation of these exact new versions was not repeated.** The installed
+host table records earlier 2026-10-31 validation of the stage 3/9 implementation:
+save/discarded/untitled history passed in VS2022, VS2026, SSMS20 and SSMS22; analysis
+reports were observed in VS2022/SSMS20/SSMS22, with invocation recorded in VS2026.
+VS2022 settings persistence and the native SSMS22 settings controls were checked.
+These are separate from the current packages' automated checks. No SQL execution or
+database connection was used. Live server/database capture and a separate restore
+UI cycle in every host remain unverified. Follow the installation guides and repeat
+the offline lifecycle checks after upgrading. Stages 10–11 and the final stage 12
+remain planned; these are unsigned local previews with no public publication.
+
+---
+
+Ниже — исторические результаты прежних пакетов; они не описывают текущие VSIX.
+
+## Историческая проверка VS 0.2.12 / SSMS 0.6.11 — 2026-10-08
 
 Windows, .NET SDK 10.0.401, Release: **0 предупреждений, 0 ошибок**.
 Пройдены **1282 Core + 145 golden = 1427 теста**, проверки всех четырёх VSIX,

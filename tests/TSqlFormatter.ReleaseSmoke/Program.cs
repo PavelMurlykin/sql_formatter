@@ -1,11 +1,14 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using TSqlFormatter.Configuration;
 using TSqlFormatter.Core.Formatting;
 using TSqlFormatter.Core.Parsing;
+using TSqlFormatter.Core.Analysis;
+using TSqlFormatter.Core.History;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace TSqlFormatter.ReleaseSmoke;
@@ -56,6 +59,9 @@ internal static class Program
             Directory.CreateDirectory(output);
             Require(Path.GetDirectoryName(typeof(ScriptDomSqlFormatter).Assembly.Location) == AppContext.BaseDirectory.TrimEnd('\\'),
                 "Formatter must load from the extracted installer.");
+            Require(Path.GetDirectoryName(typeof(EditorFeaturesSettings).Assembly.Location) == AppContext.BaseDirectory.TrimEnd('\\'),
+                "Configuration must load from the extracted installer.");
+            VerifyEditorFeatures(output);
             var formatter = new ScriptDomSqlFormatter();
             var parser = new ScriptDomSqlParser();
             foreach (var name in Profiles)
@@ -101,4 +107,45 @@ internal static class Program
 
     private static void Require(bool condition, string message)
     { if (!condition) throw new InvalidOperationException(message); }
+
+    private static void VerifyEditorFeatures(string output)
+    {
+        var settings = new EditorFeaturesSettings(new AnalysisConfiguration(new[] { "TSQL001" },
+            new Dictionary<string, AnalysisSeverity> { ["TSQL004"] = AnalysisSeverity.Info }, false),
+            historyMaxSnapshots: 2, historyMaxCharacters: 1000, historyMaxAgeDays: 7);
+        var restored = EditorFeaturesSettings.Deserialize(settings.Serialize());
+        Require(!restored.Analysis.Enabled && restored.Analysis.DisabledRules.Contains("TSQL001") &&
+            restored.Analysis.SeverityOverrides["TSQL004"] == AnalysisSeverity.Info &&
+            restored.HistoryMaxSnapshots == 2 && restored.HistoryMaxCharacters == 1000 && restored.HistoryMaxAgeDays == 7,
+            "Packaged analysis/history settings round trip failed.");
+        var project = new AnalysisConfigurationParser().Parse(
+            "{\"analysis\":{\"enabled\":true,\"disabled\":[],\"severity\":{\"TSQL001\":\"error\"}}}", restored.Analysis);
+        var parsed = new ScriptDomSqlParser().Parse("SELECT * FROM dbo.ReleaseSmoke;", SqlDialectVersion.Auto);
+        var diagnostics = new SqlAnalyzer().Analyze(parsed, project.Configuration!.ToAnalysisOptions()).Diagnostics;
+        Require(project.Succeeded && diagnostics.Count == 1 && diagnostics[0].Code == "TSQL001" &&
+            diagnostics[0].Severity == AnalysisSeverity.Error, "Packaged project analysis override failed.");
+        Require(new SqlAnalyzer().Analyze(parsed, restored.Analysis.ToAnalysisOptions()).Diagnostics.Count == 0,
+            "Packaged disabled analysis still produced findings.");
+        var session = new EditorHistorySession();
+        session.Remember(1, "untitled.sql", "SELECT 1; -- discarded", true, true, 1000, "test-server", "test-db");
+        var snapshot = session.Take(1, "close", true)!;
+        Require(snapshot.Content.Contains("discarded") && session.Take(1, "close") == null,
+            "Packaged close-time history lost the unsaved buffer.");
+        var store = restored.CreateHistoryStore(Path.Combine(output, "history"));
+        var now = DateTime.UtcNow;
+        Require(store.Save("expired.sql", "old", now.AddDays(-8)) != null, "Packaged history write failed.");
+        Require(store.Save(snapshot.FilePath, snapshot.Content, now, snapshot.Server, snapshot.Database, snapshot.Reason) != null,
+            "Packaged close snapshot write failed.");
+        var item = store.List().Single();
+        Require(item.Content == snapshot.Content && item.Server == "test-server" && item.Database == "test-db" && item.Reason == "close",
+            "Packaged age retention or snapshot metadata round trip failed.");
+        store.Save("second.sql", "second", now.AddSeconds(1));
+        store.Save("third.sql", "third", now.AddSeconds(2));
+        Require(store.List().Count == 2 && store.List().All(s => s.FilePath != snapshot.FilePath),
+            "Packaged count retention failed.");
+        store.Enabled = false; store.MaxAgeDays = 1; store.Prune(now.AddDays(20));
+        Require(store.List().Count == 2 && store.Save("off.sql", "off") == null,
+            "Packaged disabled history modified its snapshots.");
+        Console.WriteLine("Editor features: analysis settings/project overrides, unsaved close buffer, metadata, age/count retention and disabled history passed.");
+    }
 }

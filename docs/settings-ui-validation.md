@@ -1,4 +1,24 @@
-# Current settings validation — 2026-10-08
+# Current settings validation — 2026-10-31
+
+Packages: Visual Studio 0.2.13 / SSMS 0.6.12. The Release pipeline passed with
+zero warnings/errors and 1623 solution tests. All RU/EN × light/dark WinForms
+scenarios passed, including analysis/history control binding, settings round trip,
+project-independent saved drafts and unsaved-change isolation. Profile, shortcut,
+search/detail and SQL preview checks continue to pass.
+
+The four extracted VSIX libraries also passed analysis/history feature probes and
+228 profile/SQL cases. This is separate from fresh installation in an IDE, which
+was not repeated for these package versions. Previous installed-host checks of
+the stage 3/9 implementation and their limits are linked from
+[release validation](../release/VALIDATION.md).
+
+Current log: `artifacts/release-2026-10-31/build-release.log`; screenshots:
+`artifacts/settings-ui/`. Reproduce with `scripts/Build-Release.ps1 -SkipRestore`
+after restoring dependencies, or `scripts/Verify-SettingsUi.ps1 -SkipRestore`.
+
+---
+
+## Historical settings validation — 2026-10-08
 
 Packages: Visual Studio 0.2.12 / SSMS 0.6.11. Release build: zero warnings/errors;
 1282 Core + 145 golden = 1427 tests. The standalone Windows settings scenarios

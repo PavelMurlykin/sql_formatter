@@ -18,8 +18,9 @@ try {
             Invoke-Dotnet $arguments
         }
     }
-    Invoke-Dotnet @('build', 'TSqlFormatter.sln', '-c', 'Release', '--no-restore')
-    Invoke-Dotnet @('test', 'TSqlFormatter.sln', '-c', 'Release', '--no-build', '--no-restore')
+    Invoke-Dotnet @('build', 'TSqlFormatter.sln', '-c', 'Release', '--no-restore', '--disable-build-servers', '-m:1', '-p:UseSharedCompilation=false')
+    Invoke-Dotnet @('test', 'TSqlFormatter.sln', '-c', 'Release', '--no-build', '--no-restore', '--disable-build-servers', '-m:1', '--logger', 'trx;LogFilePrefix=release', '--results-directory', 'artifacts\release-tests')
+    & (Join-Path $repository 'tests\TSqlFormatter.InstallerSmoke\Verify-SSMS20Backup.ps1')
 
     $packages = @(
         @{ Host = 'VS2022'; Assembly = 'TSqlFormatter.VisualStudio2022'; Id = 'TSqlFormatter.VisualStudio'; Target = 'Microsoft.VisualStudio.Community'; Range = '[17.14,18.0)'; Architecture = 'amd64' },
@@ -63,6 +64,8 @@ try {
     Invoke-Dotnet @('tool', 'install', 'TSqlFormatter.Tool', '--tool-path', $toolDirectory, '--source', $cliOutput, '--version', [string]$cliProject.Project.PropertyGroup.Version)
     $text = 'select 1;' | & (Join-Path $toolDirectory 'tsqlformat.exe') -
     if ($LASTEXITCODE -ne 0 -or ($text | Out-String).Trim() -ne 'SELECT 1;') { throw 'Packaged CLI smoke failed.' }
+    $analysis = 'SELECT * FROM dbo.ReleaseSmoke;' | & (Join-Path $toolDirectory 'tsqlformat.exe') --analyze -
+    if ($LASTEXITCODE -ne 1 -or ($analysis | Out-String) -notmatch 'TSQL001') { throw 'Packaged CLI analysis smoke failed.' }
     foreach ($file in $deliverables) {
         $file.sha256 = (Get-FileHash -LiteralPath (Join-Path $release $file.file) -Algorithm SHA256).Hash.ToLowerInvariant()
     }

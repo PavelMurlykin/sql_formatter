@@ -3,6 +3,23 @@
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
 
+## Local delivery of stages 1–9 — 2026-10-31
+
+- Updated all four `release/` installers: VS2022/VS2026 **0.2.13** and
+  SSMS20/SSMS22 **0.6.12**, including completed analysis settings and close-time
+  history. The fixed SSMS20 installer migrates backups outside shell discovery paths.
+- CLI **0.1.0-preview.8** includes the current formatter and analysis command.
+  The three native JSON profiles retain their existing settings.
+- Added extracted-package analysis/history probes to the release smoke and
+  packaged CLI analysis verification. All 1623 tests, four VSIX checks, 228 profile
+  cases, four language/theme UI variants and the installer regression pass.
+- Refreshed RU/EN installation guides, manuals, package SHA-256 manifests and
+  validation. Previous installed-host feature checks are identified separately;
+  fresh installation of these exact versions was not repeated. Stages 10–11 and
+  the final consolidated stage 12 remain planned.
+- Distributable script/profile bytes are preserved across Git checkouts so their
+  manifest checksums remain valid.
+
 ## Analysis settings and close-time history (unreleased) — 2026-10-31
 
 - Completed stage 3 settings: enable analysis, select TSQL001–TSQL005 and override

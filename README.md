@@ -13,9 +13,10 @@ CRUD templates from CREATE TABLE, analysis settings and local save/close history
 with configurable retention. Stages 3 and 9 are complete in the
 [development roadmap](docs/development/ROADMAP.md); see the
 [installed-host evidence and limits](docs/development/stages-3-9-validation.md).
-The installers in `release/`
-still contain the earlier formatter; the consolidated release is stage 12.
-The released Visual Studio/SSMS extension provides **Format Document** and **Settings**.
+The installers in `release/` include the completed stages 1–9, with analysis
+settings and close-time history. Stages 10–11 and their final consolidated
+release remain planned. The extension provides **Format Document**, **Analyze
+Document**, editor tools, **Restore Closed Script** and **Settings**.
 Formatting affects the selection, or the whole active `.sql` when no text is
 selected, and also appears in the editor context menu. Settings include named
 profiles, shortcut assignment, grouped rules and syntax-highlighted previews,
@@ -72,7 +73,7 @@ To build and install the preview tool from this repository:
 
 ```powershell
 dotnet pack src/TSqlFormatter.Cli/TSqlFormatter.Cli.csproj -c Release -o release
-dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source release --version 0.1.0-preview.7
+dotnet tool install TSqlFormatter.Tool --tool-path artifacts/tool-bin --source release --version 0.1.0-preview.8
 .\artifacts\tool-bin\tsqlformat.exe query.sql --check
 ```
 
@@ -123,4 +124,4 @@ native import JSON for VSIX 0.2.8 / SSMS 0.6.7. Their source mapping, explicit n
 approximations and audit against both EPM-RAC database projects are described in
 [the working-profile report](docs/sql-complete-working-profiles.md).
 The current release includes these profiles and ADIR_SQL_Main in `release/`, with
-Visual Studio packages 0.2.12 and SSMS packages 0.6.11.
+Visual Studio packages 0.2.13 and SSMS packages 0.6.12.

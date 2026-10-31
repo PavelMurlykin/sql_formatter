@@ -2,8 +2,10 @@
 
 ## Русский
 
-Проверены текущие исходники ветки `feature/extra_functions`. Пакеты и инструкции
-в `release/` относятся к прежнему выпуску; их консолидация остаётся этапом 12.
+Отчёт фиксирует проверку исходников ветки `feature/extra_functions` до обновления
+версий пакетов. Текущая поставка описана отдельно в
+[проверке выпуска](../../release/VALIDATION.md); установленные результаты ниже
+не являются повторной установкой новых версий.
 Успешная сборка отдельно не считается проверкой установленного расширения.
 
 ### Автоматические проверки
@@ -76,9 +78,11 @@ SSMS20 публикует DTE под GUID-moniker, а не `VisualStudio.DTE.*`.
 
 ## English
 
-Validation covers the current `feature/extra_functions` source. Existing packages
-and instructions in `release/` still describe the previous delivery; consolidated
-packaging remains stage 12. A successful build alone is not installed-host validation.
+This report records `feature/extra_functions` source validation before the package
+version update. The current delivery is described separately in
+[release validation](../../release/VALIDATION.md); the installed-host evidence below
+does not claim fresh installation of the new versions. A successful build alone is
+not installed-host validation.
 
 The Release solution builds with no warnings or errors. All **1623 tests** pass
 (1478 Core/Configuration/CLI and 145 golden), as do four RU/EN × light/dark settings

@@ -1,6 +1,6 @@
 ﻿{
-    "date":  "2026-10-08",
-    "scope":  "Extracted-installer libraries: profile import, editor/store round trip, formatting, permitted casing/syntax edits, idempotence, identical outputs. Separate from installed-IDE UI validation.",
+    "date":  "2026-10-31",
+    "scope":  "Extracted-installer libraries: analysis/history feature smoke, profile import, editor/store round trip, formatting, permitted casing/syntax edits, idempotence, identical outputs. Separate from installed-IDE UI validation.",
     "profiles":  [
                      {
                          "file":  "ADIR_SQL_Main.json",
@@ -19,38 +19,42 @@
                      {
                          "host":  "VS2022",
                          "file":  "TSqlFormatter.VS2022.vsix",
-                         "sha256":  "75dcf556979ff0640b84453a1d8d7b4689d3d7c9095bc1d5253de88d19fd61a9",
+                         "sha256":  "fa0891f298605838cace7a79efde41a9a449c6df760d9edd312c9073ff1acc77",
                          "cases":  57,
                          "architecture":  "x64",
                          "result":  "passed",
-                         "identicalOutput":  true
+                         "identicalOutput":  true,
+                         "editorFeatures":  "passed: analysis settings/project overrides; unsaved close buffer; metadata; age/count retention; disabled history"
                      },
                      {
                          "host":  "VS2026",
                          "file":  "TSqlFormatter.VS2026.vsix",
-                         "sha256":  "53a78f8bccd960060c2a9102d2c2d901f7f6a79d2be05267b2b96fac2e51d66e",
+                         "sha256":  "0a695bf3d5d596d9266ecd855f6e6ee61a12f813a7adefb13705bfb419b4507a",
                          "cases":  57,
                          "architecture":  "x64",
                          "result":  "passed",
-                         "identicalOutput":  true
+                         "identicalOutput":  true,
+                         "editorFeatures":  "passed: analysis settings/project overrides; unsaved close buffer; metadata; age/count retention; disabled history"
                      },
                      {
                          "host":  "SSMS20",
                          "file":  "TSqlFormatter.SSMS20.vsix",
-                         "sha256":  "f1965d61d363525a3c3e76b8166298cf9487912c5e655da05f96cebcb289c393",
+                         "sha256":  "555e528f88aac1df6b668f89b0011e46c6ec4f9b5bbb3a5a313e58a2d7b53a3c",
                          "cases":  57,
                          "architecture":  "x86",
                          "result":  "passed",
-                         "identicalOutput":  true
+                         "identicalOutput":  true,
+                         "editorFeatures":  "passed: analysis settings/project overrides; unsaved close buffer; metadata; age/count retention; disabled history"
                      },
                      {
                          "host":  "SSMS22",
                          "file":  "TSqlFormatter.SSMS22.vsix",
-                         "sha256":  "0a57cea9e27f812d29f0b9105b2feed69cb2830776d229d217b0c729c0b564c7",
+                         "sha256":  "b705bc14b4c057c5ff3a808043164856214f3ab5e65f00b6dc75d693f189388e",
                          "cases":  57,
                          "architecture":  "x64",
                          "result":  "passed",
-                         "identicalOutput":  true
+                         "identicalOutput":  true,
+                         "editorFeatures":  "passed: analysis settings/project overrides; unsaved close buffer; metadata; age/count retention; disabled history"
                      }
                  ]
 }

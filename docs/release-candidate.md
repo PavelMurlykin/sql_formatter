@@ -26,8 +26,9 @@ solution, release-smoke and settings-UI projects.
 
 The builder performs a Release solution build and tests, checks the manifests and
 required assets in each VSIX, copies the three canonical JSON profiles, tests
-their import/store/formatting against extracted package libraries, runs the
-WinForms settings scenario, and packs/installs/smoke-tests the local CLI. It writes
+their import/store/formatting and analysis/history behavior against extracted
+package libraries, runs the SSMS20 upgrade regression and WinForms settings
+scenario, and packs/installs/smoke-tests formatting and analysis in the local CLI. It writes
 `release-manifest.json` with deliverable versions and SHA-256 values and
 `profile-verification.json` with profile results. It does not install IDE
 extensions or publish packages. Installation and UI checks are recorded
@@ -37,11 +38,11 @@ separately in [release validation](../release/VALIDATION.md).
 
 | Host | Package | Adapter version |
 | --- | --- | --- |
-| VS 2022 17.14 x64 | TSqlFormatter.VS2022.vsix | 0.2.12 |
-| VS 2026 18.x x64 | TSqlFormatter.VS2026.vsix | 0.2.12 |
-| SSMS 20 x86 | TSqlFormatter.SSMS20.vsix + Install-SSMS20.ps1 | 0.6.11 |
-| SSMS 22 x64 | TSqlFormatter.SSMS22.vsix | 0.6.11 |
-| CLI, .NET 10 Runtime | TSqlFormatter.Tool.0.1.0-preview.7.nupkg | 0.1.0-preview.7 |
+| VS 2022 17.14 x64 | TSqlFormatter.VS2022.vsix | 0.2.13 |
+| VS 2026 18.x x64 | TSqlFormatter.VS2026.vsix | 0.2.13 |
+| SSMS 20 x86 | TSqlFormatter.SSMS20.vsix + Install-SSMS20.ps1 | 0.6.12 |
+| SSMS 22 x64 | TSqlFormatter.SSMS22.vsix | 0.6.12 |
+| CLI, .NET 10 Runtime | TSqlFormatter.Tool.0.1.0-preview.8.nupkg | 0.1.0-preview.8 |
 
 Profiles: `ADIR_SQL_Main.json`, `AV_Profile.json`, `Right-aligned-EPM-AWB2.json`.
 The conversion limitations remain documented in the manuals and profile reports.
@@ -56,10 +57,16 @@ the modern SDK. The shared formatter and settings are bundled in all packages.
 Install the additional local CLI without publishing:
 
 ```powershell
-dotnet tool install TSqlFormatter.Tool --tool-path artifacts/eval-tool --source release --version 0.1.0-preview.7
+dotnet tool install TSqlFormatter.Tool --tool-path artifacts/eval-tool --source release --version 0.1.0-preview.8
 .\artifacts\eval-tool\tsqlformat.exe query.sql --check
 ```
 
 These are unsigned local preview packages. Existing historical IDE matrices
 describe only their stated versions; they do not certify the new four packages
 or every minor host version. No stable public release is claimed.
+
+The 2026-10-31 delivery contains completed stages 1–9. The exact new package
+versions have automated payload validation; earlier installed-host feature checks
+are recorded separately. Stages 10–11 and the final stage 12 remain planned.
+The SSMS20 installer now migrates managed backups outside the shell's package
+search paths. Replace old copies of the installer script when upgrading.

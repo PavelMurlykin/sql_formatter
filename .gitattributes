@@ -1,1 +1,9 @@
 tests/TSqlFormatter.Core.Tests/SqlCompleteParity/*.tsv text eol=lf
+
+# Keep shipped bytes stable across checkouts: release-manifest.json hashes them.
+release/*.vsix binary
+release/*.nupkg binary
+release/Install-SSMS20.ps1 -text
+release/ADIR_SQL_Main.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+release/AV_Profile.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+release/Right-aligned-EPM-AWB2.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
