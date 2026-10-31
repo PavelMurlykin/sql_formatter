@@ -26,7 +26,7 @@ namespace TSqlFormatter.Ssms;
 [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
 [ProvideAutoLoad(UIContextGuids80.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
 [ProvideAutoLoad(UIContextGuids80.SolutionExists, PackageAutoLoadFlags.BackgroundLoad)]
-[ProvideMenuResource("Menus.ctmenu", 1)]
+[ProvideMenuResource("Menus.ctmenu", 2)]
 [ProvideOptionPage(typeof(SsmsOptionsPage), "T-SQL Formatter (SSMS)", "General", 0, 0, true)]
 [ProvideOptionPage(typeof(FullSettingsOptionsPage), "T-SQL Formatter (SSMS)", "All settings", 0, 0, true)]
 [Guid(PackageGuid)]
@@ -46,7 +46,7 @@ public sealed class SsmsPackage : AsyncPackage
     private ScriptOutlineWindow? outlineWindow;
     private System.Windows.Forms.NativeWindow? outlineWindowOwner;
     private IVsRunningDocumentTable? runningDocumentTable;
-    private uint runningDocumentTableCookie;
+    private EditorHistoryIntegration? historyIntegration;
 
     protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
     {
@@ -65,9 +65,11 @@ public sealed class SsmsPackage : AsyncPackage
         fullSettings.ShortcutProvider = () => IdeHostIntegration.Shortcut(dte, CommandSet);
         fullSettings.ShortcutApply = value => IdeHostIntegration.SetShortcut(dte, CommandSet, value);
         runningDocumentTable = await GetServiceAsync(typeof(SVsRunningDocumentTable)) as IVsRunningDocumentTable;
+        fullSettings.LegacyHistoryEnabledProvider = () => ((SsmsOptionsPage)GetDialogPage(typeof(SsmsOptionsPage))).KeepEditorHistory;
         if (runningDocumentTable != null)
-            Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(runningDocumentTable.AdviseRunningDocTableEvents(
-                new RdtEvents(HandleBeforeSave), out runningDocumentTableCookie));
+            historyIntegration = new EditorHistoryIntegration(runningDocumentTable, editorAdapters, dte,
+                fullSettings.ResolveEditorFeatures);
+        fullSettings.FeaturesSaved = () => historyIntegration?.Refresh();
         if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService commands)
         {
             var format = new OleMenuCommand(ExecuteFormatDocument, new CommandID(CommandSet, 0x0200));
@@ -165,7 +167,8 @@ public sealed class SsmsPackage : AsyncPackage
         System.Collections.Generic.IReadOnlyList<EditorSnapshot> snapshots;
         try
         {
-            snapshots = await Task.Run(() => new EditorSnapshotStore().List(), DisposalToken);
+            var store = ((FullSettingsOptionsPage)GetDialogPage(typeof(FullSettingsOptionsPage))).ResolveEditorFeatures().CreateHistoryStore();
+            snapshots = await Task.Run(() => { store.Prune(); return store.List(); }, DisposalToken);
         }
         catch (OperationCanceledException) { return; }
 
@@ -200,78 +203,6 @@ public sealed class SsmsPackage : AsyncPackage
                 ShowMessage($"Restore failed: {ex.Message}", true);
             }
         }
-    }
-
-    private void HandleBeforeSave(uint docCookie)
-    {
-        ThreadHelper.ThrowIfNotOnUIThread();
-        try
-        {
-            if (runningDocumentTable == null)
-            {
-                return;
-            }
-
-            int hr = runningDocumentTable.GetDocumentInfo(docCookie, out _, out _, out _,
-                out string moniker, out _, out _, out IntPtr docData);
-            string? content = null;
-            if (docData != IntPtr.Zero)
-            {
-                if (Marshal.GetObjectForIUnknown(docData) is IVsTextLines textLines &&
-                    Microsoft.VisualStudio.ErrorHandler.Succeeded(textLines.GetLastLineIndex(out int lastLine, out int lastColumn)) &&
-                    Microsoft.VisualStudio.ErrorHandler.Succeeded(textLines.GetLineText(0, 0, lastLine, lastColumn, out string text)))
-                {
-                    content = text;
-                }
-
-                Marshal.Release(docData);
-            }
-
-            if (Microsoft.VisualStudio.ErrorHandler.Succeeded(hr) && content != null)
-            {
-                var automation = (SsmsOptionsPage)GetDialogPage(typeof(SsmsOptionsPage));
-                if (automation.KeepEditorHistory)
-                {
-                    new EditorSnapshotStore().Save(moniker ?? string.Empty, content);
-                }
-            }
-        }
-        catch (Exception)
-        {
-            // History is best-effort; storage failures never break saving.
-        }
-    }
-
-    private sealed class RdtEvents : IVsRunningDocTableEvents
-    {
-        private readonly Action<uint> beforeSave;
-
-        public RdtEvents(Action<uint> beforeSave)
-        {
-            this.beforeSave = beforeSave;
-        }
-
-        public int OnBeforeSave(uint docCookie)
-        {
-            beforeSave(docCookie);
-            return Microsoft.VisualStudio.VSConstants.S_OK;
-        }
-
-        public int OnAfterFirstDocumentLock(uint docCookie, uint dwRDTLockType,
-            uint dwReadLocksRemaining, uint dwEditLocksRemaining) => Microsoft.VisualStudio.VSConstants.S_OK;
-
-        public int OnBeforeLastDocumentUnlock(uint docCookie, uint dwRDTLockType,
-            uint dwReadLocksRemaining, uint dwEditLocksRemaining) => Microsoft.VisualStudio.VSConstants.S_OK;
-
-        public int OnAfterSave(uint docCookie) => Microsoft.VisualStudio.VSConstants.S_OK;
-
-        public int OnAfterAttributeChange(uint docCookie, uint grfAttribs) => Microsoft.VisualStudio.VSConstants.S_OK;
-
-        public int OnBeforeDocumentWindowShow(uint docCookie, int fFirstShow,
-            IVsWindowFrame pFrame) => Microsoft.VisualStudio.VSConstants.S_OK;
-
-        public int OnAfterDocumentWindowHide(uint docCookie,
-            IVsWindowFrame pFrame) => Microsoft.VisualStudio.VSConstants.S_OK;
     }
 
     private void ShowSettings(bool profiles)
@@ -911,9 +842,10 @@ public sealed class SsmsPackage : AsyncPackage
         }
 
         string source = snapshot.GetText();
+        var analysisDefaults = ((FullSettingsOptionsPage)GetDialogPage(typeof(FullSettingsOptionsPage))).ResolveEditorFeatures().Analysis;
         try
         {
-            var analysis = await Task.Run(() => SqlDocumentAnalysis.Run(editor.Path, source, DisposalToken), DisposalToken);
+            var analysis = await Task.Run(() => SqlDocumentAnalysis.Run(editor.Path, source, DisposalToken, analysisDefaults), DisposalToken);
             await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
             if (analysis.Error is { } error)
             {
@@ -934,7 +866,9 @@ public sealed class SsmsPackage : AsyncPackage
             if (analysis.Diagnostics.Count == 0)
             {
                 CloseAnalysisWindow();
-                ShowMessage(SettingsAppearance.Text("Анализ: замечаний нет.", "Analysis finished: no findings."));
+                ShowMessage(analysis.Enabled
+                    ? SettingsAppearance.Text("Анализ: замечаний нет.", "Analysis finished: no findings.")
+                    : SettingsAppearance.Text("Анализ отключён в настройках.", "Analysis is disabled in settings."));
                 return;
             }
 
@@ -1111,13 +1045,13 @@ public sealed class SsmsPackage : AsyncPackage
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing && runningDocumentTable != null && runningDocumentTableCookie != 0)
+        if (disposing && historyIntegration != null)
         {
             JoinableTaskFactory.Run(async () =>
             {
                 await JoinableTaskFactory.SwitchToMainThreadAsync();
-                runningDocumentTable.UnadviseRunningDocTableEvents(runningDocumentTableCookie);
-                runningDocumentTableCookie = 0;
+                historyIntegration.Dispose();
+                historyIntegration = null;
             });
         }
 

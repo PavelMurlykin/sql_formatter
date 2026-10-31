@@ -3,6 +3,28 @@
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
 
+## Analysis settings and close-time history (unreleased) — 2026-10-31
+
+- Completed stage 3 settings: enable analysis, select TSQL001–TSQL005 and override
+  severities in the shared RU/EN General page. Save/Cancel preserves draft semantics;
+  per-user settings stay independent of formatting profiles. Explicit project
+  `analysis` fields override IDE defaults; disabled analysis reports its state.
+- Completed stage 9 history: save and close snapshots include untitled SQL and
+  discarded edits, independent of format-on-save. Count, character and age limits
+  are configurable. Optional server/database/reason fields preserve legacy JSON
+  compatibility; context capture never opens a connection or stores credentials.
+- Fixed close-time background-IO draining to avoid waiting for its own task collection.
+  Snapshot age comparisons preserve fractional UTC timestamps.
+- SSMS20 upgrades now store backups outside the shell's package search paths and
+  migrate managed legacy backups that could override the installed DLL. Menu resource
+  revisions are refreshed for the expanded command set.
+- Added 22 unit/integration scenarios and an installer regression covering migration,
+  repeated upgrades, unsafe backup paths and unmanaged folders. All 1623 solution
+  tests, four RU/EN/theme UI variants and four VSIX checks pass.
+- Installed-host evidence and remaining validation limits are recorded in
+  [stage 3 and 9 validation](docs/development/stages-3-9-validation.md).
+  Existing `release/` packages remain unchanged; consolidated delivery is stage 12.
+
 ## Development branch fixes (unreleased) — 2026-10-30
 
 - EXEC return-code capture emits a single BEGIN/END block so IF/ELSE and WHILE

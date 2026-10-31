@@ -10,11 +10,13 @@ public sealed class AnalysisConfiguration
 
     public AnalysisConfiguration(
         IReadOnlyList<string> disabledRules,
-        IReadOnlyDictionary<string, AnalysisSeverity> severityOverrides)
+        IReadOnlyDictionary<string, AnalysisSeverity> severityOverrides,
+        bool enabled = true)
     {
         if (disabledRules is null) throw new ArgumentNullException(nameof(disabledRules));
         if (severityOverrides is null) throw new ArgumentNullException(nameof(severityOverrides));
 
+        Enabled = enabled;
         DisabledRules = disabledRules.ToArray();
         var overrides = new Dictionary<string, AnalysisSeverity>(StringComparer.OrdinalIgnoreCase);
         foreach (var pair in severityOverrides)
@@ -26,12 +28,15 @@ public sealed class AnalysisConfiguration
     }
 
     public IReadOnlyList<string> DisabledRules { get; }
+    public bool Enabled { get; }
 
     public IReadOnlyDictionary<string, AnalysisSeverity> SeverityOverrides { get; }
 
     public AnalysisOptions ToAnalysisOptions()
     {
         var options = new AnalysisOptions();
+        if (!Enabled)
+            foreach (var rule in SqlAnalyzer.DefaultRules) options.DisabledRules.Add(rule.Code);
         foreach (var code in DisabledRules)
         {
             options.DisabledRules.Add(code);

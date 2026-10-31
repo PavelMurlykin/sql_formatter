@@ -9,9 +9,11 @@ multiple files with `--write`/`--check`, configuration discovery, and local prev
 [`CODEX_DEVELOPMENT_PLAN.md`](CODEX_DEVELOPMENT_PLAN.md).
 The current development branch also provides static analysis (`--analyze` and IDE
 commands), SQL snippets, variable/alias rename, script navigation, SQL transformations,
-CRUD templates from CREATE TABLE, and local save history. See the
-[development roadmap](docs/development/ROADMAP.md) for the unfinished UI settings
-of stage 3 and close-time history/recovery of stage 9. The installers in `release/`
+CRUD templates from CREATE TABLE, analysis settings and local save/close history
+with configurable retention. Stages 3 and 9 are complete in the
+[development roadmap](docs/development/ROADMAP.md); see the
+[installed-host evidence and limits](docs/development/stages-3-9-validation.md).
+The installers in `release/`
 still contain the earlier formatter; the consolidated release is stage 12.
 The released Visual Studio/SSMS extension provides **Format Document** and **Settings**.
 Formatting affects the selection, or the whole active `.sql` when no text is

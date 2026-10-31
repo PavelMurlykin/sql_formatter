@@ -27,7 +27,7 @@ namespace TSqlFormatter.VisualStudio;
 [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
 [ProvideAutoLoad(UIContextGuids80.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
 [ProvideAutoLoad(UIContextGuids80.SolutionExists, PackageAutoLoadFlags.BackgroundLoad)]
-[ProvideMenuResource("Menus.ctmenu", 1)]
+[ProvideMenuResource("Menus.ctmenu", 2)]
 [ProvideOptionPage(typeof(GeneralOptionsPage), "T-SQL Formatter", "General", 0, 0, true)]
 [ProvideOptionPage(typeof(FullSettingsOptionsPage), "T-SQL Formatter", "All settings", 0, 0, true)]
 [ProvideOptionPage(typeof(PreviewOptionsPage), "T-SQL Formatter", "SQL Preview", 0, 0, true)]
@@ -49,7 +49,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
     private IVsStatusbar? statusbar;
     private IVsOutputWindow? outputWindow;
     private IVsRunningDocumentTable? runningDocumentTable;
-    private uint runningDocumentTableCookie;
+    private EditorHistoryIntegration? historyIntegration;
     private readonly System.Collections.Generic.HashSet<uint> savesInProgress = new();
     private readonly SqlAnalysisMarkers analysisMarkers = new();
     private AnalysisReportWindow? analysisWindow;
@@ -68,9 +68,6 @@ public sealed class SqlFormatterPackage : AsyncPackage
         statusbar = await GetServiceAsync(typeof(SVsStatusbar)) as IVsStatusbar;
         outputWindow = await GetServiceAsync(typeof(SVsOutputWindow)) as IVsOutputWindow;
         runningDocumentTable = await GetServiceAsync(typeof(SVsRunningDocumentTable)) as IVsRunningDocumentTable;
-        if (runningDocumentTable != null)
-            ErrorHandler.ThrowOnFailure(runningDocumentTable.AdviseRunningDocTableEvents(
-                new SaveEventSink(HandleBeforeSave), out runningDocumentTableCookie));
         var components = await GetServiceAsync(typeof(SComponentModel)) as IComponentModel;
         editorAdapters = components?.GetService<IVsEditorAdaptersFactoryService>();
         undoRegistry = components?.GetService<ITextUndoHistoryRegistry>();
@@ -81,6 +78,10 @@ public sealed class SqlFormatterPackage : AsyncPackage
         fullSettings.SqlPathProvider = () => ActiveSqlEditor.TryRead(textManager, out var editor, monitorSelection) ? editor.Path : null;
         fullSettings.ShortcutProvider = () => IdeHostIntegration.Shortcut(dte, CommandSet);
         fullSettings.ShortcutApply = value => IdeHostIntegration.SetShortcut(dte, CommandSet, value);
+        fullSettings.LegacyHistoryEnabledProvider = () => ((GeneralOptionsPage)GetDialogPage(typeof(GeneralOptionsPage))).KeepEditorHistory;
+        if (runningDocumentTable != null)
+            historyIntegration = new EditorHistoryIntegration(runningDocumentTable, editorAdapters, dte, fullSettings.ResolveEditorFeatures, HandleBeforeSave);
+        fullSettings.FeaturesSaved = () => historyIntegration?.Refresh();
         if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService commands)
         {
             var format = new OleMenuCommand(ExecuteFormatDocument, new CommandID(CommandSet, 0x0200));
@@ -179,55 +180,17 @@ public sealed class SqlFormatterPackage : AsyncPackage
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing && runningDocumentTable != null && runningDocumentTableCookie != 0)
+        if (disposing && historyIntegration != null)
         {
             JoinableTaskFactory.Run(async () =>
             {
                 await JoinableTaskFactory.SwitchToMainThreadAsync();
-                runningDocumentTable.UnadviseRunningDocTableEvents(runningDocumentTableCookie);
-                runningDocumentTableCookie = 0;
+                historyIntegration.Dispose();
+                historyIntegration = null;
             });
         }
 
         base.Dispose(disposing);
-    }
-
-    private static string? ReadBufferText(IntPtr docData)
-    {
-        try
-        {
-            if (Marshal.GetObjectForIUnknown(docData) is IVsTextLines textLines &&
-                ErrorHandler.Succeeded(textLines.GetLastLineIndex(out int lastLine, out int lastColumn)) &&
-                ErrorHandler.Succeeded(textLines.GetLineText(0, 0, lastLine, lastColumn, out string text)))
-            {
-                return text;
-            }
-        }
-        catch (Exception)
-        {
-            // History is best-effort; unreadable buffers are skipped.
-        }
-
-        return null;
-    }
-
-    private void SaveEditorSnapshot(string moniker, string text)
-    {
-        ThreadHelper.ThrowIfNotOnUIThread();
-        try
-        {
-            var automation = (GeneralOptionsPage)GetDialogPage(typeof(GeneralOptionsPage));
-            if (!automation.KeepEditorHistory)
-            {
-                return;
-            }
-
-            new EditorSnapshotStore().Save(moniker ?? string.Empty, text);
-        }
-        catch (Exception)
-        {
-            // History is best-effort; a settings or storage failure is ignored.
-        }
     }
 
     private int HandleBeforeSave(uint docCookie)
@@ -245,17 +208,7 @@ public sealed class SqlFormatterPackage : AsyncPackage
 
             int hr = runningDocumentTable.GetDocumentInfo(docCookie, out _, out _, out _,
                 out string moniker, out _, out _, out IntPtr docData);
-            string? historyContent = null;
-            if (docData != IntPtr.Zero)
-            {
-                historyContent = ReadBufferText(docData);
-                Marshal.Release(docData);
-            }
-
-            if (ErrorHandler.Succeeded(hr) && historyContent != null)
-            {
-                SaveEditorSnapshot(moniker, historyContent);
-            }
+            if (docData != IntPtr.Zero) Marshal.Release(docData);
             if (ErrorHandler.Failed(hr) ||
                 !ActiveSqlEditor.TryRead(textManager, out ActiveSqlEditor editor, monitorSelection) ||
                 !string.Equals(moniker, editor.Path, StringComparison.OrdinalIgnoreCase) ||
@@ -386,7 +339,8 @@ public sealed class SqlFormatterPackage : AsyncPackage
         IReadOnlyList<EditorSnapshot> snapshots;
         try
         {
-            snapshots = await Task.Run(() => new EditorSnapshotStore().List(), DisposalToken);
+            var store = ((FullSettingsOptionsPage)GetDialogPage(typeof(FullSettingsOptionsPage))).ResolveEditorFeatures().CreateHistoryStore();
+            snapshots = await Task.Run(() => { store.Prune(); return store.List(); }, DisposalToken);
         }
         catch (OperationCanceledException)
         {
@@ -871,9 +825,10 @@ public sealed class SqlFormatterPackage : AsyncPackage
         }
 
         string source = snapshot.GetText();
+        var analysisDefaults = ((FullSettingsOptionsPage)GetDialogPage(typeof(FullSettingsOptionsPage))).ResolveEditorFeatures().Analysis;
         try
         {
-            var analysis = await Task.Run(() => SqlDocumentAnalysis.Run(editor.Path, source, DisposalToken), DisposalToken);
+            var analysis = await Task.Run(() => SqlDocumentAnalysis.Run(editor.Path, source, DisposalToken, analysisDefaults), DisposalToken);
             await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
             if (analysis.Error is { } error)
             {
@@ -894,7 +849,9 @@ public sealed class SqlFormatterPackage : AsyncPackage
             if (analysis.Diagnostics.Count == 0)
             {
                 CloseAnalysisWindow();
-                NotifyFormat(SettingsAppearance.Text("Анализ: замечаний нет.", "Analysis finished: no findings."));
+                NotifyFormat(analysis.Enabled
+                    ? SettingsAppearance.Text("Анализ: замечаний нет.", "Analysis finished: no findings.")
+                    : SettingsAppearance.Text("Анализ отключён в настройках.", "Analysis is disabled in settings."));
                 return;
             }
 

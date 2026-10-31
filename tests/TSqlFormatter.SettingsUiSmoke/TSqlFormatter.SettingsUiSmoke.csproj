@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../src/TSqlFormatter.IdeShared/FullSettingsControl.cs" Link="FullSettingsControl.cs" />
+    <Compile Include="../../src/TSqlFormatter.IdeShared/EditorFeaturesControl.cs" Link="EditorFeaturesControl.cs" />
     <Compile Include="../../src/TSqlFormatter.IdeShared/FormattingSettingsWindow.cs" Link="FormattingSettingsWindow.cs" />
     <Compile Include="../../src/TSqlFormatter.IdeShared/SettingsAppearance.cs" Link="SettingsAppearance.cs" />
     <Compile Include="../../src/TSqlFormatter.IdeShared/SqlPreviewBox.cs" Link="SqlPreviewBox.cs" />

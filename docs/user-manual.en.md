@@ -66,9 +66,24 @@ Experimental VS save formatting remains under **Tools → Options → T-SQL Form
 
 ## VS and SSMS: static SQL analysis
 
-**Analyze Document** is available for the active `.sql` tab, including its text editor context menu. The extension captures a text snapshot, analyzes it in the background, and underlines the reported ranges with squiggles. A modeless **SQL Analysis** window lists the findings as position, code, severity and message; double-click or Enter moves the caret to the finding. Re-running the command refreshes the markers and the window; **Clear Analysis Markers** removes the underlines and closes the window.
+For an updated SSMS20 build, use `scripts/Install-SSMS20.ps1` with
+`-PackagePath <path-to-new-VSIX>`. It keeps backups in
+`%LOCALAPPDATA%\TSqlFormatter\SSMS20\Backups` and migrates managed backups left
+by the old installer inside the IDE directory, where the shell could load an old DLL.
+Use `-BackupDirectory` to choose another directory outside the IDE.
+This installer fix is not yet included in the existing `release/` packages.
 
-The rules are the same as in the CLI (`TSQL001`–`TSQL005`); settings come from the `analysis` section of the nearest `.tsqlformatter.json` (see the `--analyze` section). UI controls for enabling/disabling analysis and managing rules are not implemented yet: this is unfinished stage 3 work. Analysis runs on command, not automatically while typing. When the SQL cannot be parsed, the command reports the parse error and applies no markers. Analysis never modifies the file and does not participate in save formatting. Successful builds and package checks do not replace validation of the new commands inside an installed VS/SSMS.
+**Analyze Document** is available for the active `.sql` tab, including its editor context menu. It analyzes a background snapshot, underlines findings and opens a modeless report with code, severity and location; double-click or Enter navigates to a finding. **Clear Analysis Markers** removes the markers and closes the report. Analysis runs only on command, does not modify SQL or files, and does not connect to a server.
+
+**Settings… → General → SQL analysis** provides the analysis switch, checkboxes for the five rules `TSQL001`–`TSQL005`, and each rule's severity: Default, Info, Warning or Error. UPDATE/DELETE without WHERE default to Error; the other rules default to Warning. Use **Save** or **Save and close**; closing without saving discards edits. Disabled analysis explicitly reports that it is disabled and clears the previous report rather than claiming the SQL is issue-free.
+
+These per-user IDE settings are separate from formatting profiles: switching, importing or exporting a profile does not change them. The nearest `.tsqlformatter.json` overrides explicitly supplied `analysis` fields over IDE defaults: `enabled` is the overall switch, `disabled` replaces the complete list of disabled rules, and `severity` overrides individual severities. Missing fields retain IDE defaults; `disabled: []` enables all rules. Example for configuration version 1 or 2:
+
+```json
+{"version":2,"analysis":{"enabled":true,"disabled":["TSQL003"],"severity":{"TSQL004":"warning"}}}
+```
+
+The CLI uses the same section but does not read IDE settings: without configuration it uses built-in defaults. `analysis.enabled: false` disables rules; syntax and configuration errors still return exit code 2 in the CLI. With editor analysis enabled, a parse error leaves no markers. Installed-host evidence and limitations are recorded in the [stage 3 and 9 validation](development/stages-3-9-validation.md).
 
 ## VS and SSMS: SQL snippets
 
@@ -122,9 +137,22 @@ CRUD generation retains necessary brackets around schema, table, column and user
 
 ## VS and SSMS: editor history and restore
 
-Every time an SQL document is saved, the extension writes a local snapshot of its content to `%USERPROFILE%\.tsqlformatter\history` (JSON, one file per snapshot, rotation keeps the newest 100; snapshots above 1 million characters are not stored). All data stays on this machine and is never sent anywhere. History is enabled by default and can be turned off entirely with **Keep editor history** under **Tools → Options → T-SQL Formatter → General** (in SSMS — the matching **T-SQL Formatter (SSMS) → General** page); disabling keeps the existing files on disk.
+The extension stores local snapshots on save and close of SQL documents, including unsaved `.sql` documents and edits discarded when closing without saving. History is independent of Format on save. Text is retained in memory until the buffer closes; non-SQL documents and oversized snapshots are not stored. Before the final document is released, queued background writes are allowed to complete. SQL is never executed.
 
-**Restore Closed Script** opens a dialog listing the snapshots (newest first) with a filter over name, path and content, a preview of the selected snapshot, and an action that opens its content in a new document. Each save gets a separate file even with an identical timestamp; snapshots with legacy filenames remain readable. Snapshots on close and recovery of discarded unsaved edits are not implemented yet: stage 9 is partially complete. Configurable limits/age-based rotation and server/database context also remain planned; the current options are fixed count-based rotation and fully disabling history. To wipe the history, clear the `%USERPROFILE%\.tsqlformatter\history` directory.
+**Settings… → General → Local SQL history** provides:
+
+- history enabled (on by default);
+- maximum snapshots: 1–10000, default 100;
+- maximum characters per snapshot: 1–16777216, default 1000000;
+- retention: 0–36500 days, default 0 for no age limit.
+
+Settings are committed only by **Save** / **Save and close**. The old Keep editor history value is migrated when the new settings are first used. Lower limits take effect when saving settings, creating the next snapshot or opening history; rotation uses snapshot UTC time rather than file copy time. Disabling stops collection and clears cached text, but neither deletes nor rotates previously stored files.
+
+Snapshots are JSON files in `%USERPROFILE%\.tsqlformatter\history`, with a unique file for every save. Legacy snapshots remain readable without migration. Data stays local. When the active SSMS SQL editor exposes connection context, only server and database names are stored, without passwords or connection strings; disconnected editors or ordinary SQL files may have no context. History never opens a database connection.
+
+**Restore Closed Script** lists snapshots searchable by name, path, content, server and database. The preview helps select a version; **Open in a new document** restores text only, without execution or automatic connection. Existing history remains browsable with collection disabled. Clear the history directory to remove all snapshots.
+
+SSMS integration remains experimental. Tested generations, close scenarios and context limitations are listed in the [stage 3 and 9 validation](development/stages-3-9-validation.md).
 
 ## Formatting settings and profiles in VS/SSMS
 

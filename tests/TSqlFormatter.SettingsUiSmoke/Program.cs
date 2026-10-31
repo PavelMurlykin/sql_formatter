@@ -81,10 +81,25 @@ internal static class Program
         var hotkey = controls.OfType<TextBox>().Single(c => c.AccessibleName == "FormatShortcut");
         typeof(Control).GetMethod("OnKeyDown", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!.Invoke(hotkey, new object[] { new KeyEventArgs(Keys.Control | Keys.Alt | Keys.F) });
         Require(editor.Shortcut == "Ctrl+Alt+F", "Shortcut field did not capture the requested keys");
-        int saves = 0; string? savedJson = null; editor.SaveRequested += () => { saves++; savedJson = editor.Model.Export(); };
+        var analysisEnabled = controls.OfType<CheckBox>().Single(c => c.AccessibleName == "analysis.enabled");
+        var ruleEnabled = controls.OfType<CheckBox>().Single(c => c.AccessibleName == "analysis.TSQL001.enabled");
+        var ruleSeverity = controls.OfType<ComboBox>().Single(c => c.AccessibleName == "analysis.TSQL004.severity");
+        var historyAge = controls.OfType<NumericUpDown>().Single(c => c.AccessibleName == "history.maxAgeDays");
+        analysisEnabled.Checked = false; ruleEnabled.Checked = false; ruleSeverity.SelectedIndex = 2; historyAge.Value = 14;
+        Require(analysisEnabled.Text == (english ? "Enable analysis on command" : "Включить анализ по команде"), "Analysis controls not localized");
+        int saves = 0; string? savedJson = null, savedFeatures = null;
+        editor.SaveRequested += () => { saves++; savedJson = editor.Model.Export(); savedFeatures = editor.Features.Serialize(); };
         Require(editor.Save(), "Save failed"); Require(saves == 1 && window.Visible, "Save must persist without closing");
         Require(editor.Profiles.Contains("UI smoke") && editor.Profiles.DefaultProfileId == "user:UI smoke", "Save must update the active named profile");
         Require(UserProfileStore.Deserialize(editor.Profiles.Serialize()).DefaultProfileId == "user:UI smoke", "Active profile not persisted");
+        var restoredFeatures = EditorFeaturesSettings.Deserialize(savedFeatures);
+        Require(!restoredFeatures.Analysis.Enabled && restoredFeatures.Analysis.DisabledRules.Contains("TSQL001") &&
+            restoredFeatures.Analysis.SeverityOverrides["TSQL004"] == TSqlFormatter.Core.Analysis.AnalysisSeverity.Warning &&
+            restoredFeatures.HistoryMaxAgeDays == 14, "Editor features did not round-trip through save");
+        historyAge.Value = 7;
+        Require(EditorFeaturesSettings.Deserialize(savedFeatures).HistoryMaxAgeDays == 14, "Unsaved feature edits changed saved settings");
+        editor.Features = restoredFeatures;
+        Require(historyAge.Value == 14, "Loading settings did not update feature controls");
         var selector = controls.OfType<ComboBox>().Single(c => c.AccessibleName == "GeneralActiveProfile"); selector.SelectedIndex = 2;
         var secondSelector = controls.OfType<ComboBox>().Single(c => c.AccessibleName == "FormattingActiveProfile");
         Require(selector.SelectedIndex == secondSelector.SelectedIndex && editor.Profiles.DefaultProfileId == "builtin:Compact", "Active profile selectors are not synchronized");

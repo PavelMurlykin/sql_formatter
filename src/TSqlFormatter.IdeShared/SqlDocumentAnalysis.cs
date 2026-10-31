@@ -16,11 +16,12 @@ public sealed class SqlDocumentAnalysis
     public SqlDocumentAnalysis(
         IReadOnlyList<AnalysisDiagnostic>? diagnostics,
         SqlLineMap? lineMap,
-        FormatterDiagnostic? error)
+        FormatterDiagnostic? error, bool enabled = true)
     {
         Diagnostics = diagnostics ?? Array.Empty<AnalysisDiagnostic>();
         LineMap = lineMap;
         Error = error;
+        Enabled = enabled;
     }
 
     public IReadOnlyList<AnalysisDiagnostic> Diagnostics { get; }
@@ -28,9 +29,11 @@ public sealed class SqlDocumentAnalysis
     public SqlLineMap? LineMap { get; }
 
     public FormatterDiagnostic? Error { get; }
+    public bool Enabled { get; }
 
     /// <summary>Parses and analyzes the source; rules come from the nearest .tsqlformatter.json.</summary>
-    public static SqlDocumentAnalysis Run(string filePath, string source, CancellationToken cancellationToken)
+    public static SqlDocumentAnalysis Run(string filePath, string source, CancellationToken cancellationToken,
+        AnalysisConfiguration? defaults = null)
     {
         if (string.IsNullOrWhiteSpace(filePath))
         {
@@ -45,7 +48,7 @@ public sealed class SqlDocumentAnalysis
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var options = new AnalysisOptions();
+            var configuredAnalysis = defaults ?? AnalysisConfiguration.Default;
             var configPath = new SqlFormatterConfigurationDiscovery().FindForFile(filePath);
             if (configPath is not null)
             {
@@ -56,16 +59,17 @@ public sealed class SqlDocumentAnalysis
                     return new SqlDocumentAnalysis(null, null, formatting.Diagnostics[0]);
                 }
 
-                var configured = new AnalysisConfigurationParser().Parse(json);
+                var configured = new AnalysisConfigurationParser().Parse(json, configuredAnalysis);
                 if (!configured.Succeeded)
                 {
                     return new SqlDocumentAnalysis(null, null, configured.Diagnostics[0]);
                 }
 
-                options = configured.Configuration!.ToAnalysisOptions();
+                configuredAnalysis = configured.Configuration!;
             }
 
             cancellationToken.ThrowIfCancellationRequested();
+            if (!configuredAnalysis.Enabled) return new SqlDocumentAnalysis(null, new SqlLineMap(source), null, enabled: false);
             var parseResult = new ScriptDomSqlParser().Parse(source, SqlDialectVersion.Auto, cancellationToken);
             if (parseResult.Diagnostics.Count > 0)
             {
@@ -73,7 +77,7 @@ public sealed class SqlDocumentAnalysis
                     "TSF1000", parseResult.Diagnostics[0].Message, FormatterDiagnosticSeverity.Error));
             }
 
-            var result = new SqlAnalyzer().Analyze(parseResult, options, cancellationToken);
+            var result = new SqlAnalyzer().Analyze(parseResult, configuredAnalysis.ToAnalysisOptions(), cancellationToken);
             return new SqlDocumentAnalysis(result.Diagnostics, parseResult.LineMap, null);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException

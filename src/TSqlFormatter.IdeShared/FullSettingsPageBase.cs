@@ -16,6 +16,11 @@ public abstract class FullSettingsPageBase : DialogPage
     [Browsable(false)] public bool UseFullSettings { get; set; }
     [Browsable(false)] public string ConfigurationJson { get; set; } = "";
     [Browsable(false)] public string ProfilesJson { get; set; } = "";
+    [Browsable(false)] public string EditorSettingsJson { get; set; } = "";
+    internal Func<bool>? LegacyHistoryEnabledProvider { get; set; }
+    internal Action? FeaturesSaved { get; set; }
+    public EditorFeaturesSettings ResolveEditorFeatures() => EditorFeaturesSettings.Deserialize(
+        EditorSettingsJson, LegacyHistoryEnabledProvider?.Invoke() ?? true);
     internal Func<FormattingOptions>? LegacyOptionsProvider { get; set; }
     internal Func<string?>? SqlPathProvider { get; set; }
     internal Func<string>? ShortcutProvider { get; set; }
@@ -44,6 +49,7 @@ public abstract class FullSettingsPageBase : DialogPage
         editor.LoadDraft(StoredDraft(LegacyOptionsProvider?.Invoke() ?? FormattingOptions.Default),
             UserProfileStore.Deserialize(ProfilesJson), UseFullSettings);
         editor.Shortcut = ShortcutProvider?.Invoke() ?? "";
+        editor.Features = ResolveEditorFeatures();
         editor.SaveRequested += () => SaveEditor(editor);
         if (showProfiles) editor.ShowProfiles();
         using var dialog = new FormattingSettingsWindow(editor);
@@ -61,7 +67,9 @@ public abstract class FullSettingsPageBase : DialogPage
         ConfigurationJson = editor.Model.Export();
         ProfilesJson = editor.Profiles.Serialize();
         UseFullSettings = editor.UseFullSettings;
+        EditorSettingsJson = editor.Features.Serialize();
         SaveSettingsToStorage();
+        FeaturesSaved?.Invoke();
     }
 
     private sealed class DialogOwner : IWin32Window
@@ -81,6 +89,7 @@ public abstract class FullSettingsPageBase : DialogPage
             control!.LoadDraft(StoredDraft(LegacyOptionsProvider?.Invoke() ?? FormattingOptions.Default),
                 UserProfileStore.Deserialize(ProfilesJson), UseFullSettings);
             control.Shortcut = ShortcutProvider?.Invoke() ?? "";
+            control.Features = ResolveEditorFeatures();
             control.ApplyAppearance(IdeHostIntegration.Appearance());
             control.SaveRequested -= SaveControl;
             control.SaveRequested += SaveControl;
@@ -106,6 +115,8 @@ public abstract class FullSettingsPageBase : DialogPage
             ConfigurationJson = control.Model.Export();
             ProfilesJson = control.Profiles.Serialize();
             UseFullSettings = control.UseFullSettings;
+            EditorSettingsJson = control.Features.Serialize();
+            FeaturesSaved?.Invoke();
         }
         base.OnApply(e);
     }

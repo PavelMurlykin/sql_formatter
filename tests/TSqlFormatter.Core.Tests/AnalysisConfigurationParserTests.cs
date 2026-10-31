@@ -51,12 +51,12 @@ public sealed class AnalysisConfigurationParserTests
     [Fact]
     public void Unknown_analysis_property_is_rejected()
     {
-        var result = _parser.Parse("{\"analysis\":{\"enabled\":true}}");
+        var result = _parser.Parse("{\"analysis\":{\"unexpected\":true}}");
 
         Assert.False(result.Succeeded);
         Assert.Contains(result.Diagnostics,
             diagnostic => diagnostic.Code == "TSF2000" &&
-                diagnostic.Message.Contains("analysis.enabled"));
+                diagnostic.Message.Contains("analysis.unexpected"));
     }
 
     [Fact]

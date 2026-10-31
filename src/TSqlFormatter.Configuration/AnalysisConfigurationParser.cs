@@ -12,10 +12,11 @@ namespace TSqlFormatter.Configuration;
 /// </summary>
 public sealed class AnalysisConfigurationParser
 {
-    public AnalysisConfigurationParseResult Parse(string json)
+    public AnalysisConfigurationParseResult Parse(string json, AnalysisConfiguration? defaults = null)
     {
         if (json is null) throw new ArgumentNullException(nameof(json));
 
+        defaults ??= AnalysisConfiguration.Default;
         JObject root;
         try
         {
@@ -33,7 +34,7 @@ public sealed class AnalysisConfigurationParser
         if (section is null)
         {
             return new AnalysisConfigurationParseResult(
-                AnalysisConfiguration.Default, Array.Empty<FormatterDiagnostic>());
+                defaults, Array.Empty<FormatterDiagnostic>());
         }
 
         if (section is not JObject properties)
@@ -42,11 +43,19 @@ public sealed class AnalysisConfigurationParser
         }
 
         var diagnostics = new List<FormatterDiagnostic>();
-        var disabled = new List<string>();
+        var enabled = defaults.Enabled;
+        var disabled = defaults.DisabledRules.ToList();
         var severities = new Dictionary<string, AnalysisSeverity>(StringComparer.OrdinalIgnoreCase);
+        foreach (var pair in defaults.SeverityOverrides) severities[pair.Key] = pair.Value;
         foreach (var property in properties.Properties())
         {
-            if (property.Name == "disabled")
+            if (property.Name == "enabled")
+            {
+                if (property.Value.Type != JTokenType.Boolean)
+                    diagnostics.Add(Diagnostic("'analysis.enabled' must be a boolean."));
+                else enabled = property.Value.Value<bool>();
+            }
+            else if (property.Name == "disabled")
             {
                 if (property.Value is not JArray entries)
                 {
@@ -54,6 +63,7 @@ public sealed class AnalysisConfigurationParser
                     continue;
                 }
 
+                disabled.Clear();
                 foreach (var entry in entries)
                 {
                     var code = entry.Type == JTokenType.String ? entry.Value<string>() : null;
@@ -107,7 +117,7 @@ public sealed class AnalysisConfigurationParser
         }
 
         return new AnalysisConfigurationParseResult(
-            new AnalysisConfiguration(disabled, severities), Array.Empty<FormatterDiagnostic>());
+            new AnalysisConfiguration(disabled, severities, enabled), Array.Empty<FormatterDiagnostic>());
     }
 
     private static bool TryParseSeverity(string? value, out AnalysisSeverity severity)

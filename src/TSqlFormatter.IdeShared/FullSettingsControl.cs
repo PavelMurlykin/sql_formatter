@@ -26,6 +26,7 @@ internal sealed class FullSettingsControl : UserControl
     private readonly TextBox shortcut = new() { Width = 350, ReadOnly = true, AccessibleName = "FormatShortcut" };
     private readonly SettingsTabControl tabs = new() { Dock = DockStyle.Fill, DrawMode = TabDrawMode.OwnerDrawFixed, ItemSize = new Size(180, 32), SizeMode = TabSizeMode.Fixed };
     private readonly System.Windows.Forms.Timer debounce = new() { Interval = 300 };
+    private readonly EditorFeaturesControl features = new();
     private CancellationTokenSource? previewCancellation;
     private SettingsField[] selected = Array.Empty<SettingsField>();
     private SettingsAppearance appearance = SettingsAppearance.Light;
@@ -49,6 +50,7 @@ internal sealed class FullSettingsControl : UserControl
         general.Controls.Add(FieldRow(T("Активный профиль", "Active profile"), generalProfiles));
         general.Controls.Add(FieldRow(T("Название активного профиля", "Active profile name"), profileName));
         general.Controls.Add(Row(Button(T("Импорт профиля…", "Import profile…"), Import), Button(T("Экспорт профиля…", "Export profile…"), Export)));
+        general.Controls.Add(features);
         general.Controls.Add(Button(T("Сохранить", "Save"), Save));
         generalTab.Controls.Add(general);
         var layout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 2, Padding = new Padding(6) };
@@ -95,6 +97,7 @@ internal sealed class FullSettingsControl : UserControl
     }
     private string T(string ru, string en) => presentation.Text(ru, en);
     internal SettingsEditorModel Model { get; private set; }
+    internal EditorFeaturesSettings Features { get => features.Settings; set => features.LoadSettings(value); }
     internal UserProfileStore Profiles { get; private set; }
     internal bool UseFullSettings => true;
     internal string Shortcut { get => shortcut.Text; set => shortcut.Text = value; }

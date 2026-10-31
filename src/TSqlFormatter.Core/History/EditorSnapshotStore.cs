@@ -11,6 +11,7 @@ namespace TSqlFormatter.Core.History;
 /// </summary>
 public sealed class EditorSnapshotStore
 {
+    private static readonly object StorageGate = new();
     private readonly string directory;
 
     public EditorSnapshotStore(string? directory = null)
@@ -30,9 +31,12 @@ public sealed class EditorSnapshotStore
 
     /// <summary>Snapshots above this content length are not stored.</summary>
     public int MaxSnapshotCharacters { get; set; } = 1_000_000;
+    /// <summary>Zero keeps snapshots indefinitely, subject to the count limit.</summary>
+    public int MaxAgeDays { get; set; }
 
     /// <summary>Stores a snapshot; returns its file path, or null when disabled or too large.</summary>
-    public string? Save(string filePath, string content, DateTime? timestampUtc = null)
+    public string? Save(string filePath, string content, DateTime? timestampUtc = null,
+        string? server = null, string? database = null, string? reason = null)
     {
         if (filePath is null)
         {
@@ -49,6 +53,7 @@ public sealed class EditorSnapshotStore
             return null;
         }
 
+        lock (StorageGate)
         try
         {
             Directory.CreateDirectory(directory);
@@ -60,7 +65,8 @@ public sealed class EditorSnapshotStore
                 ["version"] = 1,
                 ["filePath"] = filePath,
                 ["timestampUtc"] = timestamp.ToString("o", CultureInfo.InvariantCulture),
-                ["content"] = content
+                ["content"] = content,
+                ["server"] = server, ["database"] = database, ["reason"] = reason
             };
             // CreateNew also prevents overwriting an existing snapshot if a
             // generated filename is ever reused. Finish writing before pruning.
@@ -141,8 +147,11 @@ public sealed class EditorSnapshotStore
     }
 
     /// <summary>Deletes the oldest snapshot files beyond MaxSnapshots.</summary>
-    public void Prune()
+    public void Prune(DateTime? utcNow = null)
     {
+        if (!Enabled) return;
+        if (MaxSnapshots < 1 || MaxAgeDays < 0) throw new InvalidOperationException("Invalid history retention limits.");
+        lock (StorageGate)
         try
         {
             if (!Directory.Exists(directory))
@@ -151,11 +160,13 @@ public sealed class EditorSnapshotStore
             }
 
             var files = Directory.EnumerateFiles(directory, "*.json")
-                .Select(file => (File: file, Written: File.GetLastWriteTimeUtc(file)))
+                .Select(file => (File: file, Written: SnapshotTime(file)))
                 .OrderByDescending(entry => entry.Written)
                 .ToList();
-            for (var index = MaxSnapshots; index < files.Count; index++)
+            var now = utcNow ?? DateTime.UtcNow;
+            for (var index = 0; index < files.Count; index++)
             {
+                if (index < MaxSnapshots && (MaxAgeDays == 0 || files[index].Written >= now.AddDays(-MaxAgeDays))) continue;
                 try
                 {
                     File.Delete(files[index].File);
@@ -172,6 +183,13 @@ public sealed class EditorSnapshotStore
         }
     }
 
+    private DateTime SnapshotTime(string file)
+    {
+        try { return Read(file)?.TimestampUtc.ToUniversalTime() ?? File.GetLastWriteTimeUtc(file); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException or ArgumentException)
+        { return File.GetLastWriteTimeUtc(file); }
+    }
+
     private EditorSnapshot? Read(string file)
     {
         var document = JObject.Parse(File.ReadAllText(file));
@@ -181,14 +199,19 @@ public sealed class EditorSnapshotStore
             return null;
         }
 
-        var timestamp = document["timestampUtc"]?.Value<string>() is { } stamp &&
-            DateTime.TryParse(stamp, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsed)
-                ? parsed
-                : File.GetLastWriteTimeUtc(file);
+        var timestampToken = document["timestampUtc"];
+        // ISO date tokens must not pass through string conversion, which loses
+        // subsecond precision at age-retention boundaries.
+        var timestamp = timestampToken?.Type == JTokenType.Date
+            ? timestampToken.Value<DateTime>().ToUniversalTime()
+            : timestampToken?.Value<string>() is { } stamp &&
+              DateTime.TryParse(stamp, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsed)
+                ? parsed.ToUniversalTime() : File.GetLastWriteTimeUtc(file);
         return new EditorSnapshot(
             document["filePath"]?.Value<string>() ?? string.Empty,
             timestamp,
-            contentToken.Value<string>() ?? string.Empty);
+            contentToken.Value<string>() ?? string.Empty,
+            document.Value<string>("server"), document.Value<string>("database"), document.Value<string>("reason"));
     }
 
     private static string MakeFileSafe(string filePath)

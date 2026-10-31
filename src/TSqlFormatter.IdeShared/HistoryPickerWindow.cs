@@ -80,6 +80,8 @@ public sealed class HistoryPickerWindow : Form
         snapshotList.Columns.Add(SettingsAppearance.Text("Когда", "When"), 130);
         snapshotList.Columns.Add(SettingsAppearance.Text("Имя", "Name"), 170);
         snapshotList.Columns.Add(SettingsAppearance.Text("Путь", "Path"), 380);
+        snapshotList.Columns.Add(SettingsAppearance.Text("Сервер", "Server"), 160);
+        snapshotList.Columns.Add(SettingsAppearance.Text("База данных", "Database"), 160);
         snapshotList.SelectedIndexChanged += (_, _) => ShowPreview();
         snapshotList.DoubleClick += (_, _) => Accept();
         snapshotList.KeyDown += (_, args) =>
@@ -128,7 +130,9 @@ public sealed class HistoryPickerWindow : Form
                 if (query.Length > 0 &&
                     snapshot.DisplayName.IndexOf(query, StringComparison.OrdinalIgnoreCase) < 0 &&
                     snapshot.FilePath.IndexOf(query, StringComparison.OrdinalIgnoreCase) < 0 &&
-                    snapshot.Content.IndexOf(query, StringComparison.OrdinalIgnoreCase) < 0)
+                    snapshot.Content.IndexOf(query, StringComparison.OrdinalIgnoreCase) < 0 &&
+                    (snapshot.Server ?? "").IndexOf(query, StringComparison.OrdinalIgnoreCase) < 0 &&
+                    (snapshot.Database ?? "").IndexOf(query, StringComparison.OrdinalIgnoreCase) < 0)
                 {
                     continue;
                 }
@@ -137,6 +141,8 @@ public sealed class HistoryPickerWindow : Form
                     .ToString("yyyy-MM-dd HH:mm")) { Tag = snapshot };
                 item.SubItems.Add(snapshot.DisplayName);
                 item.SubItems.Add(snapshot.FilePath);
+                item.SubItems.Add(snapshot.Server ?? "");
+                item.SubItems.Add(snapshot.Database ?? "");
                 snapshotList.Items.Add(item);
             }
 
