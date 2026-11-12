@@ -1,9 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
@@ -99,7 +97,7 @@ internal sealed class EditorHistoryIntegration : IVsRunningDocTableEvents3, IDis
             else if (lines != null && ErrorHandler.Succeeded(lines.GetLastLineIndex(out int lastLine, out int lastColumn)) &&
                 ErrorHandler.Succeeded(lines.GetLineText(0, 0, lastLine, lastColumn, out string value))) text = value;
             if (text == null) return;
-            var context = ConnectionContext(moniker);
+            var context = SqlEditorConnectionContext.Read(dte, moniker);
             session.Remember(cookie, moniker, text, true, current.HistoryEnabled, current.HistoryMaxCharacters,
                 context.Server, context.Database);
         }
@@ -160,30 +158,6 @@ internal sealed class EditorHistoryIntegration : IVsRunningDocTableEvents3, IDis
         // The waiter must not join the collection it is waiting to empty.
         // Using the history factory here would add the waiter to work itself.
         using (work.Join()) ThreadHelper.JoinableTaskFactory.Run(async () => await work.JoinTillEmptyAsync());
-    }
-
-    private (string? Server, string? Database) ConnectionContext(string moniker)
-    {
-        ThreadHelper.ThrowIfNotOnUIThread();
-        try
-        {
-            if (dte?.ActiveDocument is not { } active ||
-                !string.Equals(active.FullName, moniker, StringComparison.OrdinalIgnoreCase)) return (null, null);
-            // Only inspect the active SSMS document's existing context. No
-            // connection is opened and no connection string/credential is stored.
-            var type = AppDomain.CurrentDomain.GetAssemblies()
-                .Select(a => a.GetType("Microsoft.SqlServer.Management.UI.VSIntegration.ServiceCache", false))
-                .FirstOrDefault(t => t != null);
-            var factory = type?.GetProperty("ScriptFactory", BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
-            var info = factory?.GetType().GetProperty("CurrentlyActiveWndConnectionInfo")?.GetValue(factory);
-            if (info == null) return (null, null);
-            var server = info.GetType().GetProperty("ServerName")?.GetValue(info) as string;
-            var database = info.GetType().GetProperty("DatabaseName")?.GetValue(info) as string;
-            if (database == null && info.GetType().GetProperty("AdvancedOptions")?.GetValue(info) is IDictionary options)
-                database = options["DATABASE"] as string;
-            return (server, database);
-        }
-        catch (Exception) { return (null, null); }
     }
 
     public int OnBeforeSave(uint cookie) { ThreadHelper.ThrowIfNotOnUIThread(); Remember(cookie); return beforeSave?.Invoke(cookie) ?? VSConstants.S_OK; }

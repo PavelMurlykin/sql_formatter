@@ -13,9 +13,12 @@ CRUD templates from CREATE TABLE, analysis settings and local save/close history
 with configurable retention. Stages 3 and 9 are complete in the
 [development roadmap](docs/development/ROADMAP.md); see the
 [installed-host evidence and limits](docs/development/stages-3-9-validation.md).
+Stage 10 is implemented in source builds (VS 0.2.14 / SSMS 0.6.13): per-user
+DEV/TEST/PROD matching rules and **Check Dangerous Commands**, with a colored
+context label and a separate PROD warning. See [stage 10 validation](docs/development/stage-10-validation.md).
 The installers in `release/` include the completed stages 1–9, with analysis
-settings and close-time history. Stages 10–11 and their final consolidated
-release remain planned. The extension provides **Format Document**, **Analyze
+settings and close-time history. Stage 10 currently requires a source build;
+stage 11 and the final consolidated release remain planned. The extension provides **Format Document**, **Analyze
 Document**, editor tools, **Restore Closed Script** and **Settings**.
 Formatting affects the selection, or the whole active `.sql` when no text is
 selected, and also appears in the editor context menu. Settings include named

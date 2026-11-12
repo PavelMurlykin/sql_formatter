@@ -85,6 +85,16 @@ internal static class Program
         var ruleEnabled = controls.OfType<CheckBox>().Single(c => c.AccessibleName == "analysis.TSQL001.enabled");
         var ruleSeverity = controls.OfType<ComboBox>().Single(c => c.AccessibleName == "analysis.TSQL004.severity");
         var historyAge = controls.OfType<NumericUpDown>().Single(c => c.AccessibleName == "history.maxAgeDays");
+        var environmentRules = controls.OfType<DataGridView>().Single(c => c.AccessibleName == "EnvironmentRules");
+        Require(environmentRules.Rows.Count == 0, "Environments must default to unknown without configured rules");
+        Require(environmentRules.Columns[1].HeaderText == (english ? "Server contains" : "Сервер содержит"), "Environment columns not localized");
+        controls.OfType<Button>().Single(c => c.AccessibleName == "AddEnvironmentRule").PerformClick();
+        environmentRules.CancelEdit();
+        Require(environmentRules.Rows.Count == 1, "Add environment rule did not add a row");
+        environmentRules.Rows[0].Cells[0].Value = "PROD";
+        environmentRules.Rows[0].Cells[1].Value = "sql-prod";
+        environmentRules.Rows[0].Cells[2].Value = "Accounting";
+        environmentRules.Rows[0].Cells[4].Value = "#902020";
         analysisEnabled.Checked = false; ruleEnabled.Checked = false; ruleSeverity.SelectedIndex = 2; historyAge.Value = 14;
         Require(analysisEnabled.Text == (english ? "Enable analysis on command" : "Включить анализ по команде"), "Analysis controls not localized");
         int saves = 0; string? savedJson = null, savedFeatures = null;
@@ -96,10 +106,23 @@ internal static class Program
         Require(!restoredFeatures.Analysis.Enabled && restoredFeatures.Analysis.DisabledRules.Contains("TSQL001") &&
             restoredFeatures.Analysis.SeverityOverrides["TSQL004"] == TSqlFormatter.Core.Analysis.AnalysisSeverity.Warning &&
             restoredFeatures.HistoryMaxAgeDays == 14, "Editor features did not round-trip through save");
+        var environmentRule = restoredFeatures.Environments.Rules.Single();
+        Require(environmentRule.Kind == SqlEnvironmentKind.Prod && environmentRule.ServerContains == "sql-prod" &&
+            environmentRule.DatabaseContains == "Accounting" && environmentRule.Color == "#902020", "Environment rules did not round-trip through save");
+        environmentRules.Rows[0].Cells[1].Value = "unsaved";
+        Require(EditorFeaturesSettings.Deserialize(savedFeatures).Environments.Rules[0].ServerContains == "sql-prod", "Unsaved environment edits changed storage");
         historyAge.Value = 7;
         Require(EditorFeaturesSettings.Deserialize(savedFeatures).HistoryMaxAgeDays == 14, "Unsaved feature edits changed saved settings");
         editor.Features = restoredFeatures;
         Require(historyAge.Value == 14, "Loading settings did not update feature controls");
+        Require((string)environmentRules.Rows[0].Cells[1].Value == "sql-prod", "Loading settings lost the environment rule");
+        environmentRules.Rows[0].Cells[1].Value = ""; environmentRules.Rows[0].Cells[2].Value = "";
+        bool invalidRuleRejected = false;
+        try { editor.PrepareSave(); } catch (ArgumentException) { invalidRuleRejected = true; }
+        Require(invalidRuleRejected && saves == 1, "An empty catch-all environment rule was accepted");
+        controls.OfType<Button>().Single(c => c.AccessibleName == "RemoveEnvironmentRule").PerformClick();
+        Require(environmentRules.Rows.Count == 0 && editor.Features.Environments.Rules.Count == 0, "Remove environment rule failed");
+        editor.Features = restoredFeatures;
         var selector = controls.OfType<ComboBox>().Single(c => c.AccessibleName == "GeneralActiveProfile"); selector.SelectedIndex = 2;
         var secondSelector = controls.OfType<ComboBox>().Single(c => c.AccessibleName == "FormattingActiveProfile");
         Require(selector.SelectedIndex == secondSelector.SelectedIndex && editor.Profiles.DefaultProfileId == "builtin:Compact", "Active profile selectors are not synchronized");
@@ -118,7 +141,41 @@ internal static class Program
         tabs.SelectedIndex = 1; code.Text = "SELECT FROM;"; FormatButton().PerformClick(); await Task.Delay(800); Require(result.Text == "", "Invalid SQL produced formatted output");
         search.Text = "indent.size"; indent = Descendants(editor).OfType<NumericUpDown>().Single(c => c.AccessibleName == "indent.size"); indent.Value = 3;
         Require(saves == 1 && savedJson != editor.Model.Export(), "Unsaved changes must not update the saved baseline");
+        VerifySafetyWindow(window, english, dark);
         window.DialogResult = DialogResult.Cancel;
+    }
+    private static void VerifySafetyWindow(Form owner, bool english, bool dark)
+    {
+        var theme = dark ? new SettingsAppearance(Color.FromArgb(30, 30, 30), Color.FromArgb(220, 220, 220),
+            Color.FromArgb(45, 45, 48), Color.FromArgb(0, 122, 204)) : SettingsAppearance.Light;
+        var environments = new SqlEnvironmentConfiguration(new[] { new SqlEnvironmentRule(SqlEnvironmentKind.Prod, "prod", color: "#E0F0E0") });
+        var check = SqlSafetyCheck.Run("DROP TABLE dbo.T; TRUNCATE TABLE dbo.T; UPDATE dbo.T SET A=1; DELETE FROM dbo.T;",
+            new SqlEnvironmentContext("offline.sql", "sql-prod", "Accounting"), environments);
+        using (var warning = new DangerousCommandsWindow(check))
+        {
+            warning.StartPosition = FormStartPosition.Manual; warning.Location = new Point(-2500, -2000);
+            warning.ApplyAppearance(theme); warning.Show(owner); Application.DoEvents();
+            var labels = Descendants(warning).OfType<Label>().ToArray();
+            var banner = labels.Single(c => c.AccessibleName == "EnvironmentBanner");
+            Require(banner.Text.Contains("PROD") && banner.BackColor == ColorTranslator.FromHtml("#E0F0E0") && banner.ForeColor == Color.Black,
+                "Environment color/contrast or label missing");
+            Require(labels.Single(c => c.AccessibleName == "ProductionWarning").Visible, "PROD needs a warning independent of its configured color");
+            if (english) Require(!Descendants(warning).Any(c => c.Text.Any(ch => ch >= 'А' && ch <= 'я')), "Russian text leaked into English safety dialog");
+            var list = Descendants(warning).OfType<ListView>().Single();
+            Require(list.Items.Count == 4 && list.Items[0].SubItems[1].Text == "TSQL006", "Safety findings are missing or out of order");
+            Capture(warning, english, dark, "safety-prod");
+            list.Items[0].Selected = true;
+            Descendants(warning).OfType<Button>().Single(c => c.AccessibleName == "NavigateDangerousFinding").PerformClick();
+            Require(warning.SelectedDiagnostic?.Code == "TSQL006", "Safety finding navigation lost its position"); warning.Close();
+        }
+        var invalid = SqlSafetyCheck.Run("SELECT FROM;", new SqlEnvironmentContext("offline.sql"), SqlEnvironmentConfiguration.Default);
+        using var incomplete = new DangerousCommandsWindow(invalid);
+        incomplete.StartPosition = FormStartPosition.Manual; incomplete.Location = new Point(-2500, -2000);
+        incomplete.ApplyAppearance(theme); incomplete.Show(owner); Application.DoEvents();
+        var fields = Descendants(incomplete).OfType<Label>().ToArray();
+        Require(!fields.Single(c => c.AccessibleName == "ProductionWarning").Visible, "Unknown context was presented as PROD");
+        Require(fields.Single(c => c.AccessibleName == "SafetyStatus").Text.StartsWith(english ? "Check incomplete" : "Проверка не завершена"),
+            "A parse error was presented as a successful empty check"); incomplete.Close();
     }
     private static void Capture(Form window, bool english, bool dark, string tab)
     {

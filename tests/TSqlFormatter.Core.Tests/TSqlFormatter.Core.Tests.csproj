@@ -21,6 +21,7 @@
   <ItemGroup>
     <Using Include="Xunit" />
     <Compile Include="../../src/TSqlFormatter.IdeShared/SqlDocumentAnalysis.cs" Link="Integration/SqlDocumentAnalysis.cs" />
+    <Compile Include="../../src/TSqlFormatter.IdeShared/SqlSafetyCheck.cs" Link="Integration/SqlSafetyCheck.cs" />
   </ItemGroup>
 
   <ItemGroup>

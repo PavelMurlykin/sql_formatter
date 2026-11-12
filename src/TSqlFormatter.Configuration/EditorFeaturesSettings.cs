@@ -7,7 +7,8 @@ namespace TSqlFormatter.Configuration;
 public sealed class EditorFeaturesSettings
 {
     public EditorFeaturesSettings(AnalysisConfiguration? analysis = null, bool historyEnabled = true,
-        int historyMaxSnapshots = 100, int historyMaxCharacters = 1_000_000, int historyMaxAgeDays = 0)
+        int historyMaxSnapshots = 100, int historyMaxCharacters = 1_000_000, int historyMaxAgeDays = 0,
+        SqlEnvironmentConfiguration? environments = null)
     {
         if (historyMaxSnapshots is < 1 or > 10000) throw new ArgumentOutOfRangeException(nameof(historyMaxSnapshots));
         if (historyMaxCharacters is < 1 or > 16 * 1024 * 1024) throw new ArgumentOutOfRangeException(nameof(historyMaxCharacters));
@@ -15,6 +16,7 @@ public sealed class EditorFeaturesSettings
         Analysis = analysis ?? AnalysisConfiguration.Default;
         HistoryEnabled = historyEnabled; HistoryMaxSnapshots = historyMaxSnapshots;
         HistoryMaxCharacters = historyMaxCharacters; HistoryMaxAgeDays = historyMaxAgeDays;
+        Environments = environments ?? SqlEnvironmentConfiguration.Default;
     }
 
     public AnalysisConfiguration Analysis { get; }
@@ -22,6 +24,7 @@ public sealed class EditorFeaturesSettings
     public int HistoryMaxSnapshots { get; }
     public int HistoryMaxCharacters { get; }
     public int HistoryMaxAgeDays { get; }
+    public SqlEnvironmentConfiguration Environments { get; }
 
     public EditorSnapshotStore CreateHistoryStore(string? directory = null) => new(directory)
     {
@@ -38,6 +41,7 @@ public sealed class EditorFeaturesSettings
             ["disabled"] = new JArray(Analysis.DisabledRules),
             ["severity"] = new JObject(Analysis.SeverityOverrides.Select(p => new JProperty(p.Key, p.Value.ToString().ToLowerInvariant())))
         },
+        ["environments"] = Environments.ToJson(),
         ["history"] = new JObject
         {
             ["enabled"] = HistoryEnabled, ["maxSnapshots"] = HistoryMaxSnapshots,
@@ -55,6 +59,6 @@ public sealed class EditorFeaturesSettings
         var history = root["history"] as JObject ?? throw new ArgumentException("Missing history settings.", nameof(json));
         return new(analysis.Configuration, history.Value<bool?>("enabled") ?? legacyHistoryEnabled,
             history.Value<int?>("maxSnapshots") ?? 100, history.Value<int?>("maxCharacters") ?? 1_000_000,
-            history.Value<int?>("maxAgeDays") ?? 0);
+            history.Value<int?>("maxAgeDays") ?? 0, SqlEnvironmentConfiguration.Parse(root["environments"]));
     }
 }

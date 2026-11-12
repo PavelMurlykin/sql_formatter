@@ -213,6 +213,7 @@ internal sealed class FullSettingsControl : UserControl
     }
     internal void PrepareSave()
     {
+        _ = features.Settings; // Validate the entire editor draft before updating a named profile.
         if (dirty)
         {
             string name = profileName.Text.Trim();

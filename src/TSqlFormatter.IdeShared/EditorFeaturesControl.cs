@@ -18,6 +18,7 @@ internal sealed class EditorFeaturesControl : UserControl
     private readonly NumericUpDown age = Number("history.maxAgeDays", 0, 36500);
     private readonly Dictionary<string, (CheckBox Enabled, ComboBox Severity)> rules = new();
     private AnalysisConfiguration original = AnalysisConfiguration.Default;
+    private readonly EnvironmentRulesControl environments = new();
 
     internal EditorFeaturesControl()
     {
@@ -55,6 +56,7 @@ internal sealed class EditorFeaturesControl : UserControl
         flow.Controls.Add(new Label { AutoSize = true, MaximumSize = new Size(760, 0), Text = T(
             "Данные остаются локально. Уменьшение лимитов применяется при следующем снимке или открытии истории; отключение сохраняет существующие файлы.",
             "Data stays local. Lower limits take effect on the next snapshot or opening history; disabling keeps existing files.") });
+        flow.Controls.Add(environments);
         LoadSettings(new EditorFeaturesSettings());
     }
 
@@ -68,6 +70,7 @@ internal sealed class EditorFeaturesControl : UserControl
         }
         history.Checked = settings.HistoryEnabled; count.Value = settings.HistoryMaxSnapshots;
         characters.Value = settings.HistoryMaxCharacters; age.Value = settings.HistoryMaxAgeDays;
+        environments.LoadSettings(settings.Environments);
     }
 
     internal EditorFeaturesSettings Settings
@@ -84,7 +87,7 @@ internal sealed class EditorFeaturesControl : UserControl
                 else overrides[pair.Key] = (AnalysisSeverity)(pair.Value.Severity.SelectedIndex - 1);
             }
             return new EditorFeaturesSettings(new AnalysisConfiguration(disabled, overrides, analysis.Checked),
-                history.Checked, (int)count.Value, (int)characters.Value, (int)age.Value);
+                history.Checked, (int)count.Value, (int)characters.Value, (int)age.Value, environments.Settings);
         }
     }
 

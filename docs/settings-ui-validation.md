@@ -1,4 +1,24 @@
-# Current settings validation — 2026-10-31
+# Current settings validation — 2026-11-12
+
+Stage 10 source packages: Visual Studio 0.2.14 / SSMS 0.6.13. Release build has
+zero warnings/errors and all 1669 solution tests pass. RU/EN × light/dark smoke
+passes for the environment rules grid: add/remove, columns/labels, persistence,
+reload, unsaved isolation and empty-rule validation. Existing analysis/history/
+profiles/navigation/preview scenarios still pass.
+
+All four variants also check the safety dialog's context label, configured RGB
+and foreground contrast, independent PROD warning, ordered findings and navigation.
+An unknown environment with a parse error shows an incomplete check. English dark
+and Russian light safety captures were visually inspected. See
+[stage 10 evidence](development/stage-10-validation.md) for installed VS2022 results
+and the limits of the other hosts/live connection context. `release/` still contains
+the earlier stages 1–9 packages.
+
+Logs: `artifacts/stage10/ui.log`; captures: `artifacts/settings-ui/*-safety-prod.png`.
+
+---
+
+## Previous settings validation — 2026-10-31
 
 Packages: Visual Studio 0.2.13 / SSMS 0.6.12. The Release pipeline passed with
 zero warnings/errors and 1623 solution tests. All RU/EN × light/dark WinForms

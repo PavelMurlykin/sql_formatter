@@ -3,6 +3,23 @@
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
 
+## Environments and dangerous commands (stage 10, unreleased) — 2026-11-12
+
+- Added per-user DEV/TEST/PROD rules in General settings: literal server/database/
+  document substrings, custom RGB colors, AND matching, PROD > TEST > DEV overlap
+  precedence and UNKNOWN without a match. Existing settings migrate to no rules.
+- New **Check Dangerous Commands** menu/context command (0x0280) checks DROP,
+  TRUNCATE TABLE and UPDATE/DELETE without WHERE independently of normal analysis.
+  The read-only dialog shows environment/context, a separate PROD warning, original
+  positions and navigation. Parse errors and stale snapshots are rejected.
+- No execution interception, tab coloring or dynamic-SQL evaluation. SSMS context
+  is best effort; history shares the current-document context reader.
+- Added 46 unit/integration scenarios and extended all four RU/EN/theme UI variants.
+  All 1669 solution tests and four VSIX checks pass. Installed VS2022 verified PROD,
+  four findings, navigation and unchanged SQL; live database context was not tested.
+- Source adapter versions are VS 0.2.14 / SSMS 0.6.13. The existing `release/` files
+  still contain stages 1–9; stage 10 packaging awaits a later delivery.
+
 ## Local delivery of stages 1–9 — 2026-10-31
 
 - Updated all four `release/` installers: VS2022/VS2026 **0.2.13** and

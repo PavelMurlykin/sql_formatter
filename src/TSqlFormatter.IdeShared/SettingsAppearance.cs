@@ -26,6 +26,12 @@ internal sealed class SettingsAppearance
         control.ForeColor = Foreground;
         if (control is Button button) { button.FlatStyle = FlatStyle.Flat; button.FlatAppearance.BorderColor = Accent; button.UseVisualStyleBackColor = false; }
         if (control is CheckBox check) { check.FlatStyle = FlatStyle.Flat; check.UseVisualStyleBackColor = false; }
+        if (control is DataGridView grid)
+        {
+            grid.BackgroundColor = Input; grid.GridColor = Accent; grid.EnableHeadersVisualStyles = false;
+            grid.DefaultCellStyle.BackColor = Input; grid.DefaultCellStyle.ForeColor = Foreground;
+            grid.ColumnHeadersDefaultCellStyle.BackColor = Background; grid.ColumnHeadersDefaultCellStyle.ForeColor = Foreground;
+        }
         if (control is SettingsTabControl tab) { tab.ThemeBackground = Background; tab.ThemeForeground = Foreground; tab.Accent = Accent; }
         if (control is Form form && form.IsHandleCreated) ApplyCaption(form);
         foreach (Control child in control.Controls) Apply(child);

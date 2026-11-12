@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.Design;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -26,7 +26,7 @@ namespace TSqlFormatter.Ssms;
 [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
 [ProvideAutoLoad(UIContextGuids80.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
 [ProvideAutoLoad(UIContextGuids80.SolutionExists, PackageAutoLoadFlags.BackgroundLoad)]
-[ProvideMenuResource("Menus.ctmenu", 2)]
+[ProvideMenuResource("Menus.ctmenu", 3)]
 [ProvideOptionPage(typeof(SsmsOptionsPage), "T-SQL Formatter (SSMS)", "General", 0, 0, true)]
 [ProvideOptionPage(typeof(FullSettingsOptionsPage), "T-SQL Formatter (SSMS)", "All settings", 0, 0, true)]
 [Guid(PackageGuid)]
@@ -144,6 +144,15 @@ public sealed class SsmsPackage : AsyncPackage
                 restoreHistory.Visible = restoreHistory.Enabled = true;
             };
             commands.AddCommand(restoreHistory);
+            var dangerous = new OleMenuCommand((_, _) =>
+                JoinableTaskFactory.RunAsync(CheckDangerousCommandsAsync).FileAndForget("TSqlFormatter/CheckDangerousCommands"),
+                new CommandID(CommandSet, 0x0280));
+            dangerous.BeforeQueryStatus += (_, _) =>
+            {
+                dangerous.Text = SettingsAppearance.Text("Проверить опасные команды", "Check Dangerous Commands");
+                dangerous.Visible = dangerous.Enabled = ActiveQueryEditor.TryRead(textManager, out _, monitorSelection);
+            };
+            commands.AddCommand(dangerous);
             var settings = new OleMenuCommand((_, _) => ShowSettings(false), new CommandID(CommandSet, 0x0400));
             settings.BeforeQueryStatus += (_, _) => settings.Text = SettingsAppearance.Text("Настройки…", "Settings…");
             commands.AddCommand(settings);
@@ -823,6 +832,54 @@ public sealed class SsmsPackage : AsyncPackage
         }
 
         return picker.ShowDialog() == System.Windows.Forms.DialogResult.OK;
+    }
+
+    private async Task CheckDangerousCommandsAsync()
+    {
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        if (!ActiveQueryEditor.TryRead(textManager, out var editor, monitorSelection) || editorAdapters == null)
+        {
+            ShowMessage(SettingsAppearance.Text("Откройте SQL-документ в редакторе.", "Open a SQL document in the editor."), true);
+            return;
+        }
+        var snapshot = editor.CaptureSnapshot(editorAdapters);
+        if (snapshot == null || snapshot.Length > 16 * 1024 * 1024)
+        {
+            ShowMessage(SettingsAppearance.Text("SQL-буфер недоступен или превышает 16 Ми символов.", "The SQL buffer is unavailable or exceeds 16 Mi characters."), true);
+            return;
+        }
+        try
+        {
+            var page = (FullSettingsOptionsPage)GetDialogPage(typeof(FullSettingsOptionsPage));
+            var settingsJson = page.EditorSettingsJson;
+            var environments = page.ResolveEditorFeatures().Environments;
+            var context = SqlEditorConnectionContext.Read(dte, editor.Path);
+            string source = snapshot.GetText();
+            var check = await Task.Run(() => SqlSafetyCheck.Run(source, context, environments, DisposalToken), DisposalToken);
+            var shell = await GetServiceAsync(typeof(SVsUIShell)) as IVsUIShell;
+            await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+            bool IsCurrent() => ActiveQueryEditor.TryRead(textManager, out var current, monitorSelection) &&
+                ReferenceEquals(current.Buffer, editor.Buffer) && ReferenceEquals(current.CaptureSnapshot(editorAdapters), snapshot) &&
+                context.SameAs(SqlEditorConnectionContext.Read(dte, current.Path)) && page.EditorSettingsJson == settingsJson;
+            if (!IsCurrent())
+            {
+                ShowMessage(SettingsAppearance.Text("Документ, подключение или настройки изменились. Повторите проверку.",
+                    "The document, connection or settings changed. Run the check again."), true);
+                return;
+            }
+            using var window = new DangerousCommandsWindow(check);
+            IntPtr owner = IntPtr.Zero;
+            shell?.GetDialogOwnerHwnd(out owner);
+            window.ShowForOwner(owner, IdeHostIntegration.Appearance());
+            if (window.SelectedDiagnostic is { } finding && IsCurrent())
+                SqlEditorNavigation.GoTo(editor.View, finding.Line, finding.Column);
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex)
+        {
+            await JoinableTaskFactory.SwitchToMainThreadAsync();
+            ShowMessage(SettingsAppearance.Text("Проверка не завершена: ", "Check incomplete: ") + ex.Message, true);
+        }
     }
 
     private async Task AnalyzeDocumentAsync()

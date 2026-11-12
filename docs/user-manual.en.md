@@ -154,6 +154,58 @@ Snapshots are JSON files in `%USERPROFILE%\.tsqlformatter\history`, with a uniqu
 
 SSMS integration remains experimental. Tested generations, close scenarios and context limitations are listed in the [stage 3 and 9 validation](development/stages-3-9-validation.md).
 
+## VS and SSMS: environments and dangerous commands
+
+Stage 10 is available in current source builds: VS VSIX 0.2.14 / SSMS 0.6.13.
+The existing `release/` packages are still VS 0.2.13 / SSMS 0.6.12 and contain
+stages 1–9. Build the current source for stage 10; `scripts/Build-Release.ps1`
+prepares updated installers under `release/`.
+
+Under **Settings… → General → DEV / TEST / PROD environments**, add rules:
+
+| Field | Meaning |
+|---|---|
+| Environment | DEV, TEST or PROD |
+| Server contains / Database contains | Substring of a name available from the active SSMS editor context |
+| Path / moniker contains | Explicit document-path substring; also works for offline SQL files |
+| Color | `#RRGGBB`; initial DEV is green, TEST ochre and PROD red |
+
+For example, choose PROD and server `sql-prod`, leaving other match fields empty.
+For local files, use a path such as `\production\` instead of a server condition.
+Every filled field in a row must match; at least one is required. Matching uses
+case-insensitive substrings, without `*` wildcards or regular expressions; leading
+and trailing match-field whitespace is trimmed. There may be up to 100 rules and
+1024 characters per field. Overlaps resolve as **PROD → TEST → DEV**; the first
+matching row wins within the same environment. Use **Save** / **Save and close**.
+An invalid row prevents saving; closing without saving discards the draft.
+These per-user IDE settings are independent of formatting profiles and project
+`.tsqlformatter.json` files.
+
+In an active `.sql`, invoke **Check Dangerous Commands** from SQL Formatter or the
+editor context menu. Environment is resolved when the command runs. The dialog
+shows a colored label, available server/database names and document. PROD has a
+separate prominent warning regardless of the configured color. No rules exist by
+default, so the label is **UNKNOWN**. Missing context never defaults to DEV; a
+server/database condition cannot match an unavailable name. Paths are not guessed
+to be server names.
+
+The check examines statically parsed statements throughout the document, including
+module bodies and nested branches: `DROP` — TSQL006, `TRUNCATE TABLE` — TSQL007,
+`UPDATE` without WHERE — TSQL004 and `DELETE` without WHERE — TSQL005. Findings show
+original line/column positions. Select a finding and use **Go to**, Enter or
+double-click; navigation only applies to the original unchanged document/context.
+Disabling normal analysis or its TSQL004/TSQL005 rules does not disable this command.
+A syntax error is reported as an incomplete check, never a clean result.
+
+SQL and connection settings are unchanged; the check opens no connection and does
+not intercept query execution. It runs explicitly, without automatic typing or
+execution monitoring. Strings, comments and dynamic SQL are not interpreted as
+commands. WHERE presence is checked syntactically; predicate truth is not evaluated.
+`USE`, three-part names and procedure calls do not change the environment label,
+which reflects the captured editor context. Tabs are not recolored; the indicator
+appears in the dialog. Actual evidence and limits are in
+[stage 10 validation](development/stage-10-validation.md).
+
 ## Formatting settings and profiles in VS/SSMS
 
 Open **SQL Formatter → Settings…**. The resizable window uses current IDE theme colors and highlights SQL keywords, literals, numbers, variables and comments. The first tab, **General**, contains the shortcut, active profile selection/name, import and export. The second tab, **Formatting**, repeats the active profile selector and places **Save** at the top.
