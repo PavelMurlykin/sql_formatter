@@ -206,6 +206,85 @@ which reflects the captured editor context. Tabs are not recolored; the indicato
 appears in the dialog. Actual evidence and limits are in
 [stage 10 validation](development/stage-10-validation.md).
 
+## VS and SSMS: query results through the clipboard
+
+Stage 11 is available in current source builds: **VS 0.2.15 / SSMS 0.6.14**.
+The `release/` packages still contain stages 1–10 (**VS 0.2.14 / SSMS 0.6.13**).
+Build and install the appropriate adapter VSIX; use the installer script for
+SSMS20. See [actual checks and limits](development/stage-11-validation.md).
+
+Copy result cells as TSV: tabs separate columns and newlines separate records.
+Return to the SQL editor and open **SQL Formatter** (under **Extensions** in VS)
+or the editor context menu.
+
+| Command | Action |
+|---|---|
+| **Paste as IN (…)** | Converts one column to an `IN (…)` fragment |
+| **Generate INSERT** | Converts all columns to INSERT; enter the table in the dialog |
+| **Selection Statistics (Clipboard)** | Numeric-cell count, sum and average; reads the clipboard, not selected SQL |
+
+All rows are data by default. If column names were copied, enable **First row
+contains headers**: that row is skipped, and INSERT uses it as the column list.
+Names must be nonempty, unique ignoring case, at most 128 characters and contain
+no control characters. Without headers, INSERT has no column list: check the
+target column order. Table names contain one to three parts: `dbo.Items`,
+`[dbo].[Order Details]`, `WorkDb.dbo.Items`; brackets and escaped `]]` are supported.
+Input is limited to 512 characters; arbitrary SQL is rejected.
+
+Auto mode infers each whole column. Integers and decimals using a point become
+numeric literals when combined column precision stays within 38 digits. Leading
+zeros (`001`), TSV quoting, mixed types, decimal commas and exponents keep the
+column as text. Strings use Unicode `N'…'` with escaped apostrophes; empty cells
+become `N''`. Exact unquoted NULL (case-insensitive) becomes SQL NULL; `"NULL"`
+and ` NULL ` remain strings. **All values as text, including NULL** disables
+type inference.
+
+ISO `yyyy-MM-dd` and `yyyy-MM-ddTHH:mm:ss` (or a space instead of T), optionally
+with 1–7 fractional-second digits, use explicit CONVERT expressions for date /
+datetime2(7). Other formats and time zones remain text; mixing dates and arbitrary
+strings makes the whole column text. No database schema is read: review target
+types, IDENTITY and constraints before executing the result.
+
+Output uses the active profile with the nearest `.editorconfig` and
+`.tsqlformatter.json`. In the **Before / After** preview, **Apply** replaces the
+selection or inserts SQL at the caret. One Undo restores the original text;
+**Cancel** makes no edit. A changed document, text snapshot or caret/selection
+rejects insertion. An active SQL buffer of at most 16 Mi characters is required;
+rectangular selections with multiple spans are unsupported. IN adds no column
+name or WHERE, retains duplicates and does not rewrite NULL as IS NULL. INSERT
+is split into statements of at most [1000 rows](https://learn.microsoft.com/en-us/sql/t-sql/queries/table-value-constructor-transact-sql).
+
+For example, one column containing `1`, `2`, `NULL` produces `IN (1, 2, NULL)`.
+For the TSV below (values separated by tabs), enable headers and choose `dbo.Items`:
+
+```text
+Id	Name
+1	O'Brien
+2	NULL
+```
+
+This produces the equivalent of `INSERT INTO [dbo].[Items] (Id, Name) VALUES
+(1, N'O''Brien'), (2, NULL);`, laid out by the active profile.
+
+Statistics scans all data cells, including quoted numeric text, trimming
+surrounding numeric whitespace. It accepts signs, digits and a decimal point,
+without grouping separators or exponents. Nonnumeric values, NULL and empty cells
+are skipped. The sum is exact; a numeric cell or final sum that cannot fit decimal
+without rounding rejects the report. Average is rounded to decimal precision
+(28–29 significant digits). With no numbers, sum is 0 and average is undefined.
+For `1`, `2.5`, `NULL`, `text`, the result is 2 numeric cells, sum 3.5 and average
+1.75. This command also works without an open SQL document.
+
+CRLF/LF/CR, empty cells and double-quoted TSV fields with embedded tabs/newlines
+and escaped `""` are supported. One final record separator adds no record;
+interior blank rows are preserved. All rows must have the same column count.
+Limits: **1 Mi characters, 10000 rows including headers, 256 columns, 100000 cells**.
+Invalid quotes, NUL, unequal rows and excess limits are rejected. If the source
+does not quote tabs/newlines inside values, they become separators and the original
+structure cannot be recovered. Commands leave the clipboard unchanged, open no
+database connection and execute no SQL. COM ResultsGrid, HTML/CSV, direct grid
+access and CLI commands for these operations are not used.
+
 ## Formatting settings and profiles in VS/SSMS
 
 Open **SQL Formatter → Settings…**. The resizable window uses current IDE theme colors and highlights SQL keywords, literals, numbers, variables and comments. The first tab, **General**, contains the shortcut, active profile selection/name, import and export. The second tab, **Formatting**, repeats the active profile selector and places **Save** at the top.

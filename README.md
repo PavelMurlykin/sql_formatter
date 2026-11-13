@@ -17,8 +17,11 @@ The current installers include stage 10 (VS 0.2.14 / SSMS 0.6.13): per-user
 DEV/TEST/PROD matching rules and **Check Dangerous Commands**, with a colored
 context label and a separate PROD warning. See [stage 10 validation](docs/development/stage-10-validation.md).
 The installers in `release/` include completed stages 1–10, with analysis
-settings, close-time history and environment/safety checks. Stage 11 and the final
-consolidated release remain planned. See [release validation](release/VALIDATION.md).
+settings, close-time history and environment/safety checks. See [release validation](release/VALIDATION.md).
+Stage 11 is implemented in source builds (VS 0.2.15 / SSMS 0.6.14): clipboard
+TSV to IN/INSERT, explicit headers/text mode, profile-aware previews with one Undo,
+and numeric-cell statistics. See [stage 11 validation](docs/development/stage-11-validation.md).
+It awaits inclusion in the final consolidated release (stage 12).
 The extension provides **Format Document**, **Analyze
 Document**, editor tools, **Restore Closed Script** and **Settings**.
 Formatting affects the selection, or the whole active `.sql` when no text is

@@ -3,6 +3,24 @@
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
 
+## Query results through the clipboard (stage 11, source builds) — 2026-11-13
+
+- Added bounded TSV parsing, clipboard-to-IN and clipboard-to-INSERT, explicit
+  headers and all-text mode. Column inference preserves mixed data/leading zeros;
+  strings and identifiers are escaped, ISO dates use CONVERT, INSERT splits at
+  1000 rows. Active profile/project settings format the output.
+- Three RU/EN menu/context commands use previews and one Undo; stale documents,
+  snapshots and caret/selections are rejected. Statistics reports numeric count,
+  exact sum and decimal average without editing SQL or the clipboard. No direct
+  ResultsGrid access, database connection, execution or new CLI commands.
+- Fixed shared transformation-preview docking and off-screen actions, with
+  regressions at normal/minimum window sizes in both languages/themes.
+- All **1728 tests** pass, including **59 new scenarios**, plus four UI variants
+  and four VSIX checks. Installed VS2022 verified IN, INSERT selection replacement,
+  single Undo, preview cancel and statistics; other hosts were not run for stage 11.
+- Source versions: VS **0.2.15** / SSMS **0.6.14**. `release/` remains the verified
+  stages 1–10 delivery (VS 0.2.14 / SSMS 0.6.13); RU/EN manuals and roadmap updated.
+
 ## Local delivery of stages 1–10 — 2026-11-13
 
 - Updated all four `release/` installers: VS2022/VS2026 **0.2.14** and

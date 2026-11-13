@@ -79,6 +79,21 @@
         <CommandFlag>TextChanges</CommandFlag><CommandFlag>DynamicVisibility</CommandFlag><CommandFlag>DefaultInvisible</CommandFlag>
         <Strings><ButtonText>Check Dangerous Commands</ButtonText><CanonicalName>SQLFormatter.CheckDangerousCommands</CanonicalName><LocCanonicalName>SQLFormatter.CheckDangerousCommands</LocCanonicalName></Strings>
       </Button>
+      <Button guid="guidCommandSet" id="cmdPasteResultsAsIn" priority="0x01B0" type="Button">
+        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
+        <CommandFlag>TextChanges</CommandFlag><CommandFlag>DynamicVisibility</CommandFlag><CommandFlag>DefaultInvisible</CommandFlag>
+        <Strings><ButtonText>Paste as IN (…)</ButtonText><CanonicalName>SQLFormatter.PasteResultsAsIn</CanonicalName><LocCanonicalName>SQLFormatter.PasteResultsAsIn</LocCanonicalName></Strings>
+      </Button>
+      <Button guid="guidCommandSet" id="cmdGenerateResultsInsert" priority="0x01B1" type="Button">
+        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
+        <CommandFlag>TextChanges</CommandFlag><CommandFlag>DynamicVisibility</CommandFlag><CommandFlag>DefaultInvisible</CommandFlag>
+        <Strings><ButtonText>Generate INSERT</ButtonText><CanonicalName>SQLFormatter.GenerateResultsInsert</CanonicalName><LocCanonicalName>SQLFormatter.GenerateResultsInsert</LocCanonicalName></Strings>
+      </Button>
+      <Button guid="guidCommandSet" id="cmdClipboardStatistics" priority="0x01B2" type="Button">
+        <Parent guid="guidCommandSet" id="grpSqlFormatter" />
+        <CommandFlag>TextChanges</CommandFlag>
+        <Strings><ButtonText>Selection Statistics (Clipboard)</ButtonText><CanonicalName>SQLFormatter.ClipboardStatistics</CanonicalName><LocCanonicalName>SQLFormatter.ClipboardStatistics</LocCanonicalName></Strings>
+      </Button>
       <Button guid="guidCommandSet" id="cmdSettings" priority="0x0200" type="Button">
         <Parent guid="guidCommandSet" id="grpSqlFormatter" />
         <CommandFlag>TextChanges</CommandFlag>
@@ -93,12 +108,15 @@
     <CommandPlacement guid="guidCommandSet" id="cmdRenameSymbol" priority="0x0130"><Parent guid="guidCommandSet" id="grpContext" /></CommandPlacement>
     <CommandPlacement guid="guidCommandSet" id="cmdGoToDeclaration" priority="0x0140"><Parent guid="guidCommandSet" id="grpContext" /></CommandPlacement>
     <CommandPlacement guid="guidCommandSet" id="cmdCheckDangerousCommands" priority="0x0150"><Parent guid="guidCommandSet" id="grpContext" /></CommandPlacement>
+    <CommandPlacement guid="guidCommandSet" id="cmdPasteResultsAsIn" priority="0x01B0"><Parent guid="guidCommandSet" id="grpContext" /></CommandPlacement>
+    <CommandPlacement guid="guidCommandSet" id="cmdGenerateResultsInsert" priority="0x01B1"><Parent guid="guidCommandSet" id="grpContext" /></CommandPlacement>
+    <CommandPlacement guid="guidCommandSet" id="cmdClipboardStatistics" priority="0x01B2"><Parent guid="guidCommandSet" id="grpContext" /></CommandPlacement>
   </CommandPlacements>
   <Symbols>
     <GuidSymbol name="guidPackage" value="{C8BAF105-2C0F-484C-93DB-DC653596796B}" />
     <GuidSymbol name="guidCommandSet" value="{164528C8-0EC5-4EEC-8380-7C17745D9701}">
       <IDSymbol name="menuSqlFormatter" value="0x1000" /><IDSymbol name="grpSqlFormatter" value="0x1020" /><IDSymbol name="grpContext" value="0x1040" />
-      <IDSymbol name="cmdFormatDocument" value="0x0200" /><IDSymbol name="cmdAnalyzeDocument" value="0x0210" /><IDSymbol name="cmdClearAnalysisMarkers" value="0x0211" /><IDSymbol name="cmdInsertSnippet" value="0x0220" /><IDSymbol name="cmdRenameSymbol" value="0x0230" /><IDSymbol name="cmdShowOutline" value="0x0240" /><IDSymbol name="cmdGoToDeclaration" value="0x0241" /><IDSymbol name="cmdConvertInsertToUpdate" value="0x0250" /><IDSymbol name="cmdConvertValuesToUnion" value="0x0251" /><IDSymbol name="cmdConvertExecReturnCode" value="0x0252" /><IDSymbol name="cmdGenerateCrud" value="0x0260" /><IDSymbol name="cmdRestoreFromHistory" value="0x0270" /><IDSymbol name="cmdCheckDangerousCommands" value="0x0280" /><IDSymbol name="cmdSettings" value="0x0400" />
+      <IDSymbol name="cmdFormatDocument" value="0x0200" /><IDSymbol name="cmdAnalyzeDocument" value="0x0210" /><IDSymbol name="cmdClearAnalysisMarkers" value="0x0211" /><IDSymbol name="cmdInsertSnippet" value="0x0220" /><IDSymbol name="cmdRenameSymbol" value="0x0230" /><IDSymbol name="cmdShowOutline" value="0x0240" /><IDSymbol name="cmdGoToDeclaration" value="0x0241" /><IDSymbol name="cmdConvertInsertToUpdate" value="0x0250" /><IDSymbol name="cmdConvertValuesToUnion" value="0x0251" /><IDSymbol name="cmdConvertExecReturnCode" value="0x0252" /><IDSymbol name="cmdGenerateCrud" value="0x0260" /><IDSymbol name="cmdRestoreFromHistory" value="0x0270" /><IDSymbol name="cmdCheckDangerousCommands" value="0x0280" /><IDSymbol name="cmdPasteResultsAsIn" value="0x0290" /><IDSymbol name="cmdGenerateResultsInsert" value="0x0291" /><IDSymbol name="cmdClipboardStatistics" value="0x0292" /><IDSymbol name="cmdSettings" value="0x0400" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

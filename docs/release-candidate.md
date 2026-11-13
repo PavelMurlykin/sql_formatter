@@ -67,7 +67,8 @@ or every minor host version. No stable public release is claimed.
 
 The 2026-11-13 delivery contains completed stages 1–10. Its packages undergo
 automated payload validation, including stage 10 environment/safety probes;
-earlier installed-host feature checks are recorded separately. Stage 11 and
-the final stage 12 remain planned.
+earlier installed-host feature checks are recorded separately. Stage 11 is now
+implemented in source builds (VS 0.2.15 / SSMS 0.6.14); the current packages above
+still contain stages 1–10. Its inclusion in the final stage 12 remains planned.
 The SSMS20 installer now migrates managed backups outside the shell's package
 search paths. Replace old copies of the installer script when upgrading.

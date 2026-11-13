@@ -142,6 +142,7 @@ internal static class Program
         search.Text = "indent.size"; indent = Descendants(editor).OfType<NumericUpDown>().Single(c => c.AccessibleName == "indent.size"); indent.Value = 3;
         Require(saves == 1 && savedJson != editor.Model.Export(), "Unsaved changes must not update the saved baseline");
         VerifySafetyWindow(window, english, dark);
+        VerifyQueryResultsWindows(window, english, dark);
         window.DialogResult = DialogResult.Cancel;
     }
     private static void VerifySafetyWindow(Form owner, bool english, bool dark)
@@ -176,6 +177,62 @@ internal static class Program
         Require(!fields.Single(c => c.AccessibleName == "ProductionWarning").Visible, "Unknown context was presented as PROD");
         Require(fields.Single(c => c.AccessibleName == "SafetyStatus").Text.StartsWith(english ? "Check incomplete" : "Проверка не завершена"),
             "A parse error was presented as a successful empty check"); incomplete.Close();
+    }
+    private static void VerifyQueryResultsWindows(Form owner, bool english, bool dark)
+    {
+        var theme = dark ? new SettingsAppearance(Color.FromArgb(30, 30, 30), Color.FromArgb(220, 220, 220),
+            Color.FromArgb(45, 45, 48), Color.FromArgb(0, 122, 204)) : SettingsAppearance.Light;
+        using (var options = new QueryResultsOptionsWindow(ClipboardResultKind.Insert, 3, 2))
+        {
+            options.StartPosition = FormStartPosition.Manual; options.Location = new Point(-2500, -2000);
+            options.ApplyAppearance(theme); options.Show(owner); Application.DoEvents();
+            var controls = Descendants(options).ToArray();
+            Require(!options.Options.FirstRowHeaders && !options.Options.AllValuesAsText, "TSV options guessed headers or text mode");
+            var next = controls.OfType<Button>().Single(c => c.AccessibleName == "TsvContinue");
+            var target = controls.OfType<TextBox>().Single(c => c.AccessibleName == "TsvTargetTable");
+            target.Text = "dbo.T; DROP TABLE T;"; next.PerformClick();
+            Require(options.DialogResult != DialogResult.OK && controls.Single(c => c.AccessibleName == "TsvOptionsError").Text.Length > 0,
+                "Invalid table name closed the TSV dialog");
+            target.Text = "[dbo].[Target]";
+            Require(controls.Single(c => c.AccessibleName == "TsvOptionsError").Text.Length == 0, "Editing the table retained a stale validation error");
+            controls.OfType<CheckBox>().Single(c => c.AccessibleName == "TsvHeaders").Checked = true;
+            controls.OfType<CheckBox>().Single(c => c.AccessibleName == "TsvAllText").Checked = true;
+            Require(options.Options.FirstRowHeaders && options.Options.AllValuesAsText && options.TableName == "[dbo].[Target]", "TSV draft options were lost");
+            if (english) Require(!controls.Any(c => c.Text.Any(ch => ch >= 'А' && ch <= 'я')), "Russian text leaked into English TSV options");
+            Capture(options, english, dark, "tsv-options");
+            next.PerformClick(); Require(options.DialogResult == DialogResult.OK, "Valid TSV options did not continue"); options.Close();
+        }
+        using (var options = new QueryResultsOptionsWindow(ClipboardResultKind.Statistics, 2, 2))
+        {
+            options.StartPosition = FormStartPosition.Manual; options.Location = new Point(-2500, -2000);
+            options.ApplyAppearance(theme); options.Show(owner); Application.DoEvents();
+            Require(!Descendants(options).Single(c => c.AccessibleName == "TsvAllText").Visible, "Statistics must not offer SQL literal options");
+            options.DialogResult = DialogResult.Cancel; Require(!options.Options.FirstRowHeaders, "Cancelled TSV draft changed defaults"); options.Close();
+        }
+        var statistics = TSqlFormatter.Core.QueryResults.TsvStatistics.Calculate(TSqlFormatter.Core.QueryResults.TsvTable.Parse("1\t2.5\nNULL\ttext"));
+        using var result = new QueryResultsStatisticsWindow(statistics);
+        result.StartPosition = FormStartPosition.Manual; result.Location = new Point(-2500, -2000);
+        theme.Apply(result); result.Show(owner); Application.DoEvents();
+        var report = Descendants(result).OfType<TextBox>().Single(c => c.AccessibleName == "TsvStatistics");
+        Require(report.ReadOnly && report.Text.Contains(english ? "Numeric: 2" : "Числовых: 2") && report.Text.Contains("3.5") && report.Text.Contains("1.75"), "TSV statistics are missing or editable");
+        Require(report.BackColor.GetBrightness() < 0.5f == dark, "TSV report theme mismatch");
+        if (english) Require(!Descendants(result).Any(c => c.Text.Any(ch => ch >= 'А' && ch <= 'я')), "Russian text leaked into English statistics");
+        Capture(result, english, dark, "tsv-statistics"); result.Close();
+        using var preview = new TransformationPreviewWindow("TSV preview", "old", "IN (1, 2, NULL)");
+        preview.StartPosition = FormStartPosition.Manual; preview.Location = new Point(-2500, -2000);
+        theme.Apply(preview); preview.Show(owner); Application.DoEvents();
+        foreach (var size in new[] { preview.Size, preview.MinimumSize })
+        {
+            preview.Size = size; Application.DoEvents();
+            foreach (var button in Descendants(preview).OfType<Button>())
+                Require(button.Visible && button.Parent!.ClientRectangle.Contains(button.Bounds), "Preview action is outside the button panel");
+            foreach (var box in Descendants(preview).OfType<TextBox>())
+            {
+                var header = box.Parent!.Controls.OfType<Label>().Single();
+                Require(box.ReadOnly && box.Top >= header.Bottom && box.Height > box.Font.Height, "Preview header hides the first SQL line");
+            }
+        }
+        Capture(preview, english, dark, "tsv-preview"); preview.Close();
     }
     private static void Capture(Form window, bool english, bool dark, string tab)
     {

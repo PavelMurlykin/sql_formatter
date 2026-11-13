@@ -27,7 +27,7 @@ namespace TSqlFormatter.VisualStudio;
 [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
 [ProvideAutoLoad(UIContextGuids80.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
 [ProvideAutoLoad(UIContextGuids80.SolutionExists, PackageAutoLoadFlags.BackgroundLoad)]
-[ProvideMenuResource("Menus.ctmenu", 3)]
+[ProvideMenuResource("Menus.ctmenu", 4)]
 [ProvideOptionPage(typeof(GeneralOptionsPage), "T-SQL Formatter", "General", 0, 0, true)]
 [ProvideOptionPage(typeof(FullSettingsOptionsPage), "T-SQL Formatter", "All settings", 0, 0, true)]
 [ProvideOptionPage(typeof(PreviewOptionsPage), "T-SQL Formatter", "SQL Preview", 0, 0, true)]
@@ -165,6 +165,9 @@ public sealed class SqlFormatterPackage : AsyncPackage
                 dangerous.Visible = dangerous.Enabled = ActiveSqlEditor.TryRead(textManager, out _, monitorSelection);
             };
             commands.AddCommand(dangerous);
+            AddClipboardCommand(commands, 0x0290, ClipboardResultKind.In, "Вставить как IN (…)", "Paste as IN (…)");
+            AddClipboardCommand(commands, 0x0291, ClipboardResultKind.Insert, "Сформировать INSERT", "Generate INSERT");
+            AddClipboardCommand(commands, 0x0292, ClipboardResultKind.Statistics, "Статистика выделенного (буфер обмена)", "Selection Statistics (Clipboard)");
             var settings = new OleMenuCommand((_, _) => ShowSettings(false), new CommandID(CommandSet, 0x0400));
             settings.BeforeQueryStatus += (_, _) => settings.Text = SettingsAppearance.Text("Настройки…", "Settings…");
             commands.AddCommand(settings);
@@ -814,6 +817,68 @@ public sealed class SqlFormatterPackage : AsyncPackage
         {
             await JoinableTaskFactory.SwitchToMainThreadAsync();
             NotifyFormat($"Formatting failed: {ex.Message}", true);
+        }
+    }
+
+    private void AddClipboardCommand(OleMenuCommandService commands, int id, ClipboardResultKind kind, string ru, string en)
+    {
+        var command = new OleMenuCommand((_, _) =>
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            JoinableTaskFactory.RunAsync(() => ClipboardResultsAsync(kind)).FileAndForget("TSqlFormatter/ClipboardResults");
+        }, new CommandID(CommandSet, id));
+        command.BeforeQueryStatus += (_, _) =>
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            command.Text = SettingsAppearance.Text(ru, en);
+            command.Visible = command.Enabled = kind == ClipboardResultKind.Statistics ||
+                ActiveSqlEditor.TryRead(textManager, out _, monitorSelection);
+        };
+        commands.AddCommand(command);
+    }
+
+    private async Task ClipboardResultsAsync(ClipboardResultKind kind)
+    {
+        await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+        try
+        {
+            ClipboardEditTarget? target = null;
+            if (kind != ClipboardResultKind.Statistics)
+            {
+                if (!ActiveSqlEditor.TryRead(textManager, out var editor, monitorSelection) || editorAdapters == null || undoRegistry == null ||
+                    !editor.TryCaptureCaret(editorAdapters, out var snapshot, out int caret) || snapshot.Length > 16 * 1024 * 1024 ||
+                    editorAdapters.GetWpfTextView(editor.View)?.Selection.SelectedSpans.Count > 1)
+                {
+                    NotifyFormat(SettingsAppearance.Text("Откройте SQL-документ с обычным курсором/выделением (до 16 Ми символов).",
+                        "Open a SQL document with a stream caret/selection (up to 16 Mi characters)."), true); return;
+                }
+                var span = new Span(caret, 0);
+                if (editor.TryCaptureSelection(editorAdapters, out var selectedSnapshot, out var selected) && ReferenceEquals(snapshot, selectedSnapshot))
+                    span = selected;
+                bool IsCurrent()
+                {
+                    ThreadHelper.ThrowIfNotOnUIThread();
+                    if (!ActiveSqlEditor.TryRead(textManager, out var current, monitorSelection) || !ReferenceEquals(current.Buffer, editor.Buffer) ||
+                        !string.Equals(current.Path, editor.Path, StringComparison.OrdinalIgnoreCase) ||
+                        editorAdapters.GetWpfTextView(current.View)?.Selection.SelectedSpans.Count > 1) return false;
+                    if (current.TryCaptureSelection(editorAdapters, out var currentSnapshot, out var currentSpan))
+                        return span.Length > 0 && ReferenceEquals(currentSnapshot, snapshot) && currentSpan == span;
+                    return span.Length == 0 && current.TryCaptureCaret(editorAdapters, out var caretSnapshot, out int position) &&
+                        ReferenceEquals(caretSnapshot, snapshot) && position == span.Start;
+                }
+                target = new ClipboardEditTarget(editor.Path, snapshot.GetText(span), IsCurrent,
+                    replacement => editor.TryApplyEdit(snapshot, span.Start, span.Length, replacement,
+                        "Paste query results", editorAdapters, undoRegistry));
+            }
+            FormattingOptions defaults = kind == ClipboardResultKind.Statistics ? FormattingOptions.Default : CreateIdeOptions();
+            await ClipboardResultsCommand.RunAsync(kind, target, defaults, ShowDialog,
+                IdeHostIntegration.Appearance(), NotifyFormat, DisposalToken);
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex)
+        {
+            await JoinableTaskFactory.SwitchToMainThreadAsync();
+            NotifyFormat(SettingsAppearance.Text("Операция не выполнена: ", "Operation not completed: ") + ex.Message, true);
         }
     }
 
