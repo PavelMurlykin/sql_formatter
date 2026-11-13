@@ -13,6 +13,7 @@ if (-not $SkipBuild) {
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $profiles = @('ADIR_SQL_Main', 'AV_Profile', 'Right-aligned-EPM-AWB2')
 $baseline = @{}
+$queryResultBaseline = @{}
 $results = @()
 foreach ($hostName in @('VS2022', 'VS2026', 'SSMS20', 'SSMS22')) {
     $work = Join-Path $repository ('artifacts\release-profile-smoke\' + $hostName + '-' + [Guid]::NewGuid().ToString('N'))
@@ -39,6 +40,13 @@ foreach ($hostName in @('VS2022', 'VS2026', 'SSMS20', 'SSMS22')) {
         if ($hostName -eq 'VS2022') { $baseline[$file.Name] = $hash }
         elseif ($baseline[$file.Name] -ne $hash) { throw "$hostName differs from VS2022: $($file.Name)" }
     }
+    $queryFiles = @(Get-ChildItem -LiteralPath (Join-Path $output 'query-results') -Filter '*.sql' -File)
+    if ($queryFiles.Count -ne 9) { throw "$hostName must produce 9 query-result/profile cases." }
+    foreach ($file in $queryFiles) {
+        $hash = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash
+        if ($hostName -eq 'VS2022') { $queryResultBaseline[$file.Name] = $hash }
+        elseif ($queryResultBaseline[$file.Name] -ne $hash) { throw "$hostName query-result SQL differs from VS2022: $($file.Name)" }
+    }
     $results += [ordered]@{
         host = $hostName
         file = "TSqlFormatter.$hostName.vsix"
@@ -49,13 +57,20 @@ foreach ($hostName in @('VS2022', 'VS2026', 'SSMS20', 'SSMS22')) {
         identicalOutput = $true
         editorFeatures = 'passed: analysis settings/project overrides; unsaved close buffer; metadata; age/count retention; disabled history'
         environmentSafety = 'passed: environment persistence/AND/PROD precedence/UNKNOWN/offline rules; legacy migration; independent DROP/TRUNCATE/unfiltered writes; positions; false positives; parse rejection'
+        queryResults = [ordered]@{
+            result = 'passed'
+            profileCases = $queryFiles.Count
+            identicalOutput = $true
+            features = 'quoted TSV; limits/rejections; numeric/text IN; INSERT headers/escaping/ISO dates/NULL; 1001-row batching; exact statistics/overflow'
+        }
     }
 }
 $report = [ordered]@{
     date = (Get-Date).ToString('yyyy-MM-dd')
-    scope = 'Extracted-installer libraries: analysis/history and stage 10 environment/safety feature smoke, profile import, editor/store round trip, formatting, permitted casing/syntax edits, idempotence, identical outputs. Separate from installed-IDE UI validation.'
+    scope = 'Extracted-installer libraries: analysis/history, stage 10 environment/safety and stage 11 TSV/IN/INSERT/statistics; profile import, editor/store round trip, formatting, permitted casing/syntax edits, idempotence, identical outputs. Separate from installed-IDE UI validation.'
     profiles = @($profiles | ForEach-Object { [ordered]@{ file = "$_.json"; sha256 = (Get-FileHash -LiteralPath (Join-Path $release "$_.json") -Algorithm SHA256).Hash.ToLowerInvariant() } })
     packages = $results
 }
 $report | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $release 'profile-verification.json') -Encoding UTF8
 Write-Output "All four installer libraries produced identical output for all $($baseline.Count) profile/SQL combinations."
+Write-Output "Stage 11 output also matches for all $($queryResultBaseline.Count) query-result/profile combinations across four installers."

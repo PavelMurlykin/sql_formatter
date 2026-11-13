@@ -13,15 +13,16 @@ CRUD templates from CREATE TABLE, analysis settings and local save/close history
 with configurable retention. Stages 3 and 9 are complete in the
 [development roadmap](docs/development/ROADMAP.md); see the
 [installed-host evidence and limits](docs/development/stages-3-9-validation.md).
-The current installers include stage 10 (VS 0.2.14 / SSMS 0.6.13): per-user
+The current installers include stage 10 (VS 0.2.15 / SSMS 0.6.14): per-user
 DEV/TEST/PROD matching rules and **Check Dangerous Commands**, with a colored
 context label and a separate PROD warning. See [stage 10 validation](docs/development/stage-10-validation.md).
-The installers in `release/` include completed stages 1–10, with analysis
+The installers in `release/` include completed stages 1–11, with analysis
 settings, close-time history and environment/safety checks. See [release validation](release/VALIDATION.md).
-Stage 11 is implemented in source builds (VS 0.2.15 / SSMS 0.6.14): clipboard
+Stage 11 is shipped in VS 0.2.15 / SSMS 0.6.14: clipboard
 TSV to IN/INSERT, explicit headers/text mode, profile-aware previews with one Undo,
 and numeric-cell statistics. See [stage 11 validation](docs/development/stage-11-validation.md).
-It awaits inclusion in the final consolidated release (stage 12).
+Stage 12 consolidates these features into the local preview delivery; the
+[development roadmap](docs/development/ROADMAP.md) is complete. This is not a stable public release.
 The extension provides **Format Document**, **Analyze
 Document**, editor tools, **Restore Closed Script** and **Settings**.
 Formatting affects the selection, or the whole active `.sql` when no text is
@@ -131,4 +132,4 @@ native import JSON for VSIX 0.2.8 / SSMS 0.6.7. Their source mapping, explicit n
 approximations and audit against both EPM-RAC database projects are described in
 [the working-profile report](docs/sql-complete-working-profiles.md).
 The current release includes these profiles and ADIR_SQL_Main in `release/`, with
-Visual Studio packages 0.2.14 and SSMS packages 0.6.13.
+Visual Studio packages 0.2.15 and SSMS packages 0.6.14.

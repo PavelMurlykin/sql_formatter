@@ -4,10 +4,10 @@ Local build dated 2026-11-13. Choose the package for your IDE:
 
 | IDE | File | Extension version |
 | --- | --- | --- |
-| Visual Studio 2022 17.14.x, x64 | `TSqlFormatter.VS2022.vsix` | 0.2.14 |
-| Visual Studio 2026 18.x, x64 | `TSqlFormatter.VS2026.vsix` | 0.2.14 |
-| SSMS 20.x, x86 | `TSqlFormatter.SSMS20.vsix` + `Install-SSMS20.ps1` | 0.6.13 |
-| SSMS 22.x, x64 | `TSqlFormatter.SSMS22.vsix` | 0.6.13 |
+| Visual Studio 2022 17.14.x, x64 | `TSqlFormatter.VS2022.vsix` | 0.2.15 |
+| Visual Studio 2026 18.x, x64 | `TSqlFormatter.VS2026.vsix` | 0.2.15 |
+| SSMS 20.x, x86 | `TSqlFormatter.SSMS20.vsix` + `Install-SSMS20.ps1` | 0.6.14 |
+| SSMS 22.x, x64 | `TSqlFormatter.SSMS22.vsix` | 0.6.14 |
 
 The ready-made extensions do not require the .NET 10 SDK. They target .NET Framework 4.7.2 and bundle the formatting dependencies. Update a VS 2022 version earlier than 17.14 to the 17.14 branch.
 
@@ -45,9 +45,10 @@ Select the SSMS 22 instance in the installer, then restart it. Find the **SQL Fo
 
 ## New features and post-upgrade checks
 
-The packages include completed stages 1–10: TSQL001–TSQL005 analysis, snippets,
+The packages include completed stages 1–11: TSQL001–TSQL005 analysis, snippets,
 rename, outline/navigation, SQL transformations, CRUD from CREATE TABLE and local
 history, DEV/TEST/PROD environments and dangerous-command checks.
+Stage 11 adds clipboard TSV to IN, INSERT and numeric-cell statistics.
 Analysis, history and environment settings are under **Settings… → General**.
 
 - Enable/disable analysis and individual rules, and choose their severities.
@@ -98,6 +99,60 @@ warning and four findings on lines 1–4. Select DROP and **Go to**: the cursor 
 move to line 1 and the source text should stay unchanged. Remove the temporary
 rule and save afterwards. Normal CLI `--analyze` retains TSQL001–TSQL005; the new
 command is available in the IDE.
+
+### Stage 11: IN, INSERT and clipboard statistics
+
+Copy cells as TSV (tabs between columns, newlines between records). Return to the
+SQL editor. Commands are under **SQL Formatter** and in the editor context menu;
+in Visual Studio open **Extensions** first. All rows are data by default;
+headers must be enabled explicitly in each command's dialog.
+
+- **Paste as IN (…)**: copy one column with rows `1`, `2`, `NULL`. In separate
+  test SQL, place the caret after `SELECT 1 WHERE 1` and a space, then invoke the command.
+  Expect `IN (1, 2, NULL)` in the preview. **Apply**, then one Undo should restore
+  the original text. **Cancel** makes no SQL edit.
+- **Generate INSERT**: copy the TSV below, enable **First row contains headers**
+  and enter `dbo.Stage11_TestOnly`. Column names and `O'Brien` must be preserved
+  with escaping, and NULL must remain SQL NULL. Without headers, INSERT omits
+  the column list. Output replaces the selection or inserts at the caret, with one Undo.
+
+```text
+Id	Name
+1	O'Brien
+2	NULL
+```
+
+- **Selection Statistics (Clipboard)**: copy the TSV below, leave headers off
+  and invoke the command. Expect 4 cells, 2 numeric, sum 3.5 and average 1.75.
+  The source is the clipboard, not selected SQL; an open SQL document is not required.
+
+```text
+1	2.5
+NULL	text
+```
+
+**Do not execute** this synthetic SQL; no table is needed for these checks.
+Commands open no connection and leave the clipboard unchanged. Output uses
+the active profile with project settings. The preview shows its first line and
+accessible action buttons at minimum window size too. Changed text, document
+or caret/selection rejects insertion.
+
+Auto mode infers each column; mixed data and leading zeros stay text. Empty
+cells become `N''`, unquoted NULL becomes SQL NULL, and `"NULL"` stays a string;
+ISO dates use CONVERT. **All values as text, including NULL** disables inference.
+Table names have 1–3 parts and support [brackets]. INSERT splits at 1000 rows.
+Review target types, IDENTITY and constraints before using the SQL: schema
+metadata is not read.
+
+TSV limits: 1 Mi characters, 10000 rows including headers, 256 columns, 100000 cells.
+Quoted tabs/newlines are supported; unequal rows, NUL and invalid quotes are
+rejected. Statistics skips text, sums decimal values exactly and rounds the
+average; unrepresentable values/sums are rejected. No COM ResultsGrid, HTML/CSV
+or new CLI commands are used. Full typing rules and limits are in the
+[manual](../docs/user-manual.en.md#vs-and-ssms-query-results-through-the-clipboard).
+These exact rebuilt packages were not freshly installed in this pass; the
+earlier native VS2022 scenario and current package probes are separated in
+[release validation](VALIDATION.md).
 
 ## Profiles
 

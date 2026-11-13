@@ -1,6 +1,6 @@
 ﻿{
     "date":  "2026-11-13",
-    "scope":  "Extracted-installer libraries: analysis/history and stage 10 environment/safety feature smoke, profile import, editor/store round trip, formatting, permitted casing/syntax edits, idempotence, identical outputs. Separate from installed-IDE UI validation.",
+    "scope":  "Extracted-installer libraries: analysis/history, stage 10 environment/safety and stage 11 TSV/IN/INSERT/statistics; profile import, editor/store round trip, formatting, permitted casing/syntax edits, idempotence, identical outputs. Separate from installed-IDE UI validation.",
     "profiles":  [
                      {
                          "file":  "ADIR_SQL_Main.json",
@@ -19,46 +19,70 @@
                      {
                          "host":  "VS2022",
                          "file":  "TSqlFormatter.VS2022.vsix",
-                         "sha256":  "05ef1d5bb524c83bf6391ab832ae05032d36441c3d290f07d32cc8bd9167b806",
+                         "sha256":  "72273d088fa232ebe026092e9e1527941f298e73f0f062556053176acdbf38b2",
                          "cases":  57,
                          "architecture":  "x64",
                          "result":  "passed",
                          "identicalOutput":  true,
                          "editorFeatures":  "passed: analysis settings/project overrides; unsaved close buffer; metadata; age/count retention; disabled history",
-                         "environmentSafety":  "passed: environment persistence/AND/PROD precedence/UNKNOWN/offline rules; legacy migration; independent DROP/TRUNCATE/unfiltered writes; positions; false positives; parse rejection"
+                         "environmentSafety":  "passed: environment persistence/AND/PROD precedence/UNKNOWN/offline rules; legacy migration; independent DROP/TRUNCATE/unfiltered writes; positions; false positives; parse rejection",
+                         "queryResults":  {
+                                              "result":  "passed",
+                                              "profileCases":  9,
+                                              "identicalOutput":  true,
+                                              "features":  "quoted TSV; limits/rejections; numeric/text IN; INSERT headers/escaping/ISO dates/NULL; 1001-row batching; exact statistics/overflow"
+                                          }
                      },
                      {
                          "host":  "VS2026",
                          "file":  "TSqlFormatter.VS2026.vsix",
-                         "sha256":  "d64749fe21c1b6dcca8d801485617fd50ec4545aa7608cb1d9d15ca40d1741d1",
+                         "sha256":  "7d084b1abab7f0c5fcc87bb67654b8d41c6258b479a0422e9042b04857ff4ee6",
                          "cases":  57,
                          "architecture":  "x64",
                          "result":  "passed",
                          "identicalOutput":  true,
                          "editorFeatures":  "passed: analysis settings/project overrides; unsaved close buffer; metadata; age/count retention; disabled history",
-                         "environmentSafety":  "passed: environment persistence/AND/PROD precedence/UNKNOWN/offline rules; legacy migration; independent DROP/TRUNCATE/unfiltered writes; positions; false positives; parse rejection"
+                         "environmentSafety":  "passed: environment persistence/AND/PROD precedence/UNKNOWN/offline rules; legacy migration; independent DROP/TRUNCATE/unfiltered writes; positions; false positives; parse rejection",
+                         "queryResults":  {
+                                              "result":  "passed",
+                                              "profileCases":  9,
+                                              "identicalOutput":  true,
+                                              "features":  "quoted TSV; limits/rejections; numeric/text IN; INSERT headers/escaping/ISO dates/NULL; 1001-row batching; exact statistics/overflow"
+                                          }
                      },
                      {
                          "host":  "SSMS20",
                          "file":  "TSqlFormatter.SSMS20.vsix",
-                         "sha256":  "a9e10e7471504bd1f6fecce033c71f7c4cd6da14a5d9fa35db14372aa1cc58ea",
+                         "sha256":  "a2e803dbb9d1bda52bbaa009168886c1d564081ec4a18128b6c046c26c753cd8",
                          "cases":  57,
                          "architecture":  "x86",
                          "result":  "passed",
                          "identicalOutput":  true,
                          "editorFeatures":  "passed: analysis settings/project overrides; unsaved close buffer; metadata; age/count retention; disabled history",
-                         "environmentSafety":  "passed: environment persistence/AND/PROD precedence/UNKNOWN/offline rules; legacy migration; independent DROP/TRUNCATE/unfiltered writes; positions; false positives; parse rejection"
+                         "environmentSafety":  "passed: environment persistence/AND/PROD precedence/UNKNOWN/offline rules; legacy migration; independent DROP/TRUNCATE/unfiltered writes; positions; false positives; parse rejection",
+                         "queryResults":  {
+                                              "result":  "passed",
+                                              "profileCases":  9,
+                                              "identicalOutput":  true,
+                                              "features":  "quoted TSV; limits/rejections; numeric/text IN; INSERT headers/escaping/ISO dates/NULL; 1001-row batching; exact statistics/overflow"
+                                          }
                      },
                      {
                          "host":  "SSMS22",
                          "file":  "TSqlFormatter.SSMS22.vsix",
-                         "sha256":  "b34ba726fecd1e3719fa1d8ef57b6ad43f98b14764f7fbd2438f448c13140c70",
+                         "sha256":  "67550d8eb982e797e636aaf53825e738336737676867c05fc40e70c34ed8edc5",
                          "cases":  57,
                          "architecture":  "x64",
                          "result":  "passed",
                          "identicalOutput":  true,
                          "editorFeatures":  "passed: analysis settings/project overrides; unsaved close buffer; metadata; age/count retention; disabled history",
-                         "environmentSafety":  "passed: environment persistence/AND/PROD precedence/UNKNOWN/offline rules; legacy migration; independent DROP/TRUNCATE/unfiltered writes; positions; false positives; parse rejection"
+                         "environmentSafety":  "passed: environment persistence/AND/PROD precedence/UNKNOWN/offline rules; legacy migration; independent DROP/TRUNCATE/unfiltered writes; positions; false positives; parse rejection",
+                         "queryResults":  {
+                                              "result":  "passed",
+                                              "profileCases":  9,
+                                              "identicalOutput":  true,
+                                              "features":  "quoted TSV; limits/rejections; numeric/text IN; INSERT headers/escaping/ISO dates/NULL; 1001-row batching; exact statistics/overflow"
+                                          }
                      }
                  ]
 }

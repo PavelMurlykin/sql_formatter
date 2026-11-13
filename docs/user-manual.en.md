@@ -44,7 +44,7 @@ The repository also has an active [GitHub Actions workflow](../.github/workflows
 
 ## Installers and local release
 
-Ready-made packages and profiles are in the repository-root `release/` directory: `TSqlFormatter.VS2022.vsix` and `TSqlFormatter.VS2026.vsix` version **0.2.14**, `TSqlFormatter.SSMS20.vsix` and `TSqlFormatter.SSMS22.vsix` version **0.6.13**, plus CLI `0.1.0-preview.8`. VS 2022 requires the 17.14 branch (x64); VS 2026 requires 18.x (x64); SSMS 20 is x86; SSMS 22 is x64. Running the extensions does not require the .NET 10 SDK.
+Ready-made packages and profiles are in the repository-root `release/` directory: `TSqlFormatter.VS2022.vsix` and `TSqlFormatter.VS2026.vsix` version **0.2.15**, `TSqlFormatter.SSMS20.vsix` and `TSqlFormatter.SSMS22.vsix` version **0.6.14**, plus CLI `0.1.0-preview.8`. VS 2022 requires the 17.14 branch (x64); VS 2026 requires 18.x (x64); SSMS 20 is x86; SSMS 22 is x64. Running the extensions does not require the .NET 10 SDK.
 
 Close the IDE before installation. For Visual Studio, open the corresponding VSIX. For SSMS 22, use the VSIX Installer from its installation directory. For SSMS 20, keep the VSIX beside `Install-SSMS20.ps1` and run `powershell -NoProfile -ExecutionPolicy Bypass -File .\Install-SSMS20.ps1` from that folder in an Administrator PowerShell. The script checks the generation and backs up an earlier installation when updating; the standard VSIX Installer does not work for this legacy shell. See the [installation guide](../release/README.en.md) for details and custom paths.
 
@@ -61,7 +61,7 @@ To reproducibly build all four extensions and the CLI and verify profiles, run `
 
 ## VS and SSMS: formatting a document
 
-The VSIX files in `release/` include the completed stages 1–10: analysis settings, editor tools and save/close history. Install the matching package and restart the IDE. In Visual Studio open **Extensions → SQL Formatter**; in SSMS find the **SQL Formatter** menu (top-level in SSMS20). It contains **Format Document**, **Analyze Document**, **Insert Snippet**, **Rename Symbol**, **Script Outline**, **Go To Declaration**, the three **SQL transformation** commands, **Generate CRUD from CREATE TABLE**, **Restore Closed Script**, **Check Dangerous Commands**, **Clear Analysis Markers** (shown when markers exist) and **Settings…**. Commands, tabs, built-in profiles, rules and values use the IDE UI language: Russian for ru, English for other languages. Restart the IDE after changing its language.
+The VSIX files in `release/` include the completed stages 1–11: analysis settings, editor tools and save/close history. Install the matching package and restart the IDE. In Visual Studio open **Extensions → SQL Formatter**; in SSMS find the **SQL Formatter** menu (top-level in SSMS20). It contains **Format Document**, **Analyze Document**, **Insert Snippet**, **Rename Symbol**, **Script Outline**, **Go To Declaration**, the three **SQL transformation** commands, **Generate CRUD from CREATE TABLE**, **Restore Closed Script**, **Check Dangerous Commands**, **Paste as IN (…)**, **Generate INSERT**, **Selection Statistics (Clipboard)**, **Clear Analysis Markers** (shown when markers exist) and **Settings…**. Commands, tabs, built-in profiles, rules and values use the IDE UI language: Russian for ru, English for other languages. Restart the IDE after changing its language.
 
 **Format Document** is available for the active `.sql` tab, including its text editor context menu. A nonempty selection formats only that fragment; without a selection it formats the entire active document. Selections may contain several statements, an expression list or a query clause. Text outside the selection stays unchanged. For example, selecting `where Id=1 and Amount>0` in a SELECT formats only that condition. A boundary cutting a token or a fragment that cannot safely be processed leaves the text unchanged with a diagnostic. Fully selected standalone statements can be formatted even with invalid SQL outside the selection.
 
@@ -157,7 +157,7 @@ SSMS integration remains experimental. Tested generations, close scenarios and c
 ## VS and SSMS: environments and dangerous commands
 
 Stage 10 is included in the ready-made `release/` packages dated 2026-11-13:
-VS VSIX 0.2.14 / SSMS 0.6.13. Install the package matching your IDE generation
+VS VSIX 0.2.15 / SSMS 0.6.14. Install the package matching your IDE generation
 and restart the IDE; these features do not require a source build. Package
 contents and actual checks are recorded in [release validation](../release/VALIDATION.md).
 
@@ -208,10 +208,11 @@ appears in the dialog. Actual evidence and limits are in
 
 ## VS and SSMS: query results through the clipboard
 
-Stage 11 is available in current source builds: **VS 0.2.15 / SSMS 0.6.14**.
-The `release/` packages still contain stages 1–10 (**VS 0.2.14 / SSMS 0.6.13**).
-Build and install the appropriate adapter VSIX; use the installer script for
-SSMS20. See [actual checks and limits](development/stage-11-validation.md).
+Stage 11 is included in the ready-made `release/` packages dated 2026-11-13:
+**VS 0.2.15 / SSMS 0.6.14**, stages 1–11. Install the VSIX for your IDE generation
+and restart the IDE; use the bundled installer script for SSMS20. A source build
+is unnecessary. [Package validation](../release/VALIDATION.md) is separate from
+[the VS2022 implementation check](development/stage-11-validation.md).
 
 Copy result cells as TSV: tabs separate columns and newlines separate records.
 Return to the SQL editor and open **SQL Formatter** (under **Extensions** in VS)
@@ -307,7 +308,7 @@ Both selectors list built-in styles and user profiles. Selecting one loads it in
 
 **Import profile…** accepts native JSON v1/v2 up to 1 MiB, including all rules/alignment, and suggests the file name as the profile name. Click **Save** after each import. **Export profile…** writes the current JSON snapshot immediately, prompting before overwriting; closing the window does not undo that file. SQL Complete/SQL Prompt XML/style files are not imported directly. User profiles are stored in per-user IDE settings; export `.tsqlformatter.json` beside SQL for the CLI. User profile names are not `--profile` IDs.
 
-This interface ships in VS **0.2.14** and SSMS **0.6.13** packages. Shared WinForms editor scenarios cover Russian/English and light/dark themes; this is separate from installed Visual Studio validation. See [UI validation](settings-ui-validation.md).
+This interface ships in VS **0.2.15** and SSMS **0.6.14** packages. Shared WinForms editor scenarios cover Russian/English and light/dark themes; this is separate from installed Visual Studio validation. See [UI validation](settings-ui-validation.md).
 
 ## AV and EPM working profiles from SQL Complete
 
@@ -1455,7 +1456,7 @@ their separate normalization. Thresholds
 use `enabled/value` and a strict “shorter than” comparison. Existing profiles do not enable
 these changes automatically.
 
-In VS 0.2.14 / SSMS 0.6.13 the profile also enables
+In VS 0.2.15 / SSMS 0.6.14 the profile also enables
 `syntax.removeOptionalBrackets=true` and `syntax.addSemicolons=true`. On
 **Formatting → Global → Basics → SQL syntax**, use **Remove optional square brackets**
 and **Terminate statements with semicolons**. For example, `USE [WorkDb]` becomes
@@ -1486,7 +1487,7 @@ See the [settings mapping and comparison command](sql-prompt-adir-profile.md) an
 [audit of files changed in Git during 2026](sql-prompt-adir-validation.md).
 
 For the refined profile audited against Functions/Tables/Triggers/Types/Views, install
-Visual Studio VSIX 0.2.14 or SSMS VSIX 0.6.13 and import the JSON again: previously saved
+Visual Studio VSIX 0.2.15 or SSMS VSIX 0.6.14 and import the JSON again: previously saved
 user profiles do not update automatically. `layout.functionParameters` independently
 controls CREATE/ALTER FUNCTION parameters: `inherit` keeps the shared `routine.parameters`
 rules, `always` wraps the list, `never` keeps it inline, `multiple` wraps multiple

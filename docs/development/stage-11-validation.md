@@ -1,5 +1,11 @@
 # Этап 11 / Stage 11 — 2026-11-13
 
+Поставка / Delivery update: этап 11 включён в четыре готовых VSIX в `release/`,
+VS 0.2.15 / SSMS 0.6.14. Stage 11 is now shipped in all four ready-made packages.
+См. / See [проверку поставки / delivery validation](../../release/VALIDATION.md).
+Ниже сохранены результаты отдельного прохода реализации до этой поставки.
+The implementation evidence below predates this packaging pass.
+
 ## Русский
 
 Реализованы три команды работы с текстом TSV из буфера обмена: IN одного столбца,

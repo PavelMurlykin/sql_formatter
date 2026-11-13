@@ -26,7 +26,7 @@ solution, release-smoke and settings-UI projects.
 
 The builder performs a Release solution build and tests, checks the manifests and
 required assets in each VSIX, copies the three canonical JSON profiles, tests
-their import/store/formatting and analysis/history/environment/safety behavior against extracted
+their import/store/formatting and analysis/history/environment/safety/query-result behavior against extracted
 package libraries, runs the SSMS20 upgrade regression and WinForms settings
 scenario, and packs/installs/smoke-tests formatting and analysis in the local CLI. It writes
 `release-manifest.json` with deliverable versions and SHA-256 values and
@@ -38,10 +38,10 @@ separately in [release validation](../release/VALIDATION.md).
 
 | Host | Package | Adapter version |
 | --- | --- | --- |
-| VS 2022 17.14 x64 | TSqlFormatter.VS2022.vsix | 0.2.14 |
-| VS 2026 18.x x64 | TSqlFormatter.VS2026.vsix | 0.2.14 |
-| SSMS 20 x86 | TSqlFormatter.SSMS20.vsix + Install-SSMS20.ps1 | 0.6.13 |
-| SSMS 22 x64 | TSqlFormatter.SSMS22.vsix | 0.6.13 |
+| VS 2022 17.14 x64 | TSqlFormatter.VS2022.vsix | 0.2.15 |
+| VS 2026 18.x x64 | TSqlFormatter.VS2026.vsix | 0.2.15 |
+| SSMS 20 x86 | TSqlFormatter.SSMS20.vsix + Install-SSMS20.ps1 | 0.6.14 |
+| SSMS 22 x64 | TSqlFormatter.SSMS22.vsix | 0.6.14 |
 | CLI, .NET 10 Runtime | TSqlFormatter.Tool.0.1.0-preview.8.nupkg | 0.1.0-preview.8 |
 
 Profiles: `ADIR_SQL_Main.json`, `AV_Profile.json`, `Right-aligned-EPM-AWB2.json`.
@@ -65,10 +65,11 @@ These are unsigned local preview packages. Existing historical IDE matrices
 describe only their stated versions; they do not certify the new four packages
 or every minor host version. No stable public release is claimed.
 
-The 2026-11-13 delivery contains completed stages 1–10. Its packages undergo
-automated payload validation, including stage 10 environment/safety probes;
-earlier installed-host feature checks are recorded separately. Stage 11 is now
-implemented in source builds (VS 0.2.15 / SSMS 0.6.14); the current packages above
-still contain stages 1–10. Its inclusion in the final stage 12 remains planned.
+The current 2026-11-13 delivery contains completed stages 1–11. Payload validation
+includes stage 10 environment/safety probes and stage 11 TSV/IN/INSERT/statistics.
+Each package runs nine query-result/profile cases; all outputs match across hosts.
+Earlier installed-host feature checks are recorded separately; these exact
+rebuilt packages were not freshly installed in this pass. Stage 12's local
+consolidation and documentation are complete; no public/stable publication is implied.
 The SSMS20 installer now migrates managed backups outside the shell's package
 search paths. Replace old copies of the installer script when upgrading.

@@ -3,7 +3,24 @@
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
 
-## Query results through the clipboard (stage 11, source builds) — 2026-11-13
+## Consolidated local delivery of stages 1–11 (stage 12) — 2026-11-13
+
+- Updated all four `release/` installers: VS2022/VS2026 **0.2.15** and SSMS20/
+  SSMS22 **0.6.14**, including stage 11 IN/INSERT/statistics and the preview fix.
+  Repacked CLI preview.8 with current shared libraries; CLI behavior, the three
+  native profiles and SSMS20 installer script are unchanged. Refreshed hashes.
+- Added per-package stage 11 API probes in .NET Framework x86/x64 and **36**
+  query-result/profile conversions, comparing output hashes across hosts.
+  All **1728 tests**, four VSIX checks, **228** formatting-profile cases,
+  analysis/history/environment probes, four UI variants, installer regression
+  and packaged CLI smoke passed.
+- Updated installation guides, RU/EN manuals and final technical/business docs;
+  stage 12's local consolidation and the twelve-stage extension roadmap are complete.
+  Exact rebuilt VSIX files were not freshly installed; earlier VS2022 stage 11
+  validation used another build of the same version and is recorded separately.
+  Packages remain unsigned local previews, without public/stable publication.
+
+## Query results through the clipboard (stage 11 implementation) — 2026-11-13
 
 - Added bounded TSV parsing, clipboard-to-IN and clipboard-to-INSERT, explicit
   headers and all-text mode. Column inference preserves mixed data/leading zeros;

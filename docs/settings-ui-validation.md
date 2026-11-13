@@ -1,15 +1,17 @@
 # Current settings validation — 2026-11-13
 
-Stage 11 source builds: VS **0.2.15** / SSMS **0.6.14**, **1728 tests**.
+Stage 11 release packages: VS **0.2.15** / SSMS **0.6.14**, **1728 tests**.
 All four RU/EN × light/dark UI variants pass: TSV header/text defaults and edits,
 table-name validation/localization, stale-error clearing, read-only statistics,
 and shared transformation-preview layout at normal/minimum sizes. The first
 SQL line and both action buttons remain visible. Native VS2022 also confirmed
 IN/INSERT, one Undo, preview cancel and statistics; see
-[stage 11 evidence](development/stage-11-validation.md). `release/` still contains
-the stage 10 packages below.
+[stage 11 evidence](development/stage-11-validation.md). The new release pipeline
+reran all four standalone variants; it did not repeat the native IDE check.
+`release/` now contains stages 1–11; see [current delivery validation](../release/VALIDATION.md).
 
-Logs: `artifacts/stage11/ui.log`; captures: `artifacts/settings-ui/*-tsv-*.png`.
+Current pipeline log: `artifacts/release-stage11-2026-11-13/build-release.log`;
+implementation log: `artifacts/stage11/ui.log`; captures: `artifacts/settings-ui/*-tsv-*.png`.
 
 ## Stage 10 release snapshot — 2026-11-13
 

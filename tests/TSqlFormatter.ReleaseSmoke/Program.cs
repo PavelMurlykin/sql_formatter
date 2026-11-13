@@ -9,6 +9,7 @@ using TSqlFormatter.Core.Formatting;
 using TSqlFormatter.Core.Parsing;
 using TSqlFormatter.Core.Analysis;
 using TSqlFormatter.Core.History;
+using TSqlFormatter.Core.QueryResults;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace TSqlFormatter.ReleaseSmoke;
@@ -63,6 +64,7 @@ internal static class Program
                 "Configuration must load from the extracted installer.");
             VerifyEditorFeatures(output);
             VerifySafetyFeatures();
+            VerifyQueryResultFeatures();
             var formatter = new ScriptDomSqlFormatter();
             var parser = new ScriptDomSqlParser();
             foreach (var name in Profiles)
@@ -79,6 +81,7 @@ internal static class Program
                 store.SetDefault("user:" + name);
                 var restored = UserProfileStore.Deserialize(store.Serialize()).ResolveDefault(FormattingOptions.Default);
                 Require(model.Export() == new SettingsEditorModel(restored).Export(), name + ": default profile persistence failed");
+                VerifyQueryResultProfile(name, restored, output);
                 if (name != "ADIR_SQL_Main") Require(options.Rules.Overrides.Count == 573, name + ": rules missing");
                 else Require(options.Rules.Get("syntax.removeOptionalBrackets").Boolean
                     && options.Rules.Get("syntax.addSemicolons").Boolean
@@ -194,5 +197,77 @@ internal static class Program
         try { analyzer.Analyze(invalid); } catch (ArgumentException) { rejected = true; }
         Require(rejected, "Packaged safety analyzer must reject incomplete parses.");
         Console.WriteLine("Stage 10: environment persistence/AND/PROD precedence/UNKNOWN/offline rules, legacy migration, independent dangerous-command checks, positions, false positives and parse rejection passed.");
+    }
+
+    private static void VerifyQueryResultFeatures()
+    {
+        var quoted = TsvTable.Parse("\"a\tb\"\t\"line1\r\nline2\"\t\"\"\r\n");
+        Require(quoted.Rows.Count == 1 && quoted.ColumnCount == 3 && quoted.Rows[0][0].Text == "a\tb" &&
+            quoted.Rows[0][1].Text == "line1\r\nline2" && quoted.Rows[0][2].Text == "", "Packaged TSV decoding failed.");
+        var statistics = TsvStatistics.Calculate(TsvTable.Parse("1\t2.5\r\nNULL\ttext"));
+        Require(statistics.TotalCells == 4 && statistics.NumericCount == 2 && statistics.SkippedCount == 2 &&
+            statistics.Sum == 3.5m && statistics.Average == 1.75m, "Packaged numeric statistics failed.");
+        var empty = TsvStatistics.Calculate(TsvTable.Parse("NULL\ttext"));
+        Require(empty.NumericCount == 0 && empty.Sum == 0 && empty.Average == null, "Packaged empty statistics failed.");
+        var exact = TsvStatistics.Calculate(TsvTable.Parse("79228162514264337593543950335\n1\n-1"));
+        Require(exact.Sum == decimal.MaxValue, "Packaged exact sum lost precision during accumulation.");
+        RequireResultError(ResultDataError.NumericOverflow, () => TsvStatistics.Calculate(
+            TsvTable.Parse("4000000000000000000000000000.1\n4000000000000000000000000000.1")));
+        RequireResultError(ResultDataError.UnequalColumns, () => TsvTable.Parse("a\tb\nc"));
+        RequireResultError(ResultDataError.TooLarge, () => TsvTable.Parse(new string('x', TsvTable.MaxCharacters + 1)));
+        RequireResultError(ResultDataError.InvalidTable, () => QueryResultSql.CreateInsert(TsvTable.Parse("1"),
+            "dbo.T; DROP TABLE T;", new(), FormattingOptions.Default));
+        RequireResultError(ResultDataError.InRequiresOneColumn, () => QueryResultSql.CreateIn(TsvTable.Parse("1\t2"), new(), FormattingOptions.Default));
+        string batched = QueryResultSql.CreateInsert(TsvTable.Parse(string.Join("\n", Enumerable.Range(1, 1001))),
+            "dbo.ReleaseSmoke", new(), FormattingOptions.Default);
+        var statements = QueryFragments<InsertStatement>(batched);
+        Require(statements.Count == 2 && statements.Select(s => ((ValuesInsertSource)s.InsertSpecification.InsertSource).RowValues.Count)
+            .SequenceEqual(new[] { 1000, 1 }), "Packaged INSERT batching failed.");
+        Console.WriteLine("Stage 11: quoted TSV, limits/rejections, statistics, exact accumulation/overflow and 1001-row batching passed.");
+    }
+
+    private static void VerifyQueryResultProfile(string name, FormattingOptions options, string output)
+    {
+        var headers = new QueryResultOptions(firstRowHeaders: true);
+        string numericIn = QueryResultSql.CreateIn(TsvTable.Parse("Id\r\n1\r\n2\r\nNULL"), headers, options);
+        string numericSql = "SELECT 1 WHERE x " + numericIn + ";";
+        var numbers = QueryFragments<InPredicate>(numericSql).Single().Values;
+        Require(numbers.Count == 3 && numbers[0] is IntegerLiteral && numbers[2] is NullLiteral,
+            name + ": packaged numeric IN lost values or NULL.");
+        string textIn = QueryResultSql.CreateIn(TsvTable.Parse("Value\n001\nО'Брайен\nNULL\n\"NULL\""), headers, options);
+        string textSql = "SELECT 1 WHERE x " + textIn + ";";
+        var texts = QueryFragments<InPredicate>(textSql).Single().Values;
+        Require(texts.Count == 4 && texts[0] is StringLiteral leading && leading.Value == "001" && leading.IsNational &&
+            texts[1] is StringLiteral escaped && escaped.Value == "О'Брайен" && texts[2] is NullLiteral &&
+            texts[3] is StringLiteral literalNull && literalNull.Value == "NULL", name + ": packaged text IN lost data.");
+        string insert = QueryResultSql.CreateInsert(TsvTable.Parse("Id\tName\tStamp\n1\tO'Brien\t2026-11-13\n2\tNULL\t2026-11-14"),
+            "[dbo].[ReleaseSmoke]", headers, options);
+        var spec = QueryFragments<InsertStatement>(insert).Single().InsertSpecification;
+        var rows = ((ValuesInsertSource)spec.InsertSource).RowValues;
+        Require(spec.Columns.Count == 3 && rows.Count == 2 && rows[0].ColumnValues[1] is StringLiteral value &&
+            value.Value == "O'Brien" && rows[0].ColumnValues[2] is ConvertCall && rows[1].ColumnValues[1] is NullLiteral,
+            name + ": packaged INSERT lost headers, strings, ISO dates or NULL.");
+        string directory = Path.Combine(output, "query-results"); Directory.CreateDirectory(directory);
+        foreach (var item in new[] { (Suffix: "IN-numbers", Sql: numericSql), (Suffix: "IN-text", Sql: textSql), (Suffix: "INSERT", Sql: insert) })
+            File.WriteAllText(Path.Combine(directory, name + "-" + item.Suffix + ".sql"), item.Sql, new UTF8Encoding(false));
+        Console.WriteLine(name + ": stage 11 numeric/text IN and INSERT with profile options passed.");
+    }
+
+    private static void RequireResultError(ResultDataError code, Action action)
+    {
+        try { action(); }
+        catch (ResultDataException ex) { Require(ex.Code == code, "Unexpected packaged TSV error: " + ex.Code); return; }
+        throw new InvalidOperationException("Packaged TSV operation did not reject " + code);
+    }
+    private static IReadOnlyList<T> QueryFragments<T>(string sql) where T : TSqlFragment
+    {
+        var parsed = new ScriptDomSqlParser().Parse(sql, SqlDialectVersion.Auto);
+        Require(parsed.ParseSucceeded, "Packaged query-result SQL failed to parse.");
+        var visitor = new QueryVisitor<T>(); parsed.Root!.Accept(visitor); return visitor.Items;
+    }
+    private sealed class QueryVisitor<T> : TSqlFragmentVisitor where T : TSqlFragment
+    {
+        internal List<T> Items { get; } = new();
+        public override void Visit(TSqlFragment node) { if (node is T item) Items.Add(item); }
     }
 }
