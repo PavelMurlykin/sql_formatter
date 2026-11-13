@@ -62,6 +62,7 @@ internal static class Program
             Require(Path.GetDirectoryName(typeof(EditorFeaturesSettings).Assembly.Location) == AppContext.BaseDirectory.TrimEnd('\\'),
                 "Configuration must load from the extracted installer.");
             VerifyEditorFeatures(output);
+            VerifySafetyFeatures();
             var formatter = new ScriptDomSqlFormatter();
             var parser = new ScriptDomSqlParser();
             foreach (var name in Profiles)
@@ -147,5 +148,51 @@ internal static class Program
         Require(store.List().Count == 2 && store.Save("off.sql", "off") == null,
             "Packaged disabled history modified its snapshots.");
         Console.WriteLine("Editor features: analysis settings/project overrides, unsaved close buffer, metadata, age/count retention and disabled history passed.");
+    }
+
+    private static void VerifySafetyFeatures()
+    {
+        var settings = new EditorFeaturesSettings(analysis: new AnalysisConfiguration(
+            new[] { "TSQL004", "TSQL005" }, new Dictionary<string, AnalysisSeverity>(), false),
+            environments: new SqlEnvironmentConfiguration(new[] {
+                new SqlEnvironmentRule(SqlEnvironmentKind.Dev, "release-server"),
+                new SqlEnvironmentRule(SqlEnvironmentKind.Prod, "release-server", "Accounting", color: "#902020"),
+                new SqlEnvironmentRule(SqlEnvironmentKind.Test, documentContains: @"\offline\") }));
+        var restored = EditorFeaturesSettings.Deserialize(settings.Serialize());
+        var match = restored.Environments.Match(new(@"C:\queries\smoke.sql", "RELEASE-SERVER", "accounting"));
+        Require(match.Kind == SqlEnvironmentKind.Prod && match.Color == "#902020",
+            "Packaged environment round trip or PROD precedence failed.");
+        Require(restored.Environments.Match(new("smoke.sql", "release-server", "other")).Kind == SqlEnvironmentKind.Dev,
+            "Packaged environment fields must be combined with AND.");
+        Require(restored.Environments.Match(new(@"C:\release-server\smoke.sql")).Kind == SqlEnvironmentKind.Unknown,
+            "Packaged environment must not infer a server from a file path.");
+        Require(restored.Environments.Match(new(@"C:\offline\smoke.sql")).Kind == SqlEnvironmentKind.Test,
+            "Packaged explicit offline document rule failed.");
+        Require(EditorFeaturesSettings.Deserialize("{\"version\":1,\"analysis\":{},\"history\":{}}")
+            .Environments.Rules.Count == 0, "Packaged legacy settings must migrate to no environment rules.");
+
+        const string source = "-- release smoke\r\nDROP TABLE dbo.T;\r\nTRUNCATE TABLE dbo.T;\r\nUPDATE dbo.T SET A=1;\r\nDELETE FROM dbo.T;";
+        var parser = new ScriptDomSqlParser();
+        var parsed = parser.Parse(source, SqlDialectVersion.Auto);
+        Require(parsed.ParseSucceeded, "Packaged safety input failed to parse.");
+        Require(new SqlAnalyzer().Analyze(parsed, restored.Analysis.ToAnalysisOptions()).Diagnostics.Count == 0,
+            "Packaged normal analysis should remain disabled.");
+        var analyzer = new DangerousSqlAnalyzer();
+        var findings = analyzer.Analyze(parsed);
+        Require(findings.Select(d => d.Code).SequenceEqual(new[] { "TSQL006", "TSQL007", "TSQL004", "TSQL005" }) &&
+            findings.Select(d => d.Line).SequenceEqual(new[] { 2, 3, 4, 5 }) &&
+            findings.All(d => d.Severity == AnalysisSeverity.Error) &&
+            findings[0].Span.StartOffset == source.IndexOf("DROP", StringComparison.Ordinal),
+            "Packaged dangerous-command detection, ordering or original positions failed.");
+        var safe = parser.Parse("SELECT N'DROP TABLE dbo.T;'; EXEC(N'DELETE FROM dbo.T;'); " +
+            "UPDATE dbo.T SET A=1 WHERE Id=1; DELETE FROM dbo.T WHERE Id=1;", SqlDialectVersion.Auto);
+        Require(safe.ParseSucceeded && analyzer.Analyze(safe).Count == 0,
+            "Packaged safety check treated dynamic strings or filtered writes as dangerous statements.");
+        var invalid = parser.Parse("DROP TABLE ;", SqlDialectVersion.Auto);
+        Require(!invalid.ParseSucceeded, "Packaged invalid SQL unexpectedly parsed.");
+        bool rejected = false;
+        try { analyzer.Analyze(invalid); } catch (ArgumentException) { rejected = true; }
+        Require(rejected, "Packaged safety analyzer must reject incomplete parses.");
+        Console.WriteLine("Stage 10: environment persistence/AND/PROD precedence/UNKNOWN/offline rules, legacy migration, independent dangerous-command checks, positions, false positives and parse rejection passed.");
     }
 }

@@ -1,5 +1,11 @@
 # Этап 10 / Stage 10 — 2026-11-12
 
+Обновление / Update 2026-11-13: этап 10 теперь включён в четыре готовых VSIX
+в `release/` (VS 0.2.14 / SSMS 0.6.13). Stage 10 is now included in all four
+ready-made VSIX packages. См. / See [проверку выпуска / release validation](../../release/VALIDATION.md).
+Ниже сохранены результаты реализации от 2026-11-12. The implementation evidence
+below is the historical 2026-11-12 check, separate from this packaging pass.
+
 ## Русский
 
 Реализованы пользовательские правила DEV/TEST/PROD и команда проверки опасных

@@ -13,12 +13,13 @@ CRUD templates from CREATE TABLE, analysis settings and local save/close history
 with configurable retention. Stages 3 and 9 are complete in the
 [development roadmap](docs/development/ROADMAP.md); see the
 [installed-host evidence and limits](docs/development/stages-3-9-validation.md).
-Stage 10 is implemented in source builds (VS 0.2.14 / SSMS 0.6.13): per-user
+The current installers include stage 10 (VS 0.2.14 / SSMS 0.6.13): per-user
 DEV/TEST/PROD matching rules and **Check Dangerous Commands**, with a colored
 context label and a separate PROD warning. See [stage 10 validation](docs/development/stage-10-validation.md).
-The installers in `release/` include the completed stages 1–9, with analysis
-settings and close-time history. Stage 10 currently requires a source build;
-stage 11 and the final consolidated release remain planned. The extension provides **Format Document**, **Analyze
+The installers in `release/` include completed stages 1–10, with analysis
+settings, close-time history and environment/safety checks. Stage 11 and the final
+consolidated release remain planned. See [release validation](release/VALIDATION.md).
+The extension provides **Format Document**, **Analyze
 Document**, editor tools, **Restore Closed Script** and **Settings**.
 Formatting affects the selection, or the whole active `.sql` when no text is
 selected, and also appears in the editor context menu. Settings include named
@@ -127,4 +128,4 @@ native import JSON for VSIX 0.2.8 / SSMS 0.6.7. Their source mapping, explicit n
 approximations and audit against both EPM-RAC database projects are described in
 [the working-profile report](docs/sql-complete-working-profiles.md).
 The current release includes these profiles and ADIR_SQL_Main in `release/`, with
-Visual Studio packages 0.2.13 and SSMS packages 0.6.12.
+Visual Studio packages 0.2.14 and SSMS packages 0.6.13.

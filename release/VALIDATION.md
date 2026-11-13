@@ -1,4 +1,113 @@
-# Проверка выпуска VS 0.2.13 / SSMS 0.6.12 — 2026-10-31
+# Проверка выпуска VS 0.2.14 / SSMS 0.6.13 — 2026-11-13
+
+Текущие пакеты в `release/` включают завершённые этапы **1–10**: в том числе
+окружения DEV/TEST/PROD и явную проверку опасных команд. Это локальные preview-пакеты,
+без публикации и цифровой подписи. Реализация этапа 10 — коммит `3b698cd`;
+в этом проходе обновлены дистрибутивы, инструкции и проверки готовых библиотек.
+
+| Файл | Версия | Цель |
+|---|---|---|
+| TSqlFormatter.VS2022.vsix | 0.2.14 | VS 17.14–17.x, amd64 |
+| TSqlFormatter.VS2026.vsix | 0.2.14 | VS 18.x, amd64 |
+| TSqlFormatter.SSMS20.vsix | 0.6.13 | SSMS 20, x86; комплектный Install-SSMS20.ps1 |
+| TSqlFormatter.SSMS22.vsix | 0.6.13 | SSMS 22.x, amd64 |
+| TSqlFormatter.Tool.0.1.0-preview.8.nupkg | 0.1.0-preview.8 | CLI, .NET 10 Runtime |
+
+## Автоматические проверки текущей поставки
+
+Windows, .NET SDK 10.0.401, Release. `scripts/Build-Release.ps1 -SkipRestore`
+завершился успешно: **0 ошибок, 0 предупреждений**.
+
+| Проверка | Результат |
+|---|---|
+| Решение | 1524 Core/Configuration/CLI + 145 golden = **1669** тестов; все прошли, пропусков нет |
+| Verify-Vsix | Все 4 пакета: identity, диапазон хоста, архитектура, обязательные библиотеки |
+| Профили из готовых VSIX | **228 сочетаний**: 4 пакета × 3 профиля × 19 SQL-примеров; импорт, хранение, токены, идемпотентность; одинаковый вывод для всех 57 сочетаний профиля/SQL |
+| Этапы 3 и 9 из готовых VSIX | Все 4 пакета: настройки/переопределения анализа, отключение анализа, несохранённый буфер закрытия, метаданные, возраст/количество снимков и отключение истории |
+| Этап 10 из готовых VSIX | Все 4 пакета: сохранение окружений, AND, PROD-приоритет, UNKNOWN без контекста, явный offline-path, миграция старого JSON; независимый поиск DROP/TRUNCATE/UPDATE/DELETE, позиции, отсутствие ложных находок в динамических строках/фильтрованных записях и отказ при ошибке разбора |
+| Общий UI | RU/EN × light/dark — все 4 варианта, включая правила окружений, сохранение/отмену/валидацию, цвет/контраст, отдельный PROD-акцент, навигацию и незавершённую проверку |
+| Установщик SSMS20 | Регрессия обновления/миграции резервных копий пройдена; копии остаются вне путей загрузки IDE |
+| Упакованный CLI | Локальная установка preview.8, форматирование stdin с кодом 0, анализ SELECT * с TSQL001 и кодом 1 |
+
+Проверка извлекает библиотеки **из каждого готового VSIX**, подтверждает загрузку
+именно комплектных Core/Configuration и запускает .NET Framework-хост x86 для
+SSMS20, x64 — для остальных. Для SSMS предварительно загружается установленный
+ScriptDom, движок использует комплектный ScriptDom 18. Это проверка библиотек,
+отдельная от служб редактора внутри IDE. Новые сценарии этапа 10 не исполняют SQL.
+
+Три нативных профиля и установочный скрипт SSMS20 не изменились. CLI повторно
+упакован с текущими общими библиотеками; его версия и интерфейс остались preview.8.
+Команда проверки опасных операторов относится к IDE; CLI `--analyze` по-прежнему
+использует TSQL001–TSQL005. Все девять установочных файлов/профилей и их SHA-256 —
+в [release-manifest.json](release-manifest.json), результаты по каждому VSIX —
+в [profile-verification.json](profile-verification.json), включая поле `environmentSafety`.
+
+Лог: `artifacts/release-2026-11-13/build-release.log`; TRX:
+`artifacts/release-tests/`; извлечённые пакеты и SQL: `artifacts/release-profile-smoke/`;
+снимки UI: `artifacts/settings-ui/`. Диагностические файлы не входят в поставку.
+
+## Установленные IDE: границы подтверждения
+
+**Свежая установка именно этих пересобранных VSIX в этом проходе не выполнялась.**
+Успешная сборка и проверка извлечённых библиотек не подтверждают работу служб IDE.
+
+Ранее, **2026-11-12**, реализация этапа 10 проверена в установленной
+**VS2022 17.14.37710.0 x64** с VSIX 0.2.14: временное правило пути PROD, цветная
+метка и отдельное предупреждение, четыре находки на строках 2–5, переход к DROP
+на строку 2, неизменный исходный SQL и сохранённый буфер. Настройки восстановлены,
+тестовый документ закрыт. Это предыдущая сборка той же версии, а не свежая
+установка файлов данного выпуска. См. [отчёт этапа 10](../docs/development/stage-10-validation.md).
+
+Внутри VS2026/SSMS20/SSMS22 этап 10 не проверялся. Получение имён живого сервера/БД
+SSMS также не проверялось и остаётся best-effort. Предыдущие сценарии анализа и
+истории в четырёх IDE относятся к этапам 3 и 9 и перечислены в
+[отдельном отчёте](../docs/development/stages-3-9-validation.md). SQL не выполнялся.
+Перехват исполнения и окрашивание вкладок не входят в реализацию.
+
+## Повторение
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Build-Release.ps1 -SkipRestore
+```
+
+Без восстановленных зависимостей уберите `-SkipRestore`. Скрипт обновляет файлы
+в `release/`, но не устанавливает расширения в IDE. Установка и отдельный
+синтетический сценарий PROD без выполнения SQL описаны в
+[RU](README.ru.md) / [EN](README.en.md). После проверки удалите временное правило
+окружения и сохраните настройки.
+
+## English — current delivery
+
+The **2026-11-13** delivery contains stages **1–10**: VS2022/VS2026 **0.2.14**,
+SSMS20/SSMS22 **0.6.13**, plus repacked CLI **0.1.0-preview.8** with unchanged CLI
+behavior. The native profiles and SSMS20 installation script are unchanged.
+
+The Release pipeline passed with zero warnings/errors and **1669 tests**
+(1524 Core/Configuration/CLI + 145 golden), four VSIX checks, **228** extracted-
+package profile cases, analysis/history probes and new stage 10 probes for all
+four packages. These verify environment persistence, AND, PROD precedence, UNKNOWN,
+explicit offline paths, legacy migration, independent destructive-statement
+detection, positions, false positives and parse rejection. SSMS20 runs x86;
+the other probes run x64, loading the extracted Core/Configuration libraries.
+All 57 profile/SQL outputs match across hosts. Four RU/EN/theme UI variants,
+the SSMS20 installer regression and packaged CLI format/analyze smoke also passed.
+Hashes and package-scoped results are in the linked JSON manifests above.
+
+**These exact rebuilt VSIX files were not freshly installed in IDEs in this pass.**
+The previous **2026-11-12** installed VS2022 **17.14.37710.0 x64**, VSIX **0.2.14**
+check confirmed PROD, four findings, navigation and unchanged SQL, followed by
+restoring settings. It used an earlier build of the same version. Stage 10 was
+not run inside VS2026/SSMS20/SSMS22; live SSMS server/database capture remains
+unverified and best effort. Earlier stage 3/9 host checks are recorded separately.
+No SQL execution, execution interception or tab coloring is claimed.
+
+Use the build command and installation guides above to reproduce the checks.
+The builder does not install IDE extensions or publish packages. These remain
+unsigned local previews; stage 11 and the final consolidated release are pending.
+
+---
+
+## Историческая проверка выпуска VS 0.2.13 / SSMS 0.6.12 — 2026-10-31
 
 Текущие файлы в `release/` включают завершённые этапы 1–9, в том числе настройки
 анализа и историю закрытия. Это локальные preview-пакеты без публикации и подписи.

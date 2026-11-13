@@ -1,13 +1,13 @@
 # Installing T-SQL Formatter
 
-Local build dated 2026-10-31. Choose the package for your IDE:
+Local build dated 2026-11-13. Choose the package for your IDE:
 
 | IDE | File | Extension version |
 | --- | --- | --- |
-| Visual Studio 2022 17.14.x, x64 | `TSqlFormatter.VS2022.vsix` | 0.2.13 |
-| Visual Studio 2026 18.x, x64 | `TSqlFormatter.VS2026.vsix` | 0.2.13 |
-| SSMS 20.x, x86 | `TSqlFormatter.SSMS20.vsix` + `Install-SSMS20.ps1` | 0.6.12 |
-| SSMS 22.x, x64 | `TSqlFormatter.SSMS22.vsix` | 0.6.12 |
+| Visual Studio 2022 17.14.x, x64 | `TSqlFormatter.VS2022.vsix` | 0.2.14 |
+| Visual Studio 2026 18.x, x64 | `TSqlFormatter.VS2026.vsix` | 0.2.14 |
+| SSMS 20.x, x86 | `TSqlFormatter.SSMS20.vsix` + `Install-SSMS20.ps1` | 0.6.13 |
+| SSMS 22.x, x64 | `TSqlFormatter.SSMS22.vsix` | 0.6.13 |
 
 The ready-made extensions do not require the .NET 10 SDK. They target .NET Framework 4.7.2 and bundle the formatting dependencies. Update a VS 2022 version earlier than 17.14 to the 17.14 branch.
 
@@ -45,9 +45,10 @@ Select the SSMS 22 instance in the installer, then restart it. Find the **SQL Fo
 
 ## New features and post-upgrade checks
 
-The packages include completed stages 1–9: TSQL001–TSQL005 analysis, snippets,
+The packages include completed stages 1–10: TSQL001–TSQL005 analysis, snippets,
 rename, outline/navigation, SQL transformations, CRUD from CREATE TABLE and local
-history. Analysis and history settings are under **Settings… → General**.
+history, DEV/TEST/PROD environments and dangerous-command checks.
+Analysis, history and environment settings are under **Settings… → General**.
 
 - Enable/disable analysis and individual rules, and choose their severities.
   Run **Analyze Document** explicitly. Supplied `analysis` fields in the nearest
@@ -59,6 +60,18 @@ history. Analysis and history settings are under **Settings… → General**.
   draft. Formatting profiles do not change these settings. History is independent
   of format-on-save; disabling collection keeps existing files under
   `%USERPROFILE%\.tsqlformatter\history`.
+- In the environments grid, add DEV/TEST/PROD, substrings of available server/
+  database names or the explicit document path/moniker, and a `#RRGGBB` color.
+  Filled fields use AND and case-insensitive matching; at least one is required.
+  Overlaps resolve as PROD > TEST > DEV; the first row wins within the same kind.
+  Without a match the label is UNKNOWN; paths are never substituted for servers.
+- **Check Dangerous Commands** in the menu and editor context menu checks the
+  whole document for DROP (TSQL006), TRUNCATE TABLE (TSQL007), UPDATE/DELETE without
+  WHERE (TSQL004/TSQL005), independently of disabled normal analysis. The dialog
+  shows a colored label, a separate PROD warning and navigation to a selected row.
+  Parse errors mean an incomplete check. Tabs are not recolored and execution is
+  not intercepted; dynamic SQL and WHERE truth are not evaluated. USE, three-part
+  names and procedure calls do not change the captured context label.
 
 Use a separate `.sql` file in a directory without project configuration. Analyze
 `SELECT * FROM dbo.ReleaseSmoke;` and expect TSQL001. Save a unique comment, add
@@ -68,6 +81,23 @@ No SQL execution is needed. Server/database fields are optional; live connected
 context capture was not tested. Fresh installation of these exact versions in all
 four IDEs was not repeated for this delivery; automated and previous installed-host
 checks are distinguished in [validation](VALIDATION.md).
+
+To check stage 10, create a separate `stage10-prod.sql` with the following text;
+**do not execute it**:
+
+```sql
+DROP TABLE dbo.Stage10Smoke;
+TRUNCATE TABLE dbo.Stage10Smoke;
+UPDATE dbo.Stage10Smoke SET A = 1;
+DELETE FROM dbo.Stage10Smoke;
+```
+
+Add a temporary PROD rule with **Path / moniker contains** `stage10-prod.sql`
+and color `#B71C1C`, then save settings. Invoke the check: expect PROD, its separate
+warning and four findings on lines 1–4. Select DROP and **Go to**: the cursor should
+move to line 1 and the source text should stay unchanged. Remove the temporary
+rule and save afterwards. Normal CLI `--analyze` retains TSQL001–TSQL005; the new
+command is available in the IDE.
 
 ## Profiles
 

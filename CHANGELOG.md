@@ -3,7 +3,22 @@
 This repository has no published stable release. The entries below describe
 locally built preview packages; version numbers belong to separate adapters.
 
-## Environments and dangerous commands (stage 10, unreleased) — 2026-11-12
+## Local delivery of stages 1–10 — 2026-11-13
+
+- Updated all four `release/` installers: VS2022/VS2026 **0.2.14** and
+  SSMS20/SSMS22 **0.6.13**, including stage 10 environment rules and dangerous-
+  command checks. Repacked CLI preview.8 with current shared libraries; its
+  command-line behavior is unchanged. The native profiles and SSMS20 script
+  remain unchanged; SHA-256 manifests were refreshed.
+- Added stage 10 probes against each extracted VSIX (x86 for SSMS20, x64 for
+  the others). All **1669 tests**, four VSIX checks, **228** profile cases,
+  four environment/safety probes, four UI variants, installer regression and
+  packaged CLI smoke passed.
+- Updated installation guides, RU/EN manuals and release/roadmap status. Exact
+  rebuilt packages were not freshly installed in this pass; previous installed
+  VS2022 stage 10 evidence is dated separately. Live SSMS context remains unverified.
+
+## Environments and dangerous commands (stage 10 implementation) — 2026-11-12
 
 - Added per-user DEV/TEST/PROD rules in General settings: literal server/database/
   document substrings, custom RGB colors, AND matching, PROD > TEST > DEV overlap

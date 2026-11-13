@@ -1,6 +1,7 @@
-# Current settings validation — 2026-11-12
+# Current settings validation — 2026-11-13
 
-Stage 10 source packages: Visual Studio 0.2.14 / SSMS 0.6.13. Release build has
+Stage 10 release packages: Visual Studio 0.2.14 / SSMS 0.6.13. The release pipeline
+reran all four standalone UI variants on 2026-11-13. Release build has
 zero warnings/errors and all 1669 solution tests pass. RU/EN × light/dark smoke
 passes for the environment rules grid: add/remove, columns/labels, persistence,
 reload, unsaved isolation and empty-rule validation. Existing analysis/history/
@@ -9,12 +10,15 @@ profiles/navigation/preview scenarios still pass.
 All four variants also check the safety dialog's context label, configured RGB
 and foreground contrast, independent PROD warning, ordered findings and navigation.
 An unknown environment with a parse error shows an incomplete check. English dark
-and Russian light safety captures were visually inspected. See
+and Russian light safety captures were visually inspected during the 2026-11-12
+implementation check; there are no UI changes in this packaging pass. See
 [stage 10 evidence](development/stage-10-validation.md) for installed VS2022 results
-and the limits of the other hosts/live connection context. `release/` still contains
-the earlier stages 1–9 packages.
+and the limits of the other hosts/live connection context. The 2026-11-13
+`release/` delivery now includes stage 10; see [release validation](../release/VALIDATION.md)
+for the new packaging pass and current automated results.
 
-Logs: `artifacts/stage10/ui.log`; captures: `artifacts/settings-ui/*-safety-prod.png`.
+Current log: `artifacts/release-2026-11-13/build-release.log`; implementation log:
+`artifacts/stage10/ui.log`; captures: `artifacts/settings-ui/*-safety-prod.png`.
 
 ---
 

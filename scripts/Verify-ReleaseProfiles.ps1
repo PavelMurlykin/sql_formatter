@@ -48,11 +48,12 @@ foreach ($hostName in @('VS2022', 'VS2026', 'SSMS20', 'SSMS22')) {
         result = 'passed'
         identicalOutput = $true
         editorFeatures = 'passed: analysis settings/project overrides; unsaved close buffer; metadata; age/count retention; disabled history'
+        environmentSafety = 'passed: environment persistence/AND/PROD precedence/UNKNOWN/offline rules; legacy migration; independent DROP/TRUNCATE/unfiltered writes; positions; false positives; parse rejection'
     }
 }
 $report = [ordered]@{
     date = (Get-Date).ToString('yyyy-MM-dd')
-    scope = 'Extracted-installer libraries: analysis/history feature smoke, profile import, editor/store round trip, formatting, permitted casing/syntax edits, idempotence, identical outputs. Separate from installed-IDE UI validation.'
+    scope = 'Extracted-installer libraries: analysis/history and stage 10 environment/safety feature smoke, profile import, editor/store round trip, formatting, permitted casing/syntax edits, idempotence, identical outputs. Separate from installed-IDE UI validation.'
     profiles = @($profiles | ForEach-Object { [ordered]@{ file = "$_.json"; sha256 = (Get-FileHash -LiteralPath (Join-Path $release "$_.json") -Algorithm SHA256).Hash.ToLowerInvariant() } })
     packages = $results
 }
